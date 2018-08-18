@@ -1,0 +1,4 @@
+<RCC>
+    <qresource lang="Turkish" prefix="/new/turkish_"/>
+    <qresource prefix="/new/prefix1"/>
+</RCC>
