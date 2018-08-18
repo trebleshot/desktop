@@ -14,6 +14,7 @@
 
 #define COOLSOCKET_KEYWORD_LENGTH "length"
 #define COOLSOCKET_HEADER_DIVIDER "\nHEADER_END\n"
+#define COOLSOCKET_HEADER_HEAP_SIZE 8196
 
 using namespace std;
 
@@ -24,6 +25,7 @@ class Server;
 class Worker;
 class Response;
 class ActiveConnection;
+class PendingAppend;
 
 class Server : public QObject {
     Q_OBJECT
@@ -53,6 +55,7 @@ public slots:
 };
 
 class ActiveConnection : public QObject {
+    Q_OBJECT
     QTcpSocket* activeSocket;
 
 public:
@@ -72,10 +75,11 @@ public:
 };
 
 class Response : public QObject {
+    Q_OBJECT
 public:
     QString* response;
     QJsonObject* headerIndex;
-    long int length;
+    int length;
 };
 
 class Worker : public QThread {
@@ -100,6 +104,31 @@ protected:
 
 signals:
     void linkRequest(ActiveConnection* ActiveConnection);
+};
+
+class PendingAppend : public QObject {
+    QIODevice* ioDevice;
+    QByteArray* bytes = new QByteArray;
+    Q_OBJECT
+public:
+    PendingAppend(QIODevice* ioDevice)
+    {
+        this->ioDevice = ioDevice;
+        connect(ioDevice, SIGNAL(readyRead()), this, SLOT(readData()));
+    }
+    virtual ~PendingAppend() {}
+
+    QByteArray* getBytes()
+    {
+        return bytes;
+    }
+
+public slots:
+    void readData()
+    {
+        printf("read data");
+        bytes->append(this->ioDevice->readAll());
+    }
 };
 }
 

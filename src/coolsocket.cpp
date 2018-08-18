@@ -16,6 +16,12 @@ void Server::start()
 
 void Server::handOverRequest(ActiveConnection* connection)
 {
+    Response* response = connection->receive();
+
+    cout << "length: " << response->length << endl;
+    cout << "content: " << response->response->toStdString() << endl;
+
+    connection->reply("Thank you all");
 }
 
 void ActiveConnection::reply(char* reply)
@@ -38,30 +44,45 @@ Response* ActiveConnection::receive()
 {
     Response* response = new Response;
 
-    bool receivedHeader = false;
-    std::string* headerData = new std::string;
-    std::string* contentData = new std::string;
+    int headerPosition = string::npos;
+    string* headerData = new string;
+    string* contentData = new string;
 
-    char buffer[8196];
+    while (activeSocket->isReadable()) {
+        if (activeSocket->waitForReadyRead(2000)) {
+            if (headerPosition == string::npos) {
+                headerData->append(activeSocket->readAll());
+                headerPosition = headerData->find(COOLSOCKET_HEADER_DIVIDER);
 
-    QByteArray* byteArray = new QByteArray;
+                if (headerData->length() > COOLSOCKET_HEADER_HEAP_SIZE) {
+                    cerr << "Header exceeds heap size: " << headerData->length();
+                    break;
+                }
 
-    while (true) {
-        cout << "headerData: " << *headerData << endl;
-        cout << "contentData: " << *contentData << endl;
-        cout << "byte data: " << byteArray->toStdString() << endl;
+                if (headerPosition != string::npos) {
+                    long int dividerOccupiedSize = sizeof COOLSOCKET_HEADER_DIVIDER + headerPosition;
 
-        if (!receivedHeader) {
-            byteArray->append(activeSocket->readAll());
-            //socket->read(buffer, 8196);
+                    if (headerData->length() > dividerOccupiedSize)
+                        contentData->append(headerData->substr(dividerOccupiedSize));
 
-            int enderPosition = headerData->find(COOLSOCKET_HEADER_DIVIDER);
+                    headerData->resize(headerPosition);
 
-            if (enderPosition != std::string::npos) {
-                if (enderPosition + sizeof COOLSOCKET_HEADER_DIVIDER < headerData->length())
-                    contentData->append(headerData->substr(enderPosition + sizeof COOLSOCKET_HEADER_DIVIDER - 1));
+                    QJsonObject jsonObject = QJsonDocument::fromJson(QByteArray::fromStdString(*headerData)).object();
 
-                headerData->resize(enderPosition);
+                    if (jsonObject.contains(QString(COOLSOCKET_KEYWORD_LENGTH))) {
+                        response->length = (jsonObject.value(QString(COOLSOCKET_KEYWORD_LENGTH))).toInt();
+                    } else
+                        break;
+
+                    response->headerIndex = &jsonObject;
+                }
+            } else {
+                contentData->append(activeSocket->readAll());
+
+                if (contentData->length() >= response->length) {
+                    response->response = new QString(QByteArray::fromStdString(*contentData));
+                    break;
+                }
             }
         }
     }
