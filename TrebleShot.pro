@@ -40,5 +40,7 @@ SOURCES += \
     src/stringlistmodel.cpp
 
 DISTFILES += \
-    res/OngoingTasks.qml
+    res/OngoingTasks.qml \
+    src/MainWindowForm.ui.qml \
+    src/MainWindow.qml
 

@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QObject>
+#include <QPointer>
 #include <QString>
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -19,11 +20,12 @@
 using namespace std;
 
 namespace CoolSocket {
-inline const int maximumHeaderLength = 8196;
 
+class ServerWorker;
+class Client;
 class Server;
-class Worker;
 class Response;
+class RequestHandler;
 class ActiveConnection;
 class PendingAppend;
 
@@ -31,15 +33,29 @@ class Server : public QObject {
     Q_OBJECT
     short int port;
     QHostAddress hostAddress;
-    Worker* worker;
+    QPointer<ServerWorker> worker;
+
+protected:
+    void setWorker(ServerWorker* worker)
+    {
+        this->worker = worker;
+    }
 
 public:
     explicit Server(QHostAddress hostAddress, int port = 0, QObject* parent = 0);
-    friend class Worker;
+    friend class ServerWorker;
+    friend class ActiveConnection;
+    friend class PendingAppend;
+    friend class Response;
+    friend class RequestHandler;
 
     QHostAddress getHostAddress() { return hostAddress; }
 
+    ServerWorker* getWorker() { return worker; }
+
     int getPort() { return port; }
+
+    bool isRunning();
 
     void setHostAddress(QHostAddress hostAddress)
     {
@@ -48,27 +64,38 @@ public:
 
     void setPort(int port) { this->port = port; }
 
-    void start();
+    void start(bool block);
 
-public slots:
-    void handOverRequest(ActiveConnection* connection);
+    void stop(bool block);
+
+    virtual void connected(ActiveConnection* connection)
+    {
+    }
+signals:
+    void clientConnected(ActiveConnection* connection);
 };
 
 class ActiveConnection : public QObject {
     Q_OBJECT
     QTcpSocket* activeSocket;
+    int timeout = 2000;
 
 public:
-    ActiveConnection(QTcpSocket* tcpServer, QObject* parent = 0)
+    ActiveConnection(QTcpSocket* tcpServer, int msecTimeout = 2000, QObject* parent = 0)
         : QObject(parent)
     {
         this->activeSocket = tcpServer;
+        this->timeout = msecTimeout;
     }
 
     QTcpSocket* getSocket()
     {
         return activeSocket;
     }
+
+    int getTimeout() { return timeout; }
+
+    void setTimeout(int msecs) { this->timeout = msecs; }
 
     void reply(char* reply);
     Response* receive();
@@ -82,34 +109,94 @@ public:
     int length;
 };
 
-class Worker : public QThread {
+class ServerWorker : public QThread {
     Q_OBJECT
     QTcpServer* tcpServer;
     Server* server;
 
 public:
-    explicit Worker(Server* server, QObject* parent = 0);
+    explicit ServerWorker(Server* server, QObject* parent = 0);
 
-    ~Worker()
+    ~ServerWorker()
     {
         quit();
     }
 
     QTcpServer* getTcpServer() { return tcpServer; }
 
-    void setTcpServer(QTcpServer* server) { this->tcpServer = server; }
+    void setTcpServer(QTcpServer* server);
 
 protected:
     void run();
+};
 
-signals:
-    void linkRequest(ActiveConnection* ActiveConnection);
+class RequestHandler : public QThread {
+    Q_OBJECT
+    Server* server;
+    ActiveConnection* connection;
+
+public:
+    RequestHandler(Server* server, ActiveConnection* connection, QObject* parent = 0)
+        : QThread(parent)
+    {
+        this->server = server;
+        this->connection = connection;
+    }
+
+    ~RequestHandler()
+    {
+        cout << "Scope removed along with the data" << endl;
+    }
+
+protected:
+    void run()
+    {
+        connect(this, SIGNAL(finished()), this->connection->getSocket(), SLOT(deleteLater()));
+
+        emit server->clientConnected(this->connection);
+        server->connected(this->connection);
+    }
+};
+
+class Client : public QThread {
+    Q_OBJECT
+
+public:
+    ~Client()
+    {
+        quit();
+    }
+
+    ActiveConnection* connect(QString hostAddress, quint16 port, int timeoutMSeconds = 3000)
+    {
+        QTcpSocket* socket = new QTcpSocket;
+        socket->connectToHost(hostAddress, port);
+
+        while (QAbstractSocket::SocketState::ConnectingState == socket->state())
+            socket->waitForConnected(timeoutMSeconds);
+
+        if (QAbstractSocket::SocketState::ConnectedState != socket->state())
+            throw exception();
+
+        return new ActiveConnection(socket);
+    }
+
+    virtual void connectionPhase()
+    {
+    }
+
+protected:
+    virtual void run()
+    {
+        connectionPhase();
+    }
 };
 
 class PendingAppend : public QObject {
     QIODevice* ioDevice;
     QByteArray* bytes = new QByteArray;
     Q_OBJECT
+
 public:
     PendingAppend(QIODevice* ioDevice)
     {
@@ -126,7 +213,6 @@ public:
 public slots:
     void readData()
     {
-        printf("read data");
         bytes->append(this->ioDevice->readAll());
     }
 };

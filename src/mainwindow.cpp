@@ -8,11 +8,8 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    CoolSocket::Server* coolServer = new CoolSocket::Server(QHostAddress::Any, 5555);
-
-    coolServer->start();
-
-    //connect(coolServer, SIGNAL(handleRequest(CoolSocket::ActiveConnection*)), this, SLOT(communicate(CoolSocket::ActiveConnection*)));
+    CommunicationServer* server = new CommunicationServer;
+    server->start(true);
 
     QStringList numbers;
     QListView* listView;
@@ -29,6 +26,8 @@ MainWindow::MainWindow(QWidget* parent)
     itemModel = new StringListModel(numbers);
 
     listView->setModel(itemModel);
+
+    connect(ui->pushButton, SIGNAL(clicked(bool)), this, SLOT(testButtonClicked(bool)));
 }
 
 MainWindow::~MainWindow()
@@ -36,6 +35,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::communicate(CoolSocket::ActiveConnection* connection)
+void MainWindow::testButtonClicked(bool checked)
 {
+    cout << "Test server started" << endl;
+
+    TestClient* testClient = new TestClient;
+    testClient->start();
 }

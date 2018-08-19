@@ -1,27 +1,38 @@
-#include "coolsocket.h"
+﻿#include "coolsocket.h"
 
 namespace CoolSocket {
 Server::Server(QHostAddress hostAddress, int port, QObject* parent)
     : QObject(parent)
 {
+    setWorker(new ServerWorker(this));
+
     this->setHostAddress(hostAddress);
     this->setPort(port);
 }
 
-void Server::start()
+bool Server::isRunning()
 {
-    worker = new Worker(this);
-    worker->start();
+    return getWorker()->isRunning();
 }
 
-void Server::handOverRequest(ActiveConnection* connection)
+void Server::start(bool block)
 {
-    Response* response = connection->receive();
+    getWorker()->start();
 
-    cout << "length: " << response->length << endl;
-    cout << "content: " << response->response->toStdString() << endl;
+    if (block)
+        while (!isRunning()) {
+        }
+}
 
-    connection->reply("Thank you all");
+void Server::stop(bool block)
+{
+    if (isRunning()) {
+        getWorker()->requestInterruption();
+
+        if (block)
+            while (isRunning()) {
+            }
+    }
 }
 
 void ActiveConnection::reply(char* reply)
@@ -38,26 +49,26 @@ void ActiveConnection::reply(char* reply)
 
     activeSocket->write(replyImpl);
     activeSocket->flush();
+
+    if (!activeSocket->waitForBytesWritten(getTimeout() < 0 ? 2000 : getTimeout())) {
+        if (getTimeout() < 0)
+            throw exception();
+    }
 }
 
 Response* ActiveConnection::receive()
 {
     Response* response = new Response;
 
-    int headerPosition = string::npos;
+    size_t headerPosition = string::npos;
     string* headerData = new string;
     string* contentData = new string;
 
     while (activeSocket->isReadable()) {
-        if (activeSocket->waitForReadyRead(2000)) {
+        if (activeSocket->waitForReadyRead(getTimeout() < 0 ? 2000 : getTimeout())) {
             if (headerPosition == string::npos) {
                 headerData->append(activeSocket->readAll());
                 headerPosition = headerData->find(COOLSOCKET_HEADER_DIVIDER);
-
-                if (headerData->length() > COOLSOCKET_HEADER_HEAP_SIZE) {
-                    cerr << "Header exceeds heap size: " << headerData->length();
-                    break;
-                }
 
                 if (headerPosition != string::npos) {
                     long int dividerOccupiedSize = sizeof COOLSOCKET_HEADER_DIVIDER + headerPosition;
@@ -76,6 +87,11 @@ Response* ActiveConnection::receive()
 
                     response->headerIndex = &jsonObject;
                 }
+
+                if (headerData->length() > COOLSOCKET_HEADER_HEAP_SIZE) {
+                    cerr << "Header exceeds heap size: " << headerData->length();
+                    break;
+                }
             } else {
                 contentData->append(activeSocket->readAll());
 
@@ -84,34 +100,37 @@ Response* ActiveConnection::receive()
                     break;
                 }
             }
-        }
+        } else if (getTimeout() >= 0)
+            throw exception();
     }
 
     return response;
 }
 
-Worker::Worker(Server* server, QObject* parent)
+ServerWorker::ServerWorker(Server* server, QObject* parent)
     : QThread(parent)
 {
     this->server = server;
+    this->setTcpServer(new QTcpServer());
 }
 
-void Worker::run()
+void ServerWorker::setTcpServer(QTcpServer* server) { this->tcpServer = server; }
+
+void ServerWorker::run()
 {
     setTcpServer(new QTcpServer());
     getTcpServer()->listen(server->getHostAddress(), server->getPort());
 
-    connect(this, SIGNAL(linkRequest(ActiveConnection*)), server, SLOT(handOverRequest(ActiveConnection*)));
     connect(this, SIGNAL(finished()), getTcpServer(), SLOT(deleteLater()));
 
-    while (getTcpServer()->isListening()) {
+    while (!isInterruptionRequested() && getTcpServer()->isListening()) {
         getTcpServer()->waitForNewConnection(2000);
 
         if (getTcpServer()->hasPendingConnections()) {
             QTcpSocket* socket = getTcpServer()->nextPendingConnection();
             ActiveConnection* activeConnection = new ActiveConnection(socket);
 
-            emit linkRequest(activeConnection);
+            (new RequestHandler(server, activeConnection))->start();
         }
     }
 }
