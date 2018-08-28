@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "accessdatabase.h"
 #include "coolsocket.h"
 
 #include <QMainWindow>
@@ -24,7 +25,9 @@ public:
         connection->setTimeout(3000);
 
         try {
-            while (1) {
+            while (connection->getSocket()->isOpen()) {
+                cout << "Request start sequence" << endl;
+
                 CoolSocket::Response* response = connection->receive();
                 cout << "client said: " << response->response->toStdString() << endl;
 
@@ -41,21 +44,13 @@ class TestClient : public CoolSocket::Client {
 protected:
     void connectionPhase()
     {
-        cout << "About to connect" << endl;
-
         try {
-            CoolSocket::ActiveConnection* connection = connect("0.0.0.0", 5555);
+            CoolSocket::ActiveConnection* connection(connect("0.0.0.0", 5555));
 
-            cout << "Connected" << endl;
-
-            while (connection->getSocket()->isValid()) {
-                cout << "Running" << endl;
+            while (connection->getSocket()->state() == QAbstractSocket::SocketState::ConnectedState) {
                 connection->reply("thank you!");
 
-                cout << "Replied" << endl;
-
                 CoolSocket::Response* response = connection->receive();
-                cout << "Received" << endl;
                 cout << "server said: " << response->response->toStdString() << endl;
             }
         } catch (exception e) {
@@ -69,6 +64,9 @@ protected:
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
+    CommunicationServer* commServer = new CommunicationServer;
+    TestClient* testClient = new TestClient;
+
 public:
     explicit MainWindow(QWidget* parent = 0);
     ~MainWindow();
@@ -77,7 +75,14 @@ private:
     Ui::MainWindow* ui;
 
 public slots:
-    void testButtonClicked(bool checked);
+    void clickedButtonConnect(bool checked);
+    void clickedButtonServer(bool checked);
+    void clickedButtonServerStop(bool checked);
+
+protected:
+    void dropEvent(QDropEvent* event);
+    void mouseDoubleClickEvent(QMouseEvent* event);
+    void keyPressEvent(QKeyEvent* event);
 };
 
 #endif // MAINWINDOW_H

@@ -34,6 +34,7 @@ class Server : public QObject {
     short int port;
     QHostAddress hostAddress;
     QPointer<ServerWorker> worker;
+    QList<RequestHandler*> ongoingTasks;
 
 protected:
     void setWorker(ServerWorker* worker)
@@ -88,6 +89,12 @@ public:
         this->timeout = msecTimeout;
     }
 
+    ~ActiveConnection()
+    {
+        delete this->activeSocket;
+        cout << "ActiveConnection is deleted" << endl;
+    }
+
     QTcpSocket* getSocket()
     {
         return activeSocket;
@@ -120,6 +127,7 @@ public:
     ~ServerWorker()
     {
         quit();
+        cout << "ServerWorker was erased" << endl;
     }
 
     QTcpServer* getTcpServer() { return tcpServer; }
@@ -149,13 +157,7 @@ public:
     }
 
 protected:
-    void run()
-    {
-        connect(this, SIGNAL(finished()), this->connection->getSocket(), SLOT(deleteLater()));
-
-        emit server->clientConnected(this->connection);
-        server->connected(this->connection);
-    }
+    void run();
 };
 
 class Client : public QThread {
@@ -165,21 +167,10 @@ public:
     ~Client()
     {
         quit();
+        cout << "Scope removed along with the data" << endl;
     }
 
-    ActiveConnection* connect(QString hostAddress, quint16 port, int timeoutMSeconds = 3000)
-    {
-        QTcpSocket* socket = new QTcpSocket;
-        socket->connectToHost(hostAddress, port);
-
-        while (QAbstractSocket::SocketState::ConnectingState == socket->state())
-            socket->waitForConnected(timeoutMSeconds);
-
-        if (QAbstractSocket::SocketState::ConnectedState != socket->state())
-            throw exception();
-
-        return new ActiveConnection(socket);
-    }
+    ActiveConnection* connect(QString hostAddress, quint16 port, int timeoutMSeconds = 3000);
 
     virtual void connectionPhase()
     {
@@ -193,9 +184,9 @@ protected:
 };
 
 class PendingAppend : public QObject {
+    Q_OBJECT
     QIODevice* ioDevice;
     QByteArray* bytes = new QByteArray;
-    Q_OBJECT
 
 public:
     PendingAppend(QIODevice* ioDevice)

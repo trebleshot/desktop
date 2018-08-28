@@ -37,11 +37,15 @@ void Server::stop(bool block)
 
 void ActiveConnection::reply(char* reply)
 {
+    cout << this << " : Entered write sequence" << endl;
+
     QByteArray replyImpl(reply);
 
     QJsonObject headerIndex{
         { QString(COOLSOCKET_KEYWORD_LENGTH), QJsonValue(replyImpl.length()) }
     };
+
+    time_t startTime = clock();
 
     activeSocket->write(QJsonDocument(headerIndex).toJson());
     activeSocket->write(COOLSOCKET_HEADER_DIVIDER);
@@ -50,59 +54,75 @@ void ActiveConnection::reply(char* reply)
     activeSocket->write(replyImpl);
     activeSocket->flush();
 
-    if (!activeSocket->waitForBytesWritten(getTimeout() < 0 ? 2000 : getTimeout())) {
-        if (getTimeout() < 0)
+    while (activeSocket->bytesToWrite() != 0) {
+        if (getTimeout() >= 0 && (clock() - startTime) > getTimeout())
             throw exception();
     }
+
+    cout << this << " : Exited write sequence" << endl;
 }
 
 Response* ActiveConnection::receive()
 {
+    cout << this << " : Entered read sequence" << endl;
+
     Response* response = new Response;
 
     size_t headerPosition = string::npos;
     string* headerData = new string;
     string* contentData = new string;
 
+    time_t lastDataAvailable = clock();
+
     while (activeSocket->isReadable()) {
-        if (activeSocket->waitForReadyRead(getTimeout() < 0 ? 2000 : getTimeout())) {
-            if (headerPosition == string::npos) {
+        if (headerPosition == string::npos) {
+            if (activeSocket->waitForReadyRead(2000)) {
                 headerData->append(activeSocket->readAll());
-                headerPosition = headerData->find(COOLSOCKET_HEADER_DIVIDER);
-
-                if (headerPosition != string::npos) {
-                    long int dividerOccupiedSize = sizeof COOLSOCKET_HEADER_DIVIDER + headerPosition;
-
-                    if (headerData->length() > dividerOccupiedSize)
-                        contentData->append(headerData->substr(dividerOccupiedSize));
-
-                    headerData->resize(headerPosition);
-
-                    QJsonObject jsonObject = QJsonDocument::fromJson(QByteArray::fromStdString(*headerData)).object();
-
-                    if (jsonObject.contains(QString(COOLSOCKET_KEYWORD_LENGTH))) {
-                        response->length = (jsonObject.value(QString(COOLSOCKET_KEYWORD_LENGTH))).toInt();
-                    } else
-                        break;
-
-                    response->headerIndex = &jsonObject;
-                }
-
-                if (headerData->length() > COOLSOCKET_HEADER_HEAP_SIZE) {
-                    cerr << "Header exceeds heap size: " << headerData->length();
-                    break;
-                }
-            } else {
-                contentData->append(activeSocket->readAll());
-
-                if (contentData->length() >= response->length) {
-                    response->response = new QString(QByteArray::fromStdString(*contentData));
-                    break;
-                }
+                lastDataAvailable = clock();
             }
-        } else if (getTimeout() >= 0)
+
+            headerPosition = headerData->find(COOLSOCKET_HEADER_DIVIDER);
+
+            if (headerPosition != string::npos) {
+                long int dividerOccupiedSize = sizeof COOLSOCKET_HEADER_DIVIDER + headerPosition - 1;
+
+                if (headerData->length() > dividerOccupiedSize)
+                    contentData->append(headerData->substr(dividerOccupiedSize));
+
+                headerData->resize(headerPosition);
+
+                QJsonObject jsonObject = QJsonDocument::fromJson(QByteArray::fromStdString(*headerData))
+                                             .object();
+
+                if (jsonObject.contains(QString(COOLSOCKET_KEYWORD_LENGTH))) {
+                    response->length = (jsonObject.value(QString(COOLSOCKET_KEYWORD_LENGTH))).toInt();
+                } else
+                    break;
+
+                response->headerIndex = &jsonObject;
+            }
+
+            if (headerData->length() > COOLSOCKET_HEADER_HEAP_SIZE) {
+                cerr << "Header exceeds heap size: " << headerData->length();
+                throw exception();
+            }
+        } else {
+            if (activeSocket->waitForReadyRead(2000)) {
+                contentData->append(activeSocket->readAll());
+                lastDataAvailable = clock();
+            }
+
+            if (contentData->length() >= response->length) {
+                response->response = new QString(QByteArray::fromStdString(*contentData));
+                break;
+            }
+        }
+
+        if (getTimeout() >= 0 && (clock() - lastDataAvailable) > getTimeout())
             throw exception();
     }
+
+    cout << this << " : Exited read sequence" << endl;
 
     return response;
 }
@@ -114,7 +134,10 @@ ServerWorker::ServerWorker(Server* server, QObject* parent)
     this->setTcpServer(new QTcpServer());
 }
 
-void ServerWorker::setTcpServer(QTcpServer* server) { this->tcpServer = server; }
+void ServerWorker::setTcpServer(QTcpServer* server)
+{
+    this->tcpServer = server;
+}
 
 void ServerWorker::run()
 {
@@ -134,4 +157,32 @@ void ServerWorker::run()
         }
     }
 }
+
+void RequestHandler::run()
+{
+    server->ongoingTasks.append(this);
+
+    connect(this, SIGNAL(finished()), this->connection->getSocket(), SLOT(deleteLater()));
+
+    this->connection->getSocket()->waitForConnected(2000);
+    emit server->clientConnected(this->connection);
+    server->connected(this->connection);
+
+    server->ongoingTasks.removeOne(this);
 }
+
+ActiveConnection* Client::connect(QString hostAddress, quint16 port, int timeoutMSeconds)
+{
+    QTcpSocket* socket = new QTcpSocket;
+    socket->connectToHost(hostAddress, port);
+
+    while (QAbstractSocket::SocketState::ConnectingState == socket->state())
+        socket->waitForConnected(timeoutMSeconds);
+
+    if (QAbstractSocket::SocketState::ConnectedState != socket->state())
+        throw exception();
+
+    return new ActiveConnection(socket);
+}
+
+} // namespace CoolSocket
