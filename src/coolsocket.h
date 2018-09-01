@@ -69,9 +69,7 @@ public:
 
     void stop(bool block);
 
-    virtual void connected(ActiveConnection* connection)
-    {
-    }
+    virtual void connected(ActiveConnection* connection) = 0;
 signals:
     void clientConnected(ActiveConnection* connection);
 };
@@ -104,7 +102,7 @@ public:
 
     void setTimeout(int msecs) { this->timeout = msecs; }
 
-    void reply(char* reply);
+    void reply(const char* reply);
     Response* receive();
 };
 

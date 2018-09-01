@@ -35,7 +35,7 @@ void Server::stop(bool block)
     }
 }
 
-void ActiveConnection::reply(char* reply)
+void ActiveConnection::reply(const char* reply)
 {
     cout << this << " : Entered write sequence" << endl;
 

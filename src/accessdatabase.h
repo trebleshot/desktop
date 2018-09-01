@@ -1,14 +1,21 @@
 #ifndef ACCESSDATABASE_H
 #define ACCESSDATABASE_H
 
+#include <QMimeData>
 #include <QSqlDatabase>
+#include <QSqlField>
+#include <QSqlQuery>
+#include <QSqlRecord>
+#include <QSqlResult>
 #include <QSqlTableModel>
+#include <QVariant>
 #include <iostream>
 
 using namespace std;
 
 class AccessDatabase;
 class DatabaseObject;
+class SqlSelection;
 
 namespace AccessDatabaseStructure {
 const QString TABLE_TRANSFER = "transfer";
@@ -53,10 +60,6 @@ const QString FIELD_CLIPBOARD_ID = "id";
 const QString FIELD_CLIPBOARD_TEXT = "text";
 const QString FIELD_CLIPBOARD_TIME = "time";
 
-const QString TABLE_WRITABLEPATH = "writablePath";
-const QString FIELD_WRITABLEPATH_TITLE = "title";
-const QString FIELD_WRITABLEPATH_PATH = "path";
-
 const QString TABLE_TRANSFERASSIGNEE = "transferAssignee";
 const QString FIELD_TRANSFERASSIGNEE_GROUPID = "groupId";
 const QString FIELD_TRANSFERASSIGNEE_DEVICEID = "deviceId";
@@ -65,38 +68,102 @@ const QString FIELD_TRANSFERASSIGNEE_ISCLONE = "isClone";
 
 extern QSqlField generateField(const QString& key, const QVariant::Type type, bool nullable = true);
 
+extern QSqlField generateField(const QString& key, const QVariant& type);
+
 extern QString generateTableCreationSql(QString& tableName, QSqlRecord& record, bool mayExist = false);
 
 extern const char* transformType(QVariant::Type type);
+
+extern QSqlTableModel* gatherTableModel(AccessDatabase* db, DatabaseObject* dbObject);
 }
+
+class SqlSelection : public QObject {
+public:
+    QString tag;
+    QString tableName;
+    QStringList columns;
+    QString where;
+    QList<QVariant> whereArgs;
+    QString groupBy;
+    QString having;
+    QString orderBy;
+    int limit = -1;
+
+    void bindWhereClause(QSqlQuery& query);
+
+    QString generateSpecifierClause(bool fromStatement = true);
+
+    SqlSelection* setHaving(QString having);
+
+    SqlSelection* setGroupBy(QString field, bool ascending);
+
+    SqlSelection* setGroupBy(QString orderBy);
+
+    SqlSelection* setLimit(int limit);
+
+    SqlSelection* setOrderBy(QString field, bool ascending);
+
+    SqlSelection* setOrderBy(QString limit);
+
+    SqlSelection* setTableName(QString tableName);
+
+    SqlSelection* setWhere(QString whereString);
+
+    QSqlQuery* toDeletionQuery();
+
+    QSqlQuery* toInsertionQuery();
+
+    QSqlQuery* toSelectionQuery();
+
+    QString toSelectionColumns();
+
+    QSqlQuery* toUpdateQuery(QSqlRecord query);
+};
 
 class DatabaseObject : public QObject {
     Q_OBJECT
 
 public:
-    virtual QSqlQuery getWhere() = 0;
+    DatabaseObject(QObject* parent = 0);
 
-    virtual QList<QSqlField>* getValues() = 0;
+    virtual SqlSelection* getWhere() = 0;
 
-    virtual void onGeneratingValues(QList<QSqlField>* db) = 0;
+    virtual QSqlRecord getValues(AccessDatabase* db) = 0;
+
+    virtual void onGeneratingValues(QSqlRecord record) = 0;
 
     virtual void onUpdatingObject(AccessDatabase* db) {}
 
     virtual void onInsertingObject(AccessDatabase* db) {}
 
     virtual void onRemovingObject(AccessDatabase* db) {}
+
+    QSqlRecord prepareGenerationIndex(AccessDatabase* db);
 };
 
 class AccessDatabase : public QObject {
     QSqlDatabase* db;
 
 public:
-    AccessDatabase(QSqlDatabase* db);
-    void initialize();
+    AccessDatabase(QSqlDatabase* db, QObject* parent = 0);
+
+    QSqlDatabase* database();
 
     static QMap<QString, QSqlRecord>* getPassiveTables();
 
-    void insertObject(DatabaseObject* dbObject);
+    bool contains(DatabaseObject* dbObject);
+
+    void initialize();
+
+    bool insert(DatabaseObject* dbObject);
+
+    bool publish(DatabaseObject* dbObject);
+
+    void reconstruct(DatabaseObject* dbObject);
+
+    bool remove(DatabaseObject* dbObject);
+
+    bool update(DatabaseObject* dbObject);
 };
 
 #endif // ACCESSDATABASE_H
