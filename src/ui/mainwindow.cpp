@@ -1,40 +1,34 @@
 #include "mainwindow.h"
-#include "src/accessdatabase.h"
-#include "src/stringlistmodel.h"
-#include "src/transferobject.h"
+#include "src/model/stringlistmodel.h"
+#include "src/database/object/transferobject.h"
 #include "ui_mainwindow.h"
 
-#include <QHostAddress>
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QNetworkConfigurationManager>
-#include <QSqlDatabase>
 #include <QSqlDriver>
-#include <QSqlField>
-#include <QSqlQuery>
-#include <QSqlRecord>
-#include <QSqlResult>
-#include <QSqlTableModel>
 #include <QTime>
+#include <src/database/object/transfergroup.h>
+#include <src/database/object/networkdevice.h>
+#include <QtSql/QSqlError>
 
-MainWindow::MainWindow(QWidget* parent)
-        : QMainWindow(parent)
-        , ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent)
+        : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    CommunicationServer* cserver = new CommunicationServer();
+    CommunicationServer *cserver = new CommunicationServer();
     cout << "Start cserver stat: " << cserver->start(5000) << endl;
 
     QStringList numbers;
-    QListView* listView;
-    StringListModel* itemModel;
+    QListView *listView;
+    StringListModel *itemModel;
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 
-    db.setDatabaseName("/home/veli/test.db");
+    db.setDatabaseName("local.db");
 
     if (db.open()) {
         cout << "DB has opened" << endl;
 
-        AccessDatabase* dbInstance(new AccessDatabase(&db));
+        AccessDatabase *dbInstance(new AccessDatabase(&db));
         dbInstance->initialize();
 
         TransferObject transferObject;
@@ -63,7 +57,37 @@ MainWindow::MainWindow(QWidget* parent)
         dbInstance->update(&testtObject);
         dbInstance->remove(&testtObject);
 
-        db.close();
+        TransferGroup *transferGroup = new TransferGroup;
+
+        transferGroup->savePath = "fuckthis";
+        transferGroup->dateCreated = 23829;
+        transferGroup->groupId = 23232;
+
+        dbInstance->publish(transferGroup);
+
+        TransferGroup *testGroup = new TransferGroup(23232);
+
+        dbInstance->reconstruct(testGroup);
+
+        NetworkDevice *device = new NetworkDevice;
+
+        device->brand = QString("Brand");
+        device->model = QString("Model");
+        device->nickname = QString("Harakiri");
+        device->versionNumber = 57;
+        device->versionName = QString("1.0");
+        device->deviceId = "1a1a1a1a1";
+        device->tmpSecureKey = 2;
+        device->lastUsageTime = 1;
+        device->isLocalAddress = false;
+        device->isRestricted = false;
+        device->isTrusted = true;
+
+        dbInstance->publish(device);
+
+        NetworkDevice *testDevice = new NetworkDevice(QString("1a1a1a1a1"));
+
+        dbInstance->reconstruct(testDevice);
     }
 
     ui->setupUi(this);
@@ -116,17 +140,17 @@ void MainWindow::clickedButtonServerStop(bool checked)
     testServer->stop(true);
 }
 
-void MainWindow::dropEvent(QDropEvent* event)
+void MainWindow::dropEvent(QDropEvent *event)
 {
     cout << "has something been dropp'd" << endl;
 }
 
-void MainWindow::mouseDoubleClickEvent(QMouseEvent* event)
+void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
     cout << "has something been 2x click'd" << endl;
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* event)
+void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if ((event->modifiers() & Qt::ShiftModifier)
         && (event->modifiers() & Qt::ControlModifier)

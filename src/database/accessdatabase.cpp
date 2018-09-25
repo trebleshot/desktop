@@ -1,18 +1,16 @@
 #include "accessdatabase.h"
 
-#include <QSqlError>
-
 using AccessDatabaseStructure::generateField;
 using AccessDatabaseStructure::generateTableCreationSql;
 using AccessDatabaseStructure::transformType;
 
-AccessDatabase::AccessDatabase(QSqlDatabase* db, QObject* parent)
-    : QObject(parent)
+AccessDatabase::AccessDatabase(QSqlDatabase *db, QObject *parent)
+        : QObject(parent)
 {
     this->db = db;
 }
 
-QSqlDatabase* AccessDatabase::database()
+QSqlDatabase *AccessDatabase::database()
 {
     return this->db;
 }
@@ -20,7 +18,7 @@ QSqlDatabase* AccessDatabase::database()
 void AccessDatabase::initialize()
 {
     QSqlQuery queryExecutor(*database());
-    QMap<QString, QSqlRecord>* tables = getPassiveTables();
+    QMap<QString, QSqlRecord> *tables = getPassiveTables();
 
     for (QString dbTableKey : tables->keys()) {
         QSqlRecord dbRecord = tables->take(dbTableKey);
@@ -32,7 +30,7 @@ void AccessDatabase::initialize()
     delete tables;
 }
 
-QMap<QString, QSqlRecord>* AccessDatabase::getPassiveTables()
+QMap<QString, QSqlRecord> *AccessDatabase::getPassiveTables()
 {
     QSqlRecord tableTransfer;
     tableTransfer.append(generateField(AccessDatabaseStructure::FIELD_TRANSFER_ID, QVariant::Int, false));
@@ -82,7 +80,7 @@ QMap<QString, QSqlRecord>* AccessDatabase::getPassiveTables()
     tableAssignee.append(generateField(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER, QVariant::String, true));
     tableAssignee.append(generateField(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_ISCLONE, QVariant::Bool, true));
 
-    QMap<QString, QSqlRecord>* list = new QMap<QString, QSqlRecord>();
+    QMap<QString, QSqlRecord> *list = new QMap<QString, QSqlRecord>();
 
     list->insert(QString(AccessDatabaseStructure::TABLE_TRANSFER), tableTransfer);
     list->insert(QString(AccessDatabaseStructure::TABLE_TRANSFERGROUP), tableGroup);
@@ -94,9 +92,9 @@ QMap<QString, QSqlRecord>* AccessDatabase::getPassiveTables()
     return list;
 }
 
-bool AccessDatabase::contains(DatabaseObject* dbObject)
+bool AccessDatabase::contains(DatabaseObject *dbObject)
 {
-    QSqlQuery* query = dbObject->getWhere()->toSelectionQuery();
+    QSqlQuery *query = dbObject->getWhere()->toSelectionQuery();
     bool wasSuccessful;
 
     query->exec();
@@ -107,9 +105,9 @@ bool AccessDatabase::contains(DatabaseObject* dbObject)
     return wasSuccessful;
 }
 
-bool AccessDatabase::insert(DatabaseObject* dbObject)
+bool AccessDatabase::insert(DatabaseObject *dbObject)
 {
-    QSqlTableModel* model = AccessDatabaseStructure::gatherTableModel(this, dbObject);
+    QSqlTableModel *model = AccessDatabaseStructure::gatherTableModel(this, dbObject);
     bool wasSuccessful;
 
     wasSuccessful = model->insertRecord(-1, dbObject->getValues(this));
@@ -118,16 +116,16 @@ bool AccessDatabase::insert(DatabaseObject* dbObject)
     return wasSuccessful;
 }
 
-bool AccessDatabase::publish(DatabaseObject* dbObject)
+bool AccessDatabase::publish(DatabaseObject *dbObject)
 {
     return (this->contains(dbObject) && this->update(dbObject))
-        || this->insert(dbObject);
+           || this->insert(dbObject);
 }
 
-void AccessDatabase::reconstruct(DatabaseObject* dbObject)
+void AccessDatabase::reconstruct(DatabaseObject *dbObject)
 {
-    QSqlQuery* query = dbObject->getWhere()->toSelectionQuery();
-    bool wasSuccessful;
+    QSqlQuery *query = dbObject->getWhere()->toSelectionQuery();
+    bool wasSuccessful = false;
 
     query->exec();
 
@@ -142,15 +140,15 @@ void AccessDatabase::reconstruct(DatabaseObject* dbObject)
         throw exception();
 }
 
-bool AccessDatabase::remove(DatabaseObject* dbObject)
+bool AccessDatabase::remove(DatabaseObject *dbObject)
 {
     return dbObject->getWhere()->toDeletionQuery()->exec();
 }
 
-bool AccessDatabase::update(DatabaseObject* dbObject)
+bool AccessDatabase::update(DatabaseObject *dbObject)
 {
-    SqlSelection* selection = dbObject->getWhere();
-    QSqlQuery* updateQuery = selection->toUpdateQuery(dbObject->getValues(this));
+    SqlSelection *selection = dbObject->getWhere();
+    QSqlQuery *updateQuery = selection->toUpdateQuery(dbObject->getValues(this));
     bool wasSuccessful;
 
     wasSuccessful = updateQuery->exec();
@@ -160,7 +158,7 @@ bool AccessDatabase::update(DatabaseObject* dbObject)
     return wasSuccessful;
 }
 
-QSqlField AccessDatabaseStructure::generateField(const QString& key, const QVariant::Type type, bool nullable)
+QSqlField AccessDatabaseStructure::generateField(const QString &key, const QVariant::Type type, bool nullable)
 {
     QSqlField field(key, type);
     field.setRequired(!nullable);
@@ -168,32 +166,32 @@ QSqlField AccessDatabaseStructure::generateField(const QString& key, const QVari
     return field;
 }
 
-const char* AccessDatabaseStructure::transformType(QVariant::Type type)
+const char *AccessDatabaseStructure::transformType(QVariant::Type type)
 {
     switch (type) {
-    case QVariant::Bool:
-    case QVariant::Int:
-    case QVariant::LongLong:
-    case QVariant::UInt:
-    case QVariant::ULongLong:
-        return "integer";
-    case QVariant::Double:
-        return "double";
-    case QVariant::Time:
-        return "time";
-    case QVariant::Date:
-        return "date";
-    case QVariant::DateTime:
-        return "datetime";
-    case QVariant::String:
-    case QVariant::Url:
-        return "text";
-    default:
-        return QVariant::typeToName(type);
+        case QVariant::Bool:
+        case QVariant::Int:
+        case QVariant::LongLong:
+        case QVariant::UInt:
+        case QVariant::ULongLong:
+            return "integer";
+        case QVariant::Double:
+            return "double";
+        case QVariant::Time:
+            return "time";
+        case QVariant::Date:
+            return "date";
+        case QVariant::DateTime:
+            return "datetime";
+        case QVariant::String:
+        case QVariant::Url:
+            return "text";
+        default:
+            return QVariant::typeToName(type);
     }
 }
 
-QString AccessDatabaseStructure::generateTableCreationSql(QString& tableName, QSqlRecord& record, bool mayExist)
+QString AccessDatabaseStructure::generateTableCreationSql(QString &tableName, QSqlRecord &record, bool mayExist)
 {
     QString sql("create table ");
 
@@ -223,7 +221,7 @@ QString AccessDatabaseStructure::generateTableCreationSql(QString& tableName, QS
     return sql;
 }
 
-QSqlField AccessDatabaseStructure::generateField(const QString& key, const QVariant& value)
+QSqlField AccessDatabaseStructure::generateField(const QString &key, const QVariant &value)
 {
     QSqlField field(key);
     field.setValue(value);
@@ -231,16 +229,16 @@ QSqlField AccessDatabaseStructure::generateField(const QString& key, const QVari
     return field;
 }
 
-QSqlTableModel* AccessDatabaseStructure::gatherTableModel(AccessDatabase* db, DatabaseObject* dbObject)
+QSqlTableModel *AccessDatabaseStructure::gatherTableModel(AccessDatabase *db, DatabaseObject *dbObject)
 {
-    QSqlTableModel* model = new QSqlTableModel(db, *db->database());
+    QSqlTableModel *model = new QSqlTableModel(db, *db->database());
 
     model->setTable(dbObject->getWhere()->tableName);
 
     return model;
 }
 
-void SqlSelection::bindWhereClause(QSqlQuery& query)
+void SqlSelection::bindWhereClause(QSqlQuery &query)
 {
     for (QVariant whereArg : this->whereArgs)
         query.addBindValue(whereArg);
@@ -279,13 +277,13 @@ QString SqlSelection::generateSpecifierClause(bool fromStatement)
     return queryString;
 }
 
-SqlSelection* SqlSelection::setHaving(QString having)
+SqlSelection *SqlSelection::setHaving(QString having)
 {
     this->having = having;
     return this;
 }
 
-SqlSelection* SqlSelection::setGroupBy(QString field, bool ascending)
+SqlSelection *SqlSelection::setGroupBy(QString field, bool ascending)
 {
     this->groupBy = "`";
     this->groupBy += field;
@@ -295,19 +293,19 @@ SqlSelection* SqlSelection::setGroupBy(QString field, bool ascending)
     return this;
 }
 
-SqlSelection* SqlSelection::setGroupBy(QString orderBy)
+SqlSelection *SqlSelection::setGroupBy(QString orderBy)
 {
     this->orderBy = orderBy;
     return this;
 }
 
-SqlSelection* SqlSelection::setLimit(int limit)
+SqlSelection *SqlSelection::setLimit(int limit)
 {
     this->limit = limit;
     return this;
 }
 
-SqlSelection* SqlSelection::setOrderBy(QString field, bool ascending)
+SqlSelection *SqlSelection::setOrderBy(QString field, bool ascending)
 {
     this->orderBy = "`";
     this->orderBy += field;
@@ -317,30 +315,30 @@ SqlSelection* SqlSelection::setOrderBy(QString field, bool ascending)
     return this;
 }
 
-SqlSelection* SqlSelection::setOrderBy(QString field)
+SqlSelection *SqlSelection::setOrderBy(QString field)
 {
     this->orderBy = field;
     return this;
 }
 
-SqlSelection* SqlSelection::setTableName(QString tableName)
+SqlSelection *SqlSelection::setTableName(QString tableName)
 {
     this->tableName = tableName;
     return this;
 }
 
-SqlSelection* SqlSelection::setWhere(QString whereString)
+SqlSelection *SqlSelection::setWhere(QString whereString)
 {
     this->where = whereString;
     return this;
 }
 
-QSqlQuery* SqlSelection::toDeletionQuery()
+QSqlQuery *SqlSelection::toDeletionQuery()
 {
     QString queryString = "delete";
     queryString += generateSpecifierClause();
 
-    QSqlQuery* query = new QSqlQuery;
+    QSqlQuery *query = new QSqlQuery;
 
     query->prepare(queryString);
 
@@ -349,17 +347,17 @@ QSqlQuery* SqlSelection::toDeletionQuery()
     return query;
 }
 
-QSqlQuery* SqlSelection::toInsertionQuery()
+QSqlQuery *SqlSelection::toInsertionQuery()
 {
 }
 
-QSqlQuery* SqlSelection::toSelectionQuery()
+QSqlQuery *SqlSelection::toSelectionQuery()
 {
     QString queryString = "select ";
     queryString += this->toSelectionColumns();
     queryString += generateSpecifierClause();
 
-    QSqlQuery* query = new QSqlQuery;
+    QSqlQuery *query = new QSqlQuery;
 
     query->prepare(queryString);
 
@@ -387,9 +385,9 @@ QString SqlSelection::toSelectionColumns()
     return output;
 }
 
-QSqlQuery* SqlSelection::toUpdateQuery(QSqlRecord record)
+QSqlQuery *SqlSelection::toUpdateQuery(QSqlRecord record)
 {
-    QSqlQuery* query = new QSqlQuery;
+    QSqlQuery *query = new QSqlQuery;
     QString queryString = "update `";
     queryString += this->tableName;
     queryString += "` set ";
@@ -421,7 +419,7 @@ QSqlQuery* SqlSelection::toUpdateQuery(QSqlRecord record)
     return query;
 }
 
-DatabaseObject::DatabaseObject(QObject* parent)
-    : QObject(parent)
+DatabaseObject::DatabaseObject(QObject *parent)
+        : QObject(parent)
 {
 }

@@ -1,7 +1,7 @@
 #ifndef TRANSFEROBJECT_H
 #define TRANSFEROBJECT_H
 
-#include "accessdatabase.h"
+#include "src/database/accessdatabase.h"
 
 class TransferObject : public DatabaseObject {
 public:
@@ -29,11 +29,11 @@ public:
     Type type;
     Flag flag;
 
-    TransferObject(int requestId = -1, QObject* parent = 0);
+    TransferObject(int requestId = -1, QObject *parent = 0);
 
-    SqlSelection* getWhere();
+    SqlSelection *getWhere();
 
-    QSqlRecord getValues(AccessDatabase* db);
+    QSqlRecord getValues(AccessDatabase *db);
 
     void onGeneratingValues(QSqlRecord record);
 };

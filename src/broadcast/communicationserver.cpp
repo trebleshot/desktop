@@ -1,16 +1,16 @@
 #include "communicationserver.h"
 
-CommunicationServer::CommunicationServer(QObject* parent)
-    : CoolSocket::Server(QHostAddress::Any, PORT_COMMUNICATION_DEFAULT, parent)
+CommunicationServer::CommunicationServer(QObject *parent)
+        : CoolSocket::Server(QHostAddress::Any, PORT_COMMUNICATION_DEFAULT, parent)
 {
 }
 
-void CommunicationServer::connected(CoolSocket::ActiveConnection* connection)
+void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 {
     connection->setTimeout(3000);
 
     try {
-        CoolSocket::Response* response = connection->receive();
+        CoolSocket::Response *response = connection->receive();
         QJsonObject responseJSON = QJsonDocument::fromJson(QByteArray::fromStdString(response->response->toStdString())).object();
         QJsonObject replyJSON = QJsonObject();
 

@@ -1,9 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "src/accessdatabase.h"
-#include "src/communicationserver.h"
-#include "src/coolsocket.h"
+#include "src/database/accessdatabase.h"
+#include "src/broadcast/communicationserver.h"
+#include "src/coolsocket/coolsocket.h"
 #include <QMainWindow>
 #include <iostream>
 
@@ -20,7 +20,7 @@ public:
 
     // Server interface
 public:
-    void connected(CoolSocket::ActiveConnection* connection)
+    void connected(CoolSocket::ActiveConnection *connection)
     {
         connection->setTimeout(3000);
 
@@ -28,7 +28,7 @@ public:
             while (connection->getSocket()->isOpen()) {
                 cout << "Request start sequence" << endl;
 
-                CoolSocket::Response* response = connection->receive();
+                CoolSocket::Response *response = connection->receive();
                 cout << "client said: " << response->response->toStdString() << endl;
 
                 connection->reply("hi, there!");
@@ -45,7 +45,7 @@ protected:
     void connectionPhase()
     {
         try {
-            CoolSocket::ActiveConnection* connection(connect("0.0.0.0", 5555));
+            CoolSocket::ActiveConnection *connection(connect("0.0.0.0", 5555));
 
             int iterator = 0;
 
@@ -53,7 +53,7 @@ protected:
                    && iterator <= 10) {
                 connection->reply("thank you!");
 
-                CoolSocket::Response* response = connection->receive();
+                CoolSocket::Response *response = connection->receive();
                 cout << "server said: " << response->response->toStdString() << endl;
 
                 iterator++;
@@ -68,25 +68,31 @@ protected:
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
-    TestClient* testClient = new TestClient;
-    TestServer* testServer = new TestServer;
+    TestClient *testClient = new TestClient;
+    TestServer *testServer = new TestServer;
 
 public:
-    explicit MainWindow(QWidget* parent = 0);
+    explicit MainWindow(QWidget *parent = 0);
+
     ~MainWindow();
 
 private:
-    Ui::MainWindow* ui;
+    Ui::MainWindow *ui;
 
 public slots:
+
     void clickedButtonConnect(bool checked);
+
     void clickedButtonServer(bool checked);
+
     void clickedButtonServerStop(bool checked);
 
 protected:
-    void dropEvent(QDropEvent* event);
-    void mouseDoubleClickEvent(QMouseEvent* event);
-    void keyPressEvent(QKeyEvent* event);
+    void dropEvent(QDropEvent *event);
+
+    void mouseDoubleClickEvent(QMouseEvent *event);
+
+    void keyPressEvent(QKeyEvent *event);
 };
 
 #endif // MAINWINDOW_H

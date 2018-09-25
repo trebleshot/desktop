@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "src/ui/mainwindow.h"
 
 #include <QApplication>
 #include <QFileDialog>
@@ -6,24 +6,18 @@
 #include <QTranslator>
 #include <iostream>
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
     QApplication application(argc, argv);
     QTranslator translator;
-    QResource iconRes(":/drawable/ic_launcher.png", QLocale::system());
-
-    if (iconRes.isValid())
-        cout << "Nope you are retardded" << endl;
 
     // We need to complete the structure of this application so that things may start to happend!?
 
     if (translator.load("Turkish.qm", QLatin1String(":/translation")))
         application.installTranslator(&translator);
 
-    MainWindow mainWindow;
-
     application.setWindowIcon(QIcon(":/drawable/ic_launcher.png"));
 
+    MainWindow mainWindow;
     mainWindow.show();
 
     return application.exec();
