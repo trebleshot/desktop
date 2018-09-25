@@ -1,2 +1,3 @@
-TrebleShot.pro.*
 /.idea
+/cmake-build-debug
+TrebleShot.pro.*

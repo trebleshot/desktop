@@ -25,7 +25,7 @@ bool Server::start(int blockingTime)
     if (blockingTime >= 0) {
         time_t timeout = clock() + blockingTime;
         while (!isServing() && timeout >= clock()) {
-            <
+
         }
     }
 

@@ -1,7 +1,7 @@
 #include "mainwindow.h"
-#include "accessdatabase.h"
-#include "stringlistmodel.h"
-#include "transferobject.h"
+#include "src/accessdatabase.h"
+#include "src/stringlistmodel.h"
+#include "src/transferobject.h"
 #include "ui_mainwindow.h"
 
 #include <QHostAddress>
@@ -18,8 +18,8 @@
 #include <QTime>
 
 MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+        : QMainWindow(parent)
+        , ui(new Ui::MainWindow)
 {
     CommunicationServer* cserver = new CommunicationServer();
     cout << "Start cserver stat: " << cserver->start(5000) << endl;

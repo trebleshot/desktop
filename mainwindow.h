@@ -1,20 +1,20 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "accessdatabase.h"
-#include "communicationserver.h"
-#include "coolsocket.h"
+#include "src/accessdatabase.h"
+#include "src/communicationserver.h"
+#include "src/coolsocket.h"
 #include <QMainWindow>
 #include <iostream>
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
 class TestServer : public CoolSocket::Server {
 public:
     TestServer()
-        : CoolSocket::Server(QHostAddress::Any, 5555)
+            : CoolSocket::Server(QHostAddress::Any, 5555)
     {
     }
 
@@ -40,7 +40,7 @@ public:
 };
 
 class TestClient : public CoolSocket::Client {
-    Q_OBJECT
+Q_OBJECT
 protected:
     void connectionPhase()
     {
@@ -50,7 +50,7 @@ protected:
             int iterator = 0;
 
             while (connection->getSocket()->state() == QAbstractSocket::SocketState::ConnectedState
-                && iterator <= 10) {
+                   && iterator <= 10) {
                 connection->reply("thank you!");
 
                 CoolSocket::Response* response = connection->receive();
@@ -67,7 +67,7 @@ protected:
 };
 
 class MainWindow : public QMainWindow {
-    Q_OBJECT
+Q_OBJECT
     TestClient* testClient = new TestClient;
     TestServer* testServer = new TestServer;
 

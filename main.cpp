@@ -20,6 +20,7 @@ int main(int argc, char* argv[])
     MainWindow mainWindow;
 
     application.setWindowIcon(QIcon(":/drawable/ic_launcher.png"));
+
     mainWindow.show();
 
     return application.exec();
