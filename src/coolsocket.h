@@ -44,10 +44,15 @@ protected:
 
 public:
     explicit Server(QHostAddress hostAddress, int port = 0, QObject* parent = 0);
+
     friend class ServerWorker;
+
     friend class ActiveConnection;
+
     friend class PendingAppend;
+
     friend class Response;
+
     friend class RequestHandler;
 
     QHostAddress getHostAddress() { return hostAddress; }
@@ -56,7 +61,7 @@ public:
 
     int getPort() { return port; }
 
-    bool isRunning();
+    bool isServing();
 
     void setHostAddress(QHostAddress hostAddress)
     {
@@ -65,11 +70,12 @@ public:
 
     void setPort(int port) { this->port = port; }
 
-    void start(bool block);
+    bool start(int blockingTime = -1);
 
-    void stop(bool block);
+    void stop(int blockingTime = -1);
 
     virtual void connected(ActiveConnection* connection) = 0;
+
 signals:
     void clientConnected(ActiveConnection* connection);
 };
@@ -89,8 +95,12 @@ public:
 
     ~ActiveConnection()
     {
-        delete this->activeSocket;
         cout << "ActiveConnection is deleted" << endl;
+
+        if (this->activeSocket->isOpen())
+            this->activeSocket->close();
+
+        delete activeSocket;
     }
 
     QTcpSocket* getSocket()
@@ -103,6 +113,7 @@ public:
     void setTimeout(int msecs) { this->timeout = msecs; }
 
     void reply(const char* reply);
+
     Response* receive();
 };
 
@@ -111,21 +122,25 @@ class Response : public QObject {
 public:
     QString* response;
     QJsonObject* headerIndex;
-    int length;
+    size_t length;
 };
 
 class ServerWorker : public QThread {
     Q_OBJECT
     QTcpServer* tcpServer;
     Server* server;
+    bool serverListening = false;
 
 public:
     explicit ServerWorker(Server* server, QObject* parent = 0);
 
     ~ServerWorker()
     {
-        quit();
-        cout << "ServerWorker was erased" << endl;
+    }
+
+    bool isServing()
+    {
+        return isRunning() && serverListening;
     }
 
     QTcpServer* getTcpServer() { return tcpServer; }
@@ -149,11 +164,6 @@ public:
         this->connection = connection;
     }
 
-    ~RequestHandler()
-    {
-        cout << "Scope removed along with the data" << endl;
-    }
-
 protected:
     void run();
 };
@@ -162,17 +172,19 @@ class Client : public QThread {
     Q_OBJECT
 
 public:
+    Client(QObject* parent = 0)
+        : QThread(parent)
+    {
+    }
+
     ~Client()
     {
-        quit();
         cout << "Scope removed along with the data" << endl;
     }
 
     ActiveConnection* connect(QString hostAddress, quint16 port, int timeoutMSeconds = 3000);
 
-    virtual void connectionPhase()
-    {
-    }
+    virtual void connectionPhase() = 0;
 
 protected:
     virtual void run()
@@ -190,9 +202,14 @@ public:
     PendingAppend(QIODevice* ioDevice)
     {
         this->ioDevice = ioDevice;
+
         connect(ioDevice, SIGNAL(readyRead()), this, SLOT(readData()));
     }
-    virtual ~PendingAppend() {}
+
+    virtual ~PendingAppend()
+    {
+        delete bytes;
+    }
 
     QByteArray* getBytes()
     {

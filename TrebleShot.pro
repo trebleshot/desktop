@@ -40,7 +40,10 @@ HEADERS += \
     src/mainwindow.h \
     src/stringlistmodel.h \
     src/accessdatabase.h \
-    src/transferobject.h
+    src/transferobject.h \
+    src/communicationserver.h \
+    src/config.h \
+    src/keyword.h
 
 SOURCES += \
     src/coolsocket.cpp \
@@ -48,5 +51,6 @@ SOURCES += \
     src/mainwindow.cpp \
     src/stringlistmodel.cpp \
     src/accessdatabase.cpp \
-    src/transferobject.cpp
+    src/transferobject.cpp \
+    src/communicationserver.cpp
 

@@ -10,28 +10,38 @@ Server::Server(QHostAddress hostAddress, int port, QObject* parent)
     this->setPort(port);
 }
 
-bool Server::isRunning()
+bool Server::isServing()
 {
-    return getWorker()->isRunning();
+    return getWorker()->isServing();
 }
 
-void Server::start(bool block)
+bool Server::start(int blockingTime)
 {
+    if (isServing())
+        return true;
+
     getWorker()->start();
 
-    if (block)
-        while (!isRunning()) {
+    if (blockingTime >= 0) {
+        time_t timeout = clock() + blockingTime;
+        while (!isServing() && timeout >= clock()) {
+            <
         }
+    }
+
+    return getWorker()->isServing();
 }
 
-void Server::stop(bool block)
+void Server::stop(int blockingTime)
 {
-    if (isRunning()) {
+    if (getWorker()->isRunning()) {
         getWorker()->requestInterruption();
 
-        if (block)
-            while (isRunning()) {
+        if (blockingTime >= 0) {
+            time_t timeout = clock() + blockingTime;
+            while (getWorker()->isServing() && timeout >= clock()) {
             }
+        }
     }
 }
 
@@ -84,7 +94,7 @@ Response* ActiveConnection::receive()
             headerPosition = headerData->find(COOLSOCKET_HEADER_DIVIDER);
 
             if (headerPosition != string::npos) {
-                long int dividerOccupiedSize = sizeof COOLSOCKET_HEADER_DIVIDER + headerPosition - 1;
+                size_t dividerOccupiedSize = sizeof COOLSOCKET_HEADER_DIVIDER + headerPosition - 1;
 
                 if (headerData->length() > dividerOccupiedSize)
                     contentData->append(headerData->substr(dividerOccupiedSize));
@@ -141,20 +151,25 @@ void ServerWorker::setTcpServer(QTcpServer* server)
 
 void ServerWorker::run()
 {
-    setTcpServer(new QTcpServer());
-    getTcpServer()->listen(server->getHostAddress(), server->getPort());
+    this->setTcpServer(new QTcpServer());
 
-    connect(this, SIGNAL(finished()), getTcpServer(), SLOT(deleteLater()));
+    if (getTcpServer()->listen(server->getHostAddress(), server->getPort())) {
+        while (!isInterruptionRequested() && getTcpServer()->isListening()) {
+            this->serverListening = true;
 
-    while (!isInterruptionRequested() && getTcpServer()->isListening()) {
-        getTcpServer()->waitForNewConnection(2000);
+            getTcpServer()->waitForNewConnection(2000);
 
-        if (getTcpServer()->hasPendingConnections()) {
-            QTcpSocket* socket = getTcpServer()->nextPendingConnection();
-            ActiveConnection* activeConnection = new ActiveConnection(socket);
+            if (getTcpServer()->hasPendingConnections()) {
+                QTcpSocket* socket = getTcpServer()->nextPendingConnection();
+                ActiveConnection* activeConnection = new ActiveConnection(socket);
+                RequestHandler* handler = new RequestHandler(server, activeConnection);
 
-            (new RequestHandler(server, activeConnection))->start();
+                handler->start();
+            }
         }
+
+        this->serverListening = false;
+        getTcpServer()->close();
     }
 }
 
@@ -169,11 +184,17 @@ void RequestHandler::run()
     server->connected(this->connection);
 
     server->ongoingTasks.removeOne(this);
+
+    delete this->connection;
 }
 
 ActiveConnection* Client::connect(QString hostAddress, quint16 port, int timeoutMSeconds)
 {
     QTcpSocket* socket = new QTcpSocket;
+    ActiveConnection* connection = new ActiveConnection(socket);
+
+    socket->connect(this, SIGNAL(finished()), connection, SLOT(deleteLater()));
+
     socket->connectToHost(hostAddress, port);
 
     while (QAbstractSocket::SocketState::ConnectingState == socket->state())
@@ -182,7 +203,6 @@ ActiveConnection* Client::connect(QString hostAddress, quint16 port, int timeout
     if (QAbstractSocket::SocketState::ConnectedState != socket->state())
         throw exception();
 
-    return new ActiveConnection(socket);
+    return connection;
 }
-
 } // namespace CoolSocket

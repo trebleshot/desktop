@@ -425,9 +425,3 @@ DatabaseObject::DatabaseObject(QObject* parent)
     : QObject(parent)
 {
 }
-
-QSqlRecord DatabaseObject::prepareGenerationIndex(AccessDatabase* db)
-{
-    QSqlTableModel* model = AccessDatabaseStructure::gatherTableModel(db, this);
-    return model->record();
-}

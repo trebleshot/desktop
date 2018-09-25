@@ -6,6 +6,8 @@
 
 #include <QHostAddress>
 #include <QKeyEvent>
+#include <QMessageBox>
+#include <QNetworkConfigurationManager>
 #include <QSqlDatabase>
 #include <QSqlDriver>
 #include <QSqlField>
@@ -19,6 +21,9 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    CommunicationServer* cserver = new CommunicationServer();
+    cout << "Start cserver stat: " << cserver->start(5000) << endl;
+
     QStringList numbers;
     QListView* listView;
     StringListModel* itemModel;
@@ -29,10 +34,7 @@ MainWindow::MainWindow(QWidget* parent)
     if (db.open()) {
         cout << "DB has opened" << endl;
 
-        AccessDatabase* dbInstance = new AccessDatabase(&db);
-        QSqlQuery sqlQuery;
-        QSqlTableModel tableModel(this, db);
-
+        AccessDatabase* dbInstance(new AccessDatabase(&db));
         dbInstance->initialize();
 
         TransferObject transferObject;
@@ -56,9 +58,7 @@ MainWindow::MainWindow(QWidget* parent)
         if (testtObject.flag == TransferObject::Flag::Pending)
             cout << "Well matched" << endl;
 
-        testtObject.friendlyName = "Sagopaaaaaa";
-
-        SqlSelection* selection = testtObject.getWhere();
+        testtObject.friendlyName = "Sals";
 
         dbInstance->update(&testtObject);
         dbInstance->remove(&testtObject);
@@ -69,10 +69,13 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
     listView = ui->listView;
 
-    numbers << "One"
-            << "Two"
-            << "Three"
-            << "Four";
+    QNetworkConfigurationManager manager;
+
+    QList<QNetworkConfiguration> configurations = manager.allConfigurations(QNetworkConfiguration::StateFlag::Active);
+
+    for (QNetworkConfiguration config : configurations) {
+        numbers << config.name();
+    }
 
     itemModel = new StringListModel(numbers);
     listView->setModel(itemModel);
@@ -89,6 +92,8 @@ MainWindow::MainWindow(QWidget* parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete testClient;
+    delete testServer;
 }
 
 void MainWindow::clickedButtonConnect(bool checked)
@@ -99,14 +104,16 @@ void MainWindow::clickedButtonConnect(bool checked)
 
 void MainWindow::clickedButtonServer(bool checked)
 {
-    cout << "Test server started" << endl;
-    commServer->start(true);
+    if (testServer->start(2000))
+        cout << "Test server started" << endl;
+    else
+        QMessageBox::critical(this, QString("Critical error"), QString("Communication server won't start. It may be because there is another instance of the app running"));
 }
 
 void MainWindow::clickedButtonServerStop(bool checked)
 {
     cout << "Test server stopped" << endl;
-    commServer->stop(true);
+    testServer->stop(true);
 }
 
 void MainWindow::dropEvent(QDropEvent* event)

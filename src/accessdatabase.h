@@ -137,8 +137,6 @@ public:
     virtual void onInsertingObject(AccessDatabase* db) {}
 
     virtual void onRemovingObject(AccessDatabase* db) {}
-
-    QSqlRecord prepareGenerationIndex(AccessDatabase* db);
 };
 
 class AccessDatabase : public QObject {
@@ -147,9 +145,9 @@ class AccessDatabase : public QObject {
 public:
     AccessDatabase(QSqlDatabase* db, QObject* parent = 0);
 
-    QSqlDatabase* database();
-
     static QMap<QString, QSqlRecord>* getPassiveTables();
+
+    QSqlDatabase* database();
 
     bool contains(DatabaseObject* dbObject);
 

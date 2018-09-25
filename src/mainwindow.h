@@ -2,8 +2,8 @@
 #define MAINWINDOW_H
 
 #include "accessdatabase.h"
+#include "communicationserver.h"
 #include "coolsocket.h"
-
 #include <QMainWindow>
 #include <iostream>
 
@@ -11,9 +11,9 @@ namespace Ui {
 class MainWindow;
 }
 
-class CommunicationServer : public CoolSocket::Server {
+class TestServer : public CoolSocket::Server {
 public:
-    CommunicationServer()
+    TestServer()
         : CoolSocket::Server(QHostAddress::Any, 5555)
     {
     }
@@ -33,7 +33,7 @@ public:
 
                 connection->reply("hi, there!");
             }
-        } catch (exception e) {
+        } catch (...) {
             cerr << "Could not follow the rules" << endl;
         }
     }
@@ -47,11 +47,16 @@ protected:
         try {
             CoolSocket::ActiveConnection* connection(connect("0.0.0.0", 5555));
 
-            while (connection->getSocket()->state() == QAbstractSocket::SocketState::ConnectedState) {
+            int iterator = 0;
+
+            while (connection->getSocket()->state() == QAbstractSocket::SocketState::ConnectedState
+                && iterator <= 10) {
                 connection->reply("thank you!");
 
                 CoolSocket::Response* response = connection->receive();
                 cout << "server said: " << response->response->toStdString() << endl;
+
+                iterator++;
             }
         } catch (exception e) {
             cerr << "Failed to connect or read failed" << endl;
@@ -63,9 +68,8 @@ protected:
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
-
-    CommunicationServer* commServer = new CommunicationServer;
     TestClient* testClient = new TestClient;
+    TestServer* testServer = new TestServer;
 
 public:
     explicit MainWindow(QWidget* parent = 0);
