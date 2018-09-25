@@ -12,6 +12,9 @@ int main(int argc, char* argv[])
     QTranslator translator;
     QResource iconRes(":/drawable/ic_launcher.png", QLocale::system());
 
+    if (iconRes.isValid())
+        cout << "Nope you are retardded" << endl;
+
     // We need to complete the structure of this application so that things may start to happend!?
 
     if (translator.load("Turkish.qm", QLatin1String(":/translation")))
