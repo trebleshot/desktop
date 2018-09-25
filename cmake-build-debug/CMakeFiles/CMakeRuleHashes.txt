@@ -1,6 +1,0 @@
-# Hashes of file build rules.
-6f84eeb5a34b8e67b8943a4a38b680df CMakeFiles/TrebleShot_autogen
-7a19377c581c36cf6d95a117d7b46b2f CMakeFiles/assets_autogen
-6a676edacb1c208e670432c43dc15b57 CMakeFiles/utils_autogen
-811808042b6a1c7cfe6f898fb6090246 qrc_resources.cpp
-554097608b6c0e6aade34888565e1422 ui_mainwindow.h
