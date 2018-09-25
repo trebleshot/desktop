@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC  -Wall -g  -shared -Wl,-soname,libassets.so -o libassets.so CMakeFiles/assets.dir/qrc_resources.cpp.o CMakeFiles/assets.dir/assets_autogen/mocs_compilation.cpp.o 

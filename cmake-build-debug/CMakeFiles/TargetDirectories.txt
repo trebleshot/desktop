@@ -1,0 +1,8 @@
+/home/veli/Workspace/Qt5Projects/TrebleShot/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/veli/Workspace/Qt5Projects/TrebleShot/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/veli/Workspace/Qt5Projects/TrebleShot/cmake-build-debug/CMakeFiles/assets.dir
+/home/veli/Workspace/Qt5Projects/TrebleShot/cmake-build-debug/CMakeFiles/utils.dir
+/home/veli/Workspace/Qt5Projects/TrebleShot/cmake-build-debug/CMakeFiles/TrebleShot.dir
+/home/veli/Workspace/Qt5Projects/TrebleShot/cmake-build-debug/CMakeFiles/assets_autogen.dir
+/home/veli/Workspace/Qt5Projects/TrebleShot/cmake-build-debug/CMakeFiles/utils_autogen.dir
+/home/veli/Workspace/Qt5Projects/TrebleShot/cmake-build-debug/CMakeFiles/TrebleShot_autogen.dir

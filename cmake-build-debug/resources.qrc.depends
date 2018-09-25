@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/drawable">
+        <file alias="ic_launcher.png">drawable/ic_launcher.png</file>
+    </qresource>
+    <qresource prefix="/translation">
+        <file alias="Turkish.ts">strings/Turkish.ts</file>
+        <file alias="Turkish.qm">strings/Turkish.qm</file>
+    </qresource>
+</RCC>
