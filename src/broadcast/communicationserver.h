@@ -7,9 +7,9 @@
 
 class CommunicationServer : public CoolSocket::Server {
 public:
-    CommunicationServer(QObject* parent = nullptr);
+    CommunicationServer(QObject *parent = nullptr);
 
-    void connected(CoolSocket::ActiveConnection* connection) override;
+    void connected(CoolSocket::ActiveConnection *connection) override;
 };
 
 #endif // COMMUNICATIONSERVER_H

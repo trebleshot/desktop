@@ -9,6 +9,8 @@
 #include <QtCore/QString>
 #include <src/database/accessdatabase.h>
 
+class DeviceConnection;
+
 class NetworkDevice : public DatabaseObject {
 Q_OBJECT
 
@@ -26,6 +28,26 @@ public:
     bool isLocalAddress = false;
 
     NetworkDevice(QString deviceId = nullptr, QObject *parent = nullptr);
+
+    SqlSelection *getWhere();
+
+    QSqlRecord getValues(AccessDatabase *db);
+
+    void onGeneratingValues(QSqlRecord record);
+};
+
+class DeviceConnection : public DatabaseObject {
+public:
+    QString adapterName;
+    QString ipAddress;
+    QString deviceId;
+    int lastCheckedDate;
+
+    DeviceConnection(QObject *parent = nullptr);
+
+    DeviceConnection(QString deviceId, QString adapterName, QObject *parent = nullptr);
+
+    DeviceConnection(QString ipAddress, QObject *parent = nullptr);
 
     SqlSelection *getWhere();
 

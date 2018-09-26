@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
         TransferObject transferObject;
 
         transferObject.accessPort = 10;
-        transferObject.friendlyName = "Manameisjeff";
+        transferObject.friendlyName = "Test TransferObject Item";
         transferObject.requestId = 1;
         transferObject.groupId = 1;
         transferObject.skippedBytes = 3;
@@ -47,25 +47,25 @@ MainWindow::MainWindow(QWidget *parent)
 
         dbInstance->reconstruct(&testtObject);
 
-        cout << "Generated ?? " << testtObject.friendlyName.toStdString() << endl;
+        cout << "Generated ? " << testtObject.friendlyName.toStdString() << endl;
 
         if (testtObject.flag == TransferObject::Flag::Pending)
-            cout << "Well matched" << endl;
+            cout << "Test TransferObject Successful" << endl;
 
-        testtObject.friendlyName = "Sals";
+        testtObject.friendlyName = "Test Transfer Object Update + Successfull";
 
         dbInstance->update(&testtObject);
         dbInstance->remove(&testtObject);
 
         TransferGroup *transferGroup = new TransferGroup;
 
-        transferGroup->savePath = "fuckthis";
-        transferGroup->dateCreated = 23829;
-        transferGroup->groupId = 23232;
+        transferGroup->savePath = "Test TransferGroup Publish";
+        transferGroup->dateCreated = 1;
+        transferGroup->groupId = 2;
 
         dbInstance->publish(transferGroup);
 
-        TransferGroup *testGroup = new TransferGroup(23232);
+        TransferGroup *testGroup = new TransferGroup(2);
 
         dbInstance->reconstruct(testGroup);
 
@@ -73,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent)
 
         device->brand = QString("Brand");
         device->model = QString("Model");
-        device->nickname = QString("Harakiri");
+        device->nickname = QString("NickName");
         device->versionNumber = 57;
         device->versionName = QString("1.0");
         device->deviceId = "1a1a1a1a1";
@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent)
         device->isLocalAddress = false;
         device->isRestricted = false;
         device->isTrusted = true;
-
+    
         dbInstance->publish(device);
 
         NetworkDevice *testDevice = new NetworkDevice(QString("1a1a1a1a1"));
