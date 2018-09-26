@@ -88,6 +88,8 @@ MainWindow::MainWindow(QWidget *parent)
         NetworkDevice *testDevice = new NetworkDevice(QString("1a1a1a1a1"));
 
         dbInstance->reconstruct(testDevice);
+
+
     }
 
     ui->setupUi(this);

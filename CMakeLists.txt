@@ -69,7 +69,9 @@ set(UTIL_LIBRARY src/database/accessdatabase.h
         src/database/object/transferobject.h
         src/database/object/transferobject.cpp
         src/database/object/transfergroup.h
-        src/database/object/transfergroup.cpp src/database/object/networkdevice.cpp src/database/object/networkdevice.h)
+        src/database/object/transfergroup.cpp
+        src/database/object/networkdevice.h
+        src/database/object/networkdevice.cpp)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(TrebleShot src/main.cpp src/ui/mainwindow.cpp)

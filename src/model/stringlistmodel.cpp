@@ -2,12 +2,12 @@
 
 class StringItemModel;
 
-int StringListModel::rowCount(const QModelIndex& parent) const
+int StringListModel::rowCount(const QModelIndex &parent) const
 {
     return stringList.count();
 }
 
-QVariant StringListModel::data(const QModelIndex& index, int role) const
+QVariant StringListModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -22,7 +22,7 @@ QVariant StringListModel::data(const QModelIndex& index, int role) const
 }
 
 QVariant StringListModel::headerData(int section, Qt::Orientation orientation,
-    int role) const
+                                     int role) const
 {
     if (role != Qt::DisplayRole)
         return QVariant();

@@ -66,12 +66,14 @@ DeviceConnection::DeviceConnection(QObject *parent) : DatabaseObject(parent)
 }
 
 DeviceConnection::DeviceConnection(QString deviceId, QString adapterName, QObject *parent)
+        : DatabaseObject(parent)
 {
     this->deviceId = std::move(deviceId);
     this->adapterName = std::move(adapterName);
 }
 
 DeviceConnection::DeviceConnection(QString ipAddress, QObject *parent)
+        : DatabaseObject(parent)
 {
     this->ipAddress = std::move(ipAddress);
 }
@@ -82,14 +84,14 @@ SqlSelection *DeviceConnection::getWhere()
             ->setTableName(AccessDatabaseStructure::TABLE_DEVICECONNECTION);
 
     if (ipAddress == nullptr) {
-        selection->setWhere(QString::asprintf("`%s` = ? `%s` = ?",
+        selection->setWhere(QString::asprintf("`%s` = ? AND `%s` = ?",
                                               AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID.toStdString().c_str(),
                                               AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME.toStdString().c_str()));
 
         selection->whereArgs << QVariant(this->deviceId)
                              << QVariant(this->adapterName);
     } else {
-        selection->setWhere(QString::asprintf("`%s` = ?", AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS.toStdString().c_str());
+        selection->setWhere(QString::asprintf("`%s` = ?", AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS.toStdString().c_str()));
 
         selection->whereArgs << QVariant(this->ipAddress);
     }
