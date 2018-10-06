@@ -88,8 +88,6 @@ MainWindow::MainWindow(QWidget *parent)
         NetworkDevice *testDevice = new NetworkDevice(QString("1a1a1a1a1"));
 
         dbInstance->reconstruct(testDevice);
-
-
     }
 
     ui->setupUi(this);
@@ -101,6 +99,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     for (QNetworkConfiguration config : configurations) {
         numbers << config.name();
+        std::cout << config.identifier().toStdString() << endl;
     }
 
     itemModel = new StringListModel(numbers);

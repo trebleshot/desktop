@@ -188,10 +188,10 @@ namespace CoolSocket {
         delete this->connection;
     }
 
-    ActiveConnection *Client::connect(QString hostAddress, quint16 port, int timeoutMSeconds)
+    ActiveConnection *Client::openConnection(QString hostAddress, quint16 port, int timeoutMSeconds)
     {
-        QTcpSocket *socket = new QTcpSocket;
-        ActiveConnection *connection = new ActiveConnection(socket);
+        auto *socket = new QTcpSocket;
+        auto *connection = new ActiveConnection(socket);
 
         socket->connect(this, SIGNAL(finished()), connection, SLOT(deleteLater()));
 

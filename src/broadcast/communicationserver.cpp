@@ -18,27 +18,50 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         bool shouldContinue = false;
 
         // Insert id of this device
-
         QJsonObject deviceInfo;
         QJsonObject appInfo;
 
-        deviceInfo.insert(QString(KEYWORD_DEVICE_INFO_SERIAL), QJsonValue("athingofbeutyisajoyforever"));
-        deviceInfo.insert(QString(KEYWORD_DEVICE_INFO_BRAND), QJsonValue("Nicola"));
-        deviceInfo.insert(QString(KEYWORD_DEVICE_INFO_MODEL), QJsonValue("Tesla"));
-        deviceInfo.insert(QString(KEYWORD_DEVICE_INFO_USER), QJsonValue("Hitchhiker's Guide"));
+        deviceInfo.insert(KEYWORD_DEVICE_INFO_SERIAL, "athingofbeutyisajoyforever");
+        deviceInfo.insert(KEYWORD_DEVICE_INFO_BRAND, "Nicola");
+        deviceInfo.insert(KEYWORD_DEVICE_INFO_MODEL, "Tesla");
+        deviceInfo.insert(KEYWORD_DEVICE_INFO_USER, "Hitchhiker's Guide");
 
-        appInfo.insert(QString(KEYWORD_APP_INFO_VERSION_CODE), QJsonValue(57));
-        appInfo.insert(QString(KEYWORD_APP_INFO_VERSION_NAME), QJsonValue("0.1"));
+        appInfo.insert(KEYWORD_APP_INFO_VERSION_CODE, 62);
+        appInfo.insert(KEYWORD_APP_INFO_VERSION_NAME, "0.1");
 
-        replyJSON.insert(QString(KEYWORD_APP_INFO), QJsonValue(appInfo));
-        replyJSON.insert(QString(KEYWORD_DEVICE_INFO), QJsonValue(deviceInfo));
+        replyJSON.insert(KEYWORD_APP_INFO, appInfo);
+        replyJSON.insert(KEYWORD_DEVICE_INFO, deviceInfo);
 
-        replyJSON.insert(QString(KEYWORD_RESULT), QJsonValue(true));
+        QString deviceSerial = nullptr;
 
-        connection->reply(QJsonDocument(replyJSON).toJson().toStdString().c_str());
+        if (responseJSON.contains(KEYWORD_HANDSHAKE_REQUIRED) && responseJSON.value(KEYWORD_HANDSHAKE_REQUIRED).toBool(false)) {
+            pushReply(connection, replyJSON, true);
 
+            if (!responseJSON.contains(KEYWORD_HANDSHAKE_ONLY) || !responseJSON.value(KEYWORD_HANDSHAKE_ONLY).toBool(false)) {
+                if (responseJSON.contains(KEYWORD_DEVICE_INFO_SERIAL)) {
+                    deviceSerial = responseJSON.value(KEYWORD_DEVICE_INFO_SERIAL).toString();
+                }
+
+                response = connection->receive();
+                responseJSON = QJsonDocument::fromJson(QByteArray::fromStdString(response->response->toStdString())).object();
+            } else {
+                return;
+            }
+        }
+
+        if (deviceSerial != nullptr) {
+
+        }
+
+        pushReply(connection, replyJSON, true);
     } catch (...) {
-        cout << "What could go so wrong??\n"
+        cout << "What could go so wrong??"
              << endl;
     }
+}
+
+void CommunicationServer::pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject json, bool result)
+{
+    json.insert(KEYWORD_RESULT, result);
+    activeConnection->reply(QJsonDocument(json).toJson().toStdString().c_str());
 }

@@ -12,6 +12,7 @@
 #include <QTcpSocket>
 #include <QThread>
 #include <iostream>
+#include <utility>
 
 #define COOLSOCKET_KEYWORD_LENGTH "length"
 #define COOLSOCKET_HEADER_DIVIDER "\nHEADER_END\n"
@@ -74,10 +75,10 @@ namespace CoolSocket {
 
         void setHostAddress(QHostAddress hostAddress)
         {
-            this->hostAddress = hostAddress;
+            this->hostAddress = std::move(hostAddress);
         }
 
-        void setPort(int port)
+        void setPort(qint16 port)
         { this->port = port; }
 
         bool start(int blockingTime = -1);
@@ -87,7 +88,6 @@ namespace CoolSocket {
         virtual void connected(ActiveConnection *connection) = 0;
 
     signals:
-
         void clientConnected(ActiveConnection *connection);
     };
 
@@ -196,7 +196,7 @@ namespace CoolSocket {
             cout << "Scope removed along with the data" << endl;
         }
 
-        ActiveConnection *connect(QString hostAddress, quint16 port, int timeoutMSeconds = 3000);
+        ActiveConnection *openConnection(QString hostAddress, quint16 port, int timeoutMSeconds = 3000);
 
         virtual void connectionPhase() = 0;
 

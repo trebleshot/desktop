@@ -43,7 +43,7 @@ public:
     QString deviceId;
     int lastCheckedDate;
 
-    DeviceConnection(QObject *parent = nullptr);
+    explicit DeviceConnection(QObject *parent = nullptr);
 
     DeviceConnection(QString deviceId, QString adapterName, QObject *parent = nullptr);
 

@@ -27,7 +27,7 @@ QSqlRecord TransferObject::getValues(AccessDatabase *db)
 
 SqlSelection *TransferObject::getWhere()
 {
-    SqlSelection *selection = new SqlSelection;
+    auto *selection = new SqlSelection;
 
     selection
             ->setTableName(AccessDatabaseStructure::TABLE_TRANSFER)

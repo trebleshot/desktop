@@ -42,7 +42,7 @@ public:
 class TestClient : public CoolSocket::Client {
 Q_OBJECT
 protected:
-    void connectionPhase()
+    void connectionPhase() override
     {
         try {
             CoolSocket::ActiveConnection *connection(connect("0.0.0.0", 5555));
@@ -58,7 +58,7 @@ protected:
 
                 iterator++;
             }
-        } catch (exception e) {
+        } catch (exception& e) {
             cerr << "Failed to connect or read failed" << endl;
         }
 

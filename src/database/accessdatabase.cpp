@@ -1,3 +1,5 @@
+
+
 #include "accessdatabase.h"
 
 using AccessDatabaseStructure::generateField;
@@ -80,7 +82,7 @@ QMap<QString, QSqlRecord> *AccessDatabase::getPassiveTables()
     tableAssignee.append(generateField(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER, QVariant::String, true));
     tableAssignee.append(generateField(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_ISCLONE, QVariant::Bool, true));
 
-    QMap<QString, QSqlRecord> *list = new QMap<QString, QSqlRecord>();
+    auto *list = new QMap<QString, QSqlRecord>();
 
     list->insert(QString(AccessDatabaseStructure::TABLE_TRANSFER), tableTransfer);
     list->insert(QString(AccessDatabaseStructure::TABLE_TRANSFERGROUP), tableGroup);
@@ -240,7 +242,7 @@ QSqlTableModel *AccessDatabaseStructure::gatherTableModel(AccessDatabase *db, Da
 
 void SqlSelection::bindWhereClause(QSqlQuery &query)
 {
-    for (QVariant whereArg : this->whereArgs)
+    for (const QVariant &whereArg : this->whereArgs)
         query.addBindValue(whereArg);
 }
 
@@ -279,7 +281,7 @@ QString SqlSelection::generateSpecifierClause(bool fromStatement)
 
 SqlSelection *SqlSelection::setHaving(QString having)
 {
-    this->having = having;
+    this->having = std::move(having);
     return this;
 }
 
@@ -295,7 +297,7 @@ SqlSelection *SqlSelection::setGroupBy(QString field, bool ascending)
 
 SqlSelection *SqlSelection::setGroupBy(QString orderBy)
 {
-    this->orderBy = orderBy;
+    this->orderBy = std::move(orderBy);
     return this;
 }
 
@@ -317,19 +319,19 @@ SqlSelection *SqlSelection::setOrderBy(QString field, bool ascending)
 
 SqlSelection *SqlSelection::setOrderBy(QString field)
 {
-    this->orderBy = field;
+    this->orderBy = std::move(field);
     return this;
 }
 
 SqlSelection *SqlSelection::setTableName(QString tableName)
 {
-    this->tableName = tableName;
+    this->tableName = std::move(tableName);
     return this;
 }
 
 SqlSelection *SqlSelection::setWhere(QString whereString)
 {
-    this->where = whereString;
+    this->where = std::move(whereString);
     return this;
 }
 
@@ -370,10 +372,10 @@ QString SqlSelection::toSelectionColumns()
 {
     QString output = QString();
 
-    if (this->columns.size() == 0)
+    if (this->columns.empty())
         output += "*";
-    else if (this->columns.size() > 0)
-        for (QString item : this->columns) {
+    else if (!this->columns.empty())
+        for (const QString &item : this->columns) {
             if (output.length() > 0)
                 output += ", ";
 
