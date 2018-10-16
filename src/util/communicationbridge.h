@@ -12,49 +12,36 @@
 #include <src/database/object/networkdevice.h>
 #include <src/util/networkdeviceloader.h>
 
-namespace CommunicationBridge {
-    class Client;
+class CommunicationBridge : public CoolSocket::Client {
+    AccessDatabase *database;
+    NetworkDevice *device;
 
-    class ConnectionHandler;
+public:
+    CommunicationBridge(AccessDatabase *database, QObject *parent = nullptr);
 
-    Client connect(AccessDatabase *database, ConnectionHandler handler);
+    CoolSocket::ActiveConnection *communicate(NetworkDevice *targetDevice, DeviceConnection *targetConnection);
 
-    template<typename T>
-    Client connect(AccessDatabase *database, T clazz, DeviceConnection targetConnection);
+    CoolSocket::ActiveConnection *communicate(CoolSocket::ActiveConnection *connection, NetworkDevice *device);
 
-    Client connect(AccessDatabase *database, bool currentThread, ConnectionHandler handler);
+    CoolSocket::ActiveConnection *connect(QString ipAddress);
 
-    class Client : public CoolSocket::Client {
-        AccessDatabase *database;
-        NetworkDevice *device;
+    CoolSocket::ActiveConnection *connect(DeviceConnection *connection);
 
-    public:
-        Client(AccessDatabase *database, QObject *parent = nullptr);
+    CoolSocket::ActiveConnection *connectWithHandshake(QString ipAddress, bool handshakeOnly);
 
-        CoolSocket::ActiveConnection *communicate(NetworkDevice *targetDevice, DeviceConnection *targetConnection);
+    AccessDatabase *getDatabase();
 
-        CoolSocket::ActiveConnection *communicate(CoolSocket::ActiveConnection *connection, NetworkDevice *device);
+    NetworkDevice *getDevice();
 
-        CoolSocket::ActiveConnection *connect(QString ipAddress);
+    CoolSocket::ActiveConnection *handshake(CoolSocket::ActiveConnection *connection, bool handshakeOnly);
 
-        CoolSocket::ActiveConnection *connect(DeviceConnection *connection);
+    NetworkDevice *loadDevice(QString ipAddress);
 
-        CoolSocket::ActiveConnection *connectWithHandshake(QString ipAddress, bool handshakeOnly);
+    NetworkDevice *loadDevice(CoolSocket::ActiveConnection *connection);
 
-        AccessDatabase *getDatabase();
+    void setDevice(NetworkDevice *device);
 
-        NetworkDevice &getDevice() const;
-
-        CoolSocket::ActiveConnection *handshake(CoolSocket::ActiveConnection *connection, bool handshakeOnly);
-
-        NetworkDevice *loadDevice(QString ipAddress);
-
-        NetworkDevice *loadDevice(CoolSocket::ActiveConnection *connection);
-
-        void setDevice(const NetworkDevice &device);
-
-        NetworkDevice* updateDeviceIfOkay(CoolSocket::ActiveConnection *connection, NetworkDevice *device);
-    };
+    NetworkDevice *updateDeviceIfOkay(CoolSocket::ActiveConnection *connection, NetworkDevice *device);
 };
 
 

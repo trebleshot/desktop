@@ -1,6 +1,4 @@
-#include <utility>
 
-#include <utility>
 
 //
 // Created by veli on 9/29/18.
@@ -8,14 +6,14 @@
 
 #include "communicationbridge.h"
 
-CommunicationBridge::Client::Client(AccessDatabase *database, QObject *parent)
+CommunicationBridge::CommunicationBridge(AccessDatabase *database, QObject *parent)
         : CoolSocket::Client(parent)
 {
     this->database = database;
 }
 
 CoolSocket::ActiveConnection *
-CommunicationBridge::Client::communicate(NetworkDevice *targetDevice, DeviceConnection *targetConnection)
+CommunicationBridge::communicate(NetworkDevice *targetDevice, DeviceConnection *targetConnection)
 {
     CoolSocket::ActiveConnection *connection = connectWithHandshake(targetConnection->ipAddress, false);
 
@@ -25,39 +23,39 @@ CommunicationBridge::Client::communicate(NetworkDevice *targetDevice, DeviceConn
 }
 
 CoolSocket::ActiveConnection *
-CommunicationBridge::Client::communicate(CoolSocket::ActiveConnection *connection, NetworkDevice *device)
+CommunicationBridge::communicate(CoolSocket::ActiveConnection *connection, NetworkDevice *device)
 {
     updateDeviceIfOkay(connection, device);
     return connection;
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::Client::connect(QString ipAddress)
+CoolSocket::ActiveConnection *CommunicationBridge::connect(QString ipAddress)
 {
     return this->openConnection(std::move(ipAddress), PORT_COMMUNICATION_DEFAULT, PORT_COMMUNICATION_DEFAULT);
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::Client::connect(DeviceConnection *connection)
+CoolSocket::ActiveConnection *CommunicationBridge::connect(DeviceConnection *connection)
 {
     return connect(connection->ipAddress);
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::Client::connectWithHandshake(QString ipAddress, bool handshakeOnly)
+CoolSocket::ActiveConnection *CommunicationBridge::connectWithHandshake(QString ipAddress, bool handshakeOnly)
 {
     return handshake(connect(std::move(ipAddress)), handshakeOnly);
 }
 
-AccessDatabase *CommunicationBridge::Client::getDatabase()
+AccessDatabase *CommunicationBridge::getDatabase()
 {
     return this->database;
 }
 
-NetworkDevice CommunicationBridge::Client::getDevice()
+NetworkDevice *CommunicationBridge::getDevice()
 {
     return this->device;
 }
 
 CoolSocket::ActiveConnection *
-CommunicationBridge::Client::handshake(CoolSocket::ActiveConnection *connection, bool handshakeOnly)
+CommunicationBridge::handshake(CoolSocket::ActiveConnection *connection, bool handshakeOnly)
 {
     try {
         QJsonObject replyJSON;
@@ -77,12 +75,12 @@ CommunicationBridge::Client::handshake(CoolSocket::ActiveConnection *connection,
     return connection;
 }
 
-NetworkDevice *CommunicationBridge::Client::loadDevice(QString ipAddress)
+NetworkDevice *CommunicationBridge::loadDevice(QString ipAddress)
 {
     return loadDevice(connectWithHandshake(std::move(ipAddress), true));
 }
 
-NetworkDevice *CommunicationBridge::Client::loadDevice(CoolSocket::ActiveConnection *connection)
+NetworkDevice *CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *connection)
 {
     try {
         CoolSocket::Response *response = connection->receive();
@@ -94,21 +92,23 @@ NetworkDevice *CommunicationBridge::Client::loadDevice(CoolSocket::ActiveConnect
     }
 }
 
-void CommunicationBridge::Client::setDevice(const NetworkDevice &device)
+void CommunicationBridge::setDevice(NetworkDevice *device)
 {
-    this->device = str::codevice;
+    this->device = device;
 }
 
 NetworkDevice *
-CommunicationBridge::Client::updateDeviceIfOkay(CoolSocket::ActiveConnection *activeConnection, NetworkDevice *device)
+CommunicationBridge::updateDeviceIfOkay(CoolSocket::ActiveConnection *activeConnection, NetworkDevice *device)
 {
     NetworkDevice *loadedDevice = loadDevice(activeConnection);
-    DeviceConnection connection = NetworkDeviceLoader::processConnection(getDatabase(), loadedDevice, activeConnection->getSocket()->localAddress().);
+    DeviceConnection *connection = NetworkDeviceLoader::processConnection(getDatabase(), loadedDevice, activeConnection
+            ->getSocket()
+            ->localAddress().toString());
 
     if (device->deviceId != loadedDevice->deviceId)
         throw exception();
     else {
-        extern time_t this_time;
+        time_t this_time;
         loadedDevice->lastUsageTime = static_cast<int>(this_time);
 
         getDatabase()->publish(loadedDevice);

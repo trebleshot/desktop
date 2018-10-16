@@ -45,7 +45,7 @@ protected:
     void connectionPhase() override
     {
         try {
-            CoolSocket::ActiveConnection *connection(connect("0.0.0.0", 5555));
+            CoolSocket::ActiveConnection *connection(openConnection("0.0.0.0", (quint16) 5555));
 
             int iterator = 0;
 

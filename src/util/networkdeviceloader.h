@@ -14,7 +14,7 @@ public:
 
     static void processConnection(AccessDatabase* database, NetworkDevice* device, DeviceConnection *connection);
 
-    static void load(AccessDatabase* database, QString ipAddress); // there was listener here, we should use a signal instead
+    static void load(AccessDatabase* database,  QString ipAddress); // there was listener here, we should use a signal instead
 
     static void load(bool currentThread, AccessDatabase* database, QString ipAddress); // there was listener here, we should use a signal instead
 
