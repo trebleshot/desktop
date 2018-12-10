@@ -1,7 +1,7 @@
 #ifndef TRANSFEROBJECT_H
 #define TRANSFEROBJECT_H
 
-#include "src/database/accessdatabase.h"
+#include "src/database/AccessDatabase.h"
 
 class TransferObject : public DatabaseObject {
 public:
@@ -21,6 +21,7 @@ public:
     QString file;
     QString fileMimeType;
     QString directory;
+    QString deviceId;
     size_t fileSize;
     size_t skippedBytes;
     int requestId;

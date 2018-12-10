@@ -11,6 +11,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Turn on automatic invocation of the MOC
 set(CMAKE_AUTOMOC ON)
 
+# Minimum C++11
+set(CMAKE_CXX_STANDARD 11)
+
 # Include Qt basic functions
 include(QtCommon)
 
@@ -53,32 +56,41 @@ ENDIF ()
 
 add_project_meta(META_FILES_TO_INCLUDE)
 
-qt5_add_resources(QRCS assets/resources.qrc)
-qt5_wrap_ui(UI_HEADERS src/ui/mainwindow.ui)
+qt5_add_resources(QRCS
+        assets/resources.qrc)
 
-set(UTIL_LIBRARY src/database/accessdatabase.h
-        src/database/accessdatabase.cpp
-        src/broadcast/communicationserver.h
-        src/broadcast/communicationserver.cpp
-        src/config/config.h
-        src/coolsocket/coolsocket.h
-        src/coolsocket/coolsocket.cpp
-        src/config/keyword.h
-        src/model/stringlistmodel.h
-        src/model/stringlistmodel.cpp
-        src/database/object/transferobject.h
-        src/database/object/transferobject.cpp
-        src/database/object/transfergroup.h
-        src/database/object/transfergroup.cpp
-        src/database/object/networkdevice.h
-        src/database/object/networkdevice.cpp
-        src/util/networkdeviceloader.h
-        src/util/networkdeviceloader.cpp
-        src/util/communicationbridge.h
-        src/util/communicationbridge.cpp)
+qt5_wrap_ui(UI_HEADERS
+        src/ui/MainWindow.ui
+        src/dialog/WelcomeDialog.ui)
+
+set(UTIL_LIBRARY
+        src/broadcast/CommunicationServer.h
+        src/broadcast/CommunicationServer.cpp
+        src/config/Config.h
+        src/coolsocket/CoolSocket.h
+        src/coolsocket/CoolSocket.cpp
+        src/config/Keyword.h
+        src/model/StringListModel.h
+        src/model/StringListModel.cpp
+        src/database/AccessDatabase.h
+        src/database/AccessDatabase.cpp
+        src/database/object/TransferObject.h
+        src/database/object/TransferObject.cpp
+        src/database/object/TransferGroup.h
+        src/database/object/TransferGroup.cpp
+        src/database/object/NetworkDevice.h
+        src/database/object/NetworkDevice.cpp
+        src/util/NetworkDeviceLoader.h
+        src/util/NetworkDeviceLoader.cpp
+        src/util/CommunicationBridge.h
+        src/util/CommunicationBridge.cpp
+        src/util/AppUtils.cpp
+        src/util/AppUtils.h
+        src/dialog/WelcomeDialog.cpp
+        src/dialog/WelcomeDialog.h)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
-add_executable(TrebleShot src/main.cpp src/ui/mainwindow.cpp)
+add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)
 
 # Add the Qt5 Widgets for linking
 if (NOT TARGET Qt5::WinMain)

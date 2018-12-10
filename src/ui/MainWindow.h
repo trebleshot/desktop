@@ -1,9 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "src/database/accessdatabase.h"
-#include "src/broadcast/communicationserver.h"
-#include "src/coolsocket/coolsocket.h"
+#include "src/database/AccessDatabase.h"
+#include "src/broadcast/CommunicationServer.h"
+#include "src/coolsocket/CoolSocket.h"
 #include <QMainWindow>
 #include <iostream>
 

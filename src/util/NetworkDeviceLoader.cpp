@@ -3,7 +3,7 @@
 //
 
 #include <QtCore/QJsonObject>
-#include "networkdeviceloader.h"
+#include "NetworkDeviceLoader.h"
 
 DeviceConnection *
 NetworkDeviceLoader::processConnection(AccessDatabase *database, NetworkDevice *device, const QString ipAddress)
@@ -51,7 +51,7 @@ void NetworkDeviceLoader::load(AccessDatabase *database, const QString ipAddress
     try {
         load(false, database, ipAddress);
     } catch (exception& e) {
-        // todo We don't have listener this time around
+        // todo We don't have listener this time around. Instead, slots and signals will be used
     }
 }
 

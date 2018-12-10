@@ -1,22 +1,27 @@
-#include "mainwindow.h"
-#include "src/model/stringlistmodel.h"
-#include "src/database/object/transferobject.h"
-#include "ui_mainwindow.h"
+#include "MainWindow.h"
+#include "ui_MainWindow.h"
+#include "src/database/object/TransferObject.h"
+#include "src/model/StringListModel.h"
 
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QNetworkConfigurationManager>
 #include <QSqlDriver>
 #include <QTime>
-#include <src/database/object/transfergroup.h>
-#include <src/database/object/networkdevice.h>
 #include <QtSql/QSqlError>
+#include <src/database/object/NetworkDevice.h>
+#include <src/database/object/TransferGroup.h>
+#include <src/dialog/WelcomeDialog.h>
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    CommunicationServer *cserver = new CommunicationServer();
+    auto *cserver = new CommunicationServer();
     cout << "Start cserver stat: " << cserver->start(5000) << endl;
+
+    auto *dialog = new WelcomeDialog(this);
+
+    dialog->exec();
 
     QStringList numbers;
     QListView *listView;
@@ -52,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
         if (testtObject.flag == TransferObject::Flag::Pending)
             cout << "Test TransferObject Successful" << endl;
 
-        testtObject.friendlyName = "Test Transfer Object Update + Successfull";
+        testtObject.friendlyName = "Test Transfer Object Update + Successful";
 
         dbInstance->update(&testtObject);
         dbInstance->remove(&testtObject);
@@ -82,11 +87,10 @@ MainWindow::MainWindow(QWidget *parent)
         device->isLocalAddress = false;
         device->isRestricted = false;
         device->isTrusted = true;
-    
+
         dbInstance->publish(device);
 
         NetworkDevice *testDevice = new NetworkDevice(QString("1a1a1a1a1"));
-
         dbInstance->reconstruct(testDevice);
     }
 

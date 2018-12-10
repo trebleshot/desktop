@@ -1,6 +1,6 @@
 
 
-#include "accessdatabase.h"
+#include "AccessDatabase.h"
 
 using AccessDatabaseStructure::generateField;
 using AccessDatabaseStructure::generateTableCreationSql;
@@ -37,6 +37,7 @@ QMap<QString, QSqlRecord> *AccessDatabase::getPassiveTables()
     QSqlRecord tableTransfer;
     tableTransfer.append(generateField(AccessDatabaseStructure::FIELD_TRANSFER_ID, QVariant::Int, false));
     tableTransfer.append(generateField(AccessDatabaseStructure::FIELD_TRANSFER_GROUPID, QVariant::Int, false));
+    tableTransfer.append(generateField(AccessDatabaseStructure::FIELD_TRANSFER_DEVICEID, QVariant::String, true));
     tableTransfer.append(generateField(AccessDatabaseStructure::FIELD_TRANSFER_FILE, QVariant::String, true));
     tableTransfer.append(generateField(AccessDatabaseStructure::FIELD_TRANSFER_NAME, QVariant::String, false));
     tableTransfer.append(generateField(AccessDatabaseStructure::FIELD_TRANSFER_SIZE, QVariant::Int, true));
@@ -85,6 +86,7 @@ QMap<QString, QSqlRecord> *AccessDatabase::getPassiveTables()
     auto *list = new QMap<QString, QSqlRecord>();
 
     list->insert(QString(AccessDatabaseStructure::TABLE_TRANSFER), tableTransfer);
+    list->insert(QString(AccessDatabaseStructure::DIVIS_TRANSFER), tableTransfer);
     list->insert(QString(AccessDatabaseStructure::TABLE_TRANSFERGROUP), tableGroup);
     list->insert(QString(AccessDatabaseStructure::TABLE_DEVICES), tableDevices);
     list->insert(QString(AccessDatabaseStructure::TABLE_CLIPBOARD), tableClipboard);

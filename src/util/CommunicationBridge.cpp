@@ -4,7 +4,7 @@
 // Created by veli on 9/29/18.
 //
 
-#include "communicationbridge.h"
+#include "CommunicationBridge.h"
 
 CommunicationBridge::CommunicationBridge(AccessDatabase *database, QObject *parent)
         : CoolSocket::Client(parent)

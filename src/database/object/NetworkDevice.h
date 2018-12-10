@@ -7,7 +7,7 @@
 
 
 #include <QtCore/QString>
-#include <src/database/accessdatabase.h>
+#include <src/database/AccessDatabase.h>
 
 class DeviceConnection;
 

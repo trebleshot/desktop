@@ -5,7 +5,7 @@
 // Created by veli on 9/25/18.
 //
 
-#include "networkdevice.h"
+#include "NetworkDevice.h"
 
 NetworkDevice::NetworkDevice(QString deviceId, QObject *parent)
         : DatabaseObject(parent)

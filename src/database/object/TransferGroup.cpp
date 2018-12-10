@@ -4,7 +4,7 @@
 // Created by veli on 9/25/18.
 //
 
-#include "transfergroup.h"
+#include "TransferGroup.h"
 
 TransferGroup::TransferGroup(int groupId, QObject *parent)
         : DatabaseObject(parent)

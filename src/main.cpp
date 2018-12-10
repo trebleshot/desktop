@@ -1,24 +1,29 @@
-#include "src/ui/mainwindow.h"
+#include "src/ui/MainWindow.h"
 
 #include <QApplication>
 #include <QFileDialog>
-#include <QResource>
 #include <QTranslator>
-#include <iostream>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     QApplication application(argc, argv);
     QTranslator translator;
+
+    time_t epoch;
+
+    cout << "Epoch is "
+         << epoch
+         << endl;
 
     // We need to complete the structure of this application so that things may start to happend!?
 
     if (translator.load("Turkish.qm", QLatin1String(":/translation")))
-        application.installTranslator(&translator);
+        QApplication::installTranslator(&translator);
 
-    application.setWindowIcon(QIcon(":/drawable/ic_launcher.png"));
+    QApplication::setWindowIcon(QIcon(":/drawable/ic_launcher.png"));
 
     MainWindow mainWindow;
     mainWindow.show();
 
-    return application.exec();
+    return QApplication::exec();
 }

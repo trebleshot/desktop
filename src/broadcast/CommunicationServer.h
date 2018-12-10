@@ -1,11 +1,9 @@
 #ifndef COMMUNICATIONSERVER_H
 #define COMMUNICATIONSERVER_H
 
-#include "src/config/config.h"
-#include "src/coolsocket/coolsocket.h"
-#include "src/config/keyword.h"
-
-
+#include "src/config/Config.h"
+#include "src/coolsocket/CoolSocket.h"
+#include "src/config/Keyword.h"
 
 class CommunicationServer : public CoolSocket::Server {
     void pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject json, bool result);

@@ -1,4 +1,4 @@
-#include "communicationserver.h"
+#include "CommunicationServer.h"
 
 CommunicationServer::CommunicationServer(QObject *parent)
         : CoolSocket::Server(QHostAddress::Any, PORT_COMMUNICATION_DEFAULT, parent)

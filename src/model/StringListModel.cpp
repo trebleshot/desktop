@@ -1,4 +1,4 @@
-#include "stringlistmodel.h"
+#include "StringListModel.h"
 
 class StringItemModel;
 

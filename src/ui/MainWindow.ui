@@ -928,7 +928,7 @@
      <x>0</x>
      <y>0</y>
      <width>801</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -947,8 +947,8 @@
      <rect>
       <x>320</x>
       <y>134</y>
-      <width>159</width>
-      <height>50</height>
+      <width>146</width>
+      <height>48</height>
      </rect>
     </property>
     <property name="title">

@@ -5,12 +5,12 @@
 #ifndef TREBLESHOT_COMMUNICATIONBRIDGE_H
 #define TREBLESHOT_COMMUNICATIONBRIDGE_H
 
-#include <src/coolsocket/coolsocket.h>
-#include <src/config/config.h>
-#include <src/config/keyword.h>
-#include <src/database/accessdatabase.h>
-#include <src/database/object/networkdevice.h>
-#include <src/util/networkdeviceloader.h>
+#include <src/coolsocket/CoolSocket.h>
+#include <src/config/Config.h>
+#include <src/config/Keyword.h>
+#include <src/database/AccessDatabase.h>
+#include <src/database/object/NetworkDevice.h>
+#include <src/util/NetworkDeviceLoader.h>
 
 class CommunicationBridge : public CoolSocket::Client {
     AccessDatabase *database;
