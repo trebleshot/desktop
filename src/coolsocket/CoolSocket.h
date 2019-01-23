@@ -1,6 +1,10 @@
 ﻿#ifndef COOLSOCKET_H
 #define COOLSOCKET_H
 
+#define COOLSOCKET_KEYWORD_LENGTH "length"
+#define COOLSOCKET_HEADER_DIVIDER "\nHEADER_END\n"
+#define COOLSOCKET_HEADER_HEAP_SIZE 8196
+
 #include <QDataStream>
 #include <QHostAddress>
 #include <QJsonDocument>
@@ -13,10 +17,6 @@
 #include <QThread>
 #include <iostream>
 #include <utility>
-
-#define COOLSOCKET_KEYWORD_LENGTH "length"
-#define COOLSOCKET_HEADER_DIVIDER "\nHEADER_END\n"
-#define COOLSOCKET_HEADER_HEAP_SIZE 8196
 
 using namespace std;
 
@@ -34,11 +34,9 @@ namespace CoolSocket {
 
     class ActiveConnection;
 
-    class PendingAppend;
-
     class Server : public QObject {
     Q_OBJECT
-        qint16 port;
+        quint16 port;
         QHostAddress hostAddress;
         QPointer<ServerWorker> worker;
         QList<RequestHandler *> ongoingTasks;
@@ -50,7 +48,7 @@ namespace CoolSocket {
         }
 
     public:
-        explicit Server(QHostAddress hostAddress, int port = 0, QObject *parent = 0);
+        explicit Server(QHostAddress hostAddress, quint16 port = 0, QObject *parent = nullptr);
 
         friend class ServerWorker;
 
@@ -68,7 +66,7 @@ namespace CoolSocket {
         ServerWorker *getWorker()
         { return worker; }
 
-        qint16 getPort()
+        quint16 getPort()
         { return port; }
 
         bool isServing();
@@ -78,16 +76,19 @@ namespace CoolSocket {
             this->hostAddress = std::move(hostAddress);
         }
 
-        void setPort(qint16 port)
+        void setPort(quint16 port)
         { this->port = port; }
 
         bool start(int blockingTime = -1);
+
+        bool startEnsured(int blockingTime = -1);
 
         void stop(int blockingTime = -1);
 
         virtual void connected(ActiveConnection *connection) = 0;
 
     signals:
+
         void clientConnected(ActiveConnection *connection);
     };
 
@@ -97,14 +98,14 @@ namespace CoolSocket {
         int timeout = 2000;
 
     public:
-        ActiveConnection(QTcpSocket *tcpServer, int msecTimeout = 2000, QObject *parent = 0)
+        explicit ActiveConnection(QTcpSocket *tcpServer, int msecTimeout = 2000, QObject *parent = 0)
                 : QObject(parent)
         {
             this->activeSocket = tcpServer;
             this->timeout = msecTimeout;
         }
 
-        ~ActiveConnection()
+        ~ActiveConnection() override
         {
             cout << "ActiveConnection is deleted" << endl;
 
@@ -135,7 +136,7 @@ namespace CoolSocket {
     public:
         QString *response;
         QJsonObject *headerIndex;
-        size_t length;
+        qsizetype length;
     };
 
     class ServerWorker : public QThread {
@@ -145,11 +146,10 @@ namespace CoolSocket {
         bool serverListening = false;
 
     public:
-        explicit ServerWorker(Server *server, QObject *parent = 0);
+        explicit ServerWorker(Server *server, QObject *parent = nullptr);
 
-        ~ServerWorker()
-        {
-        }
+        ~ServerWorker() override
+        = default;
 
         bool isServing()
         {
@@ -162,7 +162,7 @@ namespace CoolSocket {
         void setTcpServer(QTcpServer *server);
 
     protected:
-        void run();
+        void run() override;
     };
 
     class RequestHandler : public QThread {
@@ -171,7 +171,7 @@ namespace CoolSocket {
         ActiveConnection *connection;
 
     public:
-        RequestHandler(Server *server, ActiveConnection *connection, QObject *parent = 0)
+        RequestHandler(Server *server, ActiveConnection *connection, QObject *parent = nullptr)
                 : QThread(parent)
         {
             this->server = server;
@@ -179,19 +179,19 @@ namespace CoolSocket {
         }
 
     protected:
-        void run();
+        void run() override;
     };
 
     class Client : public QThread {
     Q_OBJECT
 
     public:
-        Client(QObject *parent = 0)
+        explicit Client(QObject *parent = 0)
                 : QThread(parent)
         {
         }
 
-        ~Client()
+        ~Client() override
         {
             cout << "Scope removed along with the data" << endl;
         }
@@ -201,40 +201,9 @@ namespace CoolSocket {
         virtual void connectionPhase() = 0;
 
     protected:
-        virtual void run()
+        void run() override
         {
             connectionPhase();
-        }
-    };
-
-    class PendingAppend : public QObject {
-    Q_OBJECT
-        QIODevice *ioDevice;
-        QByteArray *bytes = new QByteArray;
-
-    public:
-        PendingAppend(QIODevice *ioDevice)
-        {
-            this->ioDevice = ioDevice;
-
-            connect(ioDevice, SIGNAL(readyRead()), this, SLOT(readData()));
-        }
-
-        virtual ~PendingAppend()
-        {
-            delete bytes;
-        }
-
-        QByteArray *getBytes()
-        {
-            return bytes;
-        }
-
-    public slots:
-
-        void readData()
-        {
-            bytes->append(this->ioDevice->readAll());
         }
     };
 }

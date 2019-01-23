@@ -150,11 +150,19 @@ class AccessDatabase : public QObject {
     QSqlDatabase *db;
 
 public:
-    AccessDatabase(QSqlDatabase *db, QObject *parent = 0);
+    explicit AccessDatabase(QSqlDatabase *db, QObject *parent = nullptr);
+
+    ~AccessDatabase() override;
 
     static QMap<QString, QSqlRecord> *getPassiveTables();
 
     QSqlDatabase *database();
+
+    /*
+    template <class T>
+    T castQuery() {
+
+    }*/
 
     bool contains(DatabaseObject *dbObject);
 

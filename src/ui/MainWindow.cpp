@@ -1,164 +1,83 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "src/database/object/TransferObject.h"
-#include "src/model/StringListModel.h"
 
 #include <QKeyEvent>
 #include <QMessageBox>
-#include <QNetworkConfigurationManager>
 #include <QSqlDriver>
-#include <QTime>
-#include <QtSql/QSqlError>
-#include <src/database/object/NetworkDevice.h>
-#include <src/database/object/TransferGroup.h>
 #include <src/dialog/WelcomeDialog.h>
+#include <src/model/TransferGroupListModel.h>
+#include <src/util/AppUtils.h>
 
 MainWindow::MainWindow(QWidget *parent)
-        : QMainWindow(parent), ui(new Ui::MainWindow)
+        : QMainWindow(parent), ui(new Ui::MainWindow), commServer(new CommunicationServer)
 {
-    auto *cserver = new CommunicationServer();
-    cout << "Start cserver stat: " << cserver->start(5000) << endl;
-
-    auto *dialog = new WelcomeDialog(this);
-
-    dialog->exec();
-
-    QStringList numbers;
-    QListView *listView;
-    StringListModel *itemModel;
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-
-    db.setDatabaseName("local.db");
-
-    if (db.open()) {
-        cout << "DB has opened" << endl;
-
-        AccessDatabase *dbInstance(new AccessDatabase(&db));
-        dbInstance->initialize();
-
-        TransferObject transferObject;
-
-        transferObject.accessPort = 10;
-        transferObject.friendlyName = "Test TransferObject Item";
-        transferObject.requestId = 1;
-        transferObject.groupId = 1;
-        transferObject.skippedBytes = 3;
-        transferObject.type = TransferObject::Type::Incoming;
-        transferObject.flag = TransferObject::Flag::Pending;
-
-        dbInstance->publish(&transferObject);
-
-        TransferObject testtObject(1);
-
-        dbInstance->reconstruct(&testtObject);
-
-        cout << "Generated ? " << testtObject.friendlyName.toStdString() << endl;
-
-        if (testtObject.flag == TransferObject::Flag::Pending)
-            cout << "Test TransferObject Successful" << endl;
-
-        testtObject.friendlyName = "Test Transfer Object Update + Successful";
-
-        dbInstance->update(&testtObject);
-        dbInstance->remove(&testtObject);
-
-        TransferGroup *transferGroup = new TransferGroup;
-
-        transferGroup->savePath = "Test TransferGroup Publish";
-        transferGroup->dateCreated = 1;
-        transferGroup->groupId = 2;
-
-        dbInstance->publish(transferGroup);
-
-        TransferGroup *testGroup = new TransferGroup(2);
-
-        dbInstance->reconstruct(testGroup);
-
-        NetworkDevice *device = new NetworkDevice;
-
-        device->brand = QString("Brand");
-        device->model = QString("Model");
-        device->nickname = QString("NickName");
-        device->versionNumber = 57;
-        device->versionName = QString("1.0");
-        device->deviceId = "1a1a1a1a1";
-        device->tmpSecureKey = 2;
-        device->lastUsageTime = 1;
-        device->isLocalAddress = false;
-        device->isRestricted = false;
-        device->isTrusted = true;
-
-        dbInstance->publish(device);
-
-        NetworkDevice *testDevice = new NetworkDevice(QString("1a1a1a1a1"));
-        dbInstance->reconstruct(testDevice);
-    }
-
     ui->setupUi(this);
-    listView = ui->listView;
 
-    QNetworkConfigurationManager manager;
+    if (AppUtils::getDatabase() == nullptr) {
+        auto *errorMessage = new QMessageBox(this);
 
-    QList<QNetworkConfiguration> configurations = manager.allConfigurations(QNetworkConfiguration::StateFlag::Active);
+        errorMessage->setWindowTitle("Database error");
+        errorMessage->setText("The database used to store information did not open. Refer to the development notes. "
+                              "The program will force close.");
 
-    for (QNetworkConfiguration config : configurations) {
-        numbers << config.name();
-        std::cout << config.identifier().toStdString() << endl;
+        errorMessage->show();
+
+        connect(errorMessage, SIGNAL(finished(int)), this, SLOT(failureDialogFinished(int)));
     }
 
-    itemModel = new StringListModel(numbers);
-    listView->setModel(itemModel);
+    bool serverStarted = commServer->startEnsured(5000);
+    auto *model = new TransferGroupListModel();
 
-    connect(ui->buttonStartServer, SIGNAL(clicked(bool)), this, SLOT(clickedButtonServer(bool)));
-    connect(ui->buttonStartServerStop, SIGNAL(clicked(bool)), this, SLOT(clickedButtonServerStop(bool)));
-    connect(ui->buttonConnect, SIGNAL(clicked(bool)), this, SLOT(clickedButtonConnect(bool)));
+    connect(ui->tableView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
+    connect(ui->actionAbout_TrebleShot, SIGNAL(triggered(bool)), this, SLOT(about()));
+    connect(ui->actionAbout_Qt, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
 
-    setWindowTitle(tr("Who is that") + "[*]");
-    setWindowFilePath("/home/veli/test.db");
-    setWindowModified(true);
+    ui->tableView->setModel(model);
+    ui->label->setText(serverStarted
+                       ? QString("TrebleShot is ready to accept files")
+                       : QString("TrebleShot will not receive files"));
+
+    if (!serverStarted) {
+        auto *errorMessage = new QMessageBox(this);
+
+        errorMessage->setWindowTitle(QString("Server error"));
+        errorMessage->setText(QString("TrebleShot server won't start. "
+                                      "You will not be able to communicate with "
+                                      "other devices."));
+
+        errorMessage->show();
+        connect(this, SIGNAL(destroyed()), errorMessage, SLOT(deleteLater()));
+    }
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete testClient;
-    delete testServer;
+    delete commServer;
 }
 
-void MainWindow::clickedButtonConnect(bool checked)
+void MainWindow::failureDialogFinished(int state)
 {
-    cout << "Test client started" << endl;
-    testClient->start();
+    close();
 }
 
-void MainWindow::clickedButtonServer(bool checked)
+void MainWindow::transferItemActivated(QModelIndex modelIndex)
 {
-    if (testServer->start(2000))
-        cout << "Test server started" << endl;
-    else
-        QMessageBox::critical(this, QString("Critical error"), QString("Communication server won't start. It may be because there is another instance of the app running"));
+    qDebug() << "transferItemActivated(): row=" << modelIndex.row()
+             << "column=" << modelIndex.column();
 }
 
-void MainWindow::clickedButtonServerStop(bool checked)
+void MainWindow::about()
 {
-    cout << "Test server stopped" << endl;
-    testServer->stop(true);
+    auto *about = new QMessageBox(this);
+
+    about->setWindowTitle(QString("About TrebleShot"));
+    about->setText(QString("TrebleShot is a cross platform file transferring tool."));
+
+    about->show();
 }
 
-void MainWindow::dropEvent(QDropEvent *event)
+void MainWindow::aboutQt()
 {
-    cout << "has something been dropp'd" << endl;
-}
-
-void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
-{
-    cout << "has something been 2x click'd" << endl;
-}
-
-void MainWindow::keyPressEvent(QKeyEvent *event)
-{
-    if ((event->modifiers() & Qt::ShiftModifier)
-        && (event->modifiers() & Qt::ControlModifier)
-        && event->key() == Qt::Key_S)
-        cout << "Modifiers are okay" << endl;
+    QApplication::aboutQt();
 }

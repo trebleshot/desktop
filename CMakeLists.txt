@@ -87,7 +87,7 @@ set(UTIL_LIBRARY
         src/util/AppUtils.cpp
         src/util/AppUtils.h
         src/dialog/WelcomeDialog.cpp
-        src/dialog/WelcomeDialog.h)
+        src/dialog/WelcomeDialog.h src/model/TransferGroupListModel.cpp src/model/TransferGroupListModel.h)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)

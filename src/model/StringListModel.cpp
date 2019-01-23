@@ -1,7 +1,5 @@
 #include "StringListModel.h"
 
-class StringItemModel;
-
 int StringListModel::rowCount(const QModelIndex &parent) const
 {
     return stringList.count();

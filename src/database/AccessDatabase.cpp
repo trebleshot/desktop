@@ -1,5 +1,4 @@
-
-
+#include <c++/7/bits/unique_ptr.h>
 #include "AccessDatabase.h"
 
 using AccessDatabaseStructure::generateField;
@@ -10,6 +9,12 @@ AccessDatabase::AccessDatabase(QSqlDatabase *db, QObject *parent)
         : QObject(parent)
 {
     this->db = db;
+}
+
+
+AccessDatabase::~AccessDatabase()
+{
+    delete db;
 }
 
 QSqlDatabase *AccessDatabase::database()

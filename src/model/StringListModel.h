@@ -1,3 +1,5 @@
+#include <utility>
+
 #ifndef STRINGITEMMODEL_H
 #define STRINGITEMMODEL_H
 
@@ -9,12 +11,12 @@ class StringListModel : public QAbstractListModel {
 Q_OBJECT
 
 public:
-    StringListModel(const QStringList &strings, QObject *parent = 0)
-            : QAbstractListModel(parent), stringList(strings)
+    explicit StringListModel(QStringList strings, QObject *parent = nullptr)
+            : QAbstractListModel(parent), stringList(std::move(strings))
     {
     }
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role) const;
 

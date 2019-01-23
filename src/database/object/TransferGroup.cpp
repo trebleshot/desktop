@@ -81,8 +81,8 @@ QSqlRecord TransferAssignee::getValues(AccessDatabase *db)
 
 void TransferAssignee::onGeneratingValues(QSqlRecord record)
 {
-     this->deviceId = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_DEVICEID).toString();
-     this->groupId = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID).toInt();
-     this->connectionAdapter = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER).toString();
-     this->isClone = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_ISCLONE).toInt() == 1;
+    this->deviceId = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_DEVICEID).toString();
+    this->groupId = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID).toInt();
+    this->connectionAdapter = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER).toString();
+    this->isClone = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_ISCLONE).toInt() == 1;
 }
