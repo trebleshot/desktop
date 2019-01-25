@@ -158,11 +158,26 @@ public:
 
     QSqlDatabase *database();
 
-    /*
-    template <class T>
-    T castQuery() {
+    // Template declarations fails to compile on CPP files.
+    template<typename T>
+    QList<T *> *castQuery(SqlSelection &sqlSelection, T *classInstance)
+    {
+        auto *resultList = new QList<T *>();
+        QSqlQuery *query = sqlSelection.toSelectionQuery();
 
-    }*/
+        query->exec();
+
+        if (query->first())
+            do {
+                T *dbObject = new T;
+
+                dbObject->onGeneratingValues(query->record());
+
+                resultList->append(dbObject);
+            } while (query->next());
+
+        return resultList;
+    }
 
     bool contains(DatabaseObject *dbObject);
 

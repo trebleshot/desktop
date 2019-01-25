@@ -6,7 +6,7 @@
 #include <QSqlDriver>
 #include <src/dialog/WelcomeDialog.h>
 #include <src/model/TransferGroupListModel.h>
-#include <src/util/AppUtils.h>
+#include <src/database/object/TransferObject.h>
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow), commServer(new CommunicationServer)
@@ -23,6 +23,17 @@ MainWindow::MainWindow(QWidget *parent)
         errorMessage->show();
 
         connect(errorMessage, SIGNAL(finished(int)), this, SLOT(failureDialogFinished(int)));
+    } else {
+        auto *db = AppUtils::getDatabase();
+        auto *selection = new SqlSelection;
+
+        selection->setTableName(AccessDatabaseStructure::TABLE_TRANSFER);
+
+        QList<TransferObject *> *resultList = db->castQuery(*selection, new TransferObject());
+
+        for (TransferObject* object : resultList->toStdList()) {
+            qDebug() << object->friendlyName;
+        }
     }
 
     bool serverStarted = commServer->startEnsured(5000);

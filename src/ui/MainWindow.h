@@ -29,10 +29,6 @@ public Q_SLOTS:
 
     void transferItemActivated(QModelIndex modelIndex);
 
-    void customContextMenuRequested(QPoint point);
-
-    void tableViewViewPortEntered();
-
 private:
     Ui::MainWindow *ui;
     CommunicationServer *commServer;
