@@ -6,7 +6,6 @@
 #include <QSqlDriver>
 #include <src/dialog/WelcomeDialog.h>
 #include <src/model/TransferGroupListModel.h>
-#include <src/database/object/TransferObject.h>
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow), commServer(new CommunicationServer)
@@ -24,40 +23,29 @@ MainWindow::MainWindow(QWidget *parent)
 
         connect(errorMessage, SIGNAL(finished(int)), this, SLOT(failureDialogFinished(int)));
     } else {
-        auto *db = AppUtils::getDatabase();
-        auto *selection = new SqlSelection;
+        bool serverStarted = commServer->startEnsured(5000);
+        auto *model = new TransferGroupListModel();
 
-        selection->setTableName(AccessDatabaseStructure::TABLE_TRANSFER);
+        connect(ui->tableView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
+        connect(ui->actionAbout_TrebleShot, SIGNAL(triggered(bool)), this, SLOT(about()));
+        connect(ui->actionAbout_Qt, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
 
-        QList<TransferObject *> *resultList = db->castQuery(*selection, new TransferObject());
+        ui->tableView->setModel(model);
+        ui->label->setText(serverStarted
+                           ? QString("TrebleShot is ready to accept files")
+                           : QString("TrebleShot will not receive files"));
 
-        for (TransferObject* object : resultList->toStdList()) {
-            qDebug() << object->friendlyName;
+        if (!serverStarted) {
+            auto *errorMessage = new QMessageBox(this);
+
+            errorMessage->setWindowTitle(QString("Server error"));
+            errorMessage->setText(QString("TrebleShot server won't start. "
+                                          "You will not be able to communicate with "
+                                          "other devices."));
+
+            errorMessage->show();
+            connect(this, SIGNAL(destroyed()), errorMessage, SLOT(deleteLater()));
         }
-    }
-
-    bool serverStarted = commServer->startEnsured(5000);
-    auto *model = new TransferGroupListModel();
-
-    connect(ui->tableView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
-    connect(ui->actionAbout_TrebleShot, SIGNAL(triggered(bool)), this, SLOT(about()));
-    connect(ui->actionAbout_Qt, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
-
-    ui->tableView->setModel(model);
-    ui->label->setText(serverStarted
-                       ? QString("TrebleShot is ready to accept files")
-                       : QString("TrebleShot will not receive files"));
-
-    if (!serverStarted) {
-        auto *errorMessage = new QMessageBox(this);
-
-        errorMessage->setWindowTitle(QString("Server error"));
-        errorMessage->setText(QString("TrebleShot server won't start. "
-                                      "You will not be able to communicate with "
-                                      "other devices."));
-
-        errorMessage->show();
-        connect(this, SIGNAL(destroyed()), errorMessage, SLOT(deleteLater()));
     }
 }
 

@@ -34,7 +34,7 @@ QSqlRecord NetworkDevice::getValues(AccessDatabase *db)
 
 SqlSelection *NetworkDevice::getWhere()
 {
-    SqlSelection *selection = new SqlSelection;
+    auto *selection = new SqlSelection;
 
     selection
             ->setTableName(AccessDatabaseStructure::TABLE_DEVICES)
@@ -80,14 +80,13 @@ DeviceConnection::DeviceConnection(QString ipAddress, QObject *parent)
 
 SqlSelection *DeviceConnection::getWhere()
 {
-    SqlSelection *selection = (new SqlSelection)
+    auto selection = (new SqlSelection)
             ->setTableName(AccessDatabaseStructure::TABLE_DEVICECONNECTION);
 
     if (ipAddress == nullptr) {
         selection->setWhere(QString::asprintf("`%s` = ? AND `%s` = ?",
                                               AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID.toStdString().c_str(),
                                               AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME.toStdString().c_str()));
-
         selection->whereArgs << QVariant(this->deviceId)
                              << QVariant(this->adapterName);
     } else {
@@ -116,5 +115,5 @@ void DeviceConnection::onGeneratingValues(QSqlRecord record)
     this->deviceId = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID).toString();
     this->adapterName = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME).toString();
     this->ipAddress = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS).toString();
-    this->lastCheckedDate = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE).toInt();
+    this->lastCheckedDate = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE).toULongLong();
 }

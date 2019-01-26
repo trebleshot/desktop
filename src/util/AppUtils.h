@@ -10,24 +10,7 @@
 
 class AppUtils {
 public:
-    static AccessDatabase *getDatabase()
-    {
-        static AccessDatabase *accessDatabase = nullptr;
-
-        if (accessDatabase == nullptr) {
-            QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-            db.setDatabaseName("local.db");
-
-            if (db.open()) {
-                cout << "Database has opened" << endl;
-
-                accessDatabase = new AccessDatabase(&db);
-                accessDatabase->initialize();
-            }
-        }
-
-        return accessDatabase;
-    }
+    static AccessDatabase *getDatabase();
 
     static void loadInfo();
 };

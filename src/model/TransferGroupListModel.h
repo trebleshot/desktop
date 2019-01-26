@@ -8,35 +8,47 @@
 #include <QtCore/QAbstractListModel>
 #include <iostream>
 #include <src/util/AppUtils.h>
+#include <src/database/object/TransferGroup.h>
+#include <QtCore/QDateTime>
+#include <src/database/object/NetworkDevice.h>
 
 class TransferGroupListModel
         : public QAbstractListModel {
-Q_OBJECT
 
 private:
-    QString *m_columnNames;
+    QList<TransferGroup *> *m_list;
+    QList<QString> m_columnNames{
+            tr("Devices"),
+            tr("Size"),
+            tr("Status"),
+            tr("Date"),
+    };
 
 public:
     explicit TransferGroupListModel(QObject *parent = nullptr)
             : QAbstractListModel(parent)
     {
-        //m_columnNames = AppUtils::getDatabase();
+        auto *db = AppUtils::getDatabase();
+        auto *selection = new SqlSelection;
+
+        selection->setTableName(AccessDatabaseStructure::TABLE_TRANSFERGROUP);
+
+        m_list = db->castQuery(*selection, new TransferGroup());
     }
 
     ~TransferGroupListModel() override
     {
-        if (m_columnNames != nullptr)
-            delete m_columnNames;
+        delete m_list;
     }
 
     int columnCount(const QModelIndex &parent) const override
     {
-        return 12;
+        return m_columnNames.size();
     }
 
     int rowCount(const QModelIndex &parent) const override
     {
-        return 0;
+        return m_list->size();
     }
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override
@@ -45,16 +57,65 @@ public:
             return QVariant();
 
         if (orientation == Qt::Horizontal)
-            return QString("Column %1").arg(section);
+            return m_columnNames[section];
         else
             return QString("%1").arg(section);
     }
 
-
     QVariant data(const QModelIndex &index, int role) const override
     {
-        if (role == Qt::DisplayRole)
-            return QString::asprintf("Data id %dx%d", index.row(), index.column());
+        if (role == Qt::DisplayRole) {
+            const TransferGroup *currentGroup = m_list->at(index.row());
+
+            switch (index.column()) {
+                case 0: {
+                    auto *selection = new SqlSelection();
+
+                    selection->setTableName(AccessDatabaseStructure::TABLE_TRANSFERASSIGNEE)
+                            ->setWhere(QString("`%1` = ?").arg(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
+                    selection->whereArgs << currentGroup->groupId;
+
+                    QList<TransferAssignee *> *assigneeList = AppUtils::getDatabase()->castQuery(*selection, new TransferAssignee());
+                    QString devicesString;
+
+                    for (const TransferAssignee *assignee : assigneeList->toStdList()) {
+                        try {
+                            NetworkDevice *device = new NetworkDevice(assignee->deviceId);
+
+                            AppUtils::getDatabase()->reconstruct(device);
+
+                            if (devicesString.length() > 0)
+                                devicesString.append(", ");
+
+                            devicesString.append(device->nickname);
+
+                            delete device;
+                        } catch (...) {
+                            // We will not add this device to the list.
+                            std::cout << "An assignee failed to reconstruct";
+                        }
+                    }
+
+                    if (devicesString.length() == 0)
+                        devicesString.append("-");
+
+                    delete assigneeList;
+
+                    return devicesString;
+                }
+                case 1: {
+
+                }
+                case 2:
+                case 3:
+                    return QDateTime::fromMSecsSinceEpoch(currentGroup->dateCreated)
+                            .toString(Qt::DateFormat::SystemLocaleShortDate);
+                default:
+                    return QString("Data id %1x%2")
+                            .arg(index.row())
+                            .arg(index.column());
+            }
+        }
 
         return QVariant();
     }

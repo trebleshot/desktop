@@ -7,8 +7,9 @@
 
 class CommunicationServer : public CoolSocket::Server {
     void pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject json, bool result);
+
 public:
-    CommunicationServer(QObject *parent = nullptr);
+    explicit CommunicationServer(QObject *parent = nullptr);
 
     void connected(CoolSocket::ActiveConnection *connection) override;
 };

@@ -34,10 +34,12 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
         QString deviceSerial = nullptr;
 
-        if (responseJSON.contains(KEYWORD_HANDSHAKE_REQUIRED) && responseJSON.value(KEYWORD_HANDSHAKE_REQUIRED).toBool(false)) {
+        if (responseJSON.contains(KEYWORD_HANDSHAKE_REQUIRED) &&
+            responseJSON.value(KEYWORD_HANDSHAKE_REQUIRED).toBool(false)) {
             pushReply(connection, replyJSON, true);
 
-            if (!responseJSON.contains(KEYWORD_HANDSHAKE_ONLY) || !responseJSON.value(KEYWORD_HANDSHAKE_ONLY).toBool(false)) {
+            if (!responseJSON.contains(KEYWORD_HANDSHAKE_ONLY) ||
+                !responseJSON.value(KEYWORD_HANDSHAKE_ONLY).toBool(false)) {
                 if (responseJSON.contains(KEYWORD_DEVICE_INFO_SERIAL)) {
                     deviceSerial = responseJSON.value(KEYWORD_DEVICE_INFO_SERIAL).toString();
                 }

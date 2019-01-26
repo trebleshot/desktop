@@ -12,19 +12,19 @@
 class TransferAssignee;
 
 class TransferGroup : public DatabaseObject {
-    Q_OBJECT
+Q_OBJECT
 public:
     int groupId;
-    int dateCreated;
+    unsigned long long dateCreated;
     QString savePath;
 
-    TransferGroup(int groupId = -1, QObject *parent = 0);
+    explicit TransferGroup(int groupId = -1, QObject *parent = nullptr);
 
-    SqlSelection *getWhere();
+    SqlSelection *getWhere() override;
 
-    QSqlRecord getValues(AccessDatabase *db);
+    QSqlRecord getValues(AccessDatabase *db) override;
 
-    void onGeneratingValues(QSqlRecord record);
+    void onGeneratingValues(QSqlRecord record) override;
 };
 
 class TransferAssignee : public DatabaseObject {
@@ -34,13 +34,15 @@ public:
     QString connectionAdapter;
     bool isClone = false;
 
-    TransferAssignee(int groupId, QString deviceId, QString connectionAdapter, QObject *parent = 0);
+    explicit TransferAssignee(int groupId = -1, QString deviceId = nullptr, QString connectionAdapter = nullptr,
+                              QObject *parent = nullptr);
 
-    SqlSelection *getWhere();
 
-    QSqlRecord getValues(AccessDatabase *db);
+    SqlSelection *getWhere() override;
 
-    void onGeneratingValues(QSqlRecord record);
+    QSqlRecord getValues(AccessDatabase *db) override;
+
+    void onGeneratingValues(QSqlRecord record) override;
 };
 
 #endif //TREBLESHOT_TRANSFERGROUP_H

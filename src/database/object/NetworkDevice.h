@@ -41,7 +41,7 @@ public:
     QString adapterName;
     QString ipAddress;
     QString deviceId;
-    int lastCheckedDate;
+    unsigned long long lastCheckedDate;
 
     explicit DeviceConnection(QObject *parent = nullptr);
 

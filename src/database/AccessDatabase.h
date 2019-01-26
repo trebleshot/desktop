@@ -111,7 +111,7 @@ public:
 
     SqlSelection *setTableName(QString tableName);
 
-    SqlSelection *setWhere(QString whereString);
+    SqlSelection *setWhere(const QString &whereString);
 
     QSqlQuery *toDeletionQuery();
 
@@ -128,7 +128,7 @@ class DatabaseObject : public QObject {
 Q_OBJECT
 
 public:
-    DatabaseObject(QObject *parent = 0);
+    explicit DatabaseObject(QObject *parent = 0);
 
     virtual SqlSelection *getWhere() = 0;
 

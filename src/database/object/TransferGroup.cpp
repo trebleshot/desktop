@@ -14,7 +14,7 @@ TransferGroup::TransferGroup(int groupId, QObject *parent)
 
 SqlSelection *TransferGroup::getWhere()
 {
-    SqlSelection *selection = new SqlSelection;
+    auto *selection = new SqlSelection;
 
     selection
             ->setTableName(AccessDatabaseStructure::TABLE_TRANSFERGROUP)
@@ -39,7 +39,7 @@ QSqlRecord TransferGroup::getValues(AccessDatabase *db)
 void TransferGroup::onGeneratingValues(QSqlRecord record)
 {
     groupId = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID).value().toInt();
-    dateCreated = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_DATECREATED).value().toInt();
+    dateCreated = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_DATECREATED).value().toULongLong();
     savePath = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_SAVEPATH).value().toString();
 }
 
@@ -53,7 +53,7 @@ TransferAssignee::TransferAssignee(int groupId, QString deviceId, QString connec
 
 SqlSelection *TransferAssignee::getWhere()
 {
-    SqlSelection *selection = new SqlSelection;
+    auto *selection = new SqlSelection;
 
     selection
             ->setTableName(AccessDatabaseStructure::TABLE_TRANSFERASSIGNEE)

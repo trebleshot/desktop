@@ -11,7 +11,6 @@ AccessDatabase::AccessDatabase(QSqlDatabase *db, QObject *parent)
     this->db = db;
 }
 
-
 AccessDatabase::~AccessDatabase()
 {
     delete db;
@@ -91,7 +90,7 @@ QMap<QString, QSqlRecord> *AccessDatabase::getPassiveTables()
     auto *list = new QMap<QString, QSqlRecord>();
 
     list->insert(QString(AccessDatabaseStructure::TABLE_TRANSFER), tableTransfer);
-    list->insert(QString(AccessDatabaseStructure::DIVIS_TRANSFER), tableTransfer);
+    list->insert(QString(AccessDatabaseStructure::DIVIS_TRANSFER), tableTransfer); // Generate division table
     list->insert(QString(AccessDatabaseStructure::TABLE_TRANSFERGROUP), tableGroup);
     list->insert(QString(AccessDatabaseStructure::TABLE_DEVICES), tableDevices);
     list->insert(QString(AccessDatabaseStructure::TABLE_CLIPBOARD), tableClipboard);
@@ -336,9 +335,9 @@ SqlSelection *SqlSelection::setTableName(QString tableName)
     return this;
 }
 
-SqlSelection *SqlSelection::setWhere(QString whereString)
+SqlSelection *SqlSelection::setWhere(const QString &whereString)
 {
-    this->where = std::move(whereString);
+    this->where = whereString;
     return this;
 }
 
