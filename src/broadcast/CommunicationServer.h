@@ -6,7 +6,7 @@
 #include "src/config/Keyword.h"
 
 class CommunicationServer : public CoolSocket::Server {
-    void pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject json, bool result);
+    void pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject &json, bool result);
 
 public:
     explicit CommunicationServer(QObject *parent = nullptr);

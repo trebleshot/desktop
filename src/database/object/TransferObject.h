@@ -30,13 +30,13 @@ public:
     Type type;
     Flag flag;
 
-    TransferObject(int requestId = -1, QObject *parent = 0);
+    explicit TransferObject(int requestId = -1, QObject *parent = nullptr);
 
-    SqlSelection *getWhere();
+    SqlSelection *getWhere() override;
 
-    QSqlRecord getValues(AccessDatabase *db);
+    QSqlRecord getValues(AccessDatabase *db) override;
 
-    void onGeneratingValues(QSqlRecord record);
+    void onGeneratingValues(QSqlRecord record) override;
 };
 
 #endif // TRANSFEROBJECT_H

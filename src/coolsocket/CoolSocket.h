@@ -186,7 +186,7 @@ namespace CoolSocket {
     Q_OBJECT
 
     public:
-        explicit Client(QObject *parent = 0)
+        explicit Client(QObject *parent = nullptr)
                 : QThread(parent)
         {
         }

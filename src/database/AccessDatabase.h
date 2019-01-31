@@ -128,7 +128,7 @@ class DatabaseObject : public QObject {
 Q_OBJECT
 
 public:
-    explicit DatabaseObject(QObject *parent = 0);
+    explicit DatabaseObject(QObject *parent = nullptr);
 
     virtual SqlSelection *getWhere() = 0;
 

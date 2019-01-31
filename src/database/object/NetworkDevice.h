@@ -27,13 +27,13 @@ public:
     bool isRestricted = false;
     bool isLocalAddress = false;
 
-    NetworkDevice(QString deviceId = nullptr, QObject *parent = nullptr);
+    explicit NetworkDevice(QString deviceId = nullptr, QObject *parent = nullptr);
 
-    SqlSelection *getWhere();
+    SqlSelection *getWhere() override;
 
-    QSqlRecord getValues(AccessDatabase *db);
+    QSqlRecord getValues(AccessDatabase *db) override;
 
-    void onGeneratingValues(QSqlRecord record);
+    void onGeneratingValues(QSqlRecord record) override;
 };
 
 class DeviceConnection : public DatabaseObject {
@@ -45,15 +45,15 @@ public:
 
     explicit DeviceConnection(QObject *parent = nullptr);
 
-    DeviceConnection(QString deviceId, QString adapterName, QObject *parent = nullptr);
+    explicit DeviceConnection(QString deviceId, QString adapterName, QObject *parent = nullptr);
 
-    DeviceConnection(QString ipAddress, QObject *parent = nullptr);
+    explicit DeviceConnection(QString ipAddress, QObject *parent = nullptr);
 
-    SqlSelection *getWhere();
+    SqlSelection *getWhere() override;
 
-    QSqlRecord getValues(AccessDatabase *db);
+    QSqlRecord getValues(AccessDatabase *db) override;
 
-    void onGeneratingValues(QSqlRecord record);
+    void onGeneratingValues(QSqlRecord record) override;
 };
 
 

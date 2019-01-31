@@ -62,7 +62,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
     }
 }
 
-void CommunicationServer::pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject json, bool result)
+void CommunicationServer::pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject &json, bool result)
 {
     json.insert(KEYWORD_RESULT, result);
     activeConnection->reply(QJsonDocument(json).toJson().toStdString().c_str());
