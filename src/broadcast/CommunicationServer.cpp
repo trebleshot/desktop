@@ -26,10 +26,8 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         deviceInfo.insert(KEYWORD_DEVICE_INFO_MODEL, getDeviceNameForOS());
         deviceInfo.insert(KEYWORD_DEVICE_INFO_USER, "Hitchhiker's Guide");
 
-        appInfo.insert(KEYWORD_APP_INFO_VERSION_CODE, "62");
-        appInfo.insert(KEYWORD_APP_INFO_VERSION_NAME, QApplication::applicationVersion());
-
-        qDebug() << "Version name is " << QApplication::applicationVersion();
+        appInfo.insert(KEYWORD_APP_INFO_VERSION_CODE, getApplicationVersionCode());
+        appInfo.insert(KEYWORD_APP_INFO_VERSION_NAME, getApplicationVersion());
 
         replyJSON.insert(KEYWORD_APP_INFO, appInfo);
         replyJSON.insert(KEYWORD_DEVICE_INFO, deviceInfo);

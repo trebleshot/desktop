@@ -5,6 +5,15 @@ QString getDeviceTypeName()
     return QString("Computer");
 }
 
+QString getApplicationVersion() {
+    return QApplication::applicationVersion();
+}
+
+unsigned short getApplicationVersionCode()
+{
+    return TREBLESHOT_VERSION_CODE;
+}
+
 QString getDeviceNameForOS()
 {
 #if defined(Q_OS_ANDROID)

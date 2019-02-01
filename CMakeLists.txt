@@ -35,6 +35,7 @@ set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 1)
 set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
+set(PROJECT_VERSION_CODE 91)
 
 # Find the Qt5 libraries
 find_package(Qt5Core REQUIRED)
@@ -59,6 +60,8 @@ ELSE ()
     MESSAGE(FATAL_ERROR "No Qt5 found!")
 ENDIF ()
 
+configure_file(src/build.h.in src/build.h)
+
 add_project_meta(META_FILES_TO_INCLUDE)
 
 qt5_add_resources(QRCS
@@ -69,6 +72,7 @@ qt5_wrap_ui(UI_HEADERS
         src/dialog/WelcomeDialog.ui)
 
 set(UTIL_LIBRARY
+        src/build.h
         src/broadcast/CommunicationServer.h
         src/broadcast/CommunicationServer.cpp
         src/config/Config.h

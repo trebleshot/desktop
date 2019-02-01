@@ -1,3 +1,4 @@
+#include "src/build.h"
 #include "src/ui/MainWindow.h"
 
 #include <QApplication>
@@ -16,6 +17,7 @@ int main(int argc, char *argv[])
      **/
 
     QApplication::setWindowIcon(QIcon(":/drawable/ic_launcher.png"));
+    QApplication::setApplicationVersion(QString(TREBLESHOT_VERSION_NAME));
 
     MainWindow mainWindow;
     mainWindow.show();
