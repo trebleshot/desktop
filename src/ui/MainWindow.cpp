@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include <QDesktopWidget>
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QSqlDriver>
@@ -11,6 +12,10 @@ MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow), commServer(new CommunicationServer)
 {
     ui->setupUi(this);
+
+    setWindowTitle(QString("%1 - %2")
+                           .arg(QApplication::applicationName())
+                           .arg(QApplication::applicationVersion()));
 
     if (AppUtils::getDatabase() == nullptr) {
         auto *errorMessage = new QMessageBox(this);
@@ -47,6 +52,10 @@ MainWindow::MainWindow(QWidget *parent)
             connect(this, SIGNAL(destroyed()), errorMessage, SLOT(deleteLater()));
         }
     }
+
+    const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
+    adjustSize();
+    move((availableGeometry.width() - width()) / 2, (availableGeometry.height() - height()) / 2);
 }
 
 MainWindow::~MainWindow()

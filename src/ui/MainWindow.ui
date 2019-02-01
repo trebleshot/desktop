@@ -435,7 +435,7 @@
    <enum>Qt::DefaultContextMenu</enum>
   </property>
   <property name="windowTitle">
-   <string>TrebleShot -- Pre-alpha</string>
+   <string/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">

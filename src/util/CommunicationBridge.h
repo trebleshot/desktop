@@ -17,7 +17,7 @@ class CommunicationBridge : public CoolSocket::Client {
     NetworkDevice *device;
 
 public:
-    CommunicationBridge(AccessDatabase *database, QObject *parent = nullptr);
+    explicit CommunicationBridge(AccessDatabase *database, QObject *parent = nullptr);
 
     CoolSocket::ActiveConnection *communicate(NetworkDevice *targetDevice, DeviceConnection *targetConnection);
 

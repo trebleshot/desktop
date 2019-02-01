@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8.2)
 
-project(TrebleShot VERSION 1.0)
+project(TrebleShot)
 
 # Add folder where are supportive functions
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -30,6 +30,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 if (WIN32)
     set(CMAKE_WIN32_EXECUTABLE ON)
 endif ()
+
+set(PROJECT_VERSION_MAJOR 0)
+set(PROJECT_VERSION_MINOR 1)
+set(PROJECT_VERSION_PATCH 0)
+set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 
 # Find the Qt5 libraries
 find_package(Qt5Core REQUIRED)
@@ -67,6 +72,7 @@ set(UTIL_LIBRARY
         src/broadcast/CommunicationServer.h
         src/broadcast/CommunicationServer.cpp
         src/config/Config.h
+        src/config/Config.cpp
         src/coolsocket/CoolSocket.h
         src/coolsocket/CoolSocket.cpp
         src/config/Keyword.h
@@ -87,7 +93,9 @@ set(UTIL_LIBRARY
         src/util/AppUtils.cpp
         src/util/AppUtils.h
         src/dialog/WelcomeDialog.cpp
-        src/dialog/WelcomeDialog.h src/model/TransferGroupListModel.cpp src/model/TransferGroupListModel.h)
+        src/dialog/WelcomeDialog.h
+        src/model/TransferGroupListModel.cpp
+        src/model/TransferGroupListModel.h)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)
