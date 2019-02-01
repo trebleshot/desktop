@@ -1,8 +1,10 @@
 #include "src/build.h"
 #include "src/ui/MainWindow.h"
 
-#include <QApplication>
 #include <QFileDialog>
+#include <QtCore/QSettings>
+#include <src/util/AppUtils.h>
+#include <QtCore/QUuid>
 
 int main(int argc, char *argv[])
 {

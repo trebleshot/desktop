@@ -8,9 +8,13 @@
 #include <QApplication>
 #include <QString>
 
+
+
 QString getApplicationVersion();
 
 unsigned short getApplicationVersionCode();
+
+QString getDeviceId();
 
 QString getDeviceTypeName();
 

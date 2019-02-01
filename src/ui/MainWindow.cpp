@@ -7,6 +7,7 @@
 #include <QSqlDriver>
 #include <src/dialog/WelcomeDialog.h>
 #include <src/model/TransferGroupListModel.h>
+#include <QtCore/QSettings>
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow), commServer(new CommunicationServer)
@@ -50,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
 
             errorMessage->show();
             connect(this, SIGNAL(destroyed()), errorMessage, SLOT(deleteLater()));
+        } else {
         }
     }
 

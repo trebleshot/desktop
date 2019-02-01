@@ -1,3 +1,4 @@
+#include <src/util/AppUtils.h>
 #include "Config.h"
 
 QString getDeviceTypeName()
@@ -39,4 +40,9 @@ QString getDeviceNameForOS()
 #else
     return QLatin1String("unknown");
 #endif
+}
+
+QString getDeviceId()
+{
+    return AppUtils::getDeviceId();
 }

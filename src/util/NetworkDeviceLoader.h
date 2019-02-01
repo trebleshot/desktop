@@ -5,7 +5,6 @@
 #ifndef TREBLESHOT_NETWORKDEVICELOADER_H
 #define TREBLESHOT_NETWORKDEVICELOADER_H
 
-
 #include <src/database/object/NetworkDevice.h>
 
 class NetworkDeviceLoader {
