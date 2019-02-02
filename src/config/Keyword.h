@@ -46,4 +46,7 @@
 #define KEYWORD_NETWORK_ADDRESS_IP "ipAdr"
 #define KEYWORD_FLAG_TRANSFER_QR_CONN "flagTransferQRConnection";
 
+// local
+#define KEYWORD_UNKNOWN_INTERFACE "unk0";
+
 #endif // KEYWORD_H

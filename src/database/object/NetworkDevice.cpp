@@ -24,7 +24,7 @@ QSqlRecord NetworkDevice::getValues(AccessDatabase *db)
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_BUILDNAME, QVariant(this->versionName));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_BUILDNUMBER, QVariant(this->versionNumber));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_TMPSECUREKEY, QVariant(this->tmpSecureKey));
-    record.setValue(AccessDatabaseStructure::FIELD_DEVICES_LASTUSAGETIME, QVariant(this->lastUsageTime));
+    record.setValue(AccessDatabaseStructure::FIELD_DEVICES_LASTUSAGETIME, QVariant((long long) this->lastUsageTime));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_ISTRUSTED, QVariant(this->isTrusted ? 1 : 0));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_ISRESTRICTED, QVariant(this->isRestricted ? 1 : 0));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_ISLOCALADDRESS, QVariant(this->isLocalAddress ? 1 : 0));
@@ -105,7 +105,7 @@ QSqlRecord DeviceConnection::getValues(AccessDatabase *db)
     record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID, QVariant(deviceId));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME, QVariant(adapterName));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS, QVariant(ipAddress));
-    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant(lastCheckedDate));
+    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant((long long) lastCheckedDate));
 
     return record;
 }

@@ -91,6 +91,11 @@ void CommunicationBridge::setDevice(NetworkDevice *device)
     this->m_device = device;
 }
 
+void CommunicationBridge::setSecureKey(int key)
+{
+    this->m_secureKey = key;
+}
+
 NetworkDevice *
 CommunicationBridge::updateDeviceIfOkay(CoolSocket::ActiveConnection *activeConnection, NetworkDevice *device)
 {

@@ -52,6 +52,9 @@ MainWindow::MainWindow(QWidget *parent)
             errorMessage->show();
             connect(this, SIGNAL(destroyed()), errorMessage, SLOT(deleteLater()));
         } else {
+            DeviceConnection* connection = new DeviceConnection("192.168.43.13");
+
+            AppUtils::applyAdapterName(connection);
         }
     }
 

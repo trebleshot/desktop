@@ -39,6 +39,8 @@ public:
 
     void setDevice(NetworkDevice *device);
 
+    void setSecureKey(int key);
+
     NetworkDevice *updateDeviceIfOkay(CoolSocket::ActiveConnection *connection, NetworkDevice *device);
 };
 

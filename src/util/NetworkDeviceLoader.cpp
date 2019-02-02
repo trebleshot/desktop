@@ -22,8 +22,7 @@ NetworkDeviceLoader::processConnection(NetworkDevice *device, DeviceConnection *
     try {
         AppUtils::getDatabase()->reconstruct(connection);
     } catch (exception &e) {
-        // fixme We should have an implementation telling which IP address routes to which adapter
-        //AppUtils.applyAdapterName(connection);
+        AppUtils::applyAdapterName(connection);
     }
 
     connection->lastCheckedDate = clock();
