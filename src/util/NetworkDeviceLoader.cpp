@@ -4,31 +4,29 @@
 
 #include <QtCore/QJsonObject>
 #include "NetworkDeviceLoader.h"
+#include "AppUtils.h"
 
 DeviceConnection *
-NetworkDeviceLoader::processConnection(AccessDatabase *database, NetworkDevice *device, const QString ipAddress)
+NetworkDeviceLoader::processConnection(NetworkDevice *device, const QString ipAddress)
 {
     DeviceConnection *connection = new DeviceConnection(ipAddress);
 
-    processConnection(database, device, connection);
+    processConnection(device, connection);
 
     return connection;
 }
 
 void
-NetworkDeviceLoader::processConnection(AccessDatabase *database, NetworkDevice *device, DeviceConnection *connection)
+NetworkDeviceLoader::processConnection(NetworkDevice *device, DeviceConnection *connection)
 {
     try {
-        database->reconstruct(connection);
+        AppUtils::getDatabase()->reconstruct(connection);
     } catch (exception &e) {
         // fixme We should have an implementation telling which IP address routes to which adapter
         //AppUtils.applyAdapterName(connection);
     }
 
-    time_t currentTime;
-    // todo: did it apply the epoch?
-
-    connection->lastCheckedDate = static_cast<int>(currentTime);
+    connection->lastCheckedDate = clock();
     connection->deviceId = device->deviceId;
 
     auto *sqlSelection = new SqlSelection();
@@ -43,24 +41,24 @@ NetworkDeviceLoader::processConnection(AccessDatabase *database, NetworkDevice *
                             << QVariant(connection->adapterName)
                             << QVariant(connection->ipAddress);
 
-    database->publish(connection);
+    AppUtils::getDatabase()->publish(connection);
 }
 
-void NetworkDeviceLoader::load(AccessDatabase *database, const QString ipAddress)
+void NetworkDeviceLoader::load(QString &ipAddress)
 {
     try {
-        load(false, database, ipAddress);
+        load(false, ipAddress);
     } catch (exception& e) {
-        // todo We don't have listener this time around. Instead, slots and signals will be used
+        // todo signal/slots instead of listener
     }
 }
 
-void NetworkDeviceLoader::load(bool currentThread, AccessDatabase *database, const QString ipAddress)
+void NetworkDeviceLoader::load(bool currentThread, const QString ipAddress)
 {
 
 }
 
-NetworkDevice *NetworkDeviceLoader::loadFrom(AccessDatabase *database, const QJsonObject jsonIndex)
+NetworkDevice *NetworkDeviceLoader::loadFrom(const QJsonObject jsonIndex)
 {
     return nullptr;
 }

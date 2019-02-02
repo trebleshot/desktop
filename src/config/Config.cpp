@@ -6,7 +6,8 @@ QString getDeviceTypeName()
     return QString("Computer");
 }
 
-QString getApplicationVersion() {
+QString getApplicationVersion()
+{
     return QApplication::applicationVersion();
 }
 
@@ -45,4 +46,11 @@ QString getDeviceNameForOS()
 QString getDeviceId()
 {
     return AppUtils::getDeviceId();
+}
+
+QString getUserNickname()
+{
+    return AppUtils::getDefaultSettings()
+            .value("nickname", QString("TrebleShot on %1").arg(getDeviceNameForOS()))
+            .toString();
 }

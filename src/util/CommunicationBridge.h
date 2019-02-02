@@ -13,11 +13,11 @@
 #include <src/util/NetworkDeviceLoader.h>
 
 class CommunicationBridge : public CoolSocket::Client {
-    AccessDatabase *database;
-    NetworkDevice *device;
+    NetworkDevice *m_device;
+    int m_secureKey = -1;
 
 public:
-    explicit CommunicationBridge(AccessDatabase *database, QObject *parent = nullptr);
+    explicit CommunicationBridge(QObject *parent = nullptr);
 
     CoolSocket::ActiveConnection *communicate(NetworkDevice *targetDevice, DeviceConnection *targetConnection);
 
@@ -29,13 +29,11 @@ public:
 
     CoolSocket::ActiveConnection *connectWithHandshake(QString ipAddress, bool handshakeOnly);
 
-    AccessDatabase *getDatabase();
-
     NetworkDevice *getDevice();
 
     CoolSocket::ActiveConnection *handshake(CoolSocket::ActiveConnection *connection, bool handshakeOnly);
 
-    NetworkDevice *loadDevice(QString ipAddress);
+    NetworkDevice *loadDevice(QString& ipAddress);
 
     NetworkDevice *loadDevice(CoolSocket::ActiveConnection *connection);
 

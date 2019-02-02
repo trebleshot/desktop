@@ -21,10 +21,10 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         QJsonObject deviceInfo;
         QJsonObject appInfo;
 
-        deviceInfo.insert(KEYWORD_DEVICE_INFO_SERIAL, "Qt5GenericDeviceId");
+        deviceInfo.insert(KEYWORD_DEVICE_INFO_SERIAL, getDeviceId());
         deviceInfo.insert(KEYWORD_DEVICE_INFO_BRAND, getDeviceTypeName());
         deviceInfo.insert(KEYWORD_DEVICE_INFO_MODEL, getDeviceNameForOS());
-        deviceInfo.insert(KEYWORD_DEVICE_INFO_USER, "Hitchhiker's Guide");
+        deviceInfo.insert(KEYWORD_DEVICE_INFO_USER, getUserNickname());
 
         appInfo.insert(KEYWORD_APP_INFO_VERSION_CODE, getApplicationVersionCode());
         appInfo.insert(KEYWORD_APP_INFO_VERSION_NAME, getApplicationVersion());

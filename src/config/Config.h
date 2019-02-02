@@ -16,6 +16,8 @@ unsigned short getApplicationVersionCode();
 
 QString getDeviceId();
 
+QString getUserNickname();
+
 QString getDeviceTypeName();
 
 QString getDeviceNameForOS();

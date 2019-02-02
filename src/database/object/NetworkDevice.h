@@ -22,7 +22,7 @@ public:
     QString versionName;
     int versionNumber;
     int tmpSecureKey;
-    int lastUsageTime;
+    clock_t lastUsageTime;
     bool isTrusted = false;
     bool isRestricted = false;
     bool isLocalAddress = false;
@@ -41,7 +41,7 @@ public:
     QString adapterName;
     QString ipAddress;
     QString deviceId;
-    unsigned long long lastCheckedDate;
+    clock_t lastCheckedDate;
 
     explicit DeviceConnection(QObject *parent = nullptr);
 

@@ -3,11 +3,12 @@
 //
 
 #include "CommunicationBridge.h"
+#include "AppUtils.h"
 
-CommunicationBridge::CommunicationBridge(AccessDatabase *database, QObject *parent)
+CommunicationBridge::CommunicationBridge(QObject *parent)
         : CoolSocket::Client(parent)
 {
-    this->database = database;
+    // Do nothing
 }
 
 CoolSocket::ActiveConnection *
@@ -42,14 +43,9 @@ CoolSocket::ActiveConnection *CommunicationBridge::connectWithHandshake(QString 
     return handshake(connect(std::move(ipAddress)), handshakeOnly);
 }
 
-AccessDatabase *CommunicationBridge::getDatabase()
-{
-    return this->database;
-}
-
 NetworkDevice *CommunicationBridge::getDevice()
 {
-    return this->device;
+    return this->m_device;
 }
 
 CoolSocket::ActiveConnection *
@@ -60,10 +56,10 @@ CommunicationBridge::handshake(CoolSocket::ActiveConnection *connection, bool ha
 
         replyJSON.insert(KEYWORD_HANDSHAKE_REQUIRED, true);
         replyJSON.insert(KEYWORD_HANDSHAKE_ONLY, handshakeOnly);
-        replyJSON.insert(KEYWORD_DEVICE_INFO_SERIAL, "THSANTWRKG");
-        replyJSON.insert(KEYWORD_DEVICE_SECURE_KEY, -1);
-
-        //fixme: Should add AppUtils that generates device info and serial
+        replyJSON.insert(KEYWORD_DEVICE_INFO_SERIAL, getDeviceId());
+        replyJSON.insert(KEYWORD_DEVICE_SECURE_KEY, m_device == nullptr
+                                                    ? m_secureKey
+                                                    : m_device->tmpSecureKey);
 
         connection->reply(QJsonDocument(replyJSON).toJson().toStdString().c_str());
     } catch (exception &e) {
@@ -73,7 +69,7 @@ CommunicationBridge::handshake(CoolSocket::ActiveConnection *connection, bool ha
     return connection;
 }
 
-NetworkDevice *CommunicationBridge::loadDevice(QString ipAddress)
+NetworkDevice *CommunicationBridge::loadDevice(QString &ipAddress)
 {
     return loadDevice(connectWithHandshake(std::move(ipAddress), true));
 }
@@ -84,7 +80,7 @@ NetworkDevice *CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *con
         CoolSocket::Response *response = connection->receive();
         QJsonObject receivedJSON = QJsonDocument::fromJson(QByteArray::fromStdString(response->response->toStdString())).object();
 
-        return NetworkDeviceLoader::loadFrom(getDatabase(), receivedJSON);
+        return NetworkDeviceLoader::loadFrom(receivedJSON);
     } catch (exception &e) {
         throw exception();
     }
@@ -92,24 +88,23 @@ NetworkDevice *CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *con
 
 void CommunicationBridge::setDevice(NetworkDevice *device)
 {
-    this->device = device;
+    this->m_device = device;
 }
 
 NetworkDevice *
 CommunicationBridge::updateDeviceIfOkay(CoolSocket::ActiveConnection *activeConnection, NetworkDevice *device)
 {
     NetworkDevice *loadedDevice = loadDevice(activeConnection);
-    DeviceConnection *connection = NetworkDeviceLoader::processConnection(getDatabase(), loadedDevice, activeConnection
+    DeviceConnection *connection = NetworkDeviceLoader::processConnection(loadedDevice, activeConnection
             ->getSocket()
             ->localAddress().toString());
 
     if (device->deviceId != loadedDevice->deviceId)
         throw exception();
     else {
-        time_t this_time;
-        loadedDevice->lastUsageTime = static_cast<int>(this_time);
+        loadedDevice->lastUsageTime = clock();
 
-        getDatabase()->publish(loadedDevice);
+        AppUtils::getDatabase()->publish(loadedDevice);
         setDevice(loadedDevice);
     }
 
