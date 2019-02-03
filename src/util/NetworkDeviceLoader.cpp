@@ -43,21 +43,42 @@ NetworkDeviceLoader::processConnection(NetworkDevice *device, DeviceConnection *
     AppUtils::getDatabase()->publish(connection);
 }
 
-void NetworkDeviceLoader::load(QString &ipAddress)
+void NetworkDeviceLoader::loadAsynchronously(const QString &ipAddress)
 {
     try {
-        load(false, ipAddress);
-    } catch (exception& e) {
+
+    } catch (exception &e) {
         // todo signal/slots instead of listener
     }
 }
 
-void NetworkDeviceLoader::load(bool currentThread, const QString ipAddress)
+void NetworkDeviceLoader::load(const QString &ipAddress)
 {
-
+    
 }
 
 NetworkDevice *NetworkDeviceLoader::loadFrom(const QJsonObject jsonIndex)
 {
-    return nullptr;
+    QJsonObject deviceInfo = jsonIndex.value(KEYWORD_DEVICE_INFO).toObject();
+    QJsonObject appInfo = jsonIndex.value(KEYWORD_APP_INFO).toObject();
+
+    NetworkDevice *networkDevice = new NetworkDevice(deviceInfo.value(KEYWORD_DEVICE_INFO_SERIAL).toString());
+
+    try {
+        AppUtils::getDatabase()->reconstruct(networkDevice);
+    } catch (...) {
+        // Do nothing because we just want to gather latest instance of the device
+    }
+
+    networkDevice->brand = deviceInfo.value(KEYWORD_DEVICE_INFO_BRAND).toString();
+    networkDevice->model = deviceInfo.value(KEYWORD_DEVICE_INFO_MODEL).toString();
+    networkDevice->nickname = deviceInfo.value(KEYWORD_DEVICE_INFO_USER).toString();
+    networkDevice->lastUsageTime = clock();
+    networkDevice->versionNumber = appInfo.value(KEYWORD_APP_INFO_VERSION_CODE).toInt();
+    networkDevice->versionName = appInfo.value(KEYWORD_APP_INFO_VERSION_NAME).toString();
+
+    if (networkDevice->nickname.length() > NICKNAME_LENGTH_MAX)
+        networkDevice->nickname = networkDevice->nickname.left(NICKNAME_LENGTH_MAX - 1);
+
+    return networkDevice;
 }

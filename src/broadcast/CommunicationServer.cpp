@@ -1,3 +1,6 @@
+#include <src/database/object/NetworkDevice.h>
+#include <src/util/AppUtils.h>
+#include <src/util/NetworkDeviceLoader.h>
 #include "CommunicationServer.h"
 
 CommunicationServer::CommunicationServer(QObject *parent)
@@ -52,10 +55,27 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         }
 
         if (deviceSerial != nullptr) {
+            NetworkDevice *device = new NetworkDevice(deviceSerial);
 
+            try {
+                AppUtils::getDatabase()->reconstruct(device);
+
+                if (!device->isRestricted)
+                    shouldContinue = true;
+            } catch (...) {
+                delete device;
+
+                device = NetworkDeviceLoader::load(connection->getSocket()->peerAddress().toString());
+            }
+
+            if (!shouldContinue) {
+                replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ALLOWED);
+            } else {
+
+            }
         }
 
-        pushReply(connection, replyJSON, true);
+        pushReply(connection, replyJSON, result);
     } catch (...) {
         cout << "What could go so wrong??"
              << endl;

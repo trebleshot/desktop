@@ -19,9 +19,11 @@ class CommunicationBridge : public CoolSocket::Client {
 public:
     explicit CommunicationBridge(QObject *parent = nullptr);
 
-    CoolSocket::ActiveConnection *communicate(NetworkDevice *targetDevice, DeviceConnection *targetConnection);
+    CoolSocket::ActiveConnection *communicate(NetworkDevice *targetDevice,
+                                              DeviceConnection *targetConnection);
 
-    CoolSocket::ActiveConnection *communicate(CoolSocket::ActiveConnection *connection, NetworkDevice *device);
+    CoolSocket::ActiveConnection *communicate(CoolSocket::ActiveConnection *connection,
+                                              NetworkDevice *device);
 
     CoolSocket::ActiveConnection *connect(QString ipAddress);
 
@@ -31,9 +33,10 @@ public:
 
     NetworkDevice *getDevice();
 
-    CoolSocket::ActiveConnection *handshake(CoolSocket::ActiveConnection *connection, bool handshakeOnly);
+    CoolSocket::ActiveConnection *handshake(CoolSocket::ActiveConnection *connection,
+                                            bool handshakeOnly);
 
-    NetworkDevice *loadDevice(QString& ipAddress);
+    NetworkDevice *loadDevice(QString &ipAddress);
 
     NetworkDevice *loadDevice(CoolSocket::ActiveConnection *connection);
 
@@ -41,7 +44,8 @@ public:
 
     void setSecureKey(int key);
 
-    NetworkDevice *updateDeviceIfOkay(CoolSocket::ActiveConnection *connection, NetworkDevice *device);
+    NetworkDevice *updateDeviceIfOkay(CoolSocket::ActiveConnection *connection,
+                                      NetworkDevice *device);
 };
 
 

@@ -14,15 +14,16 @@ CommunicationBridge::CommunicationBridge(QObject *parent)
 CoolSocket::ActiveConnection *
 CommunicationBridge::communicate(NetworkDevice *targetDevice, DeviceConnection *targetConnection)
 {
-    CoolSocket::ActiveConnection *connection = connectWithHandshake(targetConnection->ipAddress, false);
+    CoolSocket::ActiveConnection *connection
+            = connectWithHandshake(targetConnection->ipAddress, false);
 
     communicate(connection, targetDevice);
 
     return connection;
 }
 
-CoolSocket::ActiveConnection *
-CommunicationBridge::communicate(CoolSocket::ActiveConnection *connection, NetworkDevice *device)
+CoolSocket::ActiveConnection *CommunicationBridge::communicate(
+        CoolSocket::ActiveConnection *connection, NetworkDevice *device)
 {
     updateDeviceIfOkay(connection, device);
     return connection;
@@ -30,7 +31,8 @@ CommunicationBridge::communicate(CoolSocket::ActiveConnection *connection, Netwo
 
 CoolSocket::ActiveConnection *CommunicationBridge::connect(QString ipAddress)
 {
-    return this->openConnection(std::move(ipAddress), PORT_COMMUNICATION_DEFAULT, PORT_COMMUNICATION_DEFAULT);
+    return this->openConnection(std::move(ipAddress), PORT_COMMUNICATION_DEFAULT,
+                                PORT_COMMUNICATION_DEFAULT);
 }
 
 CoolSocket::ActiveConnection *CommunicationBridge::connect(DeviceConnection *connection)
@@ -38,7 +40,8 @@ CoolSocket::ActiveConnection *CommunicationBridge::connect(DeviceConnection *con
     return connect(connection->ipAddress);
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::connectWithHandshake(QString ipAddress, bool handshakeOnly)
+CoolSocket::ActiveConnection *CommunicationBridge::connectWithHandshake(QString ipAddress,
+                                                                        bool handshakeOnly)
 {
     return handshake(connect(std::move(ipAddress)), handshakeOnly);
 }
@@ -48,8 +51,8 @@ NetworkDevice *CommunicationBridge::getDevice()
     return this->m_device;
 }
 
-CoolSocket::ActiveConnection *
-CommunicationBridge::handshake(CoolSocket::ActiveConnection *connection, bool handshakeOnly)
+CoolSocket::ActiveConnection *CommunicationBridge::handshake(
+        CoolSocket::ActiveConnection *connection, bool handshakeOnly)
 {
     try {
         QJsonObject replyJSON;
@@ -78,7 +81,8 @@ NetworkDevice *CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *con
 {
     try {
         CoolSocket::Response *response = connection->receive();
-        QJsonObject receivedJSON = QJsonDocument::fromJson(QByteArray::fromStdString(response->response->toStdString())).object();
+        QJsonObject receivedJSON = QJsonDocument
+        ::fromJson(QByteArray::fromStdString(response->response->toStdString())).object();
 
         return NetworkDeviceLoader::loadFrom(receivedJSON);
     } catch (exception &e) {
@@ -96,13 +100,14 @@ void CommunicationBridge::setSecureKey(int key)
     this->m_secureKey = key;
 }
 
-NetworkDevice *
-CommunicationBridge::updateDeviceIfOkay(CoolSocket::ActiveConnection *activeConnection, NetworkDevice *device)
+NetworkDevice *CommunicationBridge::updateDeviceIfOkay(
+        CoolSocket::ActiveConnection *activeConnection, NetworkDevice *device)
 {
     NetworkDevice *loadedDevice = loadDevice(activeConnection);
-    DeviceConnection *connection = NetworkDeviceLoader::processConnection(loadedDevice, activeConnection
-            ->getSocket()
-            ->localAddress().toString());
+    DeviceConnection *connection
+            = NetworkDeviceLoader::processConnection(loadedDevice, activeConnection
+                    ->getSocket()
+                    ->localAddress().toString());
 
     if (device->deviceId != loadedDevice->deviceId)
         throw exception();

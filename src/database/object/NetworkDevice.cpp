@@ -1,6 +1,3 @@
-
-
-
 //
 // Created by veli on 9/25/18.
 //
@@ -10,7 +7,7 @@
 NetworkDevice::NetworkDevice(QString deviceId, QObject *parent)
         : DatabaseObject(parent)
 {
-    this->deviceId = std::move(deviceId);
+    this->deviceId = deviceId;
 }
 
 QSqlRecord NetworkDevice::getValues(AccessDatabase *db)
@@ -54,7 +51,7 @@ void NetworkDevice::onGeneratingValues(QSqlRecord record)
     this->versionName = record.value(AccessDatabaseStructure::FIELD_DEVICES_BUILDNAME).toString();
     this->versionNumber = record.value(AccessDatabaseStructure::FIELD_DEVICES_BUILDNUMBER).toInt();
     this->tmpSecureKey = record.value(AccessDatabaseStructure::FIELD_DEVICES_TMPSECUREKEY).toInt();
-    this->lastUsageTime = record.value(AccessDatabaseStructure::FIELD_DEVICES_LASTUSAGETIME).toInt();
+    this->lastUsageTime = static_cast<clock_t>(record.value(AccessDatabaseStructure::FIELD_DEVICES_LASTUSAGETIME).toULongLong());
     this->isTrusted = record.value(AccessDatabaseStructure::FIELD_DEVICES_ISTRUSTED).toInt() == 1;
     this->isRestricted = record.value(AccessDatabaseStructure::FIELD_DEVICES_ISRESTRICTED) == 1;
     this->isLocalAddress = record.value(AccessDatabaseStructure::FIELD_DEVICES_ISLOCALADDRESS) == 1;
@@ -115,5 +112,5 @@ void DeviceConnection::onGeneratingValues(QSqlRecord record)
     this->deviceId = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID).toString();
     this->adapterName = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME).toString();
     this->ipAddress = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS).toString();
-    this->lastCheckedDate = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE).toULongLong();
+    this->lastCheckedDate = static_cast<clock_t>(record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE).toULongLong());
 }

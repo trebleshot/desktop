@@ -98,7 +98,8 @@ namespace CoolSocket {
         int timeout = 2000;
 
     public:
-        explicit ActiveConnection(QTcpSocket *tcpServer, int msecTimeout = 2000, QObject *parent = 0)
+        explicit ActiveConnection(QTcpSocket *tcpServer, int msecTimeout = 2000,
+                                  QObject *parent = nullptr)
                 : QObject(parent)
         {
             this->activeSocket = tcpServer;
@@ -196,7 +197,8 @@ namespace CoolSocket {
             cout << "Scope removed along with the data" << endl;
         }
 
-        ActiveConnection *openConnection(QString hostAddress, quint16 port, int timeoutMSeconds = 3000);
+        ActiveConnection *openConnection(QString hostAddress, quint16 port,
+                                         int timeoutMSeconds = 3000);
 
         virtual void connectionPhase() = 0;
 

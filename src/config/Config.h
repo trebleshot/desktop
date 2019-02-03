@@ -3,6 +3,7 @@
 
 #define PORT_COMMUNICATION_DEFAULT 1128
 #define TIMEOUT_SOCKET_DEFAULT 5000
+#define NICKNAME_LENGTH_MAX 32
 
 #include "src/build.h"
 #include <QApplication>

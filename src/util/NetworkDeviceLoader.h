@@ -5,6 +5,7 @@
 #ifndef TREBLESHOT_NETWORKDEVICELOADER_H
 #define TREBLESHOT_NETWORKDEVICELOADER_H
 
+#include "src/config/Config.h"
 #include "src/database/object/NetworkDevice.h"
 
 class NetworkDeviceLoader {
@@ -13,9 +14,9 @@ public:
 
     static void processConnection(NetworkDevice* device, DeviceConnection *connection);
 
-    static void load(QString &ipAddress); // there was listener here, we should use a signal instead
+    static void loadAsynchronously(const QString &ipAddress); // there was listener here, we should use a signal instead
 
-    static void load(bool currentThread, QString ipAddress); // there was listener here, we should use a signal instead
+    static void load(const QString &ipAddress);
 
     static NetworkDevice* loadFrom(QJsonObject jsonIndex);
 };

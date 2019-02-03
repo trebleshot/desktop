@@ -109,18 +109,21 @@ namespace CoolSocket {
                 headerPosition = headerData->find(COOLSOCKET_HEADER_DIVIDER);
 
                 if (headerPosition != string::npos) {
-                    size_t dividerOccupiedSize = sizeof COOLSOCKET_HEADER_DIVIDER + headerPosition - 1;
+                    size_t dividerOccupiedSize
+                            = sizeof COOLSOCKET_HEADER_DIVIDER + headerPosition - 1;
 
                     if (headerData->length() > dividerOccupiedSize)
                         contentData->append(headerData->substr(dividerOccupiedSize));
 
                     headerData->resize(headerPosition);
 
-                    QJsonObject jsonObject = QJsonDocument::fromJson(QByteArray::fromStdString(*headerData))
-                            .object();
+                    QJsonObject jsonObject
+                            = QJsonDocument::fromJson(QByteArray::fromStdString(*headerData))
+                                    .object();
 
                     if (jsonObject.contains(QString(COOLSOCKET_KEYWORD_LENGTH))) {
-                        response->length = (jsonObject.value(QString(COOLSOCKET_KEYWORD_LENGTH))).toInt();
+                        response->length = (jsonObject.value(QString(COOLSOCKET_KEYWORD_LENGTH)))
+                                .toInt();
                     } else
                         break;
 
@@ -203,7 +206,8 @@ namespace CoolSocket {
         delete this->connection;
     }
 
-    ActiveConnection *Client::openConnection(QString hostAddress, quint16 port, int timeoutMSeconds)
+    ActiveConnection *Client::openConnection(QString hostAddress, quint16 port,
+                                             int timeoutMSeconds)
     {
         auto *socket = new QTcpSocket;
         auto *connection = new ActiveConnection(socket);
