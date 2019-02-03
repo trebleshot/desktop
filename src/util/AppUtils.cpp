@@ -21,8 +21,6 @@ void AppUtils::applyAdapterName(DeviceConnection *connection)
         QNetworkSession session(config);
         QString interfaceName(session.interface().name());
 
-        qDebug() << "Trying for the interface: " << interfaceName;
-
         for (const QNetworkAddressEntry &address : session.interface().addressEntries()) {
             QHostAddress currentHostAddress = address.ip();
 
@@ -31,12 +29,8 @@ void AppUtils::applyAdapterName(DeviceConnection *connection)
 
             QString ipV4Address = currentHostAddress.toString();
 
-            qDebug() << "info: " << address.ip().toString();
-            qDebug() << ipV4Address.left(ipV4Address.lastIndexOf("."));
-
             if (ipV4Address.left(ipV4Address.lastIndexOf("."))
                 == connection->ipAddress.left(connection->ipAddress.lastIndexOf("."))) {
-                qDebug() << "matches";
                 connection->adapterName = interfaceName;
                 return;
             }
@@ -70,17 +64,8 @@ AccessDatabase *AppUtils::getDatabase()
 {
     static AccessDatabase *accessDatabase = nullptr;
 
-    if (accessDatabase == nullptr) {
-        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-        db.setDatabaseName("local.db");
-
-        if (db.open()) {
-            cout << "Database has opened" << endl;
-
-            accessDatabase = new AccessDatabase(&db);
-            accessDatabase->initialize();
-        }
-    }
+    if (accessDatabase == nullptr)
+        accessDatabase = newDatabaseInstance(QApplication::instance());
 
     return accessDatabase;
 }
@@ -116,7 +101,19 @@ QString AppUtils::getDeviceId()
     return settings.value("deviceUUID", QString()).toString();
 }
 
-void AppUtils::loadInfo()
+AccessDatabase *AppUtils::newDatabaseInstance(QObject *parent)
 {
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("local.db");
 
+    if (db.open()) {
+        cout << "Database has opened" << endl;
+
+        auto *database = new AccessDatabase(&db, parent);
+        database->initialize();
+
+        return database;
+    }
+
+    return nullptr;
 }

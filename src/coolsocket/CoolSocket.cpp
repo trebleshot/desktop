@@ -214,7 +214,7 @@ namespace CoolSocket {
         auto *socket = new QTcpSocket;
         auto *connection = new ActiveConnection(socket);
 
-        QTcpSocket::connect(sender, SIGNAL(finished()), connection, SLOT(deleteLater()));
+        QTcpSocket::connect(sender, SIGNAL(destroyed()), connection, SLOT(deleteLater()));
 
         socket->connectToHost(hostName, port);
 

@@ -23,10 +23,6 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         bool shouldContinue = false;
         QString deviceSerial = nullptr;
 
-        qDebug() << "Entering response phase";
-        qDebug() << "The request is: "
-                 << QJsonDocument(responseJSON).toJson();
-
         if (responseJSON.contains(KEYWORD_HANDSHAKE_REQUIRED) &&
             responseJSON.value(KEYWORD_HANDSHAKE_REQUIRED).toBool(false)) {
             pushReply(connection, replyJSON, true);
@@ -41,7 +37,6 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                 responseJSON = QJsonDocument::fromJson(QByteArray::fromStdString(response->response->toStdString()))
                         .object();
             } else {
-                qDebug() << "The handshake only request is now being ended";
                 return;
             }
         }
@@ -73,7 +68,8 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                 shouldContinue = true;
 
-                AppUtils::getDatabase()->publish(device);
+                qDebug() << "Reached device name: " << device->nickname;
+                qDebug() << "Added: " << AppUtils::getDatabase()->publish(device);
             }
 
             if (!shouldContinue) {

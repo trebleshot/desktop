@@ -26,7 +26,7 @@ public:
 
     static NetworkDevice *getLocalDevice();
 
-    static void loadInfo();
+    static AccessDatabase* newDatabaseInstance(QObject* parent = nullptr);
 };
 
 
