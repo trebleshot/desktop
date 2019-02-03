@@ -7,6 +7,7 @@
 #include <QtNetwork/QNetworkConfigurationManager>
 #include <QtWidgets/QMessageBox>
 #include <QtNetwork/QNetworkSession>
+#include <QtCore/QJsonObject>
 #include "AppUtils.h"
 
 void AppUtils::applyAdapterName(DeviceConnection *connection)
@@ -45,6 +46,26 @@ void AppUtils::applyAdapterName(DeviceConnection *connection)
     connection->adapterName = KEYWORD_UNKNOWN_INTERFACE;
 }
 
+void AppUtils::applyDeviceToJSON(QJsonObject &object)
+{
+    NetworkDevice *device = getLocalDevice();
+    QJsonObject deviceInfo;
+    QJsonObject appInfo;
+
+    deviceInfo.insert(KEYWORD_DEVICE_INFO_SERIAL, device->deviceId);
+    deviceInfo.insert(KEYWORD_DEVICE_INFO_BRAND, device->brand);
+    deviceInfo.insert(KEYWORD_DEVICE_INFO_MODEL, device->model);
+    deviceInfo.insert(KEYWORD_DEVICE_INFO_USER, device->nickname);
+
+    appInfo.insert(KEYWORD_APP_INFO_VERSION_CODE, device->versionNumber);
+    appInfo.insert(KEYWORD_APP_INFO_VERSION_NAME, device->versionName);
+
+    object.insert(KEYWORD_APP_INFO, appInfo);
+    object.insert(KEYWORD_DEVICE_INFO, deviceInfo);
+
+    delete device;
+}
+
 AccessDatabase *AppUtils::getDatabase()
 {
     static AccessDatabase *accessDatabase = nullptr;
@@ -70,6 +91,19 @@ QSettings &AppUtils::getDefaultSettings()
                               QApplication::applicationName());
 
     return settings;
+}
+
+NetworkDevice *AppUtils::getLocalDevice()
+{
+    NetworkDevice *thisDevice = new NetworkDevice(getDeviceId());
+
+    thisDevice->brand = getDeviceTypeName();
+    thisDevice->model = getDeviceNameForOS();
+    thisDevice->nickname = getUserNickname();
+    thisDevice->versionName = getApplicationVersion();
+    thisDevice->versionNumber = getApplicationVersionCode();
+
+    return thisDevice;
 }
 
 QString AppUtils::getDeviceId()

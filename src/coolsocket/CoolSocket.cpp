@@ -206,15 +206,17 @@ namespace CoolSocket {
         delete this->connection;
     }
 
-    ActiveConnection *Client::openConnection(QString hostAddress, quint16 port,
+    ActiveConnection *Client::openConnection(const QObject *sender,
+                                             const QString &hostName,
+                                             quint16 port,
                                              int timeoutMSeconds)
     {
         auto *socket = new QTcpSocket;
         auto *connection = new ActiveConnection(socket);
 
-        QTcpSocket::connect(this, SIGNAL(finished()), connection, SLOT(deleteLater()));
+        QTcpSocket::connect(sender, SIGNAL(finished()), connection, SLOT(deleteLater()));
 
-        socket->connectToHost(hostAddress, port);
+        socket->connectToHost(hostName, port);
 
         while (QAbstractSocket::SocketState::ConnectingState == socket->state())
             socket->waitForConnected(timeoutMSeconds);

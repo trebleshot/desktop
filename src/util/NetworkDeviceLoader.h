@@ -10,15 +10,15 @@
 
 class NetworkDeviceLoader {
 public:
-    static DeviceConnection* processConnection(NetworkDevice* device, QString ipAddress);
+    static DeviceConnection *processConnection(NetworkDevice *device, QString ipAddress);
 
-    static void processConnection(NetworkDevice* device, DeviceConnection *connection);
+    static void processConnection(NetworkDevice *device, DeviceConnection *connection);
 
     static void loadAsynchronously(const QString &ipAddress); // there was listener here, we should use a signal instead
 
-    static void load(const QString &ipAddress);
+    static NetworkDevice *load(QObject* sender, const QString &ipAddress);
 
-    static NetworkDevice* loadFrom(QJsonObject jsonIndex);
+    static NetworkDevice *loadFrom(QJsonObject jsonIndex);
 };
 
 

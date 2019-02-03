@@ -5,12 +5,6 @@
 #include "CommunicationBridge.h"
 #include "AppUtils.h"
 
-CommunicationBridge::CommunicationBridge(QObject *parent)
-        : CoolSocket::Client(parent)
-{
-    // Do nothing
-}
-
 CoolSocket::ActiveConnection *
 CommunicationBridge::communicate(NetworkDevice *targetDevice, DeviceConnection *targetConnection)
 {
@@ -29,9 +23,9 @@ CoolSocket::ActiveConnection *CommunicationBridge::communicate(
     return connection;
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::connect(QString ipAddress)
+CoolSocket::ActiveConnection *CommunicationBridge::connect(const QString &ipAddress)
 {
-    return this->openConnection(std::move(ipAddress), PORT_COMMUNICATION_DEFAULT,
+    return Client::openConnection(this, ipAddress, PORT_COMMUNICATION_DEFAULT,
                                 PORT_COMMUNICATION_DEFAULT);
 }
 
@@ -40,10 +34,10 @@ CoolSocket::ActiveConnection *CommunicationBridge::connect(DeviceConnection *con
     return connect(connection->ipAddress);
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::connectWithHandshake(QString ipAddress,
+CoolSocket::ActiveConnection *CommunicationBridge::connectWithHandshake(const QString &ipAddress,
                                                                         bool handshakeOnly)
 {
-    return handshake(connect(std::move(ipAddress)), handshakeOnly);
+    return handshake(connect(ipAddress), handshakeOnly);
 }
 
 NetworkDevice *CommunicationBridge::getDevice()
@@ -72,9 +66,9 @@ CoolSocket::ActiveConnection *CommunicationBridge::handshake(
     return connection;
 }
 
-NetworkDevice *CommunicationBridge::loadDevice(QString &ipAddress)
+NetworkDevice *CommunicationBridge::loadDevice(const QString &ipAddress)
 {
-    return loadDevice(connectWithHandshake(std::move(ipAddress), true));
+    return loadDevice(connectWithHandshake(ipAddress, true));
 }
 
 NetworkDevice *CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *connection)

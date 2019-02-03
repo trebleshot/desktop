@@ -71,9 +71,9 @@ namespace CoolSocket {
 
         bool isServing();
 
-        void setHostAddress(QHostAddress hostAddress)
+        void setHostAddress(const QHostAddress &hostAddress)
         {
-            this->hostAddress = std::move(hostAddress);
+            this->hostAddress = hostAddress;
         }
 
         void setPort(quint16 port)
@@ -183,30 +183,19 @@ namespace CoolSocket {
         void run() override;
     };
 
-    class Client : public QThread {
+    class Client : public QObject {
     Q_OBJECT
 
     public:
         explicit Client(QObject *parent = nullptr)
-                : QThread(parent)
+                : QObject(parent)
         {
         }
 
-        ~Client() override
-        {
-            cout << "Scope removed along with the data" << endl;
-        }
-
-        ActiveConnection *openConnection(QString hostAddress, quint16 port,
-                                         int timeoutMSeconds = 3000);
-
-        virtual void connectionPhase() = 0;
-
-    protected:
-        void run() override
-        {
-            connectionPhase();
-        }
+        static ActiveConnection *openConnection(const QObject *sender,
+                                                const QString &hostName,
+                                                quint16 port,
+                                                int timeoutMSeconds = 3000);
     };
 }
 

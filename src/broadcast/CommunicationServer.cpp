@@ -17,25 +17,15 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         QJsonObject responseJSON = QJsonDocument::fromJson(QByteArray::fromStdString(response->response->toStdString())).object();
         QJsonObject replyJSON = QJsonObject();
 
+        AppUtils::applyDeviceToJSON(replyJSON);
+
         bool result = false;
         bool shouldContinue = false;
-
-        // Insert id of this device
-        QJsonObject deviceInfo;
-        QJsonObject appInfo;
-
-        deviceInfo.insert(KEYWORD_DEVICE_INFO_SERIAL, getDeviceId());
-        deviceInfo.insert(KEYWORD_DEVICE_INFO_BRAND, getDeviceTypeName());
-        deviceInfo.insert(KEYWORD_DEVICE_INFO_MODEL, getDeviceNameForOS());
-        deviceInfo.insert(KEYWORD_DEVICE_INFO_USER, getUserNickname());
-
-        appInfo.insert(KEYWORD_APP_INFO_VERSION_CODE, getApplicationVersionCode());
-        appInfo.insert(KEYWORD_APP_INFO_VERSION_NAME, getApplicationVersion());
-
-        replyJSON.insert(KEYWORD_APP_INFO, appInfo);
-        replyJSON.insert(KEYWORD_DEVICE_INFO, deviceInfo);
-
         QString deviceSerial = nullptr;
+
+        qDebug() << "Entering response phase";
+        qDebug() << "The request is: "
+                 << QJsonDocument(responseJSON).toJson();
 
         if (responseJSON.contains(KEYWORD_HANDSHAKE_REQUIRED) &&
             responseJSON.value(KEYWORD_HANDSHAKE_REQUIRED).toBool(false)) {
@@ -48,14 +38,20 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                 }
 
                 response = connection->receive();
-                responseJSON = QJsonDocument::fromJson(QByteArray::fromStdString(response->response->toStdString())).object();
+                responseJSON = QJsonDocument::fromJson(QByteArray::fromStdString(response->response->toStdString()))
+                        .object();
             } else {
+                qDebug() << "The handshake only request is now being ended";
                 return;
             }
         }
 
+        qDebug() << "Handshake sent, continuing to handling the request";
+
         if (deviceSerial != nullptr) {
             NetworkDevice *device = new NetworkDevice(deviceSerial);
+
+            qDebug() << "The device id has been provided";
 
             try {
                 AppUtils::getDatabase()->reconstruct(device);
@@ -65,24 +61,42 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
             } catch (...) {
                 delete device;
 
-                device = NetworkDeviceLoader::load(connection->getSocket()->peerAddress().toString());
+                qDebug() << "Will connect to "
+                         << connection->getSocket()->peerAddress().toString();
+
+                device = NetworkDeviceLoader::load(
+                        this,
+                        connection->getSocket()->peerAddress().toString());
+
+                device->isTrusted = false;
+                device->isRestricted = true;
+
+                shouldContinue = true;
+
+                AppUtils::getDatabase()->publish(device);
             }
 
             if (!shouldContinue) {
                 replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ALLOWED);
             } else {
-
+                qDebug() << "UP and RUNNING";
             }
         }
 
         pushReply(connection, replyJSON, result);
+    } catch (const exception &e) {
+        cout << "An error occurred: "
+             << e.what()
+             << endl;
     } catch (...) {
-        cout << "What could go so wrong??"
+        cout << "An unknown error occurred"
              << endl;
     }
 }
 
-void CommunicationServer::pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject &json, bool result)
+void CommunicationServer::pushReply(CoolSocket::ActiveConnection *activeConnection,
+                                    QJsonObject &json,
+                                    bool result)
 {
     json.insert(KEYWORD_RESULT, result);
     activeConnection->reply(QJsonDocument(json).toJson().toStdString().c_str());

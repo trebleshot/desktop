@@ -17,7 +17,11 @@ class CommunicationBridge : public CoolSocket::Client {
     int m_secureKey = -1;
 
 public:
-    explicit CommunicationBridge(QObject *parent = nullptr);
+    explicit CommunicationBridge(QObject *parent = nullptr, NetworkDevice* target = nullptr)
+            : CoolSocket::Client(parent), m_device(target)
+    {
+
+    }
 
     CoolSocket::ActiveConnection *communicate(NetworkDevice *targetDevice,
                                               DeviceConnection *targetConnection);
@@ -25,18 +29,18 @@ public:
     CoolSocket::ActiveConnection *communicate(CoolSocket::ActiveConnection *connection,
                                               NetworkDevice *device);
 
-    CoolSocket::ActiveConnection *connect(QString ipAddress);
+    CoolSocket::ActiveConnection *connect(const QString &ipAddress);
 
     CoolSocket::ActiveConnection *connect(DeviceConnection *connection);
 
-    CoolSocket::ActiveConnection *connectWithHandshake(QString ipAddress, bool handshakeOnly);
+    CoolSocket::ActiveConnection *connectWithHandshake(const QString &ipAddress, bool handshakeOnly);
 
     NetworkDevice *getDevice();
 
     CoolSocket::ActiveConnection *handshake(CoolSocket::ActiveConnection *connection,
                                             bool handshakeOnly);
 
-    NetworkDevice *loadDevice(QString &ipAddress);
+    NetworkDevice *loadDevice(const QString &ipAddress);
 
     NetworkDevice *loadDevice(CoolSocket::ActiveConnection *connection);
 

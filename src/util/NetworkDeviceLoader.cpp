@@ -5,6 +5,7 @@
 #include <QtCore/QJsonObject>
 #include "NetworkDeviceLoader.h"
 #include "AppUtils.h"
+#include "CommunicationBridge.h"
 
 DeviceConnection *
 NetworkDeviceLoader::processConnection(NetworkDevice *device, const QString ipAddress)
@@ -52,9 +53,17 @@ void NetworkDeviceLoader::loadAsynchronously(const QString &ipAddress)
     }
 }
 
-void NetworkDeviceLoader::load(const QString &ipAddress)
+NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QString &ipAddress)
 {
-    
+    auto *bridge = new CommunicationBridge(sender);
+    auto *device = bridge->loadDevice(ipAddress);
+
+    if (device->deviceId != nullptr) {
+
+    }
+
+    delete bridge;
+    return device;
 }
 
 NetworkDevice *NetworkDeviceLoader::loadFrom(const QJsonObject jsonIndex)
