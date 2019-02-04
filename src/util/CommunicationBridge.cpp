@@ -26,7 +26,7 @@ CoolSocket::ActiveConnection *CommunicationBridge::communicate(
 CoolSocket::ActiveConnection *CommunicationBridge::connect(const QString &ipAddress)
 {
     return Client::openConnection(this, ipAddress, PORT_COMMUNICATION_DEFAULT,
-                                PORT_COMMUNICATION_DEFAULT);
+                                  PORT_COMMUNICATION_DEFAULT);
 }
 
 CoolSocket::ActiveConnection *CommunicationBridge::connect(DeviceConnection *connection)
@@ -75,8 +75,8 @@ NetworkDevice *CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *con
 {
     try {
         CoolSocket::Response *response = connection->receive();
-        QJsonObject receivedJSON = QJsonDocument
-        ::fromJson(QByteArray::fromStdString(response->response->toStdString())).object();
+        QJsonObject receivedJSON = QJsonDocument::fromJson(QByteArray::fromStdString(
+                response->response->toStdString())).object();
 
         return NetworkDeviceLoader::loadFrom(receivedJSON);
     } catch (exception &e) {

@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
         auto *errorMessage = new QMessageBox(this);
 
         errorMessage->setWindowTitle("Database error");
-        errorMessage->setText("The database used to store information did not open. Refer to the development notes. "
+        errorMessage->setText("The getDatabase used to store information did not open. Refer to the development notes. "
                               "The program will force close.");
 
         errorMessage->show();

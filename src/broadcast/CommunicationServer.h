@@ -5,6 +5,7 @@
 #include "src/coolsocket/CoolSocket.h"
 #include "src/config/Keyword.h"
 #include <QApplication>
+#include <src/util/AppUtils.h>
 
 class CommunicationServer : public CoolSocket::Server {
     void pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject &json, bool result);

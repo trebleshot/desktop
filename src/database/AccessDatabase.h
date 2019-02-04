@@ -156,7 +156,7 @@ public:
 
     static QMap<QString, QSqlRecord> *getPassiveTables();
 
-    QSqlDatabase *database();
+    QSqlDatabase *getDatabase();
 
     // Template declarations fails to compile on CPP files.
     template<typename T>

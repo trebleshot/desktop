@@ -16,14 +16,14 @@ AccessDatabase::~AccessDatabase()
     delete db;
 }
 
-QSqlDatabase *AccessDatabase::database()
+QSqlDatabase *AccessDatabase::getDatabase()
 {
     return this->db;
 }
 
 void AccessDatabase::initialize()
 {
-    QSqlQuery queryExecutor(*database());
+    QSqlQuery queryExecutor(*getDatabase());
     QMap<QString, QSqlRecord> *tables = getPassiveTables();
 
     for (QString dbTableKey : tables->keys()) {
@@ -239,7 +239,7 @@ QSqlField AccessDatabaseStructure::generateField(const QString &key, const QVari
 
 QSqlTableModel *AccessDatabaseStructure::gatherTableModel(AccessDatabase *db, DatabaseObject *dbObject)
 {
-    QSqlTableModel *model = new QSqlTableModel(db, *db->database());
+    QSqlTableModel *model = new QSqlTableModel(db, *db->getDatabase());
 
     model->setTable(dbObject->getWhere()->tableName);
 

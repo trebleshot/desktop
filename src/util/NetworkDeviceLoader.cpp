@@ -59,7 +59,11 @@ NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QString &ipAddre
     auto *device = bridge->loadDevice(ipAddress);
 
     if (device->deviceId != nullptr) {
+        NetworkDevice* localDevice = AppUtils::getLocalDevice();
+        DeviceConnection* connection = processConnection(device, ipAddress);
 
+        delete localDevice;
+        delete connection;
     }
 
     delete bridge;

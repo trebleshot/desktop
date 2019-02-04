@@ -108,8 +108,6 @@ namespace CoolSocket {
 
         ~ActiveConnection() override
         {
-            cout << "ActiveConnection is deleted" << endl;
-
             if (this->activeSocket->isOpen())
                 this->activeSocket->close();
 
