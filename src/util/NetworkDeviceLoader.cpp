@@ -3,9 +3,11 @@
 //
 
 #include <QtCore/QJsonObject>
+#include <sys/socket.h>
 #include "NetworkDeviceLoader.h"
 #include "AppUtils.h"
 #include "CommunicationBridge.h"
+#include "GThread.h"
 
 DeviceConnection *
 NetworkDeviceLoader::processConnection(NetworkDevice *device, const QString ipAddress)
@@ -43,30 +45,41 @@ void NetworkDeviceLoader::processConnection(NetworkDevice *device,
     gDbSignal->publish(connection);
 }
 
-void NetworkDeviceLoader::loadAsynchronously(const QString &ipAddress)
-{
-    try {
 
-    } catch (exception &e) {
-        // todo signal/slots instead of listener
-    }
+void NetworkDeviceLoader::loadAsynchronously(QObject *sender,
+                                             const QString &ipAddress,
+                                             const std::function<void(NetworkDevice *)> &listener)
+{
+    auto *testThread = new GThread([sender, ipAddress, listener](QThread *thisThread) {
+        listener(load(sender, ipAddress));
+    });
+
+    QObject::connect(testThread, &QThread::destroyed, testThread, &QThread::deleteLater);
+
+    testThread->start();
 }
 
 NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QString &ipAddress)
 {
-    auto *bridge = new CommunicationBridge(sender);
-    auto *device = bridge->loadDevice(ipAddress);
+    try {
+        auto *bridge = new CommunicationBridge(sender);
+        auto *device = bridge->loadDevice(ipAddress);
 
-    if (device->deviceId != nullptr) {
-        NetworkDevice *localDevice = AppUtils::getLocalDevice();
-        DeviceConnection *connection = processConnection(device, ipAddress);
+        if (device->deviceId != nullptr) {
+            NetworkDevice *localDevice = AppUtils::getLocalDevice();
+            DeviceConnection *connection = processConnection(device, ipAddress);
 
-        delete localDevice;
-        delete connection;
+            delete localDevice;
+            delete connection;
+        }
+
+        delete bridge;
+        return device;
+    } catch (...) {
+        // do nothing
     }
 
-    delete bridge;
-    return device;
+    return nullptr;
 }
 
 NetworkDevice *NetworkDeviceLoader::loadFrom(const QJsonObject jsonIndex)

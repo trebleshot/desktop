@@ -7,7 +7,7 @@
 #include <QSqlDriver>
 #include <src/dialog/WelcomeDialog.h>
 #include <src/model/TransferGroupListModel.h>
-#include <QtCore/QSettings>
+#include <src/util/NetworkDeviceLoader.h>
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow), commServer(new CommunicationServer)
@@ -52,11 +52,16 @@ MainWindow::MainWindow(QWidget *parent)
             errorMessage->show();
             connect(this, SIGNAL(destroyed()), errorMessage, SLOT(deleteLater()));
         } else {
-            DeviceConnection* connection = new DeviceConnection("192.168.43.13");
+            DeviceConnection *connection = new DeviceConnection("192.168.43.13");
 
             AppUtils::applyAdapterName(connection);
         }
     }
+
+    NetworkDeviceLoader::loadAsynchronously(this, "127.0.0.1", [](NetworkDevice *device) {
+        if (device != nullptr)
+            qDebug() << "Device is" << device->nickname;
+    });
 
     const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
     adjustSize();

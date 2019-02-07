@@ -94,12 +94,14 @@ set(UTIL_LIBRARY
         src/util/NetworkDeviceLoader.cpp
         src/util/CommunicationBridge.h
         src/util/CommunicationBridge.cpp
-        src/util/AppUtils.cpp
         src/util/AppUtils.h
-        src/dialog/WelcomeDialog.cpp
+        src/util/AppUtils.cpp
         src/dialog/WelcomeDialog.h
+        src/dialog/WelcomeDialog.cpp
+        src/model/TransferGroupListModel.h
         src/model/TransferGroupListModel.cpp
-        src/model/TransferGroupListModel.h)
+        src/util/GThread.h
+        src/util/GThread.cpp)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)
