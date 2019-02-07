@@ -17,11 +17,11 @@ NetworkDeviceLoader::processConnection(NetworkDevice *device, const QString ipAd
     return connection;
 }
 
-void
-NetworkDeviceLoader::processConnection(NetworkDevice *device, DeviceConnection *connection)
+void NetworkDeviceLoader::processConnection(NetworkDevice *device,
+                                            DeviceConnection *connection)
 {
     try {
-        AppUtils::getDatabase()->reconstruct(connection);
+        gDbSignal->reconstruct(connection);
     } catch (exception &e) {
         AppUtils::applyAdapterName(connection);
     }
@@ -32,17 +32,15 @@ NetworkDeviceLoader::processConnection(NetworkDevice *device, DeviceConnection *
     auto *sqlSelection = new SqlSelection();
 
     sqlSelection->setTableName(AccessDatabaseStructure::TABLE_DEVICECONNECTION)
-            ->setWhere(QString("`%1` = ? AND `%2` = ? AND `%3` != ?")
-                                         .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID)
-                                         .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME)
-                                         .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS));
+            ->setWhere(QString("`%1` = ? AND `%2` = ?")
+                               .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID)
+                               .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME));
 
     sqlSelection->whereArgs << QVariant(connection->deviceId)
-                            << QVariant(connection->adapterName)
-                            << QVariant(connection->ipAddress);
+                            << QVariant(connection->adapterName);
 
-    AppUtils::getDatabase()->remove(sqlSelection);
-    AppUtils::getDatabase()->publish(connection);
+    gDbSignal->remove(sqlSelection);
+    gDbSignal->publish(connection);
 }
 
 void NetworkDeviceLoader::loadAsynchronously(const QString &ipAddress)
@@ -60,11 +58,8 @@ NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QString &ipAddre
     auto *device = bridge->loadDevice(ipAddress);
 
     if (device->deviceId != nullptr) {
-        NetworkDevice* localDevice = AppUtils::getLocalDevice();
-        DeviceConnection* connection = processConnection(device, ipAddress);
-
-        delete localDevice;
-        delete connection;
+        NetworkDevice *localDevice = AppUtils::getLocalDevice();
+        DeviceConnection *connection = processConnection(device, ipAddress);
     }
 
     delete bridge;
@@ -78,11 +73,7 @@ NetworkDevice *NetworkDeviceLoader::loadFrom(const QJsonObject jsonIndex)
 
     NetworkDevice *networkDevice = new NetworkDevice(deviceInfo.value(KEYWORD_DEVICE_INFO_SERIAL).toString());
 
-    try {
-        AppUtils::getDatabase()->reconstruct(networkDevice);
-    } catch (...) {
-        // Do nothing because we just want to gather latest instance of the device
-    }
+    gDbSignal->reconstruct(networkDevice);
 
     networkDevice->brand = deviceInfo.value(KEYWORD_DEVICE_INFO_BRAND).toString();
     networkDevice->model = deviceInfo.value(KEYWORD_DEVICE_INFO_MODEL).toString();

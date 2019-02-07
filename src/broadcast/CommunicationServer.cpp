@@ -23,8 +23,8 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         bool shouldContinue = false;
         QString deviceSerial = nullptr;
 
-        if (responseJSON.contains(KEYWORD_HANDSHAKE_REQUIRED) &&
-            responseJSON.value(KEYWORD_HANDSHAKE_REQUIRED).toBool(false)) {
+        if (responseJSON.contains(KEYWORD_HANDSHAKE_REQUIRED)
+            && responseJSON.value(KEYWORD_HANDSHAKE_REQUIRED).toBool(false)) {
             pushReply(connection, replyJSON, true);
 
             if (!responseJSON.contains(KEYWORD_HANDSHAKE_ONLY) ||
@@ -41,17 +41,17 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
             }
         }
 
-        qDebug() << "Handshake sent, continuing to handling the request";
-
         if (deviceSerial != nullptr) {
             NetworkDevice *device = nullptr;
-            auto* existingDevice = new NetworkDevice(deviceSerial);
-            auto existingState = false;
+            auto *existingDevice = new NetworkDevice(deviceSerial);
+            AsynchronousTaskResult taskResult = AsynchronousTaskResult::Waiting;
 
-            qDebug() << "The device id has been provided";
-            gDbSignal->reconstruct(existingDevice, &existingState);
+            gDbSignal->reconstruct(existingDevice, &taskResult);
 
-            if (existingState) {
+            while (taskResult == AsynchronousTaskResult::Waiting)
+                qDebug() << "Waiting for the answer to return";
+
+            if (taskResult == AsynchronousTaskResult::Success) {
                 if (!existingDevice->isRestricted)
                     shouldContinue = true;
 
@@ -66,25 +66,24 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                 shouldContinue = true;
 
-                qDebug() << "Reached device name: " << device->nickname;
                 gDbSignal->publish(device);
             }
 
             if (!shouldContinue) {
                 replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ALLOWED);
             } else {
-                qDebug() << "UP and RUNNING";
+
             }
         }
 
         pushReply(connection, replyJSON, result);
     } catch (const exception &e) {
-        cout << "An error occurred: "
-             << e.what()
-             << endl;
+        qDebug() << "An error occurred: "
+                 << e.what()
+                 << endl;
     } catch (...) {
-        cout << "An unknown error occurred"
-             << endl;
+        qDebug() << "An unknown error occurred"
+                 << endl;
     }
 }
 

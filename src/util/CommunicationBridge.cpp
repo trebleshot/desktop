@@ -108,7 +108,7 @@ NetworkDevice *CommunicationBridge::updateDeviceIfOkay(
     else {
         loadedDevice->lastUsageTime = clock();
 
-        AppUtils::getDatabase()->publish(loadedDevice);
+        gDbSignal->publish(loadedDevice);
         setDevice(loadedDevice);
     }
 

@@ -127,16 +127,16 @@ bool AccessDatabase::publish(DatabaseObject *dbObject)
            || this->insert(dbObject);
 }
 
-void AccessDatabase::reconstructRemote(DatabaseObject *dbObject, bool* success)
+void AccessDatabase::reconstructRemote(DatabaseObject *dbObject, AsynchronousTaskResult *result)
 {
     try {
         reconstruct(dbObject);
 
-        if (success != nullptr)
-            *success = true;
+        if (result != nullptr)
+            *result = AsynchronousTaskResult::Success;
     } catch (...) {
-        if (success != nullptr)
-            *success = false;
+        if (result != nullptr)
+            *result = AsynchronousTaskResult::Failure;
     }
 }
 
@@ -181,7 +181,7 @@ bool AccessDatabase::update(DatabaseObject *dbObject)
     return wasSuccessful;
 }
 
-QSqlField AccessDatabaseStructure::generateField(const QString &key, const QVariant::Type& type, bool nullable)
+QSqlField AccessDatabaseStructure::generateField(const QString &key, const QVariant::Type &type, bool nullable)
 {
     QSqlField field(key, type);
     field.setRequired(!nullable);

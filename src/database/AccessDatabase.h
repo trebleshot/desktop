@@ -4,6 +4,7 @@
 #define gDatabase AppUtils::getDatabase()
 #define gDbSignal emit AppUtils::getDatabaseSignaller()
 
+#include <QDebug>
 #include <QMimeData>
 #include <QSqlDatabase>
 #include <QSqlField>
@@ -21,6 +22,12 @@ class AccessDatabase;
 class DatabaseObject;
 
 class SqlSelection;
+
+enum AsynchronousTaskResult {
+    Waiting,
+    Success,
+    Failure
+};
 
 namespace AccessDatabaseStructure {
     const QString TABLE_TRANSFER = "transfer";
@@ -192,7 +199,7 @@ public slots:
 
     bool publish(DatabaseObject *dbObject);
 
-    void reconstructRemote(DatabaseObject *dbObject, bool* success);
+    void reconstructRemote(DatabaseObject *dbObject, AsynchronousTaskResult *result);
 
     void reconstruct(DatabaseObject *dbObject);
 
@@ -231,7 +238,7 @@ signals:
 
     bool publish(DatabaseObject *dbObject);
 
-    void reconstruct(DatabaseObject *dbObject, bool* success = nullptr);
+    void reconstruct(DatabaseObject *dbObject, AsynchronousTaskResult *result = nullptr);
 
     bool remove(SqlSelection *selection);
 
