@@ -127,17 +127,16 @@ bool AccessDatabase::publish(DatabaseObject *dbObject)
            || this->insert(dbObject);
 }
 
-void AccessDatabase::reconstructRemote(DatabaseObject *dbObject, AsynchronousTaskResult *result)
+bool AccessDatabase::reconstructRemote(DatabaseObject *dbObject)
 {
     try {
         reconstruct(dbObject);
-
-        if (result != nullptr)
-            *result = AsynchronousTaskResult::Success;
+        return true;
     } catch (...) {
-        if (result != nullptr)
-            *result = AsynchronousTaskResult::Failure;
+        // do nothing here
     }
+
+    return false;
 }
 
 void AccessDatabase::reconstruct(DatabaseObject *dbObject)

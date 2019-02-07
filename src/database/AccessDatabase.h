@@ -23,12 +23,6 @@ class DatabaseObject;
 
 class SqlSelection;
 
-enum AsynchronousTaskResult {
-    Waiting,
-    Success,
-    Failure
-};
-
 namespace AccessDatabaseStructure {
     const QString TABLE_TRANSFER = "transfer";
     const QString DIVIS_TRANSFER = "transfer";
@@ -199,7 +193,7 @@ public slots:
 
     bool publish(DatabaseObject *dbObject);
 
-    void reconstructRemote(DatabaseObject *dbObject, AsynchronousTaskResult *result);
+    bool reconstructRemote(DatabaseObject *dbObject);
 
     void reconstruct(DatabaseObject *dbObject);
 
@@ -221,13 +215,13 @@ public:
     explicit AccessDatabaseSignaller(AccessDatabase *db, QObject *parent = nullptr)
             : QObject(parent)
     {
-        connect(this, &AccessDatabaseSignaller::contains, db, &AccessDatabase::contains);
-        connect(this, &AccessDatabaseSignaller::insert, db, &AccessDatabase::insert);
-        connect(this, &AccessDatabaseSignaller::publish, db, &AccessDatabase::publish);
-        connect(this, &AccessDatabaseSignaller::reconstruct, db, &AccessDatabase::reconstructRemote);
-        connect(this, SIGNAL(remove(SqlSelection * )), db, SLOT(remove(SqlSelection * )));
-        connect(this, SIGNAL(remove(DatabaseObject * )), db, SLOT(remove(DatabaseObject * )));
-        connect(this, &AccessDatabaseSignaller::update, db, &AccessDatabase::update);
+        connect(this, &AccessDatabaseSignaller::contains, db, &AccessDatabase::contains, Qt::BlockingQueuedConnection);
+        connect(this, &AccessDatabaseSignaller::insert, db, &AccessDatabase::insert, Qt::BlockingQueuedConnection);
+        connect(this, &AccessDatabaseSignaller::publish, db, &AccessDatabase::publish, Qt::BlockingQueuedConnection);
+        connect(this, &AccessDatabaseSignaller::reconstruct, db, &AccessDatabase::reconstructRemote, Qt::BlockingQueuedConnection);
+        connect(this, SIGNAL(remove(SqlSelection * )), db, SLOT(remove(SqlSelection * )), Qt::BlockingQueuedConnection);
+        connect(this, SIGNAL(remove(DatabaseObject * )), db, SLOT(remove(DatabaseObject * )), Qt::BlockingQueuedConnection);
+        connect(this, &AccessDatabaseSignaller::update, db, &AccessDatabase::update, Qt::BlockingQueuedConnection);
     }
 
 signals:
@@ -238,7 +232,7 @@ signals:
 
     bool publish(DatabaseObject *dbObject);
 
-    void reconstruct(DatabaseObject *dbObject, AsynchronousTaskResult *result = nullptr);
+    bool reconstruct(DatabaseObject *dbObject);
 
     bool remove(SqlSelection *selection);
 

@@ -42,21 +42,14 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         }
 
         if (deviceSerial != nullptr) {
-            NetworkDevice *device = nullptr;
-            auto *existingDevice = new NetworkDevice(deviceSerial);
-            AsynchronousTaskResult taskResult = AsynchronousTaskResult::Waiting;
+            auto *device = new NetworkDevice(deviceSerial);
 
-            gDbSignal->reconstruct(existingDevice, &taskResult);
-
-            while (taskResult == AsynchronousTaskResult::Waiting)
-                qDebug() << "Waiting for the answer to return";
-
-            if (taskResult == AsynchronousTaskResult::Success) {
-                if (!existingDevice->isRestricted)
+            if (gDbSignal->reconstruct(device)) {
+                if (!device->isRestricted)
                     shouldContinue = true;
-
-                device = existingDevice;
             } else {
+                delete device;
+
                 device = NetworkDeviceLoader::load(
                         this,
                         connection->getSocket()->peerAddress().toString());
