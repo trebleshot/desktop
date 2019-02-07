@@ -19,6 +19,7 @@ public:
     static void applyDeviceToJSON(QJsonObject &object);
 
     static AccessDatabase *getDatabase();
+    static AccessDatabaseSignaller *getDatabaseSignaller();
 
     static QSettings &getDefaultSettings();
 

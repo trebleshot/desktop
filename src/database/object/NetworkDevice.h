@@ -27,7 +27,7 @@ public:
     bool isRestricted = false;
     bool isLocalAddress = false;
 
-    explicit NetworkDevice(QString deviceId = nullptr, QObject *parent = nullptr);
+    explicit NetworkDevice(const QString &deviceId = nullptr, QObject *parent = nullptr);
 
     SqlSelection *getWhere() override;
 

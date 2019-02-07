@@ -4,7 +4,7 @@
 
 #include "NetworkDevice.h"
 
-NetworkDevice::NetworkDevice(QString deviceId, QObject *parent)
+NetworkDevice::NetworkDevice(const QString &deviceId, QObject *parent)
         : DatabaseObject(parent)
 {
     this->deviceId = deviceId;
@@ -35,9 +35,9 @@ SqlSelection *NetworkDevice::getWhere()
 
     selection
             ->setTableName(AccessDatabaseStructure::TABLE_DEVICES)
-            ->setWhere(QString::asprintf("`%s` = ?", AccessDatabaseStructure::FIELD_DEVICES_ID.toStdString().c_str()));
+            ->setWhere(QString("`%1` = ?").arg(AccessDatabaseStructure::FIELD_DEVICES_ID));
 
-    selection->whereArgs << QVariant(this->deviceId);
+    selection->whereArgs << this->deviceId;
 
     return selection;
 }

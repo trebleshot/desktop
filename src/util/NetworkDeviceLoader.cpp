@@ -32,15 +32,16 @@ NetworkDeviceLoader::processConnection(NetworkDevice *device, DeviceConnection *
     auto *sqlSelection = new SqlSelection();
 
     sqlSelection->setTableName(AccessDatabaseStructure::TABLE_DEVICECONNECTION)
-            ->setWhere(QString::asprintf("`%s` = ? AND `%s` = ? AND `%s` != ?",
-                                         AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID.toStdString().c_str(),
-                                         AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME.toStdString().c_str(),
-                                         AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS.toStdString().c_str()));
+            ->setWhere(QString("`%1` = ? AND `%2` = ? AND `%3` != ?")
+                                         .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID)
+                                         .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME)
+                                         .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS));
 
     sqlSelection->whereArgs << QVariant(connection->deviceId)
                             << QVariant(connection->adapterName)
                             << QVariant(connection->ipAddress);
 
+    AppUtils::getDatabase()->remove(sqlSelection);
     AppUtils::getDatabase()->publish(connection);
 }
 

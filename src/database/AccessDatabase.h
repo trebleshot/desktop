@@ -1,6 +1,9 @@
 #ifndef ACCESSDATABASE_H
 #define ACCESSDATABASE_H
 
+#define gDatabase AppUtils::getDatabase()
+#define gDbSignal emit AppUtils::getDatabaseSignaller()
+
 #include <QMimeData>
 #include <QSqlDatabase>
 #include <QSqlField>
@@ -70,7 +73,7 @@ namespace AccessDatabaseStructure {
     const QString FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER = "connectionAdapter";
     const QString FIELD_TRANSFERASSIGNEE_ISCLONE = "isClone";
 
-    extern QSqlField generateField(const QString &key, const QVariant::Type type, bool nullable = true);
+    extern QSqlField generateField(const QString &key, const QVariant::Type &type, bool nullable = true);
 
     extern QSqlField generateField(const QString &key, const QVariant &type);
 
@@ -147,12 +150,12 @@ public:
 };
 
 class AccessDatabase : public QObject {
+Q_OBJECT
+
     QSqlDatabase *db;
 
 public:
     explicit AccessDatabase(QSqlDatabase *db, QObject *parent = nullptr);
-
-    ~AccessDatabase() override;
 
     static QMap<QString, QSqlRecord> *getPassiveTables();
 
@@ -179,15 +182,58 @@ public:
         return resultList;
     }
 
-    bool contains(DatabaseObject *dbObject);
-
     void initialize();
+
+public slots:
+
+    bool contains(DatabaseObject *dbObject);
 
     bool insert(DatabaseObject *dbObject);
 
     bool publish(DatabaseObject *dbObject);
 
+    void reconstructRemote(DatabaseObject *dbObject, bool* success);
+
     void reconstruct(DatabaseObject *dbObject);
+
+    bool remove(SqlSelection *selection);
+
+    bool remove(DatabaseObject *dbObject);
+
+    bool update(DatabaseObject *dbObject);
+
+signals:
+
+    void signalPublish(DatabaseObject *object);
+};
+
+class AccessDatabaseSignaller : public QObject {
+Q_OBJECT
+
+public:
+    explicit AccessDatabaseSignaller(AccessDatabase *db, QObject *parent = nullptr)
+            : QObject(parent)
+    {
+        connect(this, &AccessDatabaseSignaller::contains, db, &AccessDatabase::contains);
+        connect(this, &AccessDatabaseSignaller::insert, db, &AccessDatabase::insert);
+        connect(this, &AccessDatabaseSignaller::publish, db, &AccessDatabase::publish);
+        connect(this, &AccessDatabaseSignaller::reconstruct, db, &AccessDatabase::reconstructRemote);
+        connect(this, SIGNAL(remove(SqlSelection * )), db, SLOT(remove(SqlSelection * )));
+        connect(this, SIGNAL(remove(DatabaseObject * )), db, SLOT(remove(DatabaseObject * )));
+        connect(this, &AccessDatabaseSignaller::update, db, &AccessDatabase::update);
+    }
+
+signals:
+
+    bool contains(DatabaseObject *dbObject);
+
+    bool insert(DatabaseObject *dbObject);
+
+    bool publish(DatabaseObject *dbObject);
+
+    void reconstruct(DatabaseObject *dbObject, bool* success = nullptr);
+
+    bool remove(SqlSelection *selection);
 
     bool remove(DatabaseObject *dbObject);
 

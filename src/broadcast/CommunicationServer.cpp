@@ -44,21 +44,19 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         qDebug() << "Handshake sent, continuing to handling the request";
 
         if (deviceSerial != nullptr) {
-            NetworkDevice *device = new NetworkDevice(deviceSerial);
+            NetworkDevice *device = nullptr;
+            auto* existingDevice = new NetworkDevice(deviceSerial);
+            auto existingState = false;
 
             qDebug() << "The device id has been provided";
+            gDbSignal->reconstruct(existingDevice, &existingState);
 
-            try {
-                AppUtils::getDatabase()->reconstruct(device);
-
-                if (!device->isRestricted)
+            if (existingState) {
+                if (!existingDevice->isRestricted)
                     shouldContinue = true;
-            } catch (...) {
-                delete device;
 
-                qDebug() << "Will connect to "
-                         << connection->getSocket()->peerAddress().toString();
-
+                device = existingDevice;
+            } else {
                 device = NetworkDeviceLoader::load(
                         this,
                         connection->getSocket()->peerAddress().toString());
@@ -69,7 +67,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                 shouldContinue = true;
 
                 qDebug() << "Reached device name: " << device->nickname;
-                qDebug() << "Added: " << AppUtils::getDatabase()->publish(device);
+                gDbSignal->publish(device);
             }
 
             if (!shouldContinue) {

@@ -9,11 +9,8 @@ AccessDatabase::AccessDatabase(QSqlDatabase *db, QObject *parent)
         : QObject(parent)
 {
     this->db = db;
-}
 
-AccessDatabase::~AccessDatabase()
-{
-    delete db;
+    connect(this, &AccessDatabase::signalPublish, this, &AccessDatabase::publish);
 }
 
 QSqlDatabase *AccessDatabase::getDatabase()
@@ -130,6 +127,19 @@ bool AccessDatabase::publish(DatabaseObject *dbObject)
            || this->insert(dbObject);
 }
 
+void AccessDatabase::reconstructRemote(DatabaseObject *dbObject, bool* success)
+{
+    try {
+        reconstruct(dbObject);
+
+        if (success != nullptr)
+            *success = true;
+    } catch (...) {
+        if (success != nullptr)
+            *success = false;
+    }
+}
+
 void AccessDatabase::reconstruct(DatabaseObject *dbObject)
 {
     QSqlQuery *query = dbObject->getWhere()->toSelectionQuery();
@@ -148,9 +158,14 @@ void AccessDatabase::reconstruct(DatabaseObject *dbObject)
         throw exception();
 }
 
+bool AccessDatabase::remove(SqlSelection *selection)
+{
+    return selection->toDeletionQuery()->exec();
+}
+
 bool AccessDatabase::remove(DatabaseObject *dbObject)
 {
-    return dbObject->getWhere()->toDeletionQuery()->exec();
+    return remove(dbObject->getWhere());
 }
 
 bool AccessDatabase::update(DatabaseObject *dbObject)
@@ -166,7 +181,7 @@ bool AccessDatabase::update(DatabaseObject *dbObject)
     return wasSuccessful;
 }
 
-QSqlField AccessDatabaseStructure::generateField(const QString &key, const QVariant::Type type, bool nullable)
+QSqlField AccessDatabaseStructure::generateField(const QString &key, const QVariant::Type& type, bool nullable)
 {
     QSqlField field(key, type);
     field.setRequired(!nullable);
@@ -199,6 +214,7 @@ const char *AccessDatabaseStructure::transformType(QVariant::Type type)
     }
 }
 
+// todo: const ??
 QString AccessDatabaseStructure::generateTableCreationSql(QString &tableName, QSqlRecord &record, bool mayExist)
 {
     QString sql("create table ");
@@ -239,7 +255,7 @@ QSqlField AccessDatabaseStructure::generateField(const QString &key, const QVari
 
 QSqlTableModel *AccessDatabaseStructure::gatherTableModel(AccessDatabase *db, DatabaseObject *dbObject)
 {
-    QSqlTableModel *model = new QSqlTableModel(db, *db->getDatabase());
+    auto *model = new QSqlTableModel(db, *db->getDatabase());
 
     model->setTable(dbObject->getWhere()->tableName);
 

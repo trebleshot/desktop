@@ -70,6 +70,16 @@ AccessDatabase *AppUtils::getDatabase()
     return accessDatabase;
 }
 
+AccessDatabaseSignaller *AppUtils::getDatabaseSignaller()
+{
+    static AccessDatabaseSignaller *signaller = nullptr;
+
+    if (signaller == nullptr)
+        signaller = new AccessDatabaseSignaller(getDatabase());
+
+    return signaller;
+}
+
 QSettings &AppUtils::getDefaultSettings()
 {
     static QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Genonbeta",
@@ -103,13 +113,13 @@ QString AppUtils::getDeviceId()
 
 AccessDatabase *AppUtils::newDatabaseInstance(QObject *parent)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("local.db");
+    QSqlDatabase *db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
+    db->setDatabaseName("local.db");
 
-    if (db.open()) {
+    if (db->open()) {
         cout << "Database has opened" << endl;
 
-        auto *database = new AccessDatabase(&db, parent);
+        auto *database = new AccessDatabase(db, parent);
         database->initialize();
 
         return database;
