@@ -169,25 +169,33 @@ namespace CoolSocket {
 
     void ServerWorker::run()
     {
-        this->setTcpServer(new QTcpServer());
+        try {
+            this->setTcpServer(new QTcpServer());
 
-        if (getTcpServer()->listen(m_server->getHostAddress(), m_server->getPort())) {
-            while (!isInterruptionRequested() && getTcpServer()->isListening()) {
-                this->m_serverListening = true;
+            if (getTcpServer()->listen(m_server->getHostAddress(), m_server->getPort())) {
+                emit m_server->serverStarted();
 
-                getTcpServer()->waitForNewConnection(2000);
+                while (!isInterruptionRequested() && getTcpServer()->isListening()) {
+                    this->m_serverListening = true;
 
-                if (getTcpServer()->hasPendingConnections()) {
-                    QTcpSocket *socket = getTcpServer()->nextPendingConnection();
-                    auto *activeConnection = new ActiveConnection(socket);
-                    auto *handler = new RequestHandler(m_server, activeConnection);
+                    getTcpServer()->waitForNewConnection(2000);
 
-                    handler->start();
+                    if (getTcpServer()->hasPendingConnections()) {
+                        QTcpSocket *socket = getTcpServer()->nextPendingConnection();
+                        auto *activeConnection = new ActiveConnection(socket);
+                        auto *handler = new RequestHandler(m_server, activeConnection);
+
+                        handler->start();
+                    }
                 }
-            }
 
-            this->m_serverListening = false;
-            getTcpServer()->close();
+                this->m_serverListening = false;
+                getTcpServer()->close();
+
+                emit m_server->serverStopped();
+            }
+        } catch (...) {
+            emit m_server->serverFailure();
         }
     }
 

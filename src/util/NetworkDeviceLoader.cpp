@@ -50,13 +50,9 @@ void NetworkDeviceLoader::loadAsynchronously(QObject *sender,
                                              const QString &ipAddress,
                                              const std::function<void(NetworkDevice *)> &listener)
 {
-    auto *testThread = new GThread([sender, ipAddress, listener](QThread *thisThread) {
+    GThread::startIndependent([sender, ipAddress, listener](QThread *thisThread) {
         listener(load(sender, ipAddress));
     });
-
-    QObject::connect(testThread, &QThread::finished, testThread, &QThread::deleteLater);
-
-    testThread->start();
 }
 
 NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QString &ipAddress)
@@ -68,6 +64,11 @@ NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QString &ipAddre
         if (device->deviceId != nullptr) {
             NetworkDevice *localDevice = AppUtils::getLocalDevice();
             DeviceConnection *connection = processConnection(device, ipAddress);
+
+            if (localDevice->deviceId != device->deviceId) {
+                device->lastUsageTime = clock();
+                gDbSignal->publish(device);
+            }
 
             delete localDevice;
             delete connection;

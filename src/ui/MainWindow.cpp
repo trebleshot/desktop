@@ -29,7 +29,29 @@ MainWindow::MainWindow(QWidget *parent)
 
         connect(errorMessage, SIGNAL(finished(int)), this, SLOT(failureDialogFinished(int)));
     } else {
-        bool serverStarted = m_commServer->startEnsured(5000);
+        connect(m_commServer, &CoolSocket::Server::serverStarted, [this]() {
+            m_ui->label->setText(QString("TrebleShot is ready to accept files"));
+
+            NetworkDeviceLoader::loadAsynchronously(this, "127.0.0.1", [](NetworkDevice *device) {
+                if (device != nullptr)
+                    qDebug() << "Device is" << device->nickname;
+            });
+        });
+
+        connect(m_commServer, &CoolSocket::Server::serverFailure, [this]() {
+            auto *errorMessage = new QMessageBox(this);
+
+            errorMessage->setWindowTitle(QString("Server error"));
+            errorMessage->setText(QString("TrebleShot server has returned with an error. "
+                                          "Try restarting the application to solve the problem."));
+
+            errorMessage->show();
+            connect(this, SIGNAL(destroyed()), errorMessage, SLOT(deleteLater()));
+        });
+
+        m_commServer->start(0);
+        m_ui->label->setText(QString("TrebleShot will not receive files"));
+
         auto *model = new TransferGroupListModel();
 
         connect(m_ui->tableView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
@@ -37,31 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
         connect(m_ui->actionAbout_Qt, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
 
         m_ui->tableView->setModel(model);
-        m_ui->label->setText(serverStarted
-                           ? QString("TrebleShot is ready to accept files")
-                           : QString("TrebleShot will not receive files"));
-
-        if (!serverStarted) {
-            auto *errorMessage = new QMessageBox(this);
-
-            errorMessage->setWindowTitle(QString("Server error"));
-            errorMessage->setText(QString("TrebleShot server won't start. "
-                                          "You will not be able to communicate with "
-                                          "other devices."));
-
-            errorMessage->show();
-            connect(this, SIGNAL(destroyed()), errorMessage, SLOT(deleteLater()));
-        } else {
-            DeviceConnection *connection = new DeviceConnection("192.168.43.13");
-
-            AppUtils::applyAdapterName(connection);
-        }
     }
-
-    NetworkDeviceLoader::loadAsynchronously(this, "127.0.0.1", [](NetworkDevice *device) {
-        if (device != nullptr)
-            qDebug() << "Device is" << device->nickname;
-    });
 
     const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
     adjustSize();

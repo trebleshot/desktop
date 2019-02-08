@@ -88,6 +88,11 @@ namespace CoolSocket {
         virtual void connected(ActiveConnection *connection) = 0;
 
     signals:
+        void serverStarted();
+
+        void serverStopped();
+
+        void serverFailure();
 
         void clientConnected(ActiveConnection *connection);
     };
