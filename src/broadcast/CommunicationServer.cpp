@@ -56,7 +56,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                 device = NetworkDeviceLoader::load(
                         this,
-                        connection->getSocket()->peerAddress().toString());
+                        connection->getSocket()->peerAddress());
 
                 device->isTrusted = false;
                 device->isRestricted = true;
@@ -68,7 +68,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
             DeviceConnection *deviceConnection =
                     NetworkDeviceLoader::processConnection(device,
-                                                           connection->getSocket()->peerAddress().toString());
+                                                           connection->getSocket()->peerAddress());
 
             if (!shouldContinue) {
                 replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ALLOWED);
@@ -162,6 +162,10 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                           device->deviceId);
                         result = true;
                     }
+                } else if (request == KEYWORD_REQUEST_ACQUAINTANCE) {
+                    result = true;
+                } else if (request == KEYWORD_REQUEST_HANDSHAKE) {
+                    result = true;
                 }
             }
         }

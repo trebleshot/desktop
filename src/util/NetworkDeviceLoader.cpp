@@ -1,18 +1,12 @@
 //
 // Created by veli on 9/28/18.
 //
-
-#include <QtCore/QJsonObject>
-#include <sys/socket.h>
 #include "NetworkDeviceLoader.h"
-#include "AppUtils.h"
-#include "CommunicationBridge.h"
-#include "GThread.h"
 
-DeviceConnection *
-NetworkDeviceLoader::processConnection(NetworkDevice *device, const QString ipAddress)
+DeviceConnection *NetworkDeviceLoader::processConnection(NetworkDevice *device,
+                                                         const QHostAddress &hostAddress)
 {
-    DeviceConnection *connection = new DeviceConnection(ipAddress);
+    DeviceConnection *connection = new DeviceConnection(hostAddress);
 
     processConnection(device, connection);
 
@@ -22,11 +16,9 @@ NetworkDeviceLoader::processConnection(NetworkDevice *device, const QString ipAd
 void NetworkDeviceLoader::processConnection(NetworkDevice *device,
                                             DeviceConnection *connection)
 {
-    try {
-        gDbSignal->reconstruct(connection);
-    } catch (exception &e) {
-        AppUtils::applyAdapterName(connection);
-    }
+    if (AppUtils::applyAdapterName(connection)
+        || gDbSignal->reconstruct(connection))
+        connection->adapterName = KEYWORD_UNKNOWN_INTERFACE;
 
     connection->lastCheckedDate = clock();
     connection->deviceId = device->deviceId;
@@ -41,29 +33,30 @@ void NetworkDeviceLoader::processConnection(NetworkDevice *device,
     sqlSelection->whereArgs << QVariant(connection->deviceId)
                             << QVariant(connection->adapterName);
 
+    qDebug() << connection->deviceId << connection->adapterName << connection->hostAddress;
+
     gDbSignal->remove(sqlSelection);
     gDbSignal->publish(connection);
 }
 
-
 void NetworkDeviceLoader::loadAsynchronously(QObject *sender,
-                                             const QString &ipAddress,
+                                             const QHostAddress &hostAddress,
                                              const std::function<void(NetworkDevice *)> &listener)
 {
-    GThread::startIndependent([sender, ipAddress, listener](GThread *thisThread) {
-        listener(load(sender, ipAddress));
+    GThread::startIndependent([sender, hostAddress, listener](GThread *thisThread) {
+        listener(load(sender, hostAddress));
     });
 }
 
-NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QString &ipAddress)
+NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QHostAddress &hostAddress)
 {
     try {
         auto *bridge = new CommunicationBridge(sender);
-        auto *device = bridge->loadDevice(ipAddress);
+        auto *device = bridge->loadDevice(hostAddress);
 
         if (device->deviceId != nullptr) {
             NetworkDevice *localDevice = AppUtils::getLocalDevice();
-            DeviceConnection *connection = processConnection(device, ipAddress);
+            DeviceConnection *connection = processConnection(device, hostAddress);
 
             if (localDevice->deviceId != device->deviceId) {
                 device->lastUsageTime = clock();

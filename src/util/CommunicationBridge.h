@@ -29,18 +29,18 @@ public:
     CoolSocket::ActiveConnection *communicate(CoolSocket::ActiveConnection *connection,
                                               NetworkDevice *device);
 
-    CoolSocket::ActiveConnection *connect(const QString &ipAddress);
+    CoolSocket::ActiveConnection *connect(const QHostAddress &hostAddress);
 
     CoolSocket::ActiveConnection *connect(DeviceConnection *connection);
 
-    CoolSocket::ActiveConnection *connectWithHandshake(const QString &ipAddress, bool handshakeOnly);
+    CoolSocket::ActiveConnection *connectWithHandshake(const QHostAddress &hostAddress, bool handshakeOnly);
 
     NetworkDevice *getDevice();
 
     CoolSocket::ActiveConnection *handshake(CoolSocket::ActiveConnection *connection,
                                             bool handshakeOnly);
 
-    NetworkDevice *loadDevice(const QString &ipAddress);
+    NetworkDevice *loadDevice(const QHostAddress &hostAddress);
 
     NetworkDevice *loadDevice(CoolSocket::ActiveConnection *connection);
 

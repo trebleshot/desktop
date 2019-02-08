@@ -7,18 +7,23 @@
 
 #include "src/config/Config.h"
 #include "src/database/object/NetworkDevice.h"
+#include "AppUtils.h"
+#include "CommunicationBridge.h"
+#include "GThread.h"
+#include <QtCore/QJsonObject>
+#include <QHostAddress>
 
 class NetworkDeviceLoader {
 public:
-    static DeviceConnection *processConnection(NetworkDevice *device, QString ipAddress);
+    static DeviceConnection *processConnection(NetworkDevice *device, const QHostAddress &hostAddress);
 
     static void processConnection(NetworkDevice *device, DeviceConnection *connection);
 
     static void loadAsynchronously(QObject *sender,
-                                   const QString &ipAddress,
+                                   const QHostAddress &hostAddress,
                                    const std::function<void(NetworkDevice *)> &listener);
 
-    static NetworkDevice *load(QObject *sender, const QString &ipAddress);
+    static NetworkDevice *load(QObject *sender, const QHostAddress &hostAddress);
 
     static NetworkDevice *loadFrom(QJsonObject jsonIndex);
 };

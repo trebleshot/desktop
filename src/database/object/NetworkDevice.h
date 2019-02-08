@@ -5,7 +5,7 @@
 #ifndef TREBLESHOT_NETWORKDEVICE_H
 #define TREBLESHOT_NETWORKDEVICE_H
 
-
+#include <QtNetwork/QHostAddress>
 #include <QtCore/QString>
 #include <src/database/AccessDatabase.h>
 
@@ -39,15 +39,15 @@ public:
 class DeviceConnection : public DatabaseObject {
 public:
     QString adapterName;
-    QString ipAddress;
+    QHostAddress hostAddress;
     QString deviceId;
     clock_t lastCheckedDate;
 
     explicit DeviceConnection(QObject *parent = nullptr);
 
-    explicit DeviceConnection(QString deviceId, QString adapterName, QObject *parent = nullptr);
+    explicit DeviceConnection(const QString &deviceId, const QString &adapterName, QObject *parent = nullptr);
 
-    explicit DeviceConnection(QString ipAddress, QObject *parent = nullptr);
+    explicit DeviceConnection(const QHostAddress &hostAddress, QObject *parent = nullptr);
 
     SqlSelection *getWhere() override;
 

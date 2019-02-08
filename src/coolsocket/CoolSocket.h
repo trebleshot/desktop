@@ -196,7 +196,7 @@ namespace CoolSocket {
         }
 
         static ActiveConnection *openConnection(const QObject *sender,
-                                                const QString &hostName,
+                                                const QHostAddress &hostName,
                                                 quint16 port,
                                                 int timeoutMSeconds = 3000);
     };

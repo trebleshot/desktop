@@ -58,7 +58,7 @@ namespace AccessDatabaseStructure {
     const QString FIELD_DEVICES_TMPSECUREKEY = "tmpSecureKey";
 
     const QString TABLE_DEVICECONNECTION = "deviceConnection";
-    const QString FIELD_DEVICECONNECTION_IPADDRESS = "ipAddress";
+    const QString FIELD_DEVICECONNECTION_IPADDRESS = "hostAddress";
     const QString FIELD_DEVICECONNECTION_DEVICEID = "deviceId";
     const QString FIELD_DEVICECONNECTION_ADAPTERNAME = "adapterName";
     const QString FIELD_DEVICECONNECTION_LASTCHECKEDDATE = "lastCheckedDate";
@@ -189,6 +189,11 @@ public slots:
 
     bool contains(DatabaseObject *dbObject);
 
+    void doSynchronized(const std::function<void(AccessDatabase *)> &listener)
+    {
+        listener(this);
+    }
+
     bool insert(DatabaseObject *dbObject);
 
     bool publish(DatabaseObject *dbObject);
@@ -216,17 +221,31 @@ public:
             : QObject(parent)
     {
         connect(this, &AccessDatabaseSignaller::contains, db, &AccessDatabase::contains, Qt::BlockingQueuedConnection);
+        connect(this, &AccessDatabaseSignaller::doNonDirect, db, &AccessDatabase::doSynchronized);
+        connect(this, &AccessDatabaseSignaller::doSynchronized, db, &AccessDatabase::doSynchronized,
+                Qt::BlockingQueuedConnection);
         connect(this, &AccessDatabaseSignaller::insert, db, &AccessDatabase::insert, Qt::BlockingQueuedConnection);
         connect(this, &AccessDatabaseSignaller::publish, db, &AccessDatabase::publish, Qt::BlockingQueuedConnection);
-        connect(this, &AccessDatabaseSignaller::reconstruct, db, &AccessDatabase::reconstructRemote, Qt::BlockingQueuedConnection);
+        connect(this, &AccessDatabaseSignaller::reconstruct, db, &AccessDatabase::reconstructRemote,
+                Qt::BlockingQueuedConnection);
         connect(this, SIGNAL(remove(SqlSelection * )), db, SLOT(remove(SqlSelection * )), Qt::BlockingQueuedConnection);
-        connect(this, SIGNAL(remove(DatabaseObject * )), db, SLOT(remove(DatabaseObject * )), Qt::BlockingQueuedConnection);
+        connect(this, SIGNAL(remove(DatabaseObject * )), db, SLOT(remove(DatabaseObject * )),
+                Qt::BlockingQueuedConnection);
         connect(this, &AccessDatabaseSignaller::update, db, &AccessDatabase::update, Qt::BlockingQueuedConnection);
+    }
+
+    void operator<<(const std::function<void(AccessDatabase *)> &listener)
+    {
+        emit doSynchronized(listener);
     }
 
 signals:
 
     bool contains(DatabaseObject *dbObject);
+
+    void doNonDirect(const std::function<void(AccessDatabase *)> &listener);
+
+    void doSynchronized(const std::function<void(AccessDatabase *)> &listener);
 
     bool insert(DatabaseObject *dbObject);
 

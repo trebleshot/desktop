@@ -9,7 +9,7 @@ CoolSocket::ActiveConnection *
 CommunicationBridge::communicate(NetworkDevice *targetDevice, DeviceConnection *targetConnection)
 {
     CoolSocket::ActiveConnection *connection
-            = connectWithHandshake(targetConnection->ipAddress, false);
+            = connectWithHandshake(targetConnection->hostAddress, false);
 
     communicate(connection, targetDevice);
 
@@ -23,21 +23,21 @@ CoolSocket::ActiveConnection *CommunicationBridge::communicate(
     return connection;
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::connect(const QString &ipAddress)
+CoolSocket::ActiveConnection *CommunicationBridge::connect(const QHostAddress &hostAddress)
 {
-    return Client::openConnection(this, ipAddress, PORT_COMMUNICATION_DEFAULT,
+    return Client::openConnection(this, hostAddress, PORT_COMMUNICATION_DEFAULT,
                                   PORT_COMMUNICATION_DEFAULT);
 }
 
 CoolSocket::ActiveConnection *CommunicationBridge::connect(DeviceConnection *connection)
 {
-    return connect(connection->ipAddress);
+    return connect(connection->hostAddress);
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::connectWithHandshake(const QString &ipAddress,
+CoolSocket::ActiveConnection *CommunicationBridge::connectWithHandshake(const QHostAddress &hostAddress,
                                                                         bool handshakeOnly)
 {
-    return handshake(connect(ipAddress), handshakeOnly);
+    return handshake(connect(hostAddress), handshakeOnly);
 }
 
 NetworkDevice *CommunicationBridge::getDevice()
@@ -66,9 +66,9 @@ CoolSocket::ActiveConnection *CommunicationBridge::handshake(
     return connection;
 }
 
-NetworkDevice *CommunicationBridge::loadDevice(const QString &ipAddress)
+NetworkDevice *CommunicationBridge::loadDevice(const QHostAddress &hostAddress)
 {
-    return loadDevice(connectWithHandshake(ipAddress, true));
+    return loadDevice(connectWithHandshake(hostAddress, true));
 }
 
 NetworkDevice *CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *connection)
@@ -101,7 +101,7 @@ NetworkDevice *CommunicationBridge::updateDeviceIfOkay(
     DeviceConnection *connection
             = NetworkDeviceLoader::processConnection(loadedDevice, activeConnection
                     ->getSocket()
-                    ->localAddress().toString());
+                    ->localAddress());
 
     if (device->deviceId != loadedDevice->deviceId)
         throw exception();

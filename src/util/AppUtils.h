@@ -14,11 +14,12 @@
 
 class AppUtils {
 public:
-    static void applyAdapterName(DeviceConnection *connection);
+    static bool applyAdapterName(DeviceConnection *connection);
 
     static void applyDeviceToJSON(QJsonObject &object);
 
     static AccessDatabase *getDatabase();
+
     static AccessDatabaseSignaller *getDatabaseSignaller();
 
     static QSettings &getDefaultSettings();
@@ -27,7 +28,7 @@ public:
 
     static NetworkDevice *getLocalDevice();
 
-    static AccessDatabase* newDatabaseInstance(QObject* parent = nullptr);
+    static AccessDatabase *newDatabaseInstance(QObject *parent = nullptr);
 };
 
 

@@ -1,3 +1,4 @@
+#include <QtGui/QDesktopServices>
 #include "MainWindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -22,12 +23,6 @@ MainWindow::MainWindow(QWidget *parent)
     } else {
         connect(m_commServer, &CoolSocket::Server::serverStarted, [this]() {
             m_ui->label->setText(QString("TrebleShot is ready to accept files"));
-
-            NetworkDeviceLoader::loadAsynchronously(this, "127.0.0.1", [](NetworkDevice *device) {
-                if (device != nullptr)
-                    qDebug() << "Device is" << device->nickname;
-            });
-
             QObject::connect(m_commServer, &CommunicationServer::textReceived,
                              this, &MainWindow::showReceivedText);
         });
@@ -87,7 +82,7 @@ void MainWindow::about()
     QPushButton *buttonMoreInfo = about->addButton(QString("More info"), QMessageBox::ButtonRole::ActionRole);
 
     connect(buttonMoreInfo, &QPushButton::pressed, []() {
-        qDebug() << "Works like a charm";
+        QDesktopServices::openUrl(QUrl(URI_APP_HOME));
     });
 
     about->show();

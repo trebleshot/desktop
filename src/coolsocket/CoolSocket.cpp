@@ -215,7 +215,7 @@ namespace CoolSocket {
     }
 
     ActiveConnection *Client::openConnection(const QObject *sender,
-                                             const QString &hostName,
+                                             const QHostAddress &hostName,
                                              quint16 port,
                                              int timeoutMSeconds)
     {

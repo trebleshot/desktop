@@ -10,7 +10,7 @@
 #include <QtCore/QJsonObject>
 #include "AppUtils.h"
 
-void AppUtils::applyAdapterName(DeviceConnection *connection)
+bool AppUtils::applyAdapterName(DeviceConnection *connection)
 {
     QNetworkConfigurationManager manager;
 
@@ -19,7 +19,7 @@ void AppUtils::applyAdapterName(DeviceConnection *connection)
 
     for (const QNetworkConfiguration &config : activeConfigurations) {
         QNetworkSession session(config);
-        QString interfaceName(session.interface().name());
+        const QString &interfaceName(session.interface().name());
 
         for (const QNetworkAddressEntry &address : session.interface().addressEntries()) {
             QHostAddress currentHostAddress = address.ip();
@@ -27,17 +27,24 @@ void AppUtils::applyAdapterName(DeviceConnection *connection)
             if (currentHostAddress.toIPv4Address() <= 0)
                 continue;
 
+            qDebug() << "Range:"
+                     << address.broadcast().toIPv4Address() - 255
+                     << address.broadcast().toIPv4Address();
+
+            /*
             QString ipV4Address = currentHostAddress.toString();
 
             if (ipV4Address.left(ipV4Address.lastIndexOf("."))
-                == connection->ipAddress.left(connection->ipAddress.lastIndexOf("."))) {
+                == connection->hostAddress.left(connection->hostAddress.lastIndexOf("."))) {
                 connection->adapterName = interfaceName;
-                return;
-            }
+                return true;
+            }*/
         }
     }
 
-    connection->adapterName = KEYWORD_UNKNOWN_INTERFACE;
+    connection->adapterName = nullptr;
+
+    return false;
 }
 
 void AppUtils::applyDeviceToJSON(QJsonObject &object)

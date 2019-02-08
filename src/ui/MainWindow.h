@@ -25,13 +25,15 @@ namespace Ui {
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
+    Ui::MainWindow *m_ui;
+    CommunicationServer *m_commServer;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
     ~MainWindow() override;
 
-public Q_SLOTS:
+public slots:
 
     void about();
 
@@ -43,9 +45,6 @@ public Q_SLOTS:
 
     void transferItemActivated(QModelIndex modelIndex);
 
-private:
-    Ui::MainWindow *m_ui;
-    CommunicationServer *m_commServer;
 };
 
 #endif // MAINWINDOW_H

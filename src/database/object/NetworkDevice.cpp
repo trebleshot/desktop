@@ -1,7 +1,6 @@
 //
 // Created by veli on 9/25/18.
 //
-
 #include "NetworkDevice.h"
 
 NetworkDevice::NetworkDevice(const QString &deviceId, QObject *parent)
@@ -62,17 +61,17 @@ DeviceConnection::DeviceConnection(QObject *parent) : DatabaseObject(parent)
 
 }
 
-DeviceConnection::DeviceConnection(QString deviceId, QString adapterName, QObject *parent)
+DeviceConnection::DeviceConnection(const QString &deviceId, const QString &adapterName, QObject *parent)
         : DatabaseObject(parent)
 {
-    this->deviceId = std::move(deviceId);
-    this->adapterName = std::move(adapterName);
+    this->deviceId =  deviceId;
+    this->adapterName =adapterName;
 }
 
-DeviceConnection::DeviceConnection(QString ipAddress, QObject *parent)
+DeviceConnection::DeviceConnection(const QHostAddress &hostAddress, QObject *parent)
         : DatabaseObject(parent)
 {
-    this->ipAddress = std::move(ipAddress);
+    this->hostAddress = hostAddress;
 }
 
 SqlSelection *DeviceConnection::getWhere()
@@ -80,16 +79,18 @@ SqlSelection *DeviceConnection::getWhere()
     auto selection = (new SqlSelection)
             ->setTableName(AccessDatabaseStructure::TABLE_DEVICECONNECTION);
 
-    if (ipAddress == nullptr) {
-        selection->setWhere(QString::asprintf("`%s` = ? AND `%s` = ?",
-                                              AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID.toStdString().c_str(),
-                                              AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME.toStdString().c_str()));
+    if (hostAddress.isNull()) {
+        selection->setWhere(QString("`%1` = ? AND `%2` = ?")
+                                    .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID)
+                                    .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME));
+
         selection->whereArgs << QVariant(this->deviceId)
                              << QVariant(this->adapterName);
     } else {
-        selection->setWhere(QString::asprintf("`%s` = ?", AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS.toStdString().c_str()));
+        selection->setWhere(QString("`%1` = ?")
+                                    .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS));
 
-        selection->whereArgs << QVariant(this->ipAddress);
+        selection->whereArgs << QVariant(this->hostAddress.toString());
     }
 
     return selection;
@@ -101,7 +102,7 @@ QSqlRecord DeviceConnection::getValues(AccessDatabase *db)
 
     record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID, QVariant(deviceId));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME, QVariant(adapterName));
-    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS, QVariant(ipAddress));
+    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS, QVariant(hostAddress.toString()));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant((long long) lastCheckedDate));
 
     return record;
@@ -111,6 +112,6 @@ void DeviceConnection::onGeneratingValues(QSqlRecord record)
 {
     this->deviceId = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID).toString();
     this->adapterName = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME).toString();
-    this->ipAddress = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS).toString();
+    this->hostAddress = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS).toString();
     this->lastCheckedDate = static_cast<clock_t>(record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE).toULongLong());
 }
