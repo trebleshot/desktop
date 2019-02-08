@@ -6,6 +6,17 @@
 #include "src/coolsocket/CoolSocket.h"
 #include <QMainWindow>
 #include <iostream>
+#include "ui_MainWindow.h"
+
+#include <QDesktopWidget>
+#include <QKeyEvent>
+#include <QMessageBox>
+#include <QSqlDriver>
+#include <src/dialog/WelcomeDialog.h>
+#include <src/model/TransferGroupListModel.h>
+#include <src/util/NetworkDeviceLoader.h>
+#include <QtWidgets/QAbstractButton>
+#include <QPushButton>
 
 namespace Ui {
     class MainWindow;

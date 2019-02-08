@@ -14,17 +14,16 @@
 
 class TransferGroupListModel
         : public QAbstractListModel {
-
-private:
     QList<TransferGroup *> *m_list;
-    QList<QString> m_columnNames{
-            tr("Devices"),
-            tr("Size"),
-            tr("Status"),
-            tr("Date"),
-    };
 
 public:
+    enum ColumnNames {
+        Devices,
+        Size,
+        Status,
+        Date
+    };
+
     explicit TransferGroupListModel(QObject *parent = nullptr)
             : QAbstractListModel(parent)
     {
@@ -43,7 +42,7 @@ public:
 
     int columnCount(const QModelIndex &parent) const override
     {
-        return m_columnNames.size();
+        return sizeof(ColumnNames);
     }
 
     int rowCount(const QModelIndex &parent) const override
@@ -56,9 +55,20 @@ public:
         if (role != Qt::DisplayRole)
             return QVariant();
 
-        if (orientation == Qt::Horizontal)
-            return m_columnNames[section];
-        else
+        if (orientation == Qt::Horizontal) {
+            switch (section) {
+                case ColumnNames::Status:
+                    return tr("Status");
+                case ColumnNames::Devices:
+                    return tr("Devices");
+                case ColumnNames::Date:
+                    return tr("Date");
+                case ColumnNames::Size:
+                    return tr("Size");
+                default:
+                    return QString("?");
+            }
+        } else
             return QString("%1").arg(section);
     }
 
@@ -68,7 +78,7 @@ public:
             const TransferGroup *currentGroup = m_list->at(index.row());
 
             switch (index.column()) {
-                case 0: {
+                case ColumnNames::Devices: {
                     auto *selection = new SqlSelection();
 
                     selection->setTableName(AccessDatabaseStructure::TABLE_TRANSFERASSIGNEE)
@@ -103,11 +113,11 @@ public:
 
                     return devicesString;
                 }
-                case 1: {
+                case ColumnNames::Status: {
 
                 }
-                case 2:
-                case 3:
+                case ColumnNames::Size:
+                case ColumnNames::Date:
                     return QDateTime::fromMSecsSinceEpoch(currentGroup->dateCreated)
                             .toString(Qt::DateFormat::SystemLocaleShortDate);
                 default:

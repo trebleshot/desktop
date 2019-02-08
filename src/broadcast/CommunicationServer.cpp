@@ -77,7 +77,9 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                     if (responseJSON.contains(KEYWORD_FILES_INDEX)
                         && responseJSON.contains(KEYWORD_TRANSFER_GROUP_ID)) {
                         const QJsonArray &filesIndex = responseJSON.value(KEYWORD_FILES_INDEX).toArray();
-                        const int &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID).toInt(-1);
+                        const ulong &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID)
+                                .toString()
+                                .toULong();
 
                         result = true;
 
@@ -96,7 +98,9 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                             for (int iterator = 0; iterator < filesIndex.size(); iterator++) {
                                 const QJsonObject &transferIndex = filesIndex.at(iterator).toObject();
                                 auto *transferObject
-                                        = new TransferObject(transferIndex.value(KEYWORD_TRANSFER_REQUEST_ID).toInt(-1),
+                                        = new TransferObject(transferIndex.value(KEYWORD_TRANSFER_REQUEST_ID)
+                                                                     .toString()
+                                                                     .toULong(),
                                                              device->deviceId,
                                                              TransferObject::Incoming,
                                                              transferGroup);
@@ -107,7 +111,9 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                         .arg(transferObject->requestId)
                                         .arg(transferObject->deviceId);
                                 transferObject->fileMimeType = transferIndex.value(KEYWORD_INDEX_FILE_MIME).toString();
-                                transferObject->fileSize = transferIndex.value(KEYWORD_INDEX_FILE_SIZE).toInt(-1);
+                                transferObject->fileSize = transferIndex.value(KEYWORD_INDEX_FILE_SIZE)
+                                        .toString()
+                                        .toULong();
 
                                 if (transferIndex.contains(KEYWORD_INDEX_DIRECTORY))
                                     transferObject->directory = transferIndex.value(KEYWORD_INDEX_DIRECTORY).toString();

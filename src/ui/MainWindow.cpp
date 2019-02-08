@@ -1,13 +1,4 @@
 #include "MainWindow.h"
-#include "ui_MainWindow.h"
-
-#include <QDesktopWidget>
-#include <QKeyEvent>
-#include <QMessageBox>
-#include <QSqlDriver>
-#include <src/dialog/WelcomeDialog.h>
-#include <src/model/TransferGroupListModel.h>
-#include <src/util/NetworkDeviceLoader.h>
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_ui(new Ui::MainWindow), m_commServer(new CommunicationServer)
@@ -62,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
-    adjustSize();
+    //adjustSize();
     move((availableGeometry.width() - width()) / 2, (availableGeometry.height() - height()) / 2);
 }
 
@@ -89,6 +80,13 @@ void MainWindow::about()
 
     about->setWindowTitle(QString("About TrebleShot"));
     about->setText(QString("TrebleShot is a cross platform file transferring tool."));
+
+    about->addButton(QMessageBox::StandardButton::Close);
+    QPushButton *buttonMoreInfo = about->addButton(QString("More info"), QMessageBox::ButtonRole::NoRole);
+
+    connect(buttonMoreInfo, &QPushButton::pressed, []() {
+        qDebug() << "Works like a charm";
+    });
 
     about->show();
 }

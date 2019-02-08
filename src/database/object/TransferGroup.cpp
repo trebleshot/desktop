@@ -6,7 +6,7 @@
 
 #include "TransferGroup.h"
 
-TransferGroup::TransferGroup(int groupId, QObject *parent)
+TransferGroup::TransferGroup(ulong groupId, QObject *parent)
         : DatabaseObject(parent)
 {
     this->groupId = groupId;
@@ -38,12 +38,12 @@ QSqlRecord TransferGroup::getValues(AccessDatabase *db)
 
 void TransferGroup::onGeneratingValues(QSqlRecord record)
 {
-    groupId = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID).value().toInt();
+    groupId = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID).value().toString().toULong();
     dateCreated = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_DATECREATED).value().toULongLong();
     savePath = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_SAVEPATH).value().toString();
 }
 
-TransferAssignee::TransferAssignee(int groupId, QString deviceId, QString connectionAdapter, QObject *parent)
+TransferAssignee::TransferAssignee(ulong groupId, QString deviceId, QString connectionAdapter, QObject *parent)
         : DatabaseObject(parent)
 {
     this->groupId = groupId;

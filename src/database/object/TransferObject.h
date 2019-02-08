@@ -24,13 +24,13 @@ public:
     QString deviceId;
     size_t fileSize;
     size_t skippedBytes;
-    int requestId;
-    int groupId;
+    qulonglong requestId;
+    qulonglong groupId;
     int accessPort;
     Type type;
     Flag flag;
 
-    explicit TransferObject(int requestId = -1, const QString &deviceId = nullptr,
+    explicit TransferObject(ulong requestId = 0, const QString &deviceId = nullptr,
                             const Type &type = Type::Incoming, QObject *parent = nullptr);
 
     bool isDivisionObject();

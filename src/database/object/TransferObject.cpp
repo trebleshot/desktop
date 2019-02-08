@@ -1,6 +1,6 @@
 #include "TransferObject.h"
 
-TransferObject::TransferObject(int requestId, const QString &deviceId, const Type &type, QObject *parent)
+TransferObject::TransferObject(ulong requestId, const QString &deviceId, const Type &type, QObject *parent)
         : DatabaseObject(parent)
 {
     this->requestId = requestId;
@@ -56,9 +56,9 @@ void TransferObject::onGeneratingValues(QSqlRecord record)
     file = record.field(AccessDatabaseStructure::FIELD_TRANSFER_FILE).value().toString();
     directory = record.field(AccessDatabaseStructure::FIELD_TRANSFER_DIRECTORY).value().toString();
     flag = (Flag) record.field(AccessDatabaseStructure::FIELD_TRANSFER_FLAG).value().toInt();
-    groupId = record.field(AccessDatabaseStructure::FIELD_TRANSFER_GROUPID).value().toInt();
+    groupId = record.field(AccessDatabaseStructure::FIELD_TRANSFER_GROUPID).value().toULongLong();
     deviceId = record.field(AccessDatabaseStructure::FIELD_TRANSFER_DEVICEID).value().toString();
-    requestId = record.field(AccessDatabaseStructure::FIELD_TRANSFER_ID).value().toInt();
+    requestId = record.field(AccessDatabaseStructure::FIELD_TRANSFER_ID).value().toULongLong();
     fileMimeType = record.field(AccessDatabaseStructure::FIELD_TRANSFER_MIME).value().toString();
     friendlyName = record.field(AccessDatabaseStructure::FIELD_TRANSFER_NAME).value().toString();
     fileSize = record.field(AccessDatabaseStructure::FIELD_TRANSFER_SIZE).value().toUInt();
