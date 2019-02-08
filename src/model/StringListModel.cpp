@@ -2,7 +2,7 @@
 
 int StringListModel::rowCount(const QModelIndex &parent) const
 {
-    return stringList.count();
+    return m_stringList.count();
 }
 
 QVariant StringListModel::data(const QModelIndex &index, int role) const
@@ -10,11 +10,11 @@ QVariant StringListModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (index.row() >= stringList.size())
+    if (index.row() >= m_stringList.size())
         return QVariant();
 
     if (role == Qt::DisplayRole)
-        return stringList.at(index.row());
+        return m_stringList.at(index.row());
     else
         return QVariant();
 }

@@ -54,7 +54,7 @@ void NetworkDeviceLoader::loadAsynchronously(QObject *sender,
         listener(load(sender, ipAddress));
     });
 
-    QObject::connect(testThread, &QThread::destroyed, testThread, &QThread::deleteLater);
+    QObject::connect(testThread, &QThread::finished, testThread, &QThread::deleteLater);
 
     testThread->start();
 }

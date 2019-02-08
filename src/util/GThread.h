@@ -5,8 +5,8 @@
 #ifndef TREBLESHOT_GTHREAD_H
 #define TREBLESHOT_GTHREAD_H
 
-
 #include <QtCore/QThread>
+#include <QDebug>
 
 class GThread : public QThread {
 Q_OBJECT

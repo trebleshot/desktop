@@ -10,9 +10,9 @@
 #include <src/util/NetworkDeviceLoader.h>
 
 MainWindow::MainWindow(QWidget *parent)
-        : QMainWindow(parent), ui(new Ui::MainWindow), commServer(new CommunicationServer)
+        : QMainWindow(parent), m_ui(new Ui::MainWindow), m_commServer(new CommunicationServer)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 
     setWindowTitle(QString("%1 - %2")
                            .arg(QApplication::applicationName())
@@ -29,15 +29,15 @@ MainWindow::MainWindow(QWidget *parent)
 
         connect(errorMessage, SIGNAL(finished(int)), this, SLOT(failureDialogFinished(int)));
     } else {
-        bool serverStarted = commServer->startEnsured(5000);
+        bool serverStarted = m_commServer->startEnsured(5000);
         auto *model = new TransferGroupListModel();
 
-        connect(ui->tableView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
-        connect(ui->actionAbout_TrebleShot, SIGNAL(triggered(bool)), this, SLOT(about()));
-        connect(ui->actionAbout_Qt, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
+        connect(m_ui->tableView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
+        connect(m_ui->actionAbout_TrebleShot, SIGNAL(triggered(bool)), this, SLOT(about()));
+        connect(m_ui->actionAbout_Qt, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
 
-        ui->tableView->setModel(model);
-        ui->label->setText(serverStarted
+        m_ui->tableView->setModel(model);
+        m_ui->label->setText(serverStarted
                            ? QString("TrebleShot is ready to accept files")
                            : QString("TrebleShot will not receive files"));
 
@@ -70,8 +70,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete ui;
-    delete commServer;
+    delete m_ui;
+    delete m_commServer;
 }
 
 void MainWindow::failureDialogFinished(int state)

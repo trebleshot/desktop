@@ -1,5 +1,7 @@
 #include <utility>
 
+#include <utility>
+
 #ifndef STRINGITEMMODEL_H
 #define STRINGITEMMODEL_H
 
@@ -12,7 +14,7 @@ Q_OBJECT
 
 public:
     explicit StringListModel(QStringList strings, QObject *parent = nullptr)
-            : QAbstractListModel(parent), stringList(std::move(strings))
+            : QAbstractListModel(parent), m_stringList(std::move(strings))
     {
     }
 
@@ -24,7 +26,7 @@ public:
                         int role = Qt::DisplayRole) const;
 
 private:
-    QStringList stringList;
+    QStringList m_stringList;
 };
 
 #endif // STRINGITEMMODEL_H

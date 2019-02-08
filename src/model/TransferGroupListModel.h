@@ -80,7 +80,7 @@ public:
 
                     for (const TransferAssignee *assignee : assigneeList->toStdList()) {
                         try {
-                            NetworkDevice *device = new NetworkDevice(assignee->deviceId);
+                            auto *device = new NetworkDevice(assignee->deviceId);
 
                             AppUtils::getDatabase()->reconstruct(device);
 

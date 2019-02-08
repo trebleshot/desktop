@@ -36,15 +36,15 @@ namespace CoolSocket {
 
     class Server : public QObject {
     Q_OBJECT
-        quint16 port;
-        QHostAddress hostAddress;
-        QPointer<ServerWorker> worker;
-        QList<RequestHandler *> ongoingTasks;
+        quint16 m_port;
+        QHostAddress m_hostAddress;
+        QPointer<ServerWorker> m_worker;
+        QList<RequestHandler *> m_ongoingTasks;
 
     protected:
         void setWorker(ServerWorker *worker)
         {
-            this->worker = worker;
+            this->m_worker = worker;
         }
 
     public:
@@ -61,23 +61,23 @@ namespace CoolSocket {
         friend class RequestHandler;
 
         QHostAddress getHostAddress()
-        { return hostAddress; }
+        { return m_hostAddress; }
 
         ServerWorker *getWorker()
-        { return worker; }
+        { return m_worker; }
 
         quint16 getPort()
-        { return port; }
+        { return m_port; }
 
         bool isServing();
 
         void setHostAddress(const QHostAddress &hostAddress)
         {
-            this->hostAddress = hostAddress;
+            this->m_hostAddress = hostAddress;
         }
 
         void setPort(quint16 port)
-        { this->port = port; }
+        { this->m_port = port; }
 
         bool start(int blockingTime = -1);
 
@@ -94,36 +94,36 @@ namespace CoolSocket {
 
     class ActiveConnection : public QObject {
     Q_OBJECT
-        QTcpSocket *activeSocket;
-        int timeout = 2000;
+        QTcpSocket *m_activeSocket;
+        int m_timeout = 2000;
 
     public:
         explicit ActiveConnection(QTcpSocket *tcpServer, int msecTimeout = 2000,
                                   QObject *parent = nullptr)
                 : QObject(parent)
         {
-            this->activeSocket = tcpServer;
-            this->timeout = msecTimeout;
+            this->m_activeSocket = tcpServer;
+            this->m_timeout = msecTimeout;
         }
 
         ~ActiveConnection() override
         {
-            if (this->activeSocket->isOpen())
-                this->activeSocket->close();
+            if (this->m_activeSocket->isOpen())
+                this->m_activeSocket->close();
 
-            delete activeSocket;
+            delete m_activeSocket;
         }
 
         QTcpSocket *getSocket()
         {
-            return activeSocket;
+            return m_activeSocket;
         }
 
         int getTimeout()
-        { return timeout; }
+        { return m_timeout; }
 
         void setTimeout(int msecs)
-        { this->timeout = msecs; }
+        { this->m_timeout = msecs; }
 
         void reply(const char *reply);
 
@@ -140,9 +140,9 @@ namespace CoolSocket {
 
     class ServerWorker : public QThread {
     Q_OBJECT
-        QTcpServer *tcpServer;
-        Server *server;
-        bool serverListening = false;
+        QTcpServer *m_tcpServer;
+        Server *m_server;
+        bool m_serverListening = false;
 
     public:
         explicit ServerWorker(Server *server, QObject *parent = nullptr);
@@ -152,11 +152,11 @@ namespace CoolSocket {
 
         bool isServing()
         {
-            return isRunning() && serverListening;
+            return isRunning() && m_serverListening;
         }
 
         QTcpServer *getTcpServer()
-        { return tcpServer; }
+        { return m_tcpServer; }
 
         void setTcpServer(QTcpServer *server);
 
@@ -166,15 +166,15 @@ namespace CoolSocket {
 
     class RequestHandler : public QThread {
     Q_OBJECT
-        Server *server;
-        ActiveConnection *connection;
+        Server *m_server;
+        ActiveConnection *m_connection;
 
     public:
         RequestHandler(Server *server, ActiveConnection *connection, QObject *parent = nullptr)
                 : QThread(parent)
         {
-            this->server = server;
-            this->connection = connection;
+            this->m_server = server;
+            this->m_connection = connection;
         }
 
     protected:

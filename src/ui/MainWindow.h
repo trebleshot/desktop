@@ -30,8 +30,8 @@ public Q_SLOTS:
     void transferItemActivated(QModelIndex modelIndex);
 
 private:
-    Ui::MainWindow *ui;
-    CommunicationServer *commServer;
+    Ui::MainWindow *m_ui;
+    CommunicationServer *m_commServer;
 };
 
 #endif // MAINWINDOW_H

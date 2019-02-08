@@ -73,14 +73,14 @@ namespace CoolSocket {
 
         time_t startTime = clock();
 
-        activeSocket->write(QJsonDocument(headerIndex).toJson());
-        activeSocket->write(COOLSOCKET_HEADER_DIVIDER);
-        activeSocket->flush();
+        m_activeSocket->write(QJsonDocument(headerIndex).toJson());
+        m_activeSocket->write(COOLSOCKET_HEADER_DIVIDER);
+        m_activeSocket->flush();
 
-        activeSocket->write(replyImpl);
-        activeSocket->flush();
+        m_activeSocket->write(replyImpl);
+        m_activeSocket->flush();
 
-        while (activeSocket->bytesToWrite() != 0) {
+        while (m_activeSocket->bytesToWrite() != 0) {
             if (getTimeout() >= 0 && (clock() - startTime) > getTimeout())
                 throw exception();
         }
@@ -99,10 +99,10 @@ namespace CoolSocket {
 
         time_t lastDataAvailable = clock();
 
-        while (activeSocket->isReadable()) {
+        while (m_activeSocket->isReadable()) {
             if (headerPosition == string::npos) {
-                if (activeSocket->waitForReadyRead(2000)) {
-                    headerData->append(activeSocket->readAll());
+                if (m_activeSocket->waitForReadyRead(2000)) {
+                    headerData->append(m_activeSocket->readAll());
                     lastDataAvailable = clock();
                 }
 
@@ -135,8 +135,8 @@ namespace CoolSocket {
                     throw exception();
                 }
             } else {
-                if (activeSocket->waitForReadyRead(2000)) {
-                    contentData->append(activeSocket->readAll());
+                if (m_activeSocket->waitForReadyRead(2000)) {
+                    contentData->append(m_activeSocket->readAll());
                     lastDataAvailable = clock();
                 }
 
@@ -158,52 +158,52 @@ namespace CoolSocket {
     ServerWorker::ServerWorker(Server *server, QObject *parent)
             : QThread(parent)
     {
-        this->server = server;
+        this->m_server = server;
         this->setTcpServer(new QTcpServer());
     }
 
     void ServerWorker::setTcpServer(QTcpServer *server)
     {
-        this->tcpServer = server;
+        this->m_tcpServer = server;
     }
 
     void ServerWorker::run()
     {
         this->setTcpServer(new QTcpServer());
 
-        if (getTcpServer()->listen(server->getHostAddress(), server->getPort())) {
+        if (getTcpServer()->listen(m_server->getHostAddress(), m_server->getPort())) {
             while (!isInterruptionRequested() && getTcpServer()->isListening()) {
-                this->serverListening = true;
+                this->m_serverListening = true;
 
                 getTcpServer()->waitForNewConnection(2000);
 
                 if (getTcpServer()->hasPendingConnections()) {
                     QTcpSocket *socket = getTcpServer()->nextPendingConnection();
                     auto *activeConnection = new ActiveConnection(socket);
-                    auto *handler = new RequestHandler(server, activeConnection);
+                    auto *handler = new RequestHandler(m_server, activeConnection);
 
                     handler->start();
                 }
             }
 
-            this->serverListening = false;
+            this->m_serverListening = false;
             getTcpServer()->close();
         }
     }
 
     void RequestHandler::run()
     {
-        server->ongoingTasks.append(this);
+        m_server->m_ongoingTasks.append(this);
 
-        connect(this, SIGNAL(finished()), this->connection->getSocket(), SLOT(deleteLater()));
+        connect(this, SIGNAL(finished()), this->m_connection->getSocket(), SLOT(deleteLater()));
 
-        this->connection->getSocket()->waitForConnected(2000);
-        emit server->clientConnected(this->connection);
-        server->connected(this->connection);
+        this->m_connection->getSocket()->waitForConnected(2000);
+        emit m_server->clientConnected(this->m_connection);
+        m_server->connected(this->m_connection);
 
-        server->ongoingTasks.removeOne(this);
+        m_server->m_ongoingTasks.removeOne(this);
 
-        delete this->connection;
+        delete this->m_connection;
     }
 
     ActiveConnection *Client::openConnection(const QObject *sender,
