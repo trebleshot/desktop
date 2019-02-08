@@ -73,7 +73,9 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
             if (!shouldContinue) {
                 replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ALLOWED);
             } else if (responseJSON.contains(KEYWORD_REQUEST)) {
-                if (responseJSON.value(KEYWORD_REQUEST) == KEYWORD_REQUEST_TRANSFER) {
+                const QJsonValue &request = responseJSON.value(KEYWORD_REQUEST);
+
+                if (request == KEYWORD_REQUEST_TRANSFER) {
                     if (responseJSON.contains(KEYWORD_FILES_INDEX)
                         && responseJSON.contains(KEYWORD_TRANSFER_GROUP_ID)) {
                         const QJsonArray &filesIndex = responseJSON.value(KEYWORD_FILES_INDEX).toArray();
@@ -95,8 +97,8 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                             gDbSignal->publish(transferGroup);
                             gDbSignal->publish(transferAssignee);
 
-                            for (int iterator = 0; iterator < filesIndex.size(); iterator++) {
-                                const QJsonObject &transferIndex = filesIndex.at(iterator).toObject();
+                            for (const auto &iterator : filesIndex) {
+                                const QJsonObject &transferIndex = iterator.toObject();
                                 auto *transferObject
                                         = new TransferObject(transferIndex.value(KEYWORD_TRANSFER_REQUEST_ID)
                                                                      .toString()
@@ -129,6 +131,36 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                             delete transferGroup;
                             delete transferAssignee;
                         }, this);
+                    }
+                } else if (request == KEYWORD_REQUEST_RESPONSE) {
+                    if (responseJSON.contains(KEYWORD_TRANSFER_GROUP_ID)) {
+                        const qulonglong &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID)
+                                .toString()
+                                .toULong();
+                        const bool isAccepted = responseJSON.value(KEYWORD_TRANSFER_IS_ACCEPTED).toBool(false);
+
+                        auto *transferGroup = new TransferGroup(groupId);
+                        auto *transferAssignee = new TransferAssignee(groupId, device->deviceId);
+
+                        if (gDbSignal->reconstruct(transferGroup)
+                            && gDbSignal->reconstruct(transferAssignee)) {
+
+                            if (!isAccepted)
+                                gDbSignal->remove(transferGroup);
+
+                            result = true;
+                        }
+
+                        delete transferGroup;
+                        delete transferAssignee;
+                    }
+                } else if (request == KEYWORD_REQUEST_CLIPBOARD) {
+                    if (responseJSON.contains(KEYWORD_TRANSFER_CLIPBOARD_TEXT)) {
+                        emit textReceived(responseJSON
+                                                  .value(KEYWORD_TRANSFER_CLIPBOARD_TEXT)
+                                                  .toString(),
+                                          device->deviceId);
+                        result = true;
                     }
                 }
             }

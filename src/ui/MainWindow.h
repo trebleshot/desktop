@@ -17,6 +17,7 @@
 #include <src/util/NetworkDeviceLoader.h>
 #include <QtWidgets/QAbstractButton>
 #include <QPushButton>
+#include <QClipboard>
 
 namespace Ui {
     class MainWindow;
@@ -37,6 +38,8 @@ public Q_SLOTS:
     void aboutQt();
 
     void failureDialogFinished(int state);
+
+    void showReceivedText(const QString &text, const QString &deviceId);
 
     void transferItemActivated(QModelIndex modelIndex);
 
