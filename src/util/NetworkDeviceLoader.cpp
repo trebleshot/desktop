@@ -1,6 +1,7 @@
 //
 // Created by veli on 9/28/18.
 //
+#include <QtSql/QSqlError>
 #include "NetworkDeviceLoader.h"
 
 DeviceConnection *NetworkDeviceLoader::processConnection(NetworkDevice *device,
@@ -16,8 +17,7 @@ DeviceConnection *NetworkDeviceLoader::processConnection(NetworkDevice *device,
 void NetworkDeviceLoader::processConnection(NetworkDevice *device,
                                             DeviceConnection *connection)
 {
-    if (AppUtils::applyAdapterName(connection)
-        || gDbSignal->reconstruct(connection))
+    if (!AppUtils::applyAdapterName(connection) && !gDbSignal->reconstruct(connection))
         connection->adapterName = KEYWORD_UNKNOWN_INTERFACE;
 
     connection->lastCheckedDate = clock();
@@ -33,10 +33,14 @@ void NetworkDeviceLoader::processConnection(NetworkDevice *device,
     sqlSelection->whereArgs << QVariant(connection->deviceId)
                             << QVariant(connection->adapterName);
 
-    qDebug() << connection->deviceId << connection->adapterName << connection->hostAddress;
+    qDebug() << connection->deviceId << connection->adapterName << connection->hostAddress.toString();
 
     gDbSignal->remove(sqlSelection);
     gDbSignal->publish(connection);
+
+    gDbSignal->doSynchronized([connection](AccessDatabase* db) {
+        qDebug() << connection->getValues(db);
+    });
 }
 
 void NetworkDeviceLoader::loadAsynchronously(QObject *sender,

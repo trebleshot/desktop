@@ -100,9 +100,9 @@ QSqlRecord DeviceConnection::getValues(AccessDatabase *db)
 {
     QSqlRecord record = AccessDatabaseStructure::gatherTableModel(db, this)->record();
 
-    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID, QVariant(deviceId));
-    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME, QVariant(adapterName));
-    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS, QVariant(hostAddress.toString()));
+    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID, deviceId);
+    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME, adapterName);
+    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS, hostAddress.toString());
     record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant((long long) lastCheckedDate));
 
     return record;
@@ -112,6 +112,6 @@ void DeviceConnection::onGeneratingValues(QSqlRecord record)
 {
     this->deviceId = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID).toString();
     this->adapterName = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME).toString();
-    this->hostAddress = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS).toString();
+    this->hostAddress = QHostAddress(record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS).toString());
     this->lastCheckedDate = static_cast<clock_t>(record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE).toULongLong());
 }

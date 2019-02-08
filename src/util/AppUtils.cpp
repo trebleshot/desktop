@@ -12,9 +12,14 @@
 
 bool AppUtils::applyAdapterName(DeviceConnection *connection)
 {
+    quint32 ipv4Address = connection->hostAddress.toIPv4Address();
+
+    if (ipv4Address <= 0)
+        return false;
+
     QNetworkConfigurationManager manager;
 
-    const QList<QNetworkConfiguration> activeConfigurations
+    const QList<QNetworkConfiguration> &activeConfigurations
             = manager.allConfigurations(QNetworkConfiguration::StateFlag::Active);
 
     for (const QNetworkConfiguration &config : activeConfigurations) {
@@ -22,17 +27,21 @@ bool AppUtils::applyAdapterName(DeviceConnection *connection)
         const QString &interfaceName(session.interface().name());
 
         for (const QNetworkAddressEntry &address : session.interface().addressEntries()) {
-            QHostAddress currentHostAddress = address.ip();
+            quint32 netmask = address.netmask().toIPv4Address();
 
-            if (currentHostAddress.toIPv4Address() <= 0)
+            qDebug() << netmask << netmask - 255 << ipv4Address;
+
+            if (netmask <= 0)
                 continue;
 
-            qDebug() << "Range:"
-                     << address.broadcast().toIPv4Address() - 255
-                     << address.broadcast().toIPv4Address();
+            // Declare as found when the IP is in range with netmask and minus 255
+            if (netmask - 255 < ipv4Address && ipv4Address <= netmask) {
+                connection->adapterName = interfaceName;
+                return true;
+            }
 
             /*
-            QString ipV4Address = currentHostAddress.toString();
+            QHostAddress currentHostAddress = address.ip();
 
             if (ipV4Address.left(ipV4Address.lastIndexOf("."))
                 == connection->hostAddress.left(connection->hostAddress.lastIndexOf("."))) {
