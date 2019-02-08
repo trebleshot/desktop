@@ -10,12 +10,12 @@
 
 class GThread : public QThread {
 Q_OBJECT
-    const std::function<void(QThread *)> m_callback;
+    const std::function<void(GThread *)> m_callback;
 
 public:
-    explicit GThread(const std::function<void(QThread *)> &function, QObject *parent = nullptr);
+    explicit GThread(const std::function<void(GThread *)> &function, QObject *parent = nullptr);
 
-    static GThread* startIndependent(const std::function<void(QThread *)> &function, QObject *parent = nullptr);
+    static GThread* startIndependent(const std::function<void(GThread *)> &function, QObject *parent = nullptr);
 
 protected:
     void run() override;

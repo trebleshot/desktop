@@ -1,9 +1,11 @@
 #include "TransferObject.h"
 
-TransferObject::TransferObject(int requestId, QObject *parent)
+TransferObject::TransferObject(int requestId, const QString &deviceId, const Type &type, QObject *parent)
         : DatabaseObject(parent)
 {
     this->requestId = requestId;
+    this->deviceId = deviceId;
+    this->type = type;
 }
 
 QSqlRecord TransferObject::getValues(AccessDatabase *db)
@@ -32,9 +34,18 @@ SqlSelection *TransferObject::getWhere()
 
     selection
             ->setTableName(AccessDatabaseStructure::TABLE_TRANSFER)
-            ->setWhere(QString::asprintf("`%s` = ?", AccessDatabaseStructure::FIELD_TRANSFER_ID.toStdString().c_str()));
+            ->setWhere(isDivisionObject()
+                       ? QString("`%1` = ? AND `%2` = ?")
+                               .arg(AccessDatabaseStructure::FIELD_TRANSFER_ID)
+                               .arg(type)
+                       : QString("`%1` = ? AND `%2` = ? AND `%3` = ?")
+                               .arg(AccessDatabaseStructure::FIELD_TRANSFER_ID)
+                               .arg(type)
+                               .arg(deviceId));
 
-    selection->whereArgs << QVariant(this->requestId);
+    selection->whereArgs << this->requestId
+                         << this->type
+                         << this->deviceId;
 
     return selection;
 }
@@ -53,4 +64,9 @@ void TransferObject::onGeneratingValues(QSqlRecord record)
     fileSize = record.field(AccessDatabaseStructure::FIELD_TRANSFER_SIZE).value().toUInt();
     skippedBytes = record.field(AccessDatabaseStructure::FIELD_TRANSFER_SKIPPEDBYTES).value().toUInt();
     type = (Type) record.field(AccessDatabaseStructure::FIELD_TRANSFER_TYPE).value().toInt();
+}
+
+bool TransferObject::isDivisionObject()
+{
+    return deviceId == nullptr;
 }

@@ -30,7 +30,10 @@ public:
     Type type;
     Flag flag;
 
-    explicit TransferObject(int requestId = -1, QObject *parent = nullptr);
+    explicit TransferObject(int requestId = -1, const QString &deviceId = nullptr,
+                            const Type &type = Type::Incoming, QObject *parent = nullptr);
+
+    bool isDivisionObject();
 
     SqlSelection *getWhere() override;
 

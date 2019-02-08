@@ -50,7 +50,7 @@ void NetworkDeviceLoader::loadAsynchronously(QObject *sender,
                                              const QString &ipAddress,
                                              const std::function<void(NetworkDevice *)> &listener)
 {
-    GThread::startIndependent([sender, ipAddress, listener](QThread *thisThread) {
+    GThread::startIndependent([sender, ipAddress, listener](GThread *thisThread) {
         listener(load(sender, ipAddress));
     });
 }
