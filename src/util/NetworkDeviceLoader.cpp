@@ -7,7 +7,7 @@
 DeviceConnection *NetworkDeviceLoader::processConnection(NetworkDevice *device,
                                                          const QHostAddress &hostAddress)
 {
-    DeviceConnection *connection = new DeviceConnection(hostAddress);
+    auto *connection = new DeviceConnection(hostAddress);
 
     processConnection(device, connection);
 
@@ -33,14 +33,8 @@ void NetworkDeviceLoader::processConnection(NetworkDevice *device,
     sqlSelection->whereArgs << QVariant(connection->deviceId)
                             << QVariant(connection->adapterName);
 
-    qDebug() << connection->deviceId << connection->adapterName << connection->hostAddress.toString();
-
     gDbSignal->remove(sqlSelection);
     gDbSignal->publish(connection);
-
-    gDbSignal->doSynchronized([connection](AccessDatabase* db) {
-        qDebug() << connection->getValues(db);
-    });
 }
 
 void NetworkDeviceLoader::loadAsynchronously(QObject *sender,

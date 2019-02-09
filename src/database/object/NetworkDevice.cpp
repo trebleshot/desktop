@@ -50,7 +50,7 @@ void NetworkDevice::onGeneratingValues(QSqlRecord record)
     this->versionName = record.value(AccessDatabaseStructure::FIELD_DEVICES_BUILDNAME).toString();
     this->versionNumber = record.value(AccessDatabaseStructure::FIELD_DEVICES_BUILDNUMBER).toInt();
     this->tmpSecureKey = record.value(AccessDatabaseStructure::FIELD_DEVICES_TMPSECUREKEY).toInt();
-    this->lastUsageTime = static_cast<clock_t>(record.value(AccessDatabaseStructure::FIELD_DEVICES_LASTUSAGETIME).toULongLong());
+    this->lastUsageTime = static_cast<clock_t>(record.value(AccessDatabaseStructure::FIELD_DEVICES_LASTUSAGETIME).toLongLong());
     this->isTrusted = record.value(AccessDatabaseStructure::FIELD_DEVICES_ISTRUSTED).toInt() == 1;
     this->isRestricted = record.value(AccessDatabaseStructure::FIELD_DEVICES_ISRESTRICTED) == 1;
     this->isLocalAddress = record.value(AccessDatabaseStructure::FIELD_DEVICES_ISLOCALADDRESS) == 1;
@@ -64,8 +64,8 @@ DeviceConnection::DeviceConnection(QObject *parent) : DatabaseObject(parent)
 DeviceConnection::DeviceConnection(const QString &deviceId, const QString &adapterName, QObject *parent)
         : DatabaseObject(parent)
 {
-    this->deviceId =  deviceId;
-    this->adapterName =adapterName;
+    this->deviceId = deviceId;
+    this->adapterName = adapterName;
 }
 
 DeviceConnection::DeviceConnection(const QHostAddress &hostAddress, QObject *parent)
@@ -113,5 +113,5 @@ void DeviceConnection::onGeneratingValues(QSqlRecord record)
     this->deviceId = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID).toString();
     this->adapterName = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME).toString();
     this->hostAddress = QHostAddress(record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS).toString());
-    this->lastCheckedDate = static_cast<clock_t>(record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE).toULongLong());
+    this->lastCheckedDate = static_cast<clock_t>(record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE).toLongLong());
 }

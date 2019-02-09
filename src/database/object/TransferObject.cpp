@@ -1,6 +1,6 @@
 #include "TransferObject.h"
 
-TransferObject::TransferObject(ulong requestId, const QString &deviceId, const Type &type, QObject *parent)
+TransferObject::TransferObject(quint32 requestId, const QString &deviceId, const Type &type, QObject *parent)
         : DatabaseObject(parent)
 {
     this->requestId = requestId;
@@ -32,16 +32,17 @@ SqlSelection *TransferObject::getWhere()
 {
     auto *selection = new SqlSelection;
 
-    selection
-            ->setTableName(AccessDatabaseStructure::TABLE_TRANSFER)
-            ->setWhere(isDivisionObject()
-                       ? QString("`%1` = ? AND `%2` = ?")
-                               .arg(AccessDatabaseStructure::FIELD_TRANSFER_ID)
-                               .arg(type)
-                       : QString("`%1` = ? AND `%2` = ? AND `%3` = ?")
-                               .arg(AccessDatabaseStructure::FIELD_TRANSFER_ID)
-                               .arg(type)
-                               .arg(deviceId));
+    if (isDivisionObject())
+        selection->setTableName(AccessDatabaseStructure::DIVIS_TRANSFER)
+                ->setWhere(QString("`%1` = ? AND `%2` = ?")
+                                   .arg(AccessDatabaseStructure::FIELD_TRANSFER_ID)
+                                   .arg(AccessDatabaseStructure::FIELD_TRANSFER_TYPE));
+    else
+        selection->setTableName(AccessDatabaseStructure::TABLE_TRANSFER)
+                ->setWhere(QString("`%1` = ? AND `%2` = ? AND `%3` = ?")
+                                   .arg(AccessDatabaseStructure::FIELD_TRANSFER_ID)
+                                   .arg(AccessDatabaseStructure::FIELD_TRANSFER_TYPE)
+                                   .arg(AccessDatabaseStructure::FIELD_TRANSFER_DEVICEID));
 
     selection->whereArgs << this->requestId
                          << this->type
@@ -56,9 +57,9 @@ void TransferObject::onGeneratingValues(QSqlRecord record)
     file = record.field(AccessDatabaseStructure::FIELD_TRANSFER_FILE).value().toString();
     directory = record.field(AccessDatabaseStructure::FIELD_TRANSFER_DIRECTORY).value().toString();
     flag = (Flag) record.field(AccessDatabaseStructure::FIELD_TRANSFER_FLAG).value().toInt();
-    groupId = record.field(AccessDatabaseStructure::FIELD_TRANSFER_GROUPID).value().toULongLong();
+    groupId = record.field(AccessDatabaseStructure::FIELD_TRANSFER_GROUPID).value().toUInt();
     deviceId = record.field(AccessDatabaseStructure::FIELD_TRANSFER_DEVICEID).value().toString();
-    requestId = record.field(AccessDatabaseStructure::FIELD_TRANSFER_ID).value().toULongLong();
+    requestId = record.field(AccessDatabaseStructure::FIELD_TRANSFER_ID).value().toUInt();
     fileMimeType = record.field(AccessDatabaseStructure::FIELD_TRANSFER_MIME).value().toString();
     friendlyName = record.field(AccessDatabaseStructure::FIELD_TRANSFER_NAME).value().toString();
     fileSize = record.field(AccessDatabaseStructure::FIELD_TRANSFER_SIZE).value().toUInt();

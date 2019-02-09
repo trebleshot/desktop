@@ -188,7 +188,7 @@ QSqlField AccessDatabaseStructure::generateField(const QString &key, const QVari
     return field;
 }
 
-const char *AccessDatabaseStructure::transformType(QVariant::Type type)
+const char *AccessDatabaseStructure::transformType(const QVariant::Type &type)
 {
     switch (type) {
         case QVariant::Bool:
@@ -213,8 +213,7 @@ const char *AccessDatabaseStructure::transformType(QVariant::Type type)
     }
 }
 
-// todo: const ??
-QString AccessDatabaseStructure::generateTableCreationSql(QString &tableName, QSqlRecord &record, bool mayExist)
+QString AccessDatabaseStructure::generateTableCreationSql(const QString &tableName, const QSqlRecord &record, bool mayExist)
 {
     QString sql("create table ");
 

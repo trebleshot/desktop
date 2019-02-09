@@ -29,8 +29,6 @@ bool AppUtils::applyAdapterName(DeviceConnection *connection)
         for (const QNetworkAddressEntry &address : session.interface().addressEntries()) {
             quint32 netmask = address.netmask().toIPv4Address();
 
-            qDebug() << netmask << netmask - 255 << ipv4Address;
-
             if (netmask <= 0)
                 continue;
 

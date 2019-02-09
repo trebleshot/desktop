@@ -25,7 +25,7 @@ class SqlSelection;
 
 namespace AccessDatabaseStructure {
     const QString TABLE_TRANSFER = "transfer";
-    const QString DIVIS_TRANSFER = "transfer";
+    const QString DIVIS_TRANSFER = "divisTansfer";
     const QString FIELD_TRANSFER_ID = "id";
     const QString FIELD_TRANSFER_FILE = "file";
     const QString FIELD_TRANSFER_NAME = "name";
@@ -58,7 +58,7 @@ namespace AccessDatabaseStructure {
     const QString FIELD_DEVICES_TMPSECUREKEY = "tmpSecureKey";
 
     const QString TABLE_DEVICECONNECTION = "deviceConnection";
-    const QString FIELD_DEVICECONNECTION_IPADDRESS = "hostAddress";
+    const QString FIELD_DEVICECONNECTION_IPADDRESS = "ipAddress";
     const QString FIELD_DEVICECONNECTION_DEVICEID = "deviceId";
     const QString FIELD_DEVICECONNECTION_ADAPTERNAME = "adapterName";
     const QString FIELD_DEVICECONNECTION_LASTCHECKEDDATE = "lastCheckedDate";
@@ -78,9 +78,9 @@ namespace AccessDatabaseStructure {
 
     extern QSqlField generateField(const QString &key, const QVariant &type);
 
-    extern QString generateTableCreationSql(QString &tableName, QSqlRecord &record, bool mayExist = false);
+    extern QString generateTableCreationSql(const QString &tableName, const QSqlRecord &record, bool mayExist = false);
 
-    extern const char *transformType(QVariant::Type type);
+    extern const char *transformType(const QVariant::Type &type);
 
     extern QSqlTableModel *gatherTableModel(AccessDatabase *db, DatabaseObject *dbObject);
 }

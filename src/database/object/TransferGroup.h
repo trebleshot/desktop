@@ -14,11 +14,11 @@ class TransferAssignee;
 class TransferGroup : public DatabaseObject {
 Q_OBJECT
 public:
-    qulonglong groupId;
-    qulonglong dateCreated;
+    quint32 groupId;
+    qlonglong dateCreated;
     QString savePath;
 
-    explicit TransferGroup(ulong groupId = 0, QObject *parent = nullptr);
+    explicit TransferGroup(quint32 groupId = 0, QObject *parent = nullptr);
 
     SqlSelection *getWhere() override;
 
@@ -29,14 +29,14 @@ public:
 
 class TransferAssignee : public DatabaseObject {
 public:
-    qulonglong groupId;
+    quint32 groupId;
     QString deviceId;
     QString connectionAdapter;
     bool isClone = false;
 
-    explicit TransferAssignee(ulong groupId = 0, QString deviceId = nullptr, QString connectionAdapter = nullptr,
+    explicit TransferAssignee(quint32 groupId = 0, const QString &deviceId = nullptr,
+                              const QString &connectionAdapter = nullptr,
                               QObject *parent = nullptr);
-
 
     SqlSelection *getWhere() override;
 

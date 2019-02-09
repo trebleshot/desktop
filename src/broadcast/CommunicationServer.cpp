@@ -2,7 +2,6 @@
 #include <src/util/AppUtils.h>
 #include <src/util/NetworkDeviceLoader.h>
 #include <QtCore/QJsonArray>
-#include <src/util/GThread.h>
 #include <src/database/object/TransferGroup.h>
 #include <src/database/object/TransferObject.h>
 #include "CommunicationServer.h"
@@ -78,10 +77,15 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                 if (request == KEYWORD_REQUEST_TRANSFER) {
                     if (responseJSON.contains(KEYWORD_FILES_INDEX)
                         && responseJSON.contains(KEYWORD_TRANSFER_GROUP_ID)) {
-                        const QJsonArray &filesIndex = responseJSON.value(KEYWORD_FILES_INDEX).toArray();
-                        const ulong &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID)
-                                .toString()
-                                .toULong();
+                        const quint32 &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID)
+                                .toVariant()
+                                .toUInt();
+
+                        const QJsonArray &filesIndex
+                                = QJsonDocument::fromJson(
+                                        QByteArray::fromStdString(responseJSON.value(KEYWORD_FILES_INDEX)
+                                                                          .toString()
+                                                                          .toStdString())).array();
 
                         result = true;
 
@@ -94,6 +98,8 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                             bool usePublishing = gDbSignal->reconstruct(transferGroup);
 
+                            transferGroup->dateCreated = clock();
+
                             gDbSignal->publish(transferGroup);
                             gDbSignal->publish(transferAssignee);
 
@@ -101,12 +107,13 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                 const QJsonObject &transferIndex = iterator.toObject();
                                 auto *transferObject
                                         = new TransferObject(transferIndex.value(KEYWORD_TRANSFER_REQUEST_ID)
-                                                                     .toString()
-                                                                     .toULong(),
+                                                                     .toVariant()
+                                                                     .toUInt(),
                                                              device->deviceId,
                                                              TransferObject::Incoming,
                                                              transferGroup);
 
+                                transferObject->flag = TransferObject::Flag::Pending;
                                 transferObject->groupId = groupId;
                                 transferObject->friendlyName = transferIndex.value(KEYWORD_INDEX_FILE_NAME).toString();
                                 transferObject->file = QString("%1-%2.tshare")
@@ -114,8 +121,8 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                         .arg(transferObject->deviceId);
                                 transferObject->fileMimeType = transferIndex.value(KEYWORD_INDEX_FILE_MIME).toString();
                                 transferObject->fileSize = transferIndex.value(KEYWORD_INDEX_FILE_SIZE)
-                                        .toString()
-                                        .toULong();
+                                        .toVariant()
+                                        .toUInt();
 
                                 if (transferIndex.contains(KEYWORD_INDEX_DIRECTORY))
                                     transferObject->directory = transferIndex.value(KEYWORD_INDEX_DIRECTORY).toString();
@@ -134,9 +141,9 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                     }
                 } else if (request == KEYWORD_REQUEST_RESPONSE) {
                     if (responseJSON.contains(KEYWORD_TRANSFER_GROUP_ID)) {
-                        const qulonglong &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID)
-                                .toString()
-                                .toULong();
+                        const quint32 &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID)
+                                .toVariant()
+                                .toUInt();
                         const bool isAccepted = responseJSON.value(KEYWORD_TRANSFER_IS_ACCEPTED).toBool(false);
 
                         auto *transferGroup = new TransferGroup(groupId);

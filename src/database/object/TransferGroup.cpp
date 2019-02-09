@@ -6,7 +6,7 @@
 
 #include "TransferGroup.h"
 
-TransferGroup::TransferGroup(ulong groupId, QObject *parent)
+TransferGroup::TransferGroup(quint32 groupId, QObject *parent)
         : DatabaseObject(parent)
 {
     this->groupId = groupId;
@@ -18,7 +18,7 @@ SqlSelection *TransferGroup::getWhere()
 
     selection
             ->setTableName(AccessDatabaseStructure::TABLE_TRANSFERGROUP)
-            ->setWhere(QString::asprintf("`%s` = ?", AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID.toStdString().c_str()));
+            ->setWhere(QString("`%1` = ?").arg(AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID));
 
     selection->whereArgs << QVariant(this->groupId);
 
@@ -38,17 +38,18 @@ QSqlRecord TransferGroup::getValues(AccessDatabase *db)
 
 void TransferGroup::onGeneratingValues(QSqlRecord record)
 {
-    groupId = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID).value().toString().toULong();
-    dateCreated = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_DATECREATED).value().toULongLong();
+    groupId = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID).value().toUInt();
+    dateCreated = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_DATECREATED).value().toLongLong();
     savePath = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_SAVEPATH).value().toString();
 }
 
-TransferAssignee::TransferAssignee(ulong groupId, QString deviceId, QString connectionAdapter, QObject *parent)
+TransferAssignee::TransferAssignee(quint32 groupId, const QString &deviceId, const QString &connectionAdapter,
+                                   QObject *parent)
         : DatabaseObject(parent)
 {
     this->groupId = groupId;
-    this->deviceId = std::move(deviceId);
-    this->connectionAdapter = std::move(connectionAdapter);
+    this->deviceId = deviceId;
+    this->connectionAdapter = connectionAdapter;
 }
 
 SqlSelection *TransferAssignee::getWhere()
@@ -57,9 +58,9 @@ SqlSelection *TransferAssignee::getWhere()
 
     selection
             ->setTableName(AccessDatabaseStructure::TABLE_TRANSFERASSIGNEE)
-            ->setWhere(QString::asprintf("`%s` = ? AND `%s` = ?",
-                                         AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_DEVICEID.toStdString().c_str(),
-                                         AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID.toStdString().c_str()));
+            ->setWhere(QString("`%1` = ? AND `%2` = ?")
+                                         .arg(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_DEVICEID)
+                                         .arg(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
 
     selection->whereArgs << QVariant(this->deviceId)
                          << QVariant(this->groupId);
@@ -82,7 +83,7 @@ QSqlRecord TransferAssignee::getValues(AccessDatabase *db)
 void TransferAssignee::onGeneratingValues(QSqlRecord record)
 {
     this->deviceId = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_DEVICEID).toString();
-    this->groupId = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID).toInt();
+    this->groupId = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID).toUInt();
     this->connectionAdapter = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER).toString();
     this->isClone = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_ISCLONE).toInt() == 1;
 }
