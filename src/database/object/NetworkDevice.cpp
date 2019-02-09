@@ -20,7 +20,7 @@ QSqlRecord NetworkDevice::getValues(AccessDatabase *db)
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_BUILDNAME, QVariant(this->versionName));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_BUILDNUMBER, QVariant(this->versionNumber));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_TMPSECUREKEY, QVariant(this->tmpSecureKey));
-    record.setValue(AccessDatabaseStructure::FIELD_DEVICES_LASTUSAGETIME, QVariant((long long) this->lastUsageTime));
+    record.setValue(AccessDatabaseStructure::FIELD_DEVICES_LASTUSAGETIME, QVariant((qlonglong) this->lastUsageTime));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_ISTRUSTED, QVariant(this->isTrusted ? 1 : 0));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_ISRESTRICTED, QVariant(this->isRestricted ? 1 : 0));
     record.setValue(AccessDatabaseStructure::FIELD_DEVICES_ISLOCALADDRESS, QVariant(this->isLocalAddress ? 1 : 0));
@@ -41,7 +41,7 @@ SqlSelection *NetworkDevice::getWhere()
     return selection;
 }
 
-void NetworkDevice::onGeneratingValues(QSqlRecord record)
+void NetworkDevice::onGeneratingValues(const QSqlRecord &record)
 {
     this->brand = record.value(AccessDatabaseStructure::FIELD_DEVICES_BRAND).toString();
     this->model = record.value(AccessDatabaseStructure::FIELD_DEVICES_MODEL).toString();
@@ -50,7 +50,7 @@ void NetworkDevice::onGeneratingValues(QSqlRecord record)
     this->versionName = record.value(AccessDatabaseStructure::FIELD_DEVICES_BUILDNAME).toString();
     this->versionNumber = record.value(AccessDatabaseStructure::FIELD_DEVICES_BUILDNUMBER).toInt();
     this->tmpSecureKey = record.value(AccessDatabaseStructure::FIELD_DEVICES_TMPSECUREKEY).toInt();
-    this->lastUsageTime = static_cast<clock_t>(record.value(AccessDatabaseStructure::FIELD_DEVICES_LASTUSAGETIME).toLongLong());
+    this->lastUsageTime = static_cast<time_t>(record.value(AccessDatabaseStructure::FIELD_DEVICES_LASTUSAGETIME).toLongLong());
     this->isTrusted = record.value(AccessDatabaseStructure::FIELD_DEVICES_ISTRUSTED).toInt() == 1;
     this->isRestricted = record.value(AccessDatabaseStructure::FIELD_DEVICES_ISRESTRICTED) == 1;
     this->isLocalAddress = record.value(AccessDatabaseStructure::FIELD_DEVICES_ISLOCALADDRESS) == 1;
@@ -103,15 +103,15 @@ QSqlRecord DeviceConnection::getValues(AccessDatabase *db)
     record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID, deviceId);
     record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME, adapterName);
     record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS, hostAddress.toString());
-    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant((long long) lastCheckedDate));
+    record.setValue(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant((qlonglong) lastCheckedDate));
 
     return record;
 }
 
-void DeviceConnection::onGeneratingValues(QSqlRecord record)
+void DeviceConnection::onGeneratingValues(const QSqlRecord &record)
 {
     this->deviceId = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID).toString();
     this->adapterName = record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME).toString();
     this->hostAddress = QHostAddress(record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_IPADDRESS).toString());
-    this->lastCheckedDate = static_cast<clock_t>(record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE).toLongLong());
+    this->lastCheckedDate = static_cast<time_t>(record.value(AccessDatabaseStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE).toLongLong());
 }

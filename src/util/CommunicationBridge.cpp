@@ -106,8 +106,7 @@ NetworkDevice *CommunicationBridge::updateDeviceIfOkay(
     if (device->deviceId != loadedDevice->deviceId)
         throw exception();
     else {
-        loadedDevice->lastUsageTime = clock();
-
+        time(&loadedDevice->lastUsageTime);
         gDbSignal->publish(loadedDevice);
         setDevice(loadedDevice);
     }

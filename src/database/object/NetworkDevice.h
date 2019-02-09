@@ -22,7 +22,7 @@ public:
     QString versionName;
     int versionNumber;
     int tmpSecureKey;
-    clock_t lastUsageTime;
+    time_t lastUsageTime;
     bool isTrusted = false;
     bool isRestricted = false;
     bool isLocalAddress = false;
@@ -33,7 +33,7 @@ public:
 
     QSqlRecord getValues(AccessDatabase *db) override;
 
-    void onGeneratingValues(QSqlRecord record) override;
+    void onGeneratingValues(const QSqlRecord &record) override;
 };
 
 class DeviceConnection : public DatabaseObject {
@@ -41,7 +41,7 @@ public:
     QString adapterName;
     QHostAddress hostAddress;
     QString deviceId;
-    clock_t lastCheckedDate;
+    time_t lastCheckedDate;
 
     explicit DeviceConnection(QObject *parent = nullptr);
 
@@ -53,7 +53,7 @@ public:
 
     QSqlRecord getValues(AccessDatabase *db) override;
 
-    void onGeneratingValues(QSqlRecord record) override;
+    void onGeneratingValues(const QSqlRecord &record) override;
 };
 
 

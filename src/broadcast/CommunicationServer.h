@@ -20,6 +20,8 @@ public:
 signals:
 
     void textReceived(const QString &text, const QString &deviceId);
+
+    void transferRequest(const QString &deviceId, quint32 groupId, int filesTotal);
 };
 
 #endif // COMMUNICATIONSERVER_H

@@ -43,6 +43,8 @@ public slots:
 
     void showReceivedText(const QString &text, const QString &deviceId);
 
+    void showTransferRequest(const QString &deviceId, quint32 groupId, int filesTotal);
+
     void transferItemActivated(QModelIndex modelIndex);
 
 };

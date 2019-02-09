@@ -51,7 +51,7 @@ SqlSelection *TransferObject::getWhere()
     return selection;
 }
 
-void TransferObject::onGeneratingValues(QSqlRecord record)
+void TransferObject::onGeneratingValues(const QSqlRecord &record)
 {
     accessPort = record.field(AccessDatabaseStructure::FIELD_TRANSFER_ACCESSPORT).value().toInt();
     file = record.field(AccessDatabaseStructure::FIELD_TRANSFER_FILE).value().toString();

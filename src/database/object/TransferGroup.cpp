@@ -30,13 +30,13 @@ QSqlRecord TransferGroup::getValues(AccessDatabase *db)
     QSqlRecord record = AccessDatabaseStructure::gatherTableModel(db, this)->record();
 
     record.setValue(AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID, QVariant(groupId));
-    record.setValue(AccessDatabaseStructure::FIELD_TRANSFERGROUP_DATECREATED, QVariant(dateCreated));
+    record.setValue(AccessDatabaseStructure::FIELD_TRANSFERGROUP_DATECREATED, QVariant((qlonglong) dateCreated));
     record.setValue(AccessDatabaseStructure::FIELD_TRANSFERGROUP_SAVEPATH, QVariant(savePath));
 
     return record;
 }
 
-void TransferGroup::onGeneratingValues(QSqlRecord record)
+void TransferGroup::onGeneratingValues(const QSqlRecord &record)
 {
     groupId = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID).value().toUInt();
     dateCreated = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_DATECREATED).value().toLongLong();
@@ -59,8 +59,8 @@ SqlSelection *TransferAssignee::getWhere()
     selection
             ->setTableName(AccessDatabaseStructure::TABLE_TRANSFERASSIGNEE)
             ->setWhere(QString("`%1` = ? AND `%2` = ?")
-                                         .arg(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_DEVICEID)
-                                         .arg(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
+                               .arg(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_DEVICEID)
+                               .arg(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
 
     selection->whereArgs << QVariant(this->deviceId)
                          << QVariant(this->groupId);
@@ -80,7 +80,7 @@ QSqlRecord TransferAssignee::getValues(AccessDatabase *db)
     return record;
 }
 
-void TransferAssignee::onGeneratingValues(QSqlRecord record)
+void TransferAssignee::onGeneratingValues(const QSqlRecord &record)
 {
     this->deviceId = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_DEVICEID).toString();
     this->groupId = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID).toUInt();

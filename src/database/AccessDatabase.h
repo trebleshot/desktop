@@ -121,7 +121,7 @@ public:
 
     QSqlQuery *toInsertionQuery();
 
-    QSqlQuery *toSelectionQuery();
+    QSqlQuery * toSelectionQuery();
 
     QString toSelectionColumns();
 
@@ -138,7 +138,7 @@ public:
 
     virtual QSqlRecord getValues(AccessDatabase *db) = 0;
 
-    virtual void onGeneratingValues(QSqlRecord record) = 0;
+    virtual void onGeneratingValues(const QSqlRecord &record) = 0;
 
     virtual void onUpdatingObject(AccessDatabase *db)
     {}

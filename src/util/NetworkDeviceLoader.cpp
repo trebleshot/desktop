@@ -20,7 +20,7 @@ void NetworkDeviceLoader::processConnection(NetworkDevice *device,
     if (!AppUtils::applyAdapterName(connection) && !gDbSignal->reconstruct(connection))
         connection->adapterName = KEYWORD_UNKNOWN_INTERFACE;
 
-    connection->lastCheckedDate = clock();
+    time(&connection->lastCheckedDate);
     connection->deviceId = device->deviceId;
 
     auto *sqlSelection = new SqlSelection();
@@ -57,7 +57,7 @@ NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QHostAddress &ho
             DeviceConnection *connection = processConnection(device, hostAddress);
 
             if (localDevice->deviceId != device->deviceId) {
-                device->lastUsageTime = clock();
+                time(&device->lastUsageTime);
                 gDbSignal->publish(device);
             }
 
@@ -83,10 +83,10 @@ NetworkDevice *NetworkDeviceLoader::loadFrom(const QJsonObject jsonIndex)
 
     gDbSignal->reconstruct(networkDevice);
 
+    time(&networkDevice->lastUsageTime);
     networkDevice->brand = deviceInfo.value(KEYWORD_DEVICE_INFO_BRAND).toString();
     networkDevice->model = deviceInfo.value(KEYWORD_DEVICE_INFO_MODEL).toString();
     networkDevice->nickname = deviceInfo.value(KEYWORD_DEVICE_INFO_USER).toString();
-    networkDevice->lastUsageTime = clock();
     networkDevice->versionNumber = appInfo.value(KEYWORD_APP_INFO_VERSION_CODE).toInt();
     networkDevice->versionName = appInfo.value(KEYWORD_APP_INFO_VERSION_NAME).toString();
 

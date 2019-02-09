@@ -15,7 +15,7 @@ class TransferGroup : public DatabaseObject {
 Q_OBJECT
 public:
     quint32 groupId;
-    qlonglong dateCreated;
+    time_t dateCreated;
     QString savePath;
 
     explicit TransferGroup(quint32 groupId = 0, QObject *parent = nullptr);
@@ -24,7 +24,7 @@ public:
 
     QSqlRecord getValues(AccessDatabase *db) override;
 
-    void onGeneratingValues(QSqlRecord record) override;
+    void onGeneratingValues(const QSqlRecord &record) override;
 };
 
 class TransferAssignee : public DatabaseObject {
@@ -42,7 +42,7 @@ public:
 
     QSqlRecord getValues(AccessDatabase *db) override;
 
-    void onGeneratingValues(QSqlRecord record) override;
+    void onGeneratingValues(const QSqlRecord &record) override;
 };
 
 #endif //TREBLESHOT_TRANSFERGROUP_H

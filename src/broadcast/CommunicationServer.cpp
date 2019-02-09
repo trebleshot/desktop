@@ -89,7 +89,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                         result = true;
 
-                        GThread::startIndependent([filesIndex, groupId, device, deviceConnection](GThread *thisThread) {
+                        GThread::startIndependent([this, filesIndex, groupId, device, deviceConnection](GThread *thisThread) {
                             auto *transferGroup = new TransferGroup(groupId);
                             auto *transferAssignee =
                                     new TransferAssignee(transferGroup->groupId,
@@ -98,10 +98,12 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                             bool usePublishing = gDbSignal->reconstruct(transferGroup);
 
-                            transferGroup->dateCreated = clock();
+                            time(&transferGroup->dateCreated);
 
                             gDbSignal->publish(transferGroup);
                             gDbSignal->publish(transferAssignee);
+
+                            int filesTotal = 0;
 
                             for (const auto &iterator : filesIndex) {
                                 const QJsonObject &transferIndex = iterator.toObject();
@@ -127,13 +129,15 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                 if (transferIndex.contains(KEYWORD_INDEX_DIRECTORY))
                                     transferObject->directory = transferIndex.value(KEYWORD_INDEX_DIRECTORY).toString();
 
-                                if (usePublishing)
-                                    gDbSignal->publish(transferObject);
-                                else
-                                    gDbSignal->insert(transferObject);
+                                if (usePublishing ? gDbSignal->publish(transferObject)
+                                                  : gDbSignal->insert(transferObject))
+                                    filesTotal++;
 
                                 delete transferObject;
                             }
+
+                            if (filesTotal > 0)
+                                emit transferRequest(device->deviceId, transferGroup->groupId, filesTotal);
 
                             delete transferGroup;
                             delete transferAssignee;
@@ -180,11 +184,9 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         pushReply(connection, replyJSON, result);
     } catch (const exception &e) {
         qDebug() << "An error occurred: "
-                 << e.what()
-                 << endl;
+                 << e.what();
     } catch (...) {
-        qDebug() << "An unknown error occurred"
-                 << endl;
+        qDebug() << "An unknown error occurred";
     }
 }
 

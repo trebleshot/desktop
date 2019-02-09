@@ -39,7 +39,7 @@ public:
 
     QSqlRecord getValues(AccessDatabase *db) override;
 
-    void onGeneratingValues(QSqlRecord record) override;
+    void onGeneratingValues(const QSqlRecord &record) override;
 };
 
 #endif // TRANSFEROBJECT_H

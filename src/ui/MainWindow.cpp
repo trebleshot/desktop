@@ -25,6 +25,9 @@ MainWindow::MainWindow(QWidget *parent)
             m_ui->label->setText(QString("TrebleShot is ready to accept files"));
             QObject::connect(m_commServer, &CommunicationServer::textReceived,
                              this, &MainWindow::showReceivedText);
+
+            QObject::connect(m_commServer, &CommunicationServer::transferRequest,
+                             this, &MainWindow::showTransferRequest);
         });
 
         connect(m_commServer, &CoolSocket::Server::serverFailure, [this]() {
@@ -85,9 +88,9 @@ void MainWindow::about()
         QDesktopServices::openUrl(QUrl(URI_APP_HOME));
     });
 
-    about->show();
-
     connect(this, SIGNAL(destroyed()), about, SLOT(deleteLater()));
+
+    about->show();
 }
 
 void MainWindow::aboutQt()
@@ -102,21 +105,58 @@ void MainWindow::showReceivedText(const QString &text, const QString &deviceId)
     try {
         gDatabase->reconstruct(device);
 
-        auto *textDialog = new QMessageBox(this);
+        auto *messageBox = new QMessageBox(this);
 
-        textDialog->setWindowTitle(QString("Text received from %1").arg(device->nickname));
-        textDialog->setText(text);
-        textDialog->addButton(QMessageBox::StandardButton::Close);
+        messageBox->setWindowTitle(QString("Text received from %1").arg(device->nickname));
+        messageBox->setText(text);
+        messageBox->addButton(QMessageBox::StandardButton::Close);
 
-        QPushButton* buttonCopy = textDialog->addButton(QString("Copy to clipboard"), QMessageBox::ButtonRole::ActionRole);
-
-        textDialog->show();
+        QPushButton *buttonCopy = messageBox->addButton(QString("Copy to clipboard"), QMessageBox::ButtonRole::ActionRole);
 
         connect(buttonCopy, &QPushButton::pressed, [text]() {
-           QClipboard* clipboard = QApplication::clipboard();
-           clipboard->setText(text);
+            QClipboard *clipboard = QApplication::clipboard();
+            clipboard->setText(text);
         });
-        connect(this, SIGNAL(destroyed()), textDialog, SLOT(deleteLater()));
+        connect(this, SIGNAL(destroyed()), messageBox, SLOT(deleteLater()));
+
+        messageBox->show();
+    } catch (...) {
+        // do nothing
+    }
+
+    delete device;
+}
+
+void MainWindow::showTransferRequest(const QString &deviceId, quint32 groupId, int filesTotal)
+{
+    auto *device = new NetworkDevice(deviceId);
+
+    try {
+        gDatabase->reconstruct(device);
+
+        auto *messageBox = new QMessageBox(this);
+
+        messageBox->setWindowTitle(QString("File receive request from %1").arg(device->nickname));
+        messageBox->setText(QString("%1 wants to you send you files, %2 in total. Do you want to receive now?")
+                                    .arg(device->nickname)
+                                    .arg(filesTotal));
+        messageBox->addButton(QMessageBox::StandardButton::Ignore);
+
+        /*
+        messageBox->addButton(QMessageBox::StandardButton::Later);
+
+        QPushButton *buttonCopy = messageBox->addButton(QString("Copy to clipboard"), QMessageBox::ButtonRole::ActionRole);
+
+        connect(buttonCopy, &QPushButton::pressed, [text]() {
+            QClipboard *clipboard = QApplication::clipboard();
+            clipboard->setText(text);
+        });
+         */
+
+        connect(this, SIGNAL(destroyed()), messageBox, SLOT(deleteLater()));
+
+        messageBox->show();
+
     } catch (...) {
         // do nothing
     }

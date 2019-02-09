@@ -373,7 +373,7 @@ QSqlQuery *SqlSelection::toInsertionQuery()
 {
 }
 
-QSqlQuery *SqlSelection::toSelectionQuery()
+QSqlQuery * SqlSelection::toSelectionQuery()
 {
     QString queryString = "select ";
     queryString += this->toSelectionColumns();

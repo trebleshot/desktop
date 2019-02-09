@@ -118,7 +118,7 @@ public:
                 }
                 case ColumnNames::Size:
                 case ColumnNames::Date:
-                    return QDateTime::fromMSecsSinceEpoch(currentGroup->dateCreated)
+                    return QDateTime::fromTime_t(static_cast<uint>(currentGroup->dateCreated))
                             .toString(Qt::DateFormat::SystemLocaleShortDate);
                 default:
                     return QString("Data id %1x%2")
