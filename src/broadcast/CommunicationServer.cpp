@@ -14,10 +14,13 @@ CommunicationServer::CommunicationServer(QObject *parent)
 void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 {
     connection->setTimeout(3000);
+    CoolSocket::Response *response = nullptr;
+    NetworkDevice *device = nullptr;
 
     try {
-        CoolSocket::Response *response = connection->receive();
-        QJsonObject responseJSON = QJsonDocument::fromJson(QByteArray::fromStdString(response->response->toStdString())).object();
+        response = connection->receive();
+        QJsonObject responseJSON = QJsonDocument::fromJson(
+                QByteArray::fromStdString(response->response->toStdString())).object();
         QJsonObject replyJSON = QJsonObject();
 
         AppUtils::applyDeviceToJSON(replyJSON);
@@ -36,6 +39,8 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                     deviceSerial = responseJSON.value(KEYWORD_DEVICE_INFO_SERIAL).toString();
                 }
 
+                delete response;
+
                 response = connection->receive();
                 responseJSON = QJsonDocument::fromJson(QByteArray::fromStdString(response->response->toStdString()))
                         .object();
@@ -45,7 +50,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         }
 
         if (deviceSerial != nullptr) {
-            auto *device = new NetworkDevice(deviceSerial);
+            device = new NetworkDevice(deviceSerial);
 
             if (gDbSignal->reconstruct(device)) {
                 if (!device->isRestricted)
@@ -89,7 +94,8 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                         result = true;
 
-                        GThread::startIndependent([this, filesIndex, groupId, device, deviceConnection](GThread *thisThread) {
+                        GThread::startIndependent([this, filesIndex, groupId, device, deviceConnection](
+                                GThread *thisThread) {
                             auto *transferGroup = new TransferGroup(groupId);
                             auto *transferAssignee =
                                     new TransferAssignee(transferGroup->groupId,
@@ -137,7 +143,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                             }
 
                             if (filesTotal > 0)
-                                emit transferRequest(device->deviceId, transferGroup->groupId, filesTotal);
+                                    emit transferRequest(device->deviceId, transferGroup->groupId, filesTotal);
 
                             delete transferGroup;
                             delete transferAssignee;
@@ -188,6 +194,9 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
     } catch (...) {
         qDebug() << "An unknown error occurred";
     }
+
+    delete device;
+    delete response;
 }
 
 void CommunicationServer::pushReply(CoolSocket::ActiveConnection *activeConnection,
@@ -195,5 +204,5 @@ void CommunicationServer::pushReply(CoolSocket::ActiveConnection *activeConnecti
                                     bool result)
 {
     json.insert(KEYWORD_RESULT, result);
-    activeConnection->reply(QJsonDocument(json).toJson().toStdString().c_str());
+    activeConnection->reply(json);
 }

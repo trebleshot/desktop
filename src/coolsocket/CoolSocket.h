@@ -54,8 +54,6 @@ namespace CoolSocket {
 
         friend class ActiveConnection;
 
-        friend class PendingAppend;
-
         friend class Response;
 
         friend class RequestHandler;
@@ -129,6 +127,8 @@ namespace CoolSocket {
 
         void setTimeout(int msecs)
         { this->m_timeout = msecs; }
+
+        void reply(const QJsonObject &reply);
 
         void reply(const char *reply);
 

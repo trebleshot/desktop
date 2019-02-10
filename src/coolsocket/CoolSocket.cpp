@@ -61,6 +61,11 @@ namespace CoolSocket {
         }
     }
 
+    void ActiveConnection::reply(const QJsonObject &reply)
+    {
+        this->reply(QJsonDocument(reply).toJson().toStdString().c_str());
+    }
+
     void ActiveConnection::reply(const char *reply)
     {
         cout << this << " : Entered write sequence" << endl;

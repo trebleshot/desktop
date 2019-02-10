@@ -11,6 +11,7 @@
 #define KEYWORD_BACK_COMP_REQUEST_SEND_UPDATE "backCompRequestSendUpdate"
 #define KEYWORD_TRANSFER_REQUEST_ID "requestId"
 #define KEYWORD_TRANSFER_GROUP_ID "groupId"
+#define KEYWORD_TRANSFER_DEVICE_ID "deviceId"
 #define KEYWORD_TRANSFER_SOCKET_PORT "socketPort"
 #define KEYWORD_TRANSFER_IS_ACCEPTED "isAccepted"
 #define KEYWORD_TRANSFER_CLIPBOARD_TEXT "clipboardText"
