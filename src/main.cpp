@@ -2,9 +2,7 @@
 #include "src/ui/MainWindow.h"
 
 #include <QFileDialog>
-#include <QtCore/QSettings>
-#include <src/util/AppUtils.h>
-#include <QtCore/QUuid>
+#include <src/util/TransferUtils.h>
 
 int main(int argc, char *argv[])
 {
@@ -23,6 +21,9 @@ int main(int argc, char *argv[])
 
     MainWindow mainWindow;
     mainWindow.show();
+
+    qDebug() << TransferUtils::getDefaultSavePath()
+    ;
 
     return QApplication::exec();
 }

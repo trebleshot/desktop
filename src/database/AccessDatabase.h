@@ -211,6 +211,10 @@ public slots:
     bool update(DatabaseObject *dbObject);
 
     bool update(SqlSelection *selection, const QSqlRecord &record);
+
+signals:
+
+    bool signalPublish(DatabaseObject *);
 };
 
 class AccessDatabaseSignaller : public QObject {

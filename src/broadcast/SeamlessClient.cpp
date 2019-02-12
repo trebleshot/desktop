@@ -9,8 +9,6 @@
 #include <src/util/TransferUtils.h>
 #include "SeamlessClient.h"
 
-typedef const QSqlRecord &sqlRecord;
-
 SeamlessClient::SeamlessClient(const QString &deviceId, quint32 groupId, QObject *parent)
         : QThread(parent), m_groupId(groupId), m_deviceId(deviceId)
 {
@@ -95,6 +93,18 @@ void SeamlessClient::run()
 
                             gDbSignal->update(sqlSelection, record);
                         });
+                    }
+                } else {
+                    while (activeConnection->getSocket()->isOpen()) {
+                        //todo: Check when interrupted using a way similar to the code below
+                        // if (processHolder.builder.getTransferProgress().isInterrupted())
+                        //   break;
+
+                        auto *transferObject = TransferUtils::firstAvailableTransfer(m_groupId, m_deviceId);
+
+
+
+                        delete transferObject;
                     }
                 }
             }
