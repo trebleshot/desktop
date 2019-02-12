@@ -33,39 +33,38 @@ SqlSelection *TransferUtils::createSqlSelection(quint32 groupId, const QString &
     return sqlSelection;
 }
 
-TransferObject *TransferUtils::firstAvailableTransfer(quint32 groupId, const QString &deviceId)
+TransferObject *TransferUtils::firstAvailableTransfer(TransferObject *object, quint32 groupId, const QString &deviceId)
 {
-    TransferObject *object = new TransferObject();
+    if (object == nullptr)
+        object = new TransferObject;
 
-    gDbSignal->doSynchronized([object, groupId, deviceId](AccessDatabase *db) {
-        auto *sqlSelection = new SqlSelection;
+    auto *sqlSelection = new SqlSelection;
 
-        sqlSelection->tableName = DbStructure::TABLE_TRANSFER;
-        sqlSelection->setWhere(QString("`%1` = ? AND `%2` = ? AND %3 = ?")
-                                       .arg(DbStructure::FIELD_TRANSFER_GROUPID)
-                                       .arg(DbStructure::FIELD_TRANSFER_DEVICEID)
-                                       .arg(DbStructure::FIELD_TRANSFER_FLAG)
-                                       .arg(DbStructure::FIELD_TRANSFER_TYPE));
+    sqlSelection->tableName = DbStructure::TABLE_TRANSFER;
+    sqlSelection->setWhere(QString("`%1` = ? AND `%2` = ? AND %3 = ? AND %4 = ?")
+                                   .arg(DbStructure::FIELD_TRANSFER_GROUPID)
+                                   .arg(DbStructure::FIELD_TRANSFER_DEVICEID)
+                                   .arg(DbStructure::FIELD_TRANSFER_FLAG)
+                                   .arg(DbStructure::FIELD_TRANSFER_TYPE));
 
-        sqlSelection->whereArgs << groupId
-                                << deviceId
-                                << TransferObject::Flag::Pending
-                                << TransferObject::Type::Incoming;
+    sqlSelection->whereArgs << groupId
+                            << deviceId
+                            << TransferObject::Flag::Pending
+                            << TransferObject::Type::Incoming;
 
-        sqlSelection->setOrderBy(QString("`%1` ASC, `%2` ASC")
-                                         .arg(DbStructure::FIELD_TRANSFER_DIRECTORY)
-                                         .arg(DbStructure::FIELD_TRANSFER_NAME));
+    sqlSelection->setOrderBy(QString("`%1` ASC, `%2` ASC")
+                                     .arg(DbStructure::FIELD_TRANSFER_DIRECTORY)
+                                     .arg(DbStructure::FIELD_TRANSFER_NAME));
 
-        auto *query = sqlSelection->toSelectionQuery();
+    auto *query = sqlSelection->toSelectionQuery();
 
-        query->exec();
+    query->exec();
 
-        if (query->first())
-            object->onGeneratingValues(query->record());
+    if (query->first())
+        object->onGeneratingValues(query->record());
 
-        delete query;
-        delete sqlSelection;
-    });
+    delete query;
+    delete sqlSelection;
 
     return object;
 }
@@ -77,17 +76,17 @@ QString TransferUtils::getDefaultSavePath()
 
     QDir defaultFolderFile;
 
-    if (defaultFolderFile.mkdir(defaultFolder))
+    if (defaultFolderFile.mkpath(defaultFolder))
         return defaultFolder;
 
-    defaultFolderFile.mkdir(downloadsFolder);
+    defaultFolderFile.mkpath(downloadsFolder);
 
     return downloadsFolder;
 }
 
 QString TransferUtils::getSavePath(TransferGroup *group)
 {
-    return (group->savePath != nullptr && group->savePath.length() > 0 && QDir(group->savePath).exists())
+    return (group->savePath != nullptr && group->savePath.length() > 0 && QDir().mkdir(group->savePath))
            ? group->savePath
            : getDefaultSavePath();
 }
@@ -95,6 +94,11 @@ QString TransferUtils::getSavePath(TransferGroup *group)
 QString TransferUtils::getIncomingFilePath(TransferGroup *transferGroup, TransferObject *object)
 {
     QDir savePath(getSavePath(transferGroup));
+
+    if (object->directory != nullptr && object->directory.length() > 0) {
+        savePath.mkpath(object->directory);
+        savePath.setPath(savePath.filePath(object->directory));
+    }
 
     return savePath.filePath(object->file);
 }

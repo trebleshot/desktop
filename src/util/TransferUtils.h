@@ -17,13 +17,13 @@ public:
                                             TransferObject::Flag flag = TransferObject::Flag::Any,
                                             bool equals = true);
 
-    static TransferObject *firstAvailableTransfer(quint32 groupId, const QString &deviceId);
+    static TransferObject *firstAvailableTransfer(TransferObject *object, quint32 groupId, const QString &deviceId);
 
     static QString getDefaultSavePath();
 
     static QString getIncomingFilePath(TransferGroup *transferGroup, TransferObject *object);
 
-    static QString getSavePath(TransferGroup* group);
+    static QString getSavePath(TransferGroup *group);
 };
 
 

@@ -261,7 +261,7 @@ QSqlField DbStructure::generateField(const QString &key, const QVariant &value)
 QSqlTableModel *DbStructure::gatherTableModel(AccessDatabase *db, DatabaseObject *dbObject)
 {
     SqlSelection* selection = dbObject->getWhere();
-    const auto &tableName = selection->tableName;
+    auto tableName = selection->tableName;
 
     delete selection;
 

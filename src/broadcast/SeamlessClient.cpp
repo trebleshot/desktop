@@ -100,9 +100,11 @@ void SeamlessClient::run()
                         // if (processHolder.builder.getTransferProgress().isInterrupted())
                         //   break;
 
-                        auto *transferObject = TransferUtils::firstAvailableTransfer(m_groupId, m_deviceId);
+                        auto *transferObject = new TransferObject;
 
-
+                        gDbSignal->doSynchronized([transferObject, this](AccessDatabase *db) {
+                            TransferUtils::firstAvailableTransfer(transferObject, m_groupId, m_deviceId);
+                        });
 
                         delete transferObject;
                     }
