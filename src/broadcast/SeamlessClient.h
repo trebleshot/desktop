@@ -8,7 +8,14 @@
 #include <QtCore/QThread>
 
 class SeamlessClient : public QThread {
+    quint32 m_groupId = 0;
+    QString m_deviceId;
 
+public:
+    explicit SeamlessClient(const QString &deviceId, quint32 groupId, QObject* parent = nullptr);
+
+protected:
+    void run() override;
 };
 
 
