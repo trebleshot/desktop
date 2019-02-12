@@ -42,8 +42,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                 delete response;
 
                 response = connection->receive();
-                responseJSON = QJsonDocument::fromJson(QByteArray::fromStdString(response->response->toStdString()))
-                        .object();
+                responseJSON = response->asJson();
             } else {
                 return;
             }

@@ -86,6 +86,7 @@ namespace CoolSocket {
         virtual void connected(ActiveConnection *connection) = 0;
 
     signals:
+
         void serverStarted();
 
         void serverStopped();
@@ -141,6 +142,11 @@ namespace CoolSocket {
         QString *response;
         QJsonObject *headerIndex;
         qsizetype length;
+
+        QJsonObject asJson() const {
+            return QJsonDocument::fromJson(QByteArray::fromStdString(response->toStdString()))
+                    .object();
+        }
     };
 
     class ServerWorker : public QThread {

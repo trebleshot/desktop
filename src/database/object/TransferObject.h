@@ -11,6 +11,7 @@ public:
     };
 
     enum Flag {
+        Any = -1,
         Interrupted,
         Pending,
         Removed,

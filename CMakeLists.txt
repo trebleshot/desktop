@@ -105,7 +105,9 @@ set(UTIL_LIBRARY
         src/broadcast/SeamlessServer.h
         src/broadcast/SeamlessServer.cpp
         src/broadcast/SeamlessClient.h
-        src/broadcast/SeamlessClient.cpp)
+        src/broadcast/SeamlessClient.cpp
+        src/util/TransferUtils.h
+        src/util/TransferUtils.cpp)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)

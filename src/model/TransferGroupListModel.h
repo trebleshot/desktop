@@ -30,7 +30,7 @@ public:
         auto *db = AppUtils::getDatabase();
         auto *selection = new SqlSelection;
 
-        selection->setTableName(AccessDatabaseStructure::TABLE_TRANSFERGROUP);
+        selection->setTableName(DbStructure::TABLE_TRANSFERGROUP);
 
         m_list = db->castQuery(*selection, new TransferGroup());
     }
@@ -81,8 +81,8 @@ public:
                 case ColumnNames::Devices: {
                     auto *selection = new SqlSelection();
 
-                    selection->setTableName(AccessDatabaseStructure::TABLE_TRANSFERASSIGNEE)
-                            ->setWhere(QString("`%1` = ?").arg(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
+                    selection->setTableName(DbStructure::TABLE_TRANSFERASSIGNEE)
+                            ->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
                     selection->whereArgs << currentGroup->groupId;
 
                     QList<TransferAssignee *> *assigneeList = AppUtils::getDatabase()->castQuery(*selection, new TransferAssignee());

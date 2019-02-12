@@ -25,10 +25,10 @@ void NetworkDeviceLoader::processConnection(NetworkDevice *device,
 
     auto *sqlSelection = new SqlSelection();
 
-    sqlSelection->setTableName(AccessDatabaseStructure::TABLE_DEVICECONNECTION)
+    sqlSelection->setTableName(DbStructure::TABLE_DEVICECONNECTION)
             ->setWhere(QString("`%1` = ? AND `%2` = ?")
-                               .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_DEVICEID)
-                               .arg(AccessDatabaseStructure::FIELD_DEVICECONNECTION_ADAPTERNAME));
+                               .arg(DbStructure::FIELD_DEVICECONNECTION_DEVICEID)
+                               .arg(DbStructure::FIELD_DEVICECONNECTION_ADAPTERNAME));
 
     sqlSelection->whereArgs << QVariant(connection->deviceId)
                             << QVariant(connection->adapterName);

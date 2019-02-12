@@ -19,9 +19,7 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
 {
     try {
         CoolSocket::Response *mainRequest = connection->receive();
-        QJsonObject mainRequestJSON = QJsonDocument::fromJson(
-                QByteArray::fromStdString(mainRequest->response->toStdString()))
-                .object();
+        QJsonObject mainRequestJSON = mainRequest->asJson();
         QString deviceId = mainRequestJSON.contains(KEYWORD_TRANSFER_DEVICE_ID)
                            ? mainRequestJSON.value(KEYWORD_TRANSFER_DEVICE_ID).toString()
                            : nullptr;
@@ -59,10 +57,7 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
                 || response->length <= 0)
                 return;
 
-            QJsonObject request = QJsonDocument::fromJson(
-                    QByteArray::fromStdString(response->response->toStdString()))
-                    .object();
-
+            QJsonObject request = response->asJson();
             QJsonObject reply;
 
             {

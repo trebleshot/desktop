@@ -23,7 +23,7 @@ class DatabaseObject;
 
 class SqlSelection;
 
-namespace AccessDatabaseStructure {
+namespace DbStructure {
     const QString TABLE_TRANSFER = "transfer";
     const QString DIVIS_TRANSFER = "divisTansfer";
     const QString FIELD_TRANSFER_ID = "id";
@@ -83,6 +83,8 @@ namespace AccessDatabaseStructure {
     extern const char *transformType(const QVariant::Type &type);
 
     extern QSqlTableModel *gatherTableModel(AccessDatabase *db, DatabaseObject *dbObject);
+
+    extern QSqlTableModel *gatherTableModel(AccessDatabase *db, const QString &tableName);
 }
 
 class SqlSelection : public QObject {
@@ -121,7 +123,7 @@ public:
 
     QSqlQuery *toInsertionQuery();
 
-    QSqlQuery * toSelectionQuery();
+    QSqlQuery *toSelectionQuery();
 
     QString toSelectionColumns();
 
@@ -208,9 +210,7 @@ public slots:
 
     bool update(DatabaseObject *dbObject);
 
-signals:
-
-    void signalPublish(DatabaseObject *object);
+    bool update(SqlSelection *selection, const QSqlRecord &record);
 };
 
 class AccessDatabaseSignaller : public QObject {
@@ -226,12 +226,18 @@ public:
                 Qt::BlockingQueuedConnection);
         connect(this, &AccessDatabaseSignaller::insert, db, &AccessDatabase::insert, Qt::BlockingQueuedConnection);
         connect(this, &AccessDatabaseSignaller::publish, db, &AccessDatabase::publish, Qt::BlockingQueuedConnection);
-        connect(this, &AccessDatabaseSignaller::reconstruct, db, &AccessDatabase::reconstructRemote,
-                Qt::BlockingQueuedConnection);
+        connect(this, &AccessDatabaseSignaller::reconstruct,
+                db, &AccessDatabase::reconstructRemote, Qt::BlockingQueuedConnection);
         connect(this, SIGNAL(remove(SqlSelection * )), db, SLOT(remove(SqlSelection * )), Qt::BlockingQueuedConnection);
-        connect(this, SIGNAL(remove(DatabaseObject * )), db, SLOT(remove(DatabaseObject * )),
-                Qt::BlockingQueuedConnection);
-        connect(this, &AccessDatabaseSignaller::update, db, &AccessDatabase::update, Qt::BlockingQueuedConnection);
+        connect(this, SIGNAL(remove(DatabaseObject * )),
+                db, SLOT(remove(DatabaseObject * )), Qt::BlockingQueuedConnection);
+        connect(this,
+                SIGNAL(update(SqlSelection * ,
+                               const QSqlRecord & )),
+                db, SLOT(update(SqlSelection * ,
+                                 const QSqlRecord & )), Qt::BlockingQueuedConnection);
+        connect(this, SIGNAL(update(DatabaseObject * )),
+                db, SLOT(update(DatabaseObject * )), Qt::BlockingQueuedConnection);
     }
 
     void operator<<(const std::function<void(AccessDatabase *)> &listener)
@@ -258,6 +264,8 @@ signals:
     bool remove(DatabaseObject *dbObject);
 
     bool update(DatabaseObject *dbObject);
+
+    bool update(SqlSelection *selection, const QSqlRecord &values);
 };
 
 #endif // ACCESSDATABASE_H

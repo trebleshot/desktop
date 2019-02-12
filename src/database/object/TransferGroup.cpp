@@ -17,8 +17,8 @@ SqlSelection *TransferGroup::getWhere()
     auto *selection = new SqlSelection;
 
     selection
-            ->setTableName(AccessDatabaseStructure::TABLE_TRANSFERGROUP)
-            ->setWhere(QString("`%1` = ?").arg(AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID));
+            ->setTableName(DbStructure::TABLE_TRANSFERGROUP)
+            ->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFERGROUP_ID));
 
     selection->whereArgs << QVariant(this->groupId);
 
@@ -27,20 +27,20 @@ SqlSelection *TransferGroup::getWhere()
 
 QSqlRecord TransferGroup::getValues(AccessDatabase *db)
 {
-    QSqlRecord record = AccessDatabaseStructure::gatherTableModel(db, this)->record();
+    QSqlRecord record = DbStructure::gatherTableModel(db, this)->record();
 
-    record.setValue(AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID, QVariant(groupId));
-    record.setValue(AccessDatabaseStructure::FIELD_TRANSFERGROUP_DATECREATED, QVariant((qlonglong) dateCreated));
-    record.setValue(AccessDatabaseStructure::FIELD_TRANSFERGROUP_SAVEPATH, QVariant(savePath));
+    record.setValue(DbStructure::FIELD_TRANSFERGROUP_ID, QVariant(groupId));
+    record.setValue(DbStructure::FIELD_TRANSFERGROUP_DATECREATED, QVariant((qlonglong) dateCreated));
+    record.setValue(DbStructure::FIELD_TRANSFERGROUP_SAVEPATH, QVariant(savePath));
 
     return record;
 }
 
 void TransferGroup::onGeneratingValues(const QSqlRecord &record)
 {
-    groupId = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_ID).value().toUInt();
-    dateCreated = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_DATECREATED).value().toLongLong();
-    savePath = record.field(AccessDatabaseStructure::FIELD_TRANSFERGROUP_SAVEPATH).value().toString();
+    groupId = record.field(DbStructure::FIELD_TRANSFERGROUP_ID).value().toUInt();
+    dateCreated = record.field(DbStructure::FIELD_TRANSFERGROUP_DATECREATED).value().toLongLong();
+    savePath = record.field(DbStructure::FIELD_TRANSFERGROUP_SAVEPATH).value().toString();
 }
 
 TransferAssignee::TransferAssignee(quint32 groupId, const QString &deviceId, const QString &connectionAdapter,
@@ -57,10 +57,10 @@ SqlSelection *TransferAssignee::getWhere()
     auto *selection = new SqlSelection;
 
     selection
-            ->setTableName(AccessDatabaseStructure::TABLE_TRANSFERASSIGNEE)
+            ->setTableName(DbStructure::TABLE_TRANSFERASSIGNEE)
             ->setWhere(QString("`%1` = ? AND `%2` = ?")
-                               .arg(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_DEVICEID)
-                               .arg(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
+                               .arg(DbStructure::FIELD_TRANSFERASSIGNEE_DEVICEID)
+                               .arg(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
 
     selection->whereArgs << QVariant(this->deviceId)
                          << QVariant(this->groupId);
@@ -70,20 +70,20 @@ SqlSelection *TransferAssignee::getWhere()
 
 QSqlRecord TransferAssignee::getValues(AccessDatabase *db)
 {
-    QSqlRecord record = AccessDatabaseStructure::gatherTableModel(db, this)->record();
+    QSqlRecord record = DbStructure::gatherTableModel(db, this)->record();
 
-    record.setValue(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_DEVICEID, QVariant(deviceId));
-    record.setValue(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID, QVariant(groupId));
-    record.setValue(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER, QVariant(connectionAdapter));
-    record.setValue(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_ISCLONE, isClone ? 1 : 0);
+    record.setValue(DbStructure::FIELD_TRANSFERASSIGNEE_DEVICEID, QVariant(deviceId));
+    record.setValue(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID, QVariant(groupId));
+    record.setValue(DbStructure::FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER, QVariant(connectionAdapter));
+    record.setValue(DbStructure::FIELD_TRANSFERASSIGNEE_ISCLONE, isClone ? 1 : 0);
 
     return record;
 }
 
 void TransferAssignee::onGeneratingValues(const QSqlRecord &record)
 {
-    this->deviceId = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_DEVICEID).toString();
-    this->groupId = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_GROUPID).toUInt();
-    this->connectionAdapter = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER).toString();
-    this->isClone = record.value(AccessDatabaseStructure::FIELD_TRANSFERASSIGNEE_ISCLONE).toInt() == 1;
+    this->deviceId = record.value(DbStructure::FIELD_TRANSFERASSIGNEE_DEVICEID).toString();
+    this->groupId = record.value(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID).toUInt();
+    this->connectionAdapter = record.value(DbStructure::FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER).toString();
+    this->isClone = record.value(DbStructure::FIELD_TRANSFERASSIGNEE_ISCLONE).toInt() == 1;
 }
