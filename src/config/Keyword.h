@@ -33,6 +33,7 @@
 #define KEYWORD_APP_INFO_VERSION_NAME "versionName"
 #define KEYWORD_APP_INFO_VERSION_CODE "versionCode"
 #define KEYWORD_SKIPPED_BYTES "skippedBytes"
+#define KEYWORD_SIZE_CHANGED "sizeChanged"
 #define KEYWORD_ERROR "error"
 #define KEYWORD_ERROR_NOT_ALLOWED "notAllowed"
 #define KEYWORD_ERROR_NOT_FOUND "notFound"

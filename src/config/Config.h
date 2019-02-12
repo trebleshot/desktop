@@ -5,6 +5,7 @@
 #define PORT_SEAMLESS 58762
 #define TIMEOUT_SOCKET_DEFAULT 5000
 #define TIMEOUT_SOCKET_DEFAULT_LARGE 40000
+#define BUFFER_LENGTH_DEFAULT 8096
 #define NICKNAME_LENGTH_MAX 32
 #define URI_APP_HOME "https://github.com/genonbeta/TrebleShot-Desktop"
 
