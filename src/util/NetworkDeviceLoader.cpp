@@ -29,6 +29,11 @@ void NetworkDeviceLoader::processConnection(NetworkDevice *device,
     time(&connection->lastCheckedDate);
     connection->deviceId = device->deviceId;
 
+    qDebug() << "Processing connection for device"
+             << device->deviceId
+             << "with connection name"
+             << connection->hostAddress.toString();
+
     auto *sqlSelection = new SqlSelection();
 
     sqlSelection->setTableName(DbStructure::TABLE_DEVICECONNECTION)

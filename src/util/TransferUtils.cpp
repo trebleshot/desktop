@@ -4,6 +4,7 @@
 
 #include <QtGui/QDesktopServices>
 #include <QtCore/QDir>
+#include <QSqlError>
 #include "TransferUtils.h"
 #include "AppUtils.h"
 
@@ -46,12 +47,12 @@ bool TransferUtils::firstAvailableTransfer(TransferObject *object, quint32 group
     auto *sqlSelection = new SqlSelection;
 
     sqlSelection->tableName = DbStructure::TABLE_TRANSFER;
-    sqlSelection->setWhere(QString("`%1` = ? AND `%2` = ? AND %3 = ? AND %4 = ?")
+    sqlSelection->setWhere(QString("`%1` = ? AND `%2` = ? AND `%3` = ? AND `%4` = ?")
                                    .arg(DbStructure::FIELD_TRANSFER_GROUPID)
                                    .arg(DbStructure::FIELD_TRANSFER_DEVICEID)
                                    .arg(DbStructure::FIELD_TRANSFER_FLAG)
                                    .arg(DbStructure::FIELD_TRANSFER_TYPE))
-            ->setLimit(0)
+            ->setLimit(1)
             ->setOrderBy(QString("`%1` ASC, `%2` ASC")
                                  .arg(DbStructure::FIELD_TRANSFER_DIRECTORY)
                                  .arg(DbStructure::FIELD_TRANSFER_NAME));
@@ -65,13 +66,20 @@ bool TransferUtils::firstAvailableTransfer(TransferObject *object, quint32 group
 
     query->exec();
 
-    if (query->first())
+    auto taskResult = query->first();
+
+    qDebug() << sqlSelection->where;
+
+    if (taskResult) {
+        qDebug() << query->record();
         object->onGeneratingValues(query->record());
+    } else
+        qDebug() << query->lastError() << endl << query->executedQuery();
 
     delete query;
     delete sqlSelection;
 
-    return object;
+    return taskResult;
 }
 
 QString TransferUtils::getDefaultSavePath()

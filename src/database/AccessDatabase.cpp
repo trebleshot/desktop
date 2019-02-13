@@ -310,7 +310,7 @@ QString SqlSelection::generateSpecifierClause(bool fromStatement)
     }
 
     if (this->limit != -1) {
-        queryString += ", limit ";
+        queryString += " limit ";
         queryString += std::to_string(this->limit).c_str();
     }
 

@@ -82,7 +82,7 @@ void SeamlessClient::run()
                 QJsonObject groupInfoJson;
 
                 groupInfoJson.insert(KEYWORD_TRANSFER_GROUP_ID, QVariant(m_groupId).toString());
-                groupInfoJson.insert(KEYWORD_TRANSFER_DEVICE_ID, m_deviceId);
+                groupInfoJson.insert(KEYWORD_TRANSFER_DEVICE_ID, AppUtils::getDeviceId());
 
                 activeConnection->reply(groupInfoJson);
                 auto *response = activeConnection->receive();
@@ -146,7 +146,7 @@ void SeamlessClient::run()
 
                             {
                                 auto *fileResponse = activeConnection->receive();
-                                auto fileResponseJSON = response->asJson();
+                                auto fileResponseJSON = fileResponse->asJson();
 
                                 delete fileResponse;
 
@@ -238,7 +238,7 @@ void SeamlessClient::run()
     delete device;
     delete localDevice;
 
-    qDebug()<< "-- SeamlessClient --";
+    qDebug() << "-- SeamlessClient --";
 }
 
 void SeamlessClient::interrupt()

@@ -101,7 +101,7 @@ NetworkDevice *CommunicationBridge::updateDeviceIfOkay(
     DeviceConnection *connection
             = NetworkDeviceLoader::processConnection(loadedDevice, activeConnection
                     ->getSocket()
-                    ->localAddress());
+                    ->peerAddress());
 
     if (device->deviceId != loadedDevice->deviceId) {
         qDebug() << "Compared" << device->nickname << "with" << loadedDevice->nickname;
