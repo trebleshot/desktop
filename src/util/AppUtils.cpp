@@ -37,15 +37,6 @@ bool AppUtils::applyAdapterName(DeviceConnection *connection)
                 connection->adapterName = interfaceName;
                 return true;
             }
-
-            /*
-            QHostAddress currentHostAddress = address.ip();
-
-            if (ipV4Address.left(ipV4Address.lastIndexOf("."))
-                == connection->hostAddress.left(connection->hostAddress.lastIndexOf("."))) {
-                connection->adapterName = interfaceName;
-                return true;
-            }*/
         }
     }
 

@@ -567,10 +567,17 @@
     <addaction name="actionAbout_TrebleShot"/>
     <addaction name="actionAbout_Qt"/>
    </widget>
+   <widget class="QMenu" name="menu_Debug">
+    <property name="title">
+     <string>&amp;Debug</string>
+    </property>
+    <addaction name="actionStart_receiver"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTool"/>
    <addaction name="menuHelp"/>
+   <addaction name="menu_Debug"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionChange_device_name">
@@ -596,6 +603,11 @@
   <action name="actionAbout_Qt">
    <property name="text">
     <string>About &amp;Qt</string>
+   </property>
+  </action>
+  <action name="actionStart_receiver">
+   <property name="text">
+    <string>Start receiver</string>
    </property>
   </action>
  </widget>

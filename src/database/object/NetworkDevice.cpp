@@ -1,6 +1,7 @@
 //
 // Created by veli on 9/25/18.
 //
+#include <src/util/NetworkDeviceLoader.h>
 #include "NetworkDevice.h"
 
 NetworkDevice::NetworkDevice(const QString &deviceId, QObject *parent)
@@ -102,7 +103,8 @@ QSqlRecord DeviceConnection::getValues(AccessDatabase *db)
 
     record.setValue(DbStructure::FIELD_DEVICECONNECTION_DEVICEID, deviceId);
     record.setValue(DbStructure::FIELD_DEVICECONNECTION_ADAPTERNAME, adapterName);
-    record.setValue(DbStructure::FIELD_DEVICECONNECTION_IPADDRESS, hostAddress.toString());
+    record.setValue(DbStructure::FIELD_DEVICECONNECTION_IPADDRESS,
+            NetworkDeviceLoader::convertToInet4Address(hostAddress.toIPv4Address()));
     record.setValue(DbStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant((qlonglong) lastCheckedDate));
 
     return record;

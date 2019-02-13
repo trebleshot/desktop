@@ -4,6 +4,12 @@
 #include <QtSql/QSqlError>
 #include "NetworkDeviceLoader.h"
 
+QString NetworkDeviceLoader::convertToInet4Address(int ipv4Address)
+{
+    return QString("%4.%3.%2.%1").arg(ipv4Address & 0xff).arg(ipv4Address >> 8 & 0xff)
+            .arg(ipv4Address >> 16 & 0xff).arg(ipv4Address >> 24 & 0xff);
+}
+
 DeviceConnection *NetworkDeviceLoader::processConnection(NetworkDevice *device,
                                                          const QHostAddress &hostAddress)
 {

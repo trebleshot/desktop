@@ -1,4 +1,5 @@
 #include <QtGui/QDesktopServices>
+#include <src/broadcast/SeamlessClient.h>
 #include "MainWindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -51,6 +52,29 @@ MainWindow::MainWindow(QWidget *parent)
         connect(m_ui->actionAbout_Qt, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
 
         m_ui->tableView->setModel(model);
+
+        connect(m_ui->actionStart_receiver, &QAction::triggered, []() {
+            qDebug() << "Debug process";
+
+            SqlSelection sqlSelection;
+            sqlSelection.setTableName(DbStructure::TABLE_TRANSFERASSIGNEE);
+
+            auto *assigneeList = gDatabase->castQuery(sqlSelection, new TransferAssignee);
+
+            if (assigneeList->first() != nullptr) {
+                auto *assignee = assigneeList->first();
+                auto *client = new SeamlessClient(assignee->deviceId, assignee->groupId);
+
+                qDebug() << "Randomly starting a receive process for device"
+                         << assignee->deviceId
+                         << "for group id"
+                         << assignee->groupId;
+
+                client->start();
+            } else {
+                qDebug() << "No assignee found to start as debug receiver process";
+            }
+        });
     }
 
     const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);

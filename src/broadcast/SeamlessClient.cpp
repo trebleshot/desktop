@@ -16,6 +16,8 @@ SeamlessClient::SeamlessClient(const QString &deviceId, quint32 groupId, QObject
 
 void SeamlessClient::run()
 {
+    qDebug() << "== SeamlessClient ==";
+
     auto *localDevice = AppUtils::getLocalDevice();
     auto *device = new NetworkDevice(m_deviceId);
     auto *group = new TransferGroup(m_groupId);
@@ -40,7 +42,18 @@ void SeamlessClient::run()
 
         try {
             {
+                qDebug() << "Receive process for"
+                         << device->nickname
+                         << "for group"
+                         << group->groupId
+                         << "with connection"
+                         << connection->hostAddress.toString()
+                         << "of adapter"
+                         << connection->adapterName;
+
                 auto *activeConnection = client->communicate(device, connection);
+
+                qDebug() << "Communication port is open";
 
                 QJsonObject initialConnection;
                 initialConnection.insert(KEYWORD_REQUEST, KEYWORD_REQUEST_HANDSHAKE);
@@ -52,7 +65,7 @@ void SeamlessClient::run()
 
                 delete response;
 
-                qDebug() << "Will evaluate the result";
+                qDebug() << "Will evaluate the result" << resultObject;
 
                 if (!resultObject.value(KEYWORD_RESULT).toBool(false))
                     throw exception();
@@ -224,6 +237,8 @@ void SeamlessClient::run()
     delete group;
     delete device;
     delete localDevice;
+
+    qDebug()<< "-- SeamlessClient --";
 }
 
 void SeamlessClient::interrupt()

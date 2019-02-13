@@ -103,8 +103,10 @@ NetworkDevice *CommunicationBridge::updateDeviceIfOkay(
                     ->getSocket()
                     ->localAddress());
 
-    if (device->deviceId != loadedDevice->deviceId)
+    if (device->deviceId != loadedDevice->deviceId) {
+        qDebug() << "Compared" << device->nickname << "with" << loadedDevice->nickname;
         throw exception();
+    }
     else {
         time(&loadedDevice->lastUsageTime);
         gDbSignal->publish(loadedDevice);

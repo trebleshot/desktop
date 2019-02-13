@@ -15,9 +15,7 @@
 
 class NetworkDeviceLoader {
 public:
-    static DeviceConnection *processConnection(NetworkDevice *device, const QHostAddress &hostAddress);
-
-    static void processConnection(NetworkDevice *device, DeviceConnection *connection);
+    static QString convertToInet4Address(int ipv4Address);
 
     static void loadAsynchronously(QObject *sender,
                                    const QHostAddress &hostAddress,
@@ -26,6 +24,10 @@ public:
     static NetworkDevice *load(QObject *sender, const QHostAddress &hostAddress);
 
     static NetworkDevice *loadFrom(QJsonObject jsonIndex);
+
+    static DeviceConnection *processConnection(NetworkDevice *device, const QHostAddress &hostAddress);
+
+    static void processConnection(NetworkDevice *device, DeviceConnection *connection);
 };
 
 
