@@ -49,13 +49,15 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         }
 
         if (deviceSerial != nullptr) {
-            device = new NetworkDevice(deviceSerial);
+            auto *testDevice = new NetworkDevice(deviceSerial);
 
-            if (gDbSignal->reconstruct(device)) {
-                if (!device->isRestricted)
+            if (gDbSignal->reconstruct(testDevice)) {
+                if (!testDevice->isRestricted)
                     shouldContinue = true;
+
+                device = testDevice;
             } else {
-                delete device;
+                delete testDevice;
 
                 device = NetworkDeviceLoader::load(
                         this,

@@ -68,12 +68,9 @@ bool TransferUtils::firstAvailableTransfer(TransferObject *object, quint32 group
 
     auto taskResult = query->first();
 
-    qDebug() << sqlSelection->where;
-
-    if (taskResult) {
-        qDebug() << query->record();
+    if (taskResult)
         object->onGeneratingValues(query->record());
-    } else
+    else
         qDebug() << query->lastError() << endl << query->executedQuery();
 
     delete query;
@@ -148,9 +145,8 @@ QString TransferUtils::getUniqueFileName(const QString &filePath, bool tryActual
 QString TransferUtils::saveIncomingFile(TransferGroup *group, TransferObject *object)
 {
     QFile file(getIncomingFilePath(group, object));
-    QString savePath = getSavePath(group);
-    QDir savePathFile(savePath);
-    QString uniqueName = getUniqueFileName(savePathFile.filePath(object->friendlyName), true);
+    QFileInfo fileInfo(file);
+    QString uniqueName = getUniqueFileName(fileInfo.dir().filePath(object->friendlyName), true);
     QFile uniqueFile(uniqueName);
 
     qDebug() << file.fileName();
