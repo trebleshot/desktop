@@ -116,3 +116,53 @@ QString TransferUtils::getIncomingFilePath(TransferGroup *transferGroup, Transfe
     return savePath.filePath(object->file);
 }
 
+QString TransferUtils::getUniqueFileName(const QString &filePath, bool tryActualFile)
+{
+    if (tryActualFile && !QFile::exists(filePath))
+        return filePath;
+
+    QFile file(filePath);
+    QString fileName = file.fileName();
+    int pathStartPosition = file.fileName().lastIndexOf(".");
+
+    QString mergedName = pathStartPosition != -1 ? fileName.left(pathStartPosition) : fileName;
+    QString fileExtension = pathStartPosition != -1 ? fileName.right(pathStartPosition) : "";
+
+    if (mergedName.length() == 0 && fileExtension.length() > 0) {
+        mergedName = fileExtension;
+        fileExtension = "";
+    }
+
+    QFileInfo fileInfo(file);
+
+    for (int exceed = 1; exceed < 999; exceed++) {
+        QString newName = mergedName + " (" + exceed + ")" + fileExtension;
+
+        if (!QFile::exists(fileInfo.dir().filePath(newName)))
+            return newName;
+    }
+
+    return fileName;
+}
+
+QString TransferUtils::saveIncomingFile(TransferGroup *group, TransferObject *object)
+{
+    QFile file(getIncomingFilePath(group, object));
+    QString savePath = getSavePath(group);
+    QDir savePathFile(savePath);
+    QString uniqueName = getUniqueFileName(savePathFile.filePath(object->friendlyName), true);
+    QFile uniqueFile(uniqueName);
+
+    qDebug() << file.fileName();
+
+    if (file.exists()) {
+        if (file.rename(uniqueFile.fileName()))
+            object->file = uniqueFile.fileName();
+    }
+
+    object->flag = TransferObject::Flag::Done;
+
+    gDatabase->publish(object);
+
+    return QString();
+}

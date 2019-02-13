@@ -121,7 +121,7 @@ void SeamlessClient::run()
 
                         if (constStatus) {
                             QFile currentFile(TransferUtils::getIncomingFilePath(group, transferObject));
-                            currentFile.open(QFile::OpenModeFlag::WriteOnly);
+                            currentFile.open(QFile::OpenModeFlag::Append);
 
                             auto *tcpServer = new QTcpServer;
 
@@ -198,7 +198,8 @@ void SeamlessClient::run()
                                             auto *socket = tcpServer->nextPendingConnection();
                                             clock_t lastDataAvailable = clock();
 
-                                            while (socket->isReadable()) {
+                                            while (socket->isReadable()
+                                                   && currentFile.size() < transferObject->fileSize) {
                                                 if (socket->waitForReadyRead(2000)) {
                                                     currentFile.write(socket->read(BUFFER_LENGTH_DEFAULT));
                                                     currentFile.flush();
@@ -209,6 +210,15 @@ void SeamlessClient::run()
                                                 if (lastDataAvailable < clock() - TIMEOUT_SOCKET_DEFAULT) {
                                                     throw exception();
                                                 }
+                                            }
+
+                                            if (currentFile.size() == transferObject->fileSize) {
+                                                gDbSignal->doSynchronized([group, transferObject](AccessDatabase *db) {
+                                                    TransferUtils::saveIncomingFile(group, transferObject);
+                                                });
+                                            } else {
+                                                transferObject->flag = TransferObject::Flag::Interrupted;
+                                                gDbSignal->publish(transferObject);
                                             }
                                         }
                                     }
@@ -225,20 +235,31 @@ void SeamlessClient::run()
             qDebug() << "Connection failed to the server";
         }
     } else {
-        qDebug() << "Could not produce information within given group id"
-                 << m_groupId
-                 << "and device id"
-                 << m_deviceId;
+        qDebug()
+
+                << "Could not produce information within given group id"
+                << m_groupId
+                << "and device id"
+                <<
+                m_deviceId;
     }
 
-    delete client;
-    delete connection;
-    delete assignee;
-    delete group;
-    delete device;
-    delete localDevice;
+    delete
+            client;
+    delete
+            connection;
+    delete
+            assignee;
+    delete
+            group;
+    delete
+            device;
+    delete
+            localDevice;
 
-    qDebug() << "-- SeamlessClient --";
+    qDebug()
+
+            << "-- SeamlessClient --";
 }
 
 void SeamlessClient::interrupt()

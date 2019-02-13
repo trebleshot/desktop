@@ -26,6 +26,10 @@ public:
     static QString getIncomingFilePath(TransferGroup *transferGroup, TransferObject *object);
 
     static QString getSavePath(TransferGroup *group);
+
+    static QString getUniqueFileName(const QString &filePath, bool tryActualFile);
+
+    static QString saveIncomingFile(TransferGroup* group, TransferObject* object);
 };
 
 
