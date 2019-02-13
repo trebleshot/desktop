@@ -73,7 +73,7 @@ void SeamlessClient::run()
 
                 activeConnection->reply(groupInfoJson);
                 auto *response = activeConnection->receive();
-                const QJsonObject &request = response->asJson();
+                auto request = response->asJson();
 
                 delete response;
 
@@ -96,17 +96,115 @@ void SeamlessClient::run()
                     }
                 } else {
                     while (activeConnection->getSocket()->isOpen()) {
-                        //todo: Check when interrupted using a way similar to the code below
-                        // if (processHolder.builder.getTransferProgress().isInterrupted())
-                        //   break;
+                        if (interrupted())
+                            break;
 
-                        auto *transferObject = new TransferObject;
+                        TransferObject *transferObject = new TransferObject;
+                        bool constStatus = false;
 
-                        gDbSignal->doSynchronized([transferObject, this](AccessDatabase *db) {
-                            TransferUtils::firstAvailableTransfer(transferObject, m_groupId, m_deviceId);
+                        gDbSignal->doSynchronized([this, transferObject, &constStatus](AccessDatabase *db) {
+                            constStatus = TransferUtils::firstAvailableTransfer(transferObject, m_groupId, m_deviceId);
                         });
 
-                        delete transferObject;
+                        if (constStatus) {
+                            QFile currentFile(TransferUtils::getIncomingFilePath(group, transferObject));
+                            currentFile.open(QFile::OpenModeFlag::WriteOnly);
+
+                            auto *tcpServer = new QTcpServer;
+
+                            tcpServer->listen();
+
+                            {
+                                QJsonObject reply;
+
+                                reply.insert(KEYWORD_TRANSFER_REQUEST_ID,
+                                             QVariant(transferObject->requestId).toString());
+                                reply.insert(KEYWORD_TRANSFER_GROUP_ID, QVariant(transferObject->groupId).toString());
+                                reply.insert(KEYWORD_TRANSFER_SOCKET_PORT, tcpServer->serverPort());
+                                reply.insert(KEYWORD_RESULT, true);
+
+                                if (currentFile.size() > 0) {
+                                    transferObject->skippedBytes = static_cast<size_t>(currentFile.size());
+                                    reply.insert(KEYWORD_SKIPPED_BYTES, currentFile.size());
+                                }
+
+                                activeConnection->reply(reply);
+                            }
+
+                            {
+                                auto *fileResponse = activeConnection->receive();
+                                auto fileResponseJSON = response->asJson();
+
+                                delete fileResponse;
+
+                                if (!fileResponseJSON.value(KEYWORD_RESULT).toBool(false)) {
+                                    if (fileResponseJSON.contains(KEYWORD_TRANSFER_JOB_DONE)
+                                        && !fileResponseJSON.value(KEYWORD_TRANSFER_JOB_DONE).toBool(false)) {
+                                        interrupt();
+                                        qDebug() << "The other side requested the task to be cancelled";
+                                        break;
+                                    } else if (fileResponseJSON.contains(KEYWORD_FLAG)
+                                               && fileResponseJSON.value(KEYWORD_FLAG).toString()
+                                                  == KEYWORD_FLAG_GROUP_EXISTS) {
+                                        if (fileResponseJSON.contains(KEYWORD_ERROR)) {
+                                            QString error = fileResponseJSON.value(KEYWORD_ERROR).toString();
+
+                                            qDebug() << "Sender says error" << error << "occurred";
+
+                                            if (error == KEYWORD_ERROR_NOT_FOUND)
+                                                transferObject->flag = TransferObject::Flag::Removed;
+                                            else if (error == KEYWORD_ERROR_UNKNOWN
+                                                     || error == KEYWORD_ERROR_NOT_ACCESSIBLE)
+                                                transferObject->flag = TransferObject::Flag::Interrupted;
+                                        } else {
+                                            transferObject->flag = TransferObject::Flag::Interrupted;
+                                        }
+                                    }
+                                } else {
+                                    bool canContinue = true;
+
+                                    if (fileResponseJSON.contains(KEYWORD_SIZE_CHANGED)) {
+                                        size_t currentSize = fileResponseJSON.value(KEYWORD_SIZE_CHANGED)
+                                                .toVariant()
+                                                .toUInt();
+
+                                        if (currentSize != transferObject->fileSize
+                                            && currentFile.size() > 0) {
+                                            transferObject->fileSize = currentSize;
+                                            transferObject->flag = TransferObject::Flag::Removed;
+
+                                            canContinue = false;
+                                        }
+                                    }
+
+                                    if (canContinue) {
+                                        // We do receive the file here ...
+                                        tcpServer->waitForNewConnection(TIMEOUT_SOCKET_DEFAULT);
+
+                                        if (tcpServer->hasPendingConnections()) {
+                                            auto *socket = tcpServer->nextPendingConnection();
+                                            clock_t lastDataAvailable = clock();
+
+                                            while (socket->isReadable()) {
+                                                if (socket->waitForReadyRead(2000)) {
+                                                    currentFile.write(socket->read(BUFFER_LENGTH_DEFAULT));
+                                                    currentFile.flush();
+
+                                                    lastDataAvailable = clock();
+                                                }
+
+                                                if (lastDataAvailable < clock() - TIMEOUT_SOCKET_DEFAULT) {
+                                                    throw exception();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            delete transferObject;
+                            break;
+                        }
                     }
                 }
             }
@@ -126,4 +224,9 @@ void SeamlessClient::run()
     delete group;
     delete device;
     delete localDevice;
+}
+
+void SeamlessClient::interrupt()
+{
+    m_interrupted = true;
 }

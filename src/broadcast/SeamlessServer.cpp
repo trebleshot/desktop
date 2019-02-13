@@ -120,7 +120,7 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
                                     throw exception();
                             }
 
-                            time_t lastDataAvailable = clock();
+                            clock_t lastDataAvailable = clock();
 
                             while (file->isReadable()) {
                                 if (file->waitForReadyRead(2000)) {

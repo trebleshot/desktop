@@ -33,11 +33,16 @@ SqlSelection *TransferUtils::createSqlSelection(quint32 groupId, const QString &
     return sqlSelection;
 }
 
-TransferObject *TransferUtils::firstAvailableTransfer(TransferObject *object, quint32 groupId, const QString &deviceId)
+TransferObject *TransferUtils::firstAvailableTransfer(quint32 groupId, const QString &deviceId)
 {
-    if (object == nullptr)
-        object = new TransferObject;
+    TransferObject *object = new TransferObject;
+    firstAvailableTransfer(object, groupId, deviceId);
 
+    return object;
+}
+
+bool TransferUtils::firstAvailableTransfer(TransferObject *object, quint32 groupId, const QString &deviceId)
+{
     auto *sqlSelection = new SqlSelection;
 
     sqlSelection->tableName = DbStructure::TABLE_TRANSFER;
@@ -45,16 +50,16 @@ TransferObject *TransferUtils::firstAvailableTransfer(TransferObject *object, qu
                                    .arg(DbStructure::FIELD_TRANSFER_GROUPID)
                                    .arg(DbStructure::FIELD_TRANSFER_DEVICEID)
                                    .arg(DbStructure::FIELD_TRANSFER_FLAG)
-                                   .arg(DbStructure::FIELD_TRANSFER_TYPE));
+                                   .arg(DbStructure::FIELD_TRANSFER_TYPE))
+            ->setLimit(0)
+            ->setOrderBy(QString("`%1` ASC, `%2` ASC")
+                                 .arg(DbStructure::FIELD_TRANSFER_DIRECTORY)
+                                 .arg(DbStructure::FIELD_TRANSFER_NAME));
 
     sqlSelection->whereArgs << groupId
                             << deviceId
                             << TransferObject::Flag::Pending
                             << TransferObject::Type::Incoming;
-
-    sqlSelection->setOrderBy(QString("`%1` ASC, `%2` ASC")
-                                     .arg(DbStructure::FIELD_TRANSFER_DIRECTORY)
-                                     .arg(DbStructure::FIELD_TRANSFER_NAME));
 
     auto *query = sqlSelection->toSelectionQuery();
 

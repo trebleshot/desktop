@@ -6,16 +6,26 @@
 #define TREBLESHOT_SEAMLESSCLIENT_H
 
 #include <QtCore/QThread>
+#include <QFile>
 
 class SeamlessClient : public QThread {
     quint32 m_groupId = 0;
     QString m_deviceId;
+    bool m_interrupted = false;
 
 public:
-    explicit SeamlessClient(const QString &deviceId, quint32 groupId, QObject* parent = nullptr);
+    explicit SeamlessClient(const QString &deviceId, quint32 groupId, QObject *parent = nullptr);
+
+    bool interrupted() {
+        return m_interrupted;
+    }
 
 protected:
     void run() override;
+
+public slots:
+
+    void interrupt();
 };
 
 

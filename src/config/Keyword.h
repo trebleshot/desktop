@@ -37,6 +37,7 @@
 #define KEYWORD_ERROR "error"
 #define KEYWORD_ERROR_NOT_ALLOWED "notAllowed"
 #define KEYWORD_ERROR_NOT_FOUND "notFound"
+#define KEYWORD_ERROR_UNKNOWN "errorUnknown"
 #define KEYWORD_ERROR_NOT_ACCESSIBLE "notAccessible"
 #define KEYWORD_HANDSHAKE_REQUIRED "handshakeRequired"
 #define KEYWORD_HANDSHAKE_ONLY "handshakeOnly"
