@@ -4,6 +4,7 @@
 #include <QtCore/QJsonArray>
 #include <src/database/object/TransferGroup.h>
 #include <src/database/object/TransferObject.h>
+#include <src/database/object/TextStreamObject.h>
 #include "CommunicationServer.h"
 
 CommunicationServer::CommunicationServer(QObject *parent)
@@ -174,10 +175,19 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                     }
                 } else if (request == KEYWORD_REQUEST_CLIPBOARD) {
                     if (responseJSON.contains(KEYWORD_TRANSFER_CLIPBOARD_TEXT)) {
-                        emit textReceived(responseJSON
-                                                  .value(KEYWORD_TRANSFER_CLIPBOARD_TEXT)
-                                                  .toString(),
-                                          device->deviceId);
+                        auto text = responseJSON
+                                .value(KEYWORD_TRANSFER_CLIPBOARD_TEXT)
+                                .toString();
+                        emit textReceived(text, device->deviceId);
+
+                        auto *textObject = new TextStreamObject;
+                        textObject->text = text;
+                        textObject->id = qrand();
+                        time(&textObject->dateCreated);
+
+                        gDbSignal->publish(textObject);
+                        delete textObject;
+
                         result = true;
                     }
                 } else if (request == KEYWORD_REQUEST_ACQUAINTANCE) {
