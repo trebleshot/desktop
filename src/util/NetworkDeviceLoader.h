@@ -15,7 +15,9 @@
 
 class NetworkDeviceLoader {
 public:
-    static QString convertToInet4Address(int ipv4Address);
+    static QString convertToInet4Address(const QHostAddress &hostAddress, bool parentOnly = false);
+
+    static QString convertToInet4Address(int ipv4Address, bool parentOnly = false);
 
     static void loadAsynchronously(QObject *sender,
                                    const QHostAddress &hostAddress,

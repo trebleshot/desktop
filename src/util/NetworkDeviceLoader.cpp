@@ -4,10 +4,26 @@
 #include <QtSql/QSqlError>
 #include "NetworkDeviceLoader.h"
 
-QString NetworkDeviceLoader::convertToInet4Address(int ipv4Address)
+QString NetworkDeviceLoader::convertToInet4Address(const QHostAddress &hostAddress, bool parentOnly)
 {
-    return QString("%4.%3.%2.%1").arg(ipv4Address & 0xff).arg(ipv4Address >> 8 & 0xff)
-            .arg(ipv4Address >> 16 & 0xff).arg(ipv4Address >> 24 & 0xff);
+    return convertToInet4Address(hostAddress.toIPv4Address(), parentOnly);
+}
+
+
+QString NetworkDeviceLoader::convertToInet4Address(int ipv4Address, bool parentOnly)
+{
+    QString inet4Address = QString("%1.%2.%3")
+            .arg(ipv4Address >> 24 & 0xff)
+            .arg(ipv4Address >> 16 & 0xff)
+            .arg(ipv4Address >> 8 & 0xff);
+
+
+    if (!parentOnly) {
+        inet4Address = inet4Address.append(".%1")
+                .arg(ipv4Address & 0xff);
+    }
+
+    return inet4Address;
 }
 
 DeviceConnection *NetworkDeviceLoader::processConnection(NetworkDevice *device,
@@ -37,12 +53,14 @@ void NetworkDeviceLoader::processConnection(NetworkDevice *device,
     auto *sqlSelection = new SqlSelection();
 
     sqlSelection->setTableName(DbStructure::TABLE_DEVICECONNECTION)
-            ->setWhere(QString("`%1` = ? AND `%2` = ?")
+            ->setWhere(QString("`%1` = ? AND (`%2` = ? OR `%3` = ?)")
                                .arg(DbStructure::FIELD_DEVICECONNECTION_DEVICEID)
-                               .arg(DbStructure::FIELD_DEVICECONNECTION_ADAPTERNAME));
+                               .arg(DbStructure::FIELD_DEVICECONNECTION_ADAPTERNAME)
+                               .arg(DbStructure::FIELD_DEVICECONNECTION_IPADDRESS));
 
     sqlSelection->whereArgs << QVariant(connection->deviceId)
-                            << QVariant(connection->adapterName);
+                            << QVariant(connection->adapterName)
+                            << QVariant(NetworkDeviceLoader::convertToInet4Address(connection->hostAddress));
 
     gDbSignal->remove(sqlSelection);
     gDbSignal->publish(connection);

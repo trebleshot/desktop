@@ -9,6 +9,7 @@
 #include <QtNetwork/QNetworkSession>
 #include <QtCore/QJsonObject>
 #include "AppUtils.h"
+#include "NetworkDeviceLoader.h"
 
 bool AppUtils::applyAdapterName(DeviceConnection *connection)
 {
@@ -27,13 +28,12 @@ bool AppUtils::applyAdapterName(DeviceConnection *connection)
         const QString &interfaceName(session.interface().name());
 
         for (const QNetworkAddressEntry &address : session.interface().addressEntries()) {
-            quint32 netmask = address.netmask().toIPv4Address();
+            quint32 broadcast = address.broadcast().toIPv4Address();
 
-            if (netmask <= 0)
+            if (broadcast <= 0)
                 continue;
 
-            // Declare as found when the IP is in range with netmask and minus 255
-            if (netmask - 255 < ipv4Address && ipv4Address <= netmask) {
+            if (broadcast - 255 < ipv4Address && broadcast >= ipv4Address) {
                 connection->adapterName = interfaceName;
                 return true;
             }
