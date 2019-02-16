@@ -25,6 +25,7 @@ namespace Ui {
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
+protected:
     Ui::MainWindow *m_ui;
     CommunicationServer *m_commServer;
 

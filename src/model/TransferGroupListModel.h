@@ -11,9 +11,11 @@
 #include <src/database/object/TransferGroup.h>
 #include <QtCore/QDateTime>
 #include <src/database/object/NetworkDevice.h>
+#include <QIcon>
+#include <QtGui/QIconEngine>
 
 class TransferGroupListModel
-        : public QAbstractListModel {
+        : public QAbstractTableModel {
     QList<TransferGroup *> *m_list;
 
 public:
@@ -25,7 +27,7 @@ public:
     };
 
     explicit TransferGroupListModel(QObject *parent = nullptr)
-            : QAbstractListModel(parent)
+            : QAbstractTableModel(parent)
     {
         auto *db = AppUtils::getDatabase();
         auto *selection = new SqlSelection;
@@ -52,24 +54,25 @@ public:
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override
     {
-        if (role != Qt::DisplayRole)
-            return QVariant();
+        if (role == Qt::DisplayRole) {
+            if (orientation == Qt::Horizontal) {
+                switch (section) {
+                    case ColumnNames::Status:
+                        return tr("Status");
+                    case ColumnNames::Devices:
+                        return tr("Devices");
+                    case ColumnNames::Date:
+                        return tr("Date");
+                    case ColumnNames::Size:
+                        return tr("Size");
+                    default:
+                        return QString("?");
+                }
+            } else
+                return QString("%1").arg(section);
+        }
 
-        if (orientation == Qt::Horizontal) {
-            switch (section) {
-                case ColumnNames::Status:
-                    return tr("Status");
-                case ColumnNames::Devices:
-                    return tr("Devices");
-                case ColumnNames::Date:
-                    return tr("Date");
-                case ColumnNames::Size:
-                    return tr("Size");
-                default:
-                    return QString("?");
-            }
-        } else
-            return QString("%1").arg(section);
+        return QVariant();
     }
 
     QVariant data(const QModelIndex &index, int role) const override
@@ -119,12 +122,16 @@ public:
                 case ColumnNames::Size:
                 case ColumnNames::Date:
                     return QDateTime::fromTime_t(static_cast<uint>(currentGroup->dateCreated))
-                            .toString(Qt::DateFormat::SystemLocaleShortDate);
+                            .toString("ddd, d MMM");
                 default:
                     return QString("Data id %1x%2")
                             .arg(index.row())
                             .arg(index.column());
             }
+        } else if (role == Qt::DecorationRole) {
+            switch (index.column())
+                case ColumnNames::Devices:
+                    return QIcon(":/icon/arrow_down");
         }
 
         return QVariant();

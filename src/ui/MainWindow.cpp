@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
         auto *errorMessage = new QMessageBox(this);
 
         errorMessage->setWindowTitle("Database error");
-        errorMessage->setText("The getDatabase used to store information did not open. Refer to the development notes. "
+        errorMessage->setText("The database used to store information did not open. Refer to the development notes. "
                               "The program will force close.");
 
         errorMessage->show();
@@ -47,17 +47,18 @@ MainWindow::MainWindow(QWidget *parent)
 
         auto *model = new TransferGroupListModel();
 
-        connect(m_ui->tableView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
+        connect(m_ui->treeView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
         connect(m_ui->actionAbout_TrebleShot, SIGNAL(triggered(bool)), this, SLOT(about()));
         connect(m_ui->actionAbout_Qt, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
 
-        m_ui->tableView->setModel(model);
+        m_ui->treeView->setModel(model);
 
         connect(m_ui->actionStart_receiver, &QAction::triggered, []() {
             qDebug() << "Debug process";
 
             SqlSelection sqlSelection;
             sqlSelection.setTableName(DbStructure::TABLE_TRANSFERASSIGNEE);
+            sqlSelection.setOrderBy(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID, false);
 
             auto *assigneeList = gDatabase->castQuery(sqlSelection, new TransferAssignee);
 

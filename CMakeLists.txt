@@ -69,6 +69,7 @@ qt5_add_resources(QRCS
 
 qt5_wrap_ui(UI_HEADERS
         src/ui/MainWindow.ui
+        src/ui/TransferWindow.ui
         src/dialog/WelcomeDialog.ui)
 
 set(UTIL_LIBRARY
@@ -109,10 +110,12 @@ set(UTIL_LIBRARY
         src/util/TransferUtils.h
         src/util/TransferUtils.cpp
         src/database/object/TextStreamObject.h
-        src/database/object/TextStreamObject.cpp)
+        src/database/object/TextStreamObject.cpp
+        src/ui/TransferWindow.h
+        src/ui/TransferWindow.cpp)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
-add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)
+add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp src/ui/TransferWindow.cpp src/ui/TransferWindow.h)
 
 # Add the Qt5 Widgets for linking
 if (NOT TARGET Qt5::WinMain)

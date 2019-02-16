@@ -235,31 +235,20 @@ void SeamlessClient::run()
             qDebug() << "Connection failed to the server";
         }
     } else {
-        qDebug()
-
-                << "Could not produce information within given group id"
-                << m_groupId
-                << "and device id"
-                <<
-                m_deviceId;
+        qDebug() << "Could not produce information within given group id"
+                 << m_groupId
+                 << "and device id"
+                 << m_deviceId;
     }
 
-    delete
-            client;
-    delete
-            connection;
-    delete
-            assignee;
-    delete
-            group;
-    delete
-            device;
-    delete
-            localDevice;
+    delete client;
+    delete connection;
+    delete assignee;
+    delete group;
+    delete device;
+    delete localDevice;
 
-    qDebug()
-
-            << "-- SeamlessClient --";
+    qDebug() << "-- SeamlessClient --";
 }
 
 void SeamlessClient::interrupt()

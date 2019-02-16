@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
         QApplication::installTranslator(&translator);
      **/
 
-    QApplication::setWindowIcon(QIcon(":/drawable/ic_launcher.png"));
+    QApplication::setWindowIcon(QIcon(":/logo/launcher"));
     QApplication::setApplicationVersion(QString(TREBLESHOT_VERSION_NAME));
 
     MainWindow mainWindow;

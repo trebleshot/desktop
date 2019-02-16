@@ -120,8 +120,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                                                      .toVariant()
                                                                      .toUInt(),
                                                              device->deviceId,
-                                                             TransferObject::Incoming,
-                                                             transferGroup);
+                                                             TransferObject::Incoming);
 
                                 transferObject->flag = TransferObject::Flag::Pending;
                                 transferObject->groupId = groupId;

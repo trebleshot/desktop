@@ -119,23 +119,28 @@ QString TransferUtils::getUniqueFileName(const QString &filePath, bool tryActual
         return filePath;
 
     QFile file(filePath);
-    QString fileName = file.fileName();
-    int pathStartPosition = file.fileName().lastIndexOf(".");
+    QFileInfo fileInfo(file);
+    QString fileName = fileInfo.fileName();
+    int pathStartPosition = fileName.lastIndexOf(".");
 
     QString mergedName = pathStartPosition != -1 ? fileName.left(pathStartPosition) : fileName;
-    QString fileExtension = pathStartPosition != -1 ? fileName.right(pathStartPosition) : "";
+    QString fileExtension = pathStartPosition != -1 ? fileName.mid(pathStartPosition) : "";
 
     if (mergedName.length() == 0 && fileExtension.length() > 0) {
         mergedName = fileExtension;
         fileExtension = "";
     }
 
-    QFileInfo fileInfo(file);
-
     for (int exceed = 1; exceed < 999; exceed++) {
-        QString newName = mergedName + " (" + exceed + ")" + fileExtension;
+        QString newName = fileInfo.dir().filePath(
+                QString("%1 (%2)%3")
+                        .arg(mergedName)
+                        .arg(exceed)
+                        .arg(fileExtension));
 
-        if (!QFile::exists(fileInfo.dir().filePath(newName)))
+        qDebug() << newName;
+
+        if (!QFile::exists(newName))
             return newName;
     }
 
@@ -148,12 +153,11 @@ QString TransferUtils::saveIncomingFile(TransferGroup *group, TransferObject *ob
     QFileInfo fileInfo(file);
     QString uniqueName = getUniqueFileName(fileInfo.dir().filePath(object->friendlyName), true);
     QFile uniqueFile(uniqueName);
-
-    qDebug() << file.fileName();
+    QFileInfo uniqueFileInfo(uniqueFile);
 
     if (file.exists()) {
         if (file.rename(uniqueFile.fileName()))
-            object->file = uniqueFile.fileName();
+            object->file = uniqueFileInfo.fileName();
     }
 
     object->flag = TransferObject::Flag::Done;

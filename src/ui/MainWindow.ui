@@ -499,21 +499,12 @@
      </widget>
     </item>
     <item row="1" column="0" colspan="2">
-     <widget class="QTableView" name="tableView">
-      <property name="defaultDropAction">
-       <enum>Qt::IgnoreAction</enum>
-      </property>
-      <property name="selectionMode">
-       <enum>QAbstractItemView::SingleSelection</enum>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <property name="showGrid">
+     <widget class="QTreeView" name="treeView">
+      <property name="dragEnabled">
        <bool>true</bool>
       </property>
-      <property name="gridStyle">
-       <enum>Qt::SolidLine</enum>
+      <property name="allColumnsShowFocus">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -607,7 +598,7 @@
   </action>
   <action name="actionStart_receiver">
    <property name="text">
-    <string>Start receiver</string>
+    <string>&amp;Start receiver</string>
    </property>
   </action>
  </widget>
