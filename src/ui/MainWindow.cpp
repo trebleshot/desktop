@@ -1,6 +1,7 @@
 #include <QtGui/QDesktopServices>
 #include <src/broadcast/SeamlessClient.h>
 #include "MainWindow.h"
+#include "ManageDevicesWidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_ui(new Ui::MainWindow), m_commServer(new CommunicationServer)
@@ -50,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
         connect(m_ui->treeView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
         connect(m_ui->actionAbout_TrebleShot, SIGNAL(triggered(bool)), this, SLOT(about()));
         connect(m_ui->actionAbout_Qt, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
+        connect(m_ui->actionManage_devices, &QAction::triggered, this, &MainWindow::manageDevices);
 
         m_ui->treeView->setModel(model);
 
@@ -187,4 +189,14 @@ void MainWindow::showTransferRequest(const QString &deviceId, quint32 groupId, i
     }
 
     delete device;
+}
+
+void MainWindow::manageDevices()
+{
+    ManageDevicesWidget manageDevices(
+            nullptr);
+
+    manageDevices.show();
+
+    qDebug() << "Did it start?";
 }

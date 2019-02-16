@@ -42,6 +42,8 @@ public slots:
 
     void failureDialogFinished(int state);
 
+    void manageDevices();
+
     void showReceivedText(const QString &text, const QString &deviceId);
 
     void showTransferRequest(const QString &deviceId, quint32 groupId, int filesTotal);

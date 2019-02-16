@@ -197,6 +197,12 @@ TransferGroupInfo TransferUtils::getInfo(TransferGroup *group)
             groupInfo.completed++;
             groupInfo.completedBytes += object->fileSize;
         }
+
+        if (!groupInfo.hasIncoming && object->type == TransferObject::Type::Incoming)
+            groupInfo.hasIncoming = true;
+
+        if (!groupInfo.hasOutgoing && object->type == TransferObject::Type::Outgoing)
+            groupInfo.hasOutgoing = true;
     }
 
     delete selection;

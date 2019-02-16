@@ -34,7 +34,8 @@ public:
         auto *db = AppUtils::getDatabase();
         auto *selection = new SqlSelection;
 
-        selection->setTableName(DbStructure::TABLE_TRANSFERGROUP);
+        selection->setTableName(DbStructure::TABLE_TRANSFERGROUP)
+        ->setOrderBy(DbStructure::FIELD_TRANSFERGROUP_DATECREATED, false);
 
         auto *dbList = db->castQuery(*selection, new TransferGroup());
 
@@ -122,8 +123,12 @@ public:
             }
         } else if (role == Qt::DecorationRole) {
             switch (index.column())
-                case ColumnNames::Devices:
-                    return QIcon(":/icon/arrow_down");
+                case ColumnNames::Devices: {
+                    const TransferGroupInfo &currentGroup = m_list->at(index.row());
+                    return QIcon(currentGroup.hasIncoming
+                                 ? ":/icon/arrow_down"
+                                 : ":/icon/arrow_up");
+                }
         }
 
         return QVariant();

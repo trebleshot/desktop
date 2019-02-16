@@ -24,6 +24,8 @@ struct TransferGroupInfo {
     int total;
     int completed;
     bool hasError;
+    bool hasIncoming;
+    bool hasOutgoing;
     size_t totalBytes;
     size_t completedBytes;
 };
