@@ -5,6 +5,7 @@
 #include <QtGui/QDesktopServices>
 #include <QtCore/QDir>
 #include <QSqlError>
+#include <cmath>
 #include "TransferUtils.h"
 #include "AppUtils.h"
 
@@ -165,4 +166,94 @@ QString TransferUtils::saveIncomingFile(TransferGroup *group, TransferObject *ob
     gDatabase->publish(object);
 
     return QString();
+}
+
+TransferGroupInfo TransferUtils::getInfo(TransferGroup *group)
+{
+    TransferGroupInfo groupInfo{};
+
+    auto *selection = (new SqlSelection())
+            ->setTableName(DbStructure::TABLE_TRANSFER)
+            ->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFER_GROUPID));
+
+    selection->whereArgs << group->groupId;
+
+    auto *list = gDatabase->castQuery(*selection, new TransferObject);
+
+    groupInfo.assignees = getAllAssigneeInfo(group);
+    groupInfo.group = group;
+    groupInfo.total = list->size();
+    groupInfo.completed = 0;
+    groupInfo.hasError = false;
+
+    for (auto *object : list->toStdList()) {
+        if (!groupInfo.hasError
+            && (object->flag == TransferObject::Flag::Interrupted || object->flag == TransferObject::Flag::Removed))
+            groupInfo.hasError = true;
+
+        groupInfo.totalBytes += object->fileSize;
+
+        if (object->flag == TransferObject::Flag::Done) {
+            groupInfo.completed++;
+            groupInfo.completedBytes += object->fileSize;
+        }
+    }
+
+    delete selection;
+    delete list;
+
+    return groupInfo;
+}
+
+AssigneeInfo TransferUtils::getInfo(TransferAssignee *assignee)
+{
+    AssigneeInfo assigneeInfo{};
+
+    try {
+        auto *device = new NetworkDevice(assignee->deviceId);
+
+        gDatabase->reconstruct(device);
+
+        assigneeInfo.assignee = assignee;
+        assigneeInfo.device = device;
+        assigneeInfo.valid = true;
+    } catch (...) {
+        // do nothing
+    }
+
+    return assigneeInfo;
+}
+
+QList<AssigneeInfo> TransferUtils::getAllAssigneeInfo(TransferGroup *group)
+{
+    auto *selection = new SqlSelection();
+
+    selection->setTableName(DbStructure::TABLE_TRANSFERASSIGNEE)
+            ->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
+    selection->whereArgs << group->groupId;
+
+    QList<AssigneeInfo> returnedList;
+    QList<TransferAssignee *> *assigneeList = AppUtils::getDatabase()->castQuery(*selection, new TransferAssignee());
+
+    for (auto *assignee : assigneeList->toStdList())
+        returnedList.append(getInfo(assignee));
+
+    delete assigneeList;
+
+    return returnedList;
+}
+
+QString TransferUtils::sizeExpression(size_t bytes, bool notUseByte)
+{
+    int unit = notUseByte ? 1000 : 1024;
+
+    if (bytes < unit)
+        return QString("%1 B").arg(bytes);
+
+    int expression = (int) (log(bytes) / log(unit));
+
+    return QString("%1 %2B%3")
+            .arg(QString::asprintf("%.1f", bytes / pow(unit, expression)))
+            .arg(QString(notUseByte ? "kMGTPE" : "KMGTPE").at(expression - 1))
+            .arg(notUseByte ? "i" : "");
 }

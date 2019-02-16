@@ -10,6 +10,23 @@
 #include <src/database/object/TransferObject.h>
 #include <QtCore/QFile>
 #include <src/database/object/TransferGroup.h>
+#include "src/database/object/NetworkDevice.h"
+
+struct AssigneeInfo {
+    NetworkDevice* device;
+    TransferAssignee* assignee;
+    bool valid = false;
+};
+
+struct TransferGroupInfo {
+    TransferGroup *group;
+    QList<AssigneeInfo> assignees;
+    int total;
+    int completed;
+    bool hasError;
+    size_t totalBytes;
+    size_t completedBytes;
+};
 
 class TransferUtils {
 public:
@@ -29,7 +46,15 @@ public:
 
     static QString getUniqueFileName(const QString &filePath, bool tryActualFile);
 
-    static QString saveIncomingFile(TransferGroup* group, TransferObject* object);
+    static QList<AssigneeInfo> getAllAssigneeInfo(TransferGroup *group);
+
+    static TransferGroupInfo getInfo(TransferGroup *group);
+
+    static AssigneeInfo getInfo(TransferAssignee *assignee);
+
+    static QString saveIncomingFile(TransferGroup *group, TransferObject *object);
+
+    static QString sizeExpression(size_t size, bool notUseByte);
 };
 
 

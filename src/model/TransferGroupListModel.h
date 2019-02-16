@@ -5,6 +5,7 @@
 #ifndef TREBLESHOT_TRANSFERGROUPLISTMODEL_H
 #define TREBLESHOT_TRANSFERGROUPLISTMODEL_H
 
+#include "src/util/TransferUtils.h"
 #include <QtCore/QAbstractListModel>
 #include <iostream>
 #include <src/util/AppUtils.h>
@@ -13,10 +14,11 @@
 #include <src/database/object/NetworkDevice.h>
 #include <QIcon>
 #include <QtGui/QIconEngine>
+#include <src/database/object/TransferObject.h>
 
 class TransferGroupListModel
         : public QAbstractTableModel {
-    QList<TransferGroup *> *m_list;
+    QList<TransferGroupInfo> *m_list;
 
 public:
     enum ColumnNames {
@@ -27,14 +29,21 @@ public:
     };
 
     explicit TransferGroupListModel(QObject *parent = nullptr)
-            : QAbstractTableModel(parent)
+            : QAbstractTableModel(parent), m_list(new QList<TransferGroupInfo>)
     {
         auto *db = AppUtils::getDatabase();
         auto *selection = new SqlSelection;
 
         selection->setTableName(DbStructure::TABLE_TRANSFERGROUP);
 
-        m_list = db->castQuery(*selection, new TransferGroup());
+        auto *dbList = db->castQuery(*selection, new TransferGroup());
+
+        for (auto *group : dbList->toStdList()) {
+            m_list->append(TransferUtils::getInfo(group));
+        }
+
+        delete dbList;
+        delete selection;
     }
 
     ~TransferGroupListModel() override
@@ -78,50 +87,33 @@ public:
     QVariant data(const QModelIndex &index, int role) const override
     {
         if (role == Qt::DisplayRole) {
-            const TransferGroup *currentGroup = m_list->at(index.row());
+            const TransferGroupInfo &currentGroup = m_list->at(index.row());
 
             switch (index.column()) {
                 case ColumnNames::Devices: {
-                    auto *selection = new SqlSelection();
-
-                    selection->setTableName(DbStructure::TABLE_TRANSFERASSIGNEE)
-                            ->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
-                    selection->whereArgs << currentGroup->groupId;
-
-                    QList<TransferAssignee *> *assigneeList = AppUtils::getDatabase()->castQuery(*selection, new TransferAssignee());
                     QString devicesString;
 
-                    for (const TransferAssignee *assignee : assigneeList->toStdList()) {
-                        try {
-                            auto *device = new NetworkDevice(assignee->deviceId);
-
-                            AppUtils::getDatabase()->reconstruct(device);
-
+                    if (currentGroup.assignees.empty())
+                        devicesString.append("-");
+                    else {
+                        for (auto assigneeInfo : currentGroup.assignees) {
                             if (devicesString.length() > 0)
-                                devicesString.append(", ");
+                                devicesString.append(",");
 
-                            devicesString.append(device->nickname);
-
-                            delete device;
-                        } catch (...) {
-                            // We will not add this device to the list.
-                            std::cout << "An assignee failed to reconstruct";
+                            devicesString.append(assigneeInfo.device->nickname);
                         }
                     }
 
-                    if (devicesString.length() == 0)
-                        devicesString.append("-");
-
-                    delete assigneeList;
-
                     return devicesString;
                 }
-                case ColumnNames::Status: {
-
-                }
+                case ColumnNames::Status:
+                    return QString("%1 of %2")
+                            .arg(currentGroup.completed)
+                            .arg(currentGroup.total);
                 case ColumnNames::Size:
+                    return TransferUtils::sizeExpression(currentGroup.totalBytes, false);
                 case ColumnNames::Date:
-                    return QDateTime::fromTime_t(static_cast<uint>(currentGroup->dateCreated))
+                    return QDateTime::fromTime_t(static_cast<uint>(currentGroup.group->dateCreated))
                             .toString("ddd, d MMM");
                 default:
                     return QString("Data id %1x%2")
