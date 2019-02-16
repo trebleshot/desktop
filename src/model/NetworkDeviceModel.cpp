@@ -1,0 +1,80 @@
+//
+// Created by veli on 2/16/19.
+//
+
+#include <src/util/AppUtils.h>
+#include <QtCore/QDateTime>
+#include "NetworkDeviceModel.h"
+
+NetworkDeviceModel::NetworkDeviceModel(QObject *parent)
+        : QAbstractTableModel(parent)
+{
+    auto *selection = (new SqlSelection())
+            ->setTableName(DbStructure::TABLE_DEVICES)
+            ->setOrderBy(DbStructure::FIELD_DEVICES_LASTUSAGETIME, false);
+
+    m_list = gDatabase->castQuery(*selection, new NetworkDevice);
+
+    delete selection;
+}
+
+NetworkDeviceModel::~NetworkDeviceModel()
+{
+    delete m_list;
+}
+
+int NetworkDeviceModel::columnCount(const QModelIndex &parent) const
+{
+    return ColumnNames::__itemCount;
+}
+
+int NetworkDeviceModel::rowCount(const QModelIndex &parent) const
+{
+    return m_list->size();
+}
+
+QVariant NetworkDeviceModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::DisplayRole) {
+        if (orientation == Qt::Horizontal) {
+            switch (section) {
+                case ColumnNames::Status:
+                    return tr("Status");
+                case ColumnNames::Name:
+                    return tr("Name");
+                case ColumnNames::LastUsageDate:
+                    return tr("Last usage");
+                default:
+                    return QString("?");
+            }
+        } else
+            return QString("%1").arg(section);
+    }
+
+    return QVariant();
+}
+
+QVariant NetworkDeviceModel::data(const QModelIndex &index, int role) const
+{
+    if (role == Qt::DisplayRole) {
+        auto *thisDevice = m_list->at(index.row());
+
+        switch (index.column()) {
+            case ColumnNames::Name:
+                return thisDevice->nickname;
+            case ColumnNames::Status:
+                return thisDevice->isRestricted
+                       ? QString("Restricted")
+                       : QString("Normal");
+            case ColumnNames::LastUsageDate:
+                return QDateTime::fromTime_t(static_cast<uint>(thisDevice->lastUsageTime))
+                        .toString("ddd, d MMM");
+            default:
+                return QString("Data id %1x%2")
+                        .arg(index.row())
+                        .arg(index.column());
+        }
+    }
+
+    return QVariant();
+}

@@ -69,7 +69,7 @@ qt5_add_resources(QRCS
 
 qt5_wrap_ui(UI_HEADERS
         src/ui/MainWindow.ui
-        src/ui/ManageDevicesWidget.ui
+        src/ui/ManageDevicesDialog.ui
         src/ui/ShowTransferWidget.ui
         src/dialog/WelcomeDialog.ui)
 
@@ -82,8 +82,6 @@ set(UTIL_LIBRARY
         src/coolsocket/CoolSocket.h
         src/coolsocket/CoolSocket.cpp
         src/config/Keyword.h
-        src/model/StringListModel.h
-        src/model/StringListModel.cpp
         src/database/AccessDatabase.h
         src/database/AccessDatabase.cpp
         src/database/object/TransferObject.h
@@ -100,8 +98,8 @@ set(UTIL_LIBRARY
         src/util/AppUtils.cpp
         src/dialog/WelcomeDialog.h
         src/dialog/WelcomeDialog.cpp
-        src/model/TransferGroupListModel.h
-        src/model/TransferGroupListModel.cpp
+        src/model/TransferGroupModel.h
+        src/model/TransferGroupModel.cpp
         src/util/GThread.h
         src/util/GThread.cpp
         src/broadcast/SeamlessServer.h
@@ -113,7 +111,7 @@ set(UTIL_LIBRARY
         src/database/object/TextStreamObject.h
         src/database/object/TextStreamObject.cpp
         src/ui/ShowTransferWidget.h
-        src/ui/ShowTransferWidget.cpp src/ui/ManageDevicesWidget.cpp src/ui/ManageDevicesWidget.h)
+        src/ui/ShowTransferWidget.cpp src/ui/ManageDevicesDialog.cpp src/ui/ManageDevicesDialog.h src/model/NetworkDeviceModel.cpp src/model/NetworkDeviceModel.h)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)

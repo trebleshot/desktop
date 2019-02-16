@@ -13,7 +13,7 @@
 #include <QMessageBox>
 #include <QSqlDriver>
 #include <src/dialog/WelcomeDialog.h>
-#include <src/model/TransferGroupListModel.h>
+#include <src/model/TransferGroupModel.h>
 #include <src/util/NetworkDeviceLoader.h>
 #include <QtWidgets/QAbstractButton>
 #include <QPushButton>

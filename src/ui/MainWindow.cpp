@@ -1,7 +1,7 @@
 #include <QtGui/QDesktopServices>
 #include <src/broadcast/SeamlessClient.h>
 #include "MainWindow.h"
-#include "ManageDevicesWidget.h"
+#include "ManageDevicesDialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_ui(new Ui::MainWindow), m_commServer(new CommunicationServer)
@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
         m_commServer->start(0);
         m_ui->label->setText(QString("TrebleShot will not receive files"));
 
-        auto *model = new TransferGroupListModel();
+        auto *model = new TransferGroupModel();
 
         connect(m_ui->treeView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
         connect(m_ui->actionAbout_TrebleShot, SIGNAL(triggered(bool)), this, SLOT(about()));
@@ -193,10 +193,7 @@ void MainWindow::showTransferRequest(const QString &deviceId, quint32 groupId, i
 
 void MainWindow::manageDevices()
 {
-    ManageDevicesWidget manageDevices(
-            nullptr);
+    auto* manageDevices = new ManageDevicesDialog(this);
 
-    manageDevices.show();
-
-    qDebug() << "Did it start?";
+    manageDevices->show();
 }
