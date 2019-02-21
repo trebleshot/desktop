@@ -12,9 +12,5 @@ ManageDevicesDialog::ManageDevicesDialog(QWidget *parent)
 
     auto *deviceModel = new NetworkDeviceModel();
 
-    qDebug() << sizeof(NetworkDeviceModel::ColumnNames
-    );
-
     m_ui->treeView->setModel(deviceModel);
-
 }

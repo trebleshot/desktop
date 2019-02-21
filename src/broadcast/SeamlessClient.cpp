@@ -22,7 +22,7 @@ void SeamlessClient::run()
     auto *device = new NetworkDevice(m_deviceId);
     auto *group = new TransferGroup(m_groupId);
     auto *assignee = new TransferAssignee(m_groupId, m_deviceId, nullptr, this);
-    auto *connection = new DeviceConnection(); // Adapter name passed when assignee reconstruction is successful
+    auto *connection = new DeviceConnection(); // Adapter name will be passed when assignee reconstruction is successful
     auto *client = new CommunicationBridge;
     bool retry = false;
 

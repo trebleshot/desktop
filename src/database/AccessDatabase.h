@@ -130,6 +130,13 @@ public:
     QSqlQuery *toUpdateQuery(QSqlRecord query);
 };
 
+class SqlSelectionConst : public QObject {
+Q_OBJECT
+
+public:
+
+};
+
 class DatabaseObject : public QObject {
 Q_OBJECT
 
