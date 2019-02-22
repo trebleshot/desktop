@@ -18,7 +18,7 @@
 
 class TransferGroupModel
         : public QAbstractTableModel {
-    QList<TransferGroupInfo> *m_list;
+    QList<TransferGroupInfo *> *m_list;
 
 public:
     enum ColumnNames {

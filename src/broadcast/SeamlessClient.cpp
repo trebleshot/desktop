@@ -197,9 +197,9 @@ void SeamlessClient::run()
                                         if (tcpServer->hasPendingConnections()) {
                                             auto *socket = tcpServer->nextPendingConnection();
                                             clock_t lastDataAvailable = clock();
+                                            qint64 fileSize = static_cast<qint64>(transferObject->fileSize);
 
-                                            while (socket->isReadable()
-                                                   && currentFile.size() < transferObject->fileSize) {
+                                            while (socket->isReadable() && currentFile.size() < fileSize) {
                                                 if (socket->waitForReadyRead(2000)) {
                                                     currentFile.write(socket->read(BUFFER_LENGTH_DEFAULT));
                                                     currentFile.flush();

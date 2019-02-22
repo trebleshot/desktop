@@ -9,11 +9,12 @@
 NetworkDeviceModel::NetworkDeviceModel(QObject *parent)
         : QAbstractTableModel(parent)
 {
-    auto *selection = (new SqlSelection())
-            ->setTableName(DbStructure::TABLE_DEVICES)
-            ->setOrderBy(DbStructure::FIELD_DEVICES_LASTUSAGETIME, false);
+    auto *selection = new SqlSelection();
 
-    m_list = gDatabase->castQuery(*selection, new NetworkDevice);
+    selection->setTableName(DbStructure::TABLE_DEVICES);
+    selection->setOrderBy(DbStructure::FIELD_DEVICES_LASTUSAGETIME, false);
+
+    m_list = gDatabase->castQuery(*selection, NetworkDevice());
 
     delete selection;
 }
@@ -57,7 +58,7 @@ QVariant NetworkDeviceModel::headerData(int section, Qt::Orientation orientation
 QVariant NetworkDeviceModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole) {
-        auto *thisDevice = m_list->at(index.row());
+        const auto &thisDevice = m_list->at(index.row());
 
         switch (index.column()) {
             case ColumnNames::Name:

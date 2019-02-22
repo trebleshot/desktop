@@ -103,6 +103,8 @@ NetworkDevice *CommunicationBridge::updateDeviceIfOkay(
                     ->getSocket()
                     ->peerAddress());
 
+    delete connection;
+
     if (device->deviceId != loadedDevice->deviceId) {
         qDebug() << "Compared" << device->nickname << "with" << loadedDevice->nickname;
         throw exception();

@@ -14,9 +14,9 @@ SqlSelection *TextStreamObject::getWhere()
 {
     auto *selection = new SqlSelection;
 
-    selection->setTableName(DbStructure::TABLE_CLIPBOARD)
-            ->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_CLIPBOARD_ID))
-            ->whereArgs << this->id;
+    selection->setTableName(DbStructure::TABLE_CLIPBOARD);
+    selection->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_CLIPBOARD_ID));
+    selection->whereArgs << this->id;
 
     return selection;
 }

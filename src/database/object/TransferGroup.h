@@ -18,6 +18,11 @@ public:
     time_t dateCreated;
     QString savePath;
 
+    explicit TransferGroup(const TransferGroup &group)
+    {
+
+    }
+
     explicit TransferGroup(quint32 groupId = 0, QObject *parent = nullptr);
 
     SqlSelection *getWhere() override;
@@ -33,6 +38,11 @@ public:
     QString deviceId;
     QString connectionAdapter;
     bool isClone = false;
+
+    TransferAssignee(const TransferAssignee &assignee)
+    {
+
+    }
 
     explicit TransferAssignee(quint32 groupId = 0, const QString &deviceId = nullptr,
                               const QString &connectionAdapter = nullptr,

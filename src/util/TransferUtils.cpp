@@ -45,37 +45,36 @@ TransferObject *TransferUtils::firstAvailableTransfer(quint32 groupId, const QSt
 
 bool TransferUtils::firstAvailableTransfer(TransferObject *object, quint32 groupId, const QString &deviceId)
 {
-    auto *sqlSelection = new SqlSelection;
+    auto *selection = new SqlSelection;
 
-    sqlSelection->tableName = DbStructure::TABLE_TRANSFER;
-    sqlSelection->setWhere(QString("`%1` = ? AND `%2` = ? AND `%3` = ? AND `%4` = ?")
-                                   .arg(DbStructure::FIELD_TRANSFER_GROUPID)
-                                   .arg(DbStructure::FIELD_TRANSFER_DEVICEID)
-                                   .arg(DbStructure::FIELD_TRANSFER_FLAG)
-                                   .arg(DbStructure::FIELD_TRANSFER_TYPE))
-            ->setLimit(1)
-            ->setOrderBy(QString("`%1` ASC, `%2` ASC")
-                                 .arg(DbStructure::FIELD_TRANSFER_DIRECTORY)
-                                 .arg(DbStructure::FIELD_TRANSFER_NAME));
+    selection->tableName = DbStructure::TABLE_TRANSFER;
+    selection->setWhere(QString("`%1` = ? AND `%2` = ? AND `%3` = ? AND `%4` = ?")
+                                .arg(DbStructure::FIELD_TRANSFER_GROUPID)
+                                .arg(DbStructure::FIELD_TRANSFER_DEVICEID)
+                                .arg(DbStructure::FIELD_TRANSFER_FLAG)
+                                .arg(DbStructure::FIELD_TRANSFER_TYPE));
+    selection->setLimit(1);
+    selection->setOrderBy(QString("`%1` ASC, `%2` ASC")
+                                  .arg(DbStructure::FIELD_TRANSFER_DIRECTORY)
+                                  .arg(DbStructure::FIELD_TRANSFER_NAME));
 
-    sqlSelection->whereArgs << groupId
-                            << deviceId
-                            << TransferObject::Flag::Pending
-                            << TransferObject::Type::Incoming;
+    selection->whereArgs << groupId
+                         << deviceId
+                         << TransferObject::Flag::Pending
+                         << TransferObject::Type::Incoming;
 
-    auto *query = sqlSelection->toSelectionQuery();
+    auto query = selection->toSelectionQuery();
 
-    query->exec();
+    query.exec();
 
-    auto taskResult = query->first();
+    auto taskResult = query.first();
 
     if (taskResult)
-        object->onGeneratingValues(query->record());
+        object->onGeneratingValues(query.record());
     else
-        qDebug() << query->lastError() << endl << query->executedQuery();
+        qDebug() << query.lastError() << endl << query.executedQuery();
 
-    delete query;
-    delete sqlSelection;
+    delete selection;
 
     return taskResult;
 }
@@ -168,25 +167,19 @@ QString TransferUtils::saveIncomingFile(TransferGroup *group, TransferObject *ob
     return QString();
 }
 
-TransferGroupInfo TransferUtils::getInfo(TransferGroup *group)
+TransferGroupInfo TransferUtils::getInfo(const TransferGroup &group)
 {
-    TransferGroupInfo groupInfo{};
+    SqlSelection selection;
 
-    auto *selection = (new SqlSelection())
-            ->setTableName(DbStructure::TABLE_TRANSFER)
-            ->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFER_GROUPID));
+    selection.setTableName(DbStructure::TABLE_TRANSFER);
+    selection.setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFER_GROUPID));
+    selection.whereArgs << group.groupId;
 
-    selection->whereArgs << group->groupId;
+    auto *list = gDatabase->castQuery(selection, TransferObject());
 
-    auto *list = gDatabase->castQuery(*selection, new TransferObject);
+    TransferGroupInfo groupInfo(group, getAllAssigneeInfo(group), list->size());
 
-    groupInfo.assignees = getAllAssigneeInfo(group);
-    groupInfo.group = group;
-    groupInfo.total = list->size();
-    groupInfo.completed = 0;
-    groupInfo.hasError = false;
-
-    for (auto *object : list->toStdList()) {
+    for (auto *object: *list) {
         if (!groupInfo.hasError
             && (object->flag == TransferObject::Flag::Interrupted || object->flag == TransferObject::Flag::Removed))
             groupInfo.hasError = true;
@@ -205,44 +198,41 @@ TransferGroupInfo TransferUtils::getInfo(TransferGroup *group)
             groupInfo.hasOutgoing = true;
     }
 
-    delete selection;
     delete list;
 
     return groupInfo;
 }
 
-AssigneeInfo TransferUtils::getInfo(TransferAssignee *assignee)
+AssigneeInfo TransferUtils::getInfo(const TransferAssignee &assignee)
 {
-    AssigneeInfo assigneeInfo{};
-
     try {
-        auto *device = new NetworkDevice(assignee->deviceId);
+        auto *device = new NetworkDevice(assignee.deviceId);
 
         gDatabase->reconstruct(device);
 
-        assigneeInfo.assignee = assignee;
-        assigneeInfo.device = device;
-        assigneeInfo.valid = true;
+        return AssigneeInfo(*device, assignee);
     } catch (...) {
         // do nothing
     }
 
-    return assigneeInfo;
+    return AssigneeInfo();
 }
 
-QList<AssigneeInfo> TransferUtils::getAllAssigneeInfo(TransferGroup *group)
+QList<AssigneeInfo *> TransferUtils::getAllAssigneeInfo(const TransferGroup &group)
 {
-    auto *selection = new SqlSelection();
+    SqlSelection selection;
 
-    selection->setTableName(DbStructure::TABLE_TRANSFERASSIGNEE)
-            ->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
-    selection->whereArgs << group->groupId;
+    selection.setTableName(DbStructure::TABLE_TRANSFERASSIGNEE);
+    selection.setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
+    selection.whereArgs << group.groupId;
 
-    QList<AssigneeInfo> returnedList;
-    QList<TransferAssignee *> *assigneeList = AppUtils::getDatabase()->castQuery(*selection, new TransferAssignee());
+    QList<AssigneeInfo* > returnedList;
+    auto *assigneeList = gDatabase->castQuery(selection, TransferAssignee());
 
-    for (auto *assignee : assigneeList->toStdList())
-        returnedList.append(getInfo(assignee));
+    for (auto *assignee : *assigneeList) {
+        auto copyAssignee = getInfo(*assignee);
+        returnedList.append(&copyAssignee);
+    }
 
     delete assigneeList;
 

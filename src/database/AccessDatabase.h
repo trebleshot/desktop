@@ -99,35 +99,35 @@ public:
     QString orderBy;
     int limit = -1;
 
-    void bindWhereClause(QSqlQuery &query);
+    void bindWhereClause(QSqlQuery &query) const;
 
-    QString generateSpecifierClause(bool fromStatement = true);
+    QString generateSpecifierClause(bool fromStatement = true) const;
 
-    SqlSelection *setHaving(QString having);
+    void setHaving(const QString &having);
 
-    SqlSelection *setGroupBy(QString field, bool ascending);
+    void setGroupBy(const QString &field, bool ascending);
 
-    SqlSelection *setGroupBy(QString orderBy);
+    void setGroupBy(const QString &orderBy);
 
-    SqlSelection *setLimit(int limit);
+    void setLimit(int limit);
 
-    SqlSelection *setOrderBy(QString field, bool ascending);
+    void setOrderBy(const QString &field, bool ascending);
 
-    SqlSelection *setOrderBy(QString limit);
+    void setOrderBy(const QString &limit);
 
-    SqlSelection *setTableName(QString tableName);
+    void setTableName(const QString &tableName);
 
-    SqlSelection *setWhere(const QString &whereString);
+    void setWhere(const QString &whereString);
 
-    QSqlQuery *toDeletionQuery();
+    QSqlQuery toDeletionQuery() const;
 
-    QSqlQuery *toInsertionQuery();
+    QSqlQuery toInsertionQuery() const;
 
-    QSqlQuery *toSelectionQuery();
+    QSqlQuery toSelectionQuery() const;
 
-    QString toSelectionColumns();
+    QString toSelectionColumns() const;
 
-    QSqlQuery *toUpdateQuery(QSqlRecord query);
+    QSqlQuery toUpdateQuery(const QSqlRecord &query) const;
 };
 
 class SqlSelectionConst : public QObject {
@@ -171,23 +171,25 @@ public:
 
     QSqlDatabase *getDatabase();
 
-    // Template declarations fails to compile on CPP files.
     template<typename T>
-    QList<T *> *castQuery(SqlSelection &sqlSelection, T *classInstance)
+    QList<T *> *castQuery(const SqlSelection &sqlSelection, const T &classInstance)
     {
         auto *resultList = new QList<T *>();
-        QSqlQuery *query = sqlSelection.toSelectionQuery();
 
-        query->exec();
+        if (std::is_base_of<DatabaseObject, T>().value) {
+            QSqlQuery query = sqlSelection.toSelectionQuery();
 
-        if (query->first())
-            do {
-                T *dbObject = new T;
+            query.exec();
 
-                dbObject->onGeneratingValues(query->record());
+            if (query.first())
+                do {
+                    T* dbObject = new T;
+                    dbObject->onGeneratingValues(query.record());
 
-                resultList->append(dbObject);
-            } while (query->next());
+                    resultList->append(dbObject);
+                } while (query.next());
+        } else
+            qDebug() << "Received an unknown class type which should have been a base DatabaseObject";
 
         return resultList;
     }

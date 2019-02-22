@@ -111,7 +111,7 @@ set(UTIL_LIBRARY
         src/database/object/TextStreamObject.h
         src/database/object/TextStreamObject.cpp
         src/ui/ShowTransferWidget.h
-        src/ui/ShowTransferWidget.cpp src/ui/ManageDevicesDialog.cpp src/ui/ManageDevicesDialog.h src/model/NetworkDeviceModel.cpp src/model/NetworkDeviceModel.h)
+        src/ui/ShowTransferWidget.cpp src/ui/ManageDevicesDialog.cpp src/ui/ManageDevicesDialog.h src/model/NetworkDeviceModel.cpp src/model/NetworkDeviceModel.h src/database/ReconstructionException.cpp src/database/ReconstructionException.h)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)

@@ -50,19 +50,19 @@ void NetworkDeviceLoader::processConnection(NetworkDevice *device,
              << "with connection name"
              << connection->hostAddress.toString();
 
-    auto *sqlSelection = new SqlSelection();
+    auto *selection = new SqlSelection();
 
-    sqlSelection->setTableName(DbStructure::TABLE_DEVICECONNECTION)
-            ->setWhere(QString("`%1` = ? AND (`%2` = ? OR `%3` = ?)")
+    selection->setTableName(DbStructure::TABLE_DEVICECONNECTION);
+    selection->setWhere(QString("`%1` = ? AND (`%2` = ? OR `%3` = ?)")
                                .arg(DbStructure::FIELD_DEVICECONNECTION_DEVICEID)
                                .arg(DbStructure::FIELD_DEVICECONNECTION_ADAPTERNAME)
                                .arg(DbStructure::FIELD_DEVICECONNECTION_IPADDRESS));
 
-    sqlSelection->whereArgs << QVariant(connection->deviceId)
+    selection->whereArgs << QVariant(connection->deviceId)
                             << QVariant(connection->adapterName)
                             << QVariant(NetworkDeviceLoader::convertToInet4Address(connection->hostAddress));
 
-    gDbSignal->remove(sqlSelection);
+    gDbSignal->remove(selection);
     gDbSignal->publish(connection);
 }
 

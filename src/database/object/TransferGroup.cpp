@@ -16,9 +16,8 @@ SqlSelection *TransferGroup::getWhere()
 {
     auto *selection = new SqlSelection;
 
-    selection
-            ->setTableName(DbStructure::TABLE_TRANSFERGROUP)
-            ->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFERGROUP_ID));
+    selection->setTableName(DbStructure::TABLE_TRANSFERGROUP);
+    selection->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFERGROUP_ID));
 
     selection->whereArgs << QVariant(this->groupId);
 
@@ -56,11 +55,10 @@ SqlSelection *TransferAssignee::getWhere()
 {
     auto *selection = new SqlSelection;
 
-    selection
-            ->setTableName(DbStructure::TABLE_TRANSFERASSIGNEE)
-            ->setWhere(QString("`%1` = ? AND `%2` = ?")
-                               .arg(DbStructure::FIELD_TRANSFERASSIGNEE_DEVICEID)
-                               .arg(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
+    selection->setTableName(DbStructure::TABLE_TRANSFERASSIGNEE);
+    selection->setWhere(QString("`%1` = ? AND `%2` = ?")
+                                .arg(DbStructure::FIELD_TRANSFERASSIGNEE_DEVICEID)
+                                .arg(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
 
     selection->whereArgs << QVariant(this->deviceId)
                          << QVariant(this->groupId);

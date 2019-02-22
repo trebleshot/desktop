@@ -33,9 +33,8 @@ SqlSelection *NetworkDevice::getWhere()
 {
     auto *selection = new SqlSelection;
 
-    selection
-            ->setTableName(DbStructure::TABLE_DEVICES)
-            ->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_DEVICES_ID));
+    selection->setTableName(DbStructure::TABLE_DEVICES);
+    selection->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_DEVICES_ID));
 
     selection->whereArgs << this->deviceId;
 
@@ -77,8 +76,9 @@ DeviceConnection::DeviceConnection(const QHostAddress &hostAddress, QObject *par
 
 SqlSelection *DeviceConnection::getWhere()
 {
-    auto selection = (new SqlSelection)
-            ->setTableName(DbStructure::TABLE_DEVICECONNECTION);
+    auto selection = new SqlSelection;
+
+    selection->setTableName(DbStructure::TABLE_DEVICECONNECTION);
 
     if (hostAddress.isNull()) {
         selection->setWhere(QString("`%1` = ? AND `%2` = ?")

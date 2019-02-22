@@ -32,17 +32,18 @@ SqlSelection *TransferObject::getWhere()
 {
     auto *selection = new SqlSelection;
 
-    if (isDivisionObject())
-        selection->setTableName(DbStructure::DIVIS_TRANSFER)
-                ->setWhere(QString("`%1` = ? AND `%2` = ?")
-                                   .arg(DbStructure::FIELD_TRANSFER_ID)
-                                   .arg(DbStructure::FIELD_TRANSFER_TYPE));
-    else
-        selection->setTableName(DbStructure::TABLE_TRANSFER)
-                ->setWhere(QString("`%1` = ? AND `%2` = ? AND `%3` = ?")
-                                   .arg(DbStructure::FIELD_TRANSFER_ID)
-                                   .arg(DbStructure::FIELD_TRANSFER_TYPE)
-                                   .arg(DbStructure::FIELD_TRANSFER_DEVICEID));
+    if (isDivisionObject()) {
+        selection->setTableName(DbStructure::DIVIS_TRANSFER);
+        selection->setWhere(QString("`%1` = ? AND `%2` = ?")
+                                    .arg(DbStructure::FIELD_TRANSFER_ID)
+                                    .arg(DbStructure::FIELD_TRANSFER_TYPE));
+    } else {
+        selection->setTableName(DbStructure::TABLE_TRANSFER);
+        selection->setWhere(QString("`%1` = ? AND `%2` = ? AND `%3` = ?")
+                                    .arg(DbStructure::FIELD_TRANSFER_ID)
+                                    .arg(DbStructure::FIELD_TRANSFER_TYPE)
+                                    .arg(DbStructure::FIELD_TRANSFER_DEVICEID));
+    }
 
     selection->whereArgs << this->requestId
                          << this->type

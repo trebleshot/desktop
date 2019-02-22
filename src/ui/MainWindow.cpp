@@ -62,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent)
             sqlSelection.setTableName(DbStructure::TABLE_TRANSFERASSIGNEE);
             sqlSelection.setOrderBy(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID, false);
 
-            auto *assigneeList = gDatabase->castQuery(sqlSelection, new TransferAssignee);
+            auto *assigneeList = gDatabase->castQuery(sqlSelection, TransferAssignee());
 
             if (assigneeList->first() != nullptr) {
                 auto *assignee = assigneeList->first();
