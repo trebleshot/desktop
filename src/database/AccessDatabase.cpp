@@ -1,4 +1,5 @@
 #include <c++/7/bits/unique_ptr.h>
+#include <src/util/AppUtils.h>
 #include "AccessDatabase.h"
 #include "ReconstructionException.h"
 
@@ -109,7 +110,7 @@ bool AccessDatabase::contains(const DatabaseObject &dbObject)
 
 bool AccessDatabase::insert(DatabaseObject &dbObject)
 {
-    QSqlTableModel *model = DbStructure::gatherTableModel(this, &dbObject);
+    QSqlTableModel *model = DbStructure::gatherTableModel(dbObject);
     bool state = model->insertRecord(-1, record(dbObject, *model));
 
     if (state)
@@ -176,7 +177,7 @@ bool AccessDatabase::update(DatabaseObject &dbObject)
 
 bool AccessDatabase::update(const SqlSelection &selection, const DbObjectMap &map)
 {
-    auto *tableModel = DbStructure::gatherTableModel(this, selection.tableName);
+    auto *tableModel = DbStructure::gatherTableModel(selection.tableName);
     QSqlQuery updateQuery = selection.toUpdateQuery(record(map, *tableModel));
 
     delete tableModel;
@@ -274,14 +275,14 @@ QSqlField DbStructure::generateField(const QString &key, const QVariant &value)
     return field;
 }
 
-QSqlTableModel *DbStructure::gatherTableModel(AccessDatabase *db, DatabaseObject *dbObject)
+QSqlTableModel *DbStructure::gatherTableModel(const DatabaseObject &dbObject)
 {
-    return gatherTableModel(db, dbObject->getWhere().tableName);
+    return gatherTableModel(dbObject.getWhere().tableName);
 }
 
-QSqlTableModel *DbStructure::gatherTableModel(AccessDatabase *db, const QString &tableName)
+QSqlTableModel *DbStructure::gatherTableModel(const QString &tableName)
 {
-    auto *model = new QSqlTableModel(db, *db->getDatabase());
+    auto *model = new QSqlTableModel(gDatabase, *gDatabase->getDatabase());
 
     model->setTable(tableName);
 

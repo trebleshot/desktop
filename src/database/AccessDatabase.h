@@ -84,9 +84,9 @@ namespace DbStructure {
 
     extern const char *transformType(const QVariant::Type &type);
 
-    extern QSqlTableModel *gatherTableModel(AccessDatabase *db, DatabaseObject *dbObject);
+    extern QSqlTableModel *gatherTableModel(const DatabaseObject &dbObject);
 
-    extern QSqlTableModel *gatherTableModel(AccessDatabase *db, const QString &tableName);
+    extern QSqlTableModel *gatherTableModel(const QString &tableName);
 }
 
 class SqlSelection {
@@ -263,9 +263,9 @@ public:
                 db, SLOT(remove(DatabaseObject & )), Qt::BlockingQueuedConnection);
 
         connect(this, SIGNAL(update(
-                                     const SqlSelection &, const QSqlRecord & )),
+                                     const SqlSelection &, const DbObjectMap & )),
                 db, SLOT(update(
-                                 const SqlSelection &, const QSqlRecord & )), Qt::BlockingQueuedConnection);
+                                 const SqlSelection &, const DbObjectMap & )), Qt::BlockingQueuedConnection);
 
         connect(this, SIGNAL(update(DatabaseObject & )),
                 db, SLOT(update(DatabaseObject & )), Qt::BlockingQueuedConnection);
@@ -296,7 +296,7 @@ signals:
 
     bool update(DatabaseObject &dbObject);
 
-    bool update(const SqlSelection &selection, const QSqlRecord &values);
+    bool update(const SqlSelection &selection, const DbObjectMap &values);
 };
 
 #endif // ACCESSDATABASE_H

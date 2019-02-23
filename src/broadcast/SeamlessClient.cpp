@@ -98,15 +98,11 @@ void SeamlessClient::run()
                     if (KEYWORD_ERROR_NOT_FOUND == errorCode) {
                         gDbSignal->doSynchronized([this](AccessDatabase *database) {
                             auto sqlSelection = TransferUtils::createSqlSelection(m_groupId, m_deviceId,
-                                                                                   TransferObject::Flag::Done, false);
-                            QSqlRecord record = DbStructure::gatherTableModel(
-                                    database, DbStructure::TABLE_TRANSFER)->record();
+                                                                                  TransferObject::Flag::Done, false);
 
-                            DbObjectMap {
+                            gDbSignal->update(sqlSelection, DbObjectMap{
                                     {DbStructure::FIELD_TRANSFER_FLAG, QVariant(TransferObject::Flag::Removed)}
-                            };
-
-                            gDbSignal->update(sqlSelection, record);
+                            });
                         });
                     }
                 } else {
