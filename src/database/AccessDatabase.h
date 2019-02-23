@@ -154,7 +154,7 @@ Q_OBJECT
 public:
     explicit DatabaseObject(QObject *parent = nullptr);
 
-    void generateValues(const QSqlRecord &record) const;
+    void generateValues(const QSqlRecord &record);
 
     virtual void operator=(const DatabaseObject& object) {
         onGeneratingValues(object.getValues());

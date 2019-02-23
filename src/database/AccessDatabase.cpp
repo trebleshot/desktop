@@ -477,7 +477,7 @@ DatabaseObject::DatabaseObject(QObject *parent)
      *
      * (key (readable name) => value (reference)).
      */
-void DatabaseObject::generateValues(const QSqlRecord &record) const
+void DatabaseObject::generateValues(const QSqlRecord &record)
 {
     DbObjectMap map;
 
@@ -486,4 +486,6 @@ void DatabaseObject::generateValues(const QSqlRecord &record) const
         const QSqlField &thisField = record.field(pos);
         map.insert(thisField.name(), thisField.value());
     }
+
+    onGeneratingValues(map);
 }
