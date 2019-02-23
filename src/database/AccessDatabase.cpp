@@ -98,33 +98,31 @@ QMap<QString, QSqlRecord> *AccessDatabase::getPassiveTables()
     return list;
 }
 
-bool AccessDatabase::contains(DatabaseObject *dbObject)
+bool AccessDatabase::contains(const DatabaseObject &dbObject)
 {
-    QSqlQuery query = dbObject->getWhere()->toSelectionQuery();
+    QSqlQuery query = dbObject.getWhere().toSelectionQuery();
 
     query.exec();
 
     return query.next();
 }
 
-bool AccessDatabase::insert(DatabaseObject *dbObject)
+bool AccessDatabase::insert(DatabaseObject &dbObject)
 {
-    QSqlTableModel *model = DbStructure::gatherTableModel(this, dbObject);
-    bool wasSuccessful;
-
-    wasSuccessful = model->insertRecord(-1, dbObject->getValues(this));
+    QSqlTableModel *model = DbStructure::gatherTableModel(this, &dbObject);
+    bool wasSuccessful = model->insertRecord(-1, record(dbObject, *model));
 
     delete model;
     return wasSuccessful;
 }
 
-bool AccessDatabase::publish(DatabaseObject *dbObject)
+bool AccessDatabase::publish(DatabaseObject &dbObject)
 {
     return (this->contains(dbObject) && this->update(dbObject))
            || this->insert(dbObject);
 }
 
-bool AccessDatabase::reconstructRemote(DatabaseObject *dbObject)
+bool AccessDatabase::reconstructRemote(DatabaseObject &dbObject)
 {
     try {
         reconstruct(dbObject);
@@ -136,42 +134,57 @@ bool AccessDatabase::reconstructRemote(DatabaseObject *dbObject)
     return false;
 }
 
-void AccessDatabase::reconstruct(DatabaseObject *dbObject)
+void AccessDatabase::reconstruct(DatabaseObject &dbObject)
 {
-    QSqlQuery query = dbObject->getWhere()->toSelectionQuery();
+    QSqlQuery query = dbObject.getWhere().toSelectionQuery();
 
     query.exec();
 
     if (!query.first())
         throw ReconstructionException();
 
-    dbObject->onGeneratingValues(query.record());
+    dbObject.onGeneratingValues(query.record());
 }
 
-bool AccessDatabase::remove(SqlSelection *selection)
+bool AccessDatabase::remove(const SqlSelection &selection)
 {
-    return selection->toDeletionQuery().exec();
+    return selection.toDeletionQuery().exec();
 }
 
-bool AccessDatabase::remove(DatabaseObject *dbObject)
+bool AccessDatabase::remove(DatabaseObject &dbObject)
 {
-    return remove(dbObject->getWhere());
+    return remove(dbObject.getWhere());
 }
 
-bool AccessDatabase::update(DatabaseObject *dbObject)
+bool AccessDatabase::update(DatabaseObject &dbObject)
 {
-    SqlSelection *selection = dbObject->getWhere();
-
-    bool wasSuccessful = update(selection, dbObject->getValues(this));
-
-    delete selection;
-    return wasSuccessful;
+    return update(dbObject.getWhere(), dbObject.getValues());
 }
 
-bool AccessDatabase::update(SqlSelection *selection, const QSqlRecord &record)
+bool AccessDatabase::update(const SqlSelection &selection, const DbObjectMap &record)
 {
-    QSqlQuery updateQuery = selection->toUpdateQuery(record);
+    QSqlQuery updateQuery = selection.toUpdateQuery(record);
     return updateQuery.exec();
+}
+
+QSqlRecord AccessDatabase::record(const DatabaseObject &object, const QSqlTableModel &tableModel)
+{
+    return record(object.getValues(), tableModel);
+}
+
+QSqlRecord AccessDatabase::record(const DbObjectMap &objectMap, const QSqlTableModel &tableModel)
+{
+    QSqlRecord record = tableModel.record();
+
+    for (const auto &key : objectMap.keys())
+        record.setValue(key, objectMap.value(key));
+
+    return record;
+}
+
+QSqlRecord AccessDatabase::record(const DatabaseObject &object)
+{
+    return QSqlRecord();
 }
 
 QSqlField DbStructure::generateField(const QString &key, const QVariant::Type &type, bool nullable)
@@ -247,12 +260,7 @@ QSqlField DbStructure::generateField(const QString &key, const QVariant &value)
 
 QSqlTableModel *DbStructure::gatherTableModel(AccessDatabase *db, DatabaseObject *dbObject)
 {
-    SqlSelection *selection = dbObject->getWhere();
-    auto tableName = selection->tableName;
-
-    delete selection;
-
-    return gatherTableModel(db, tableName);
+    return gatherTableModel(db, dbObject->getWhere().tableName);
 }
 
 QSqlTableModel *DbStructure::gatherTableModel(AccessDatabase *db, const QString &tableName)

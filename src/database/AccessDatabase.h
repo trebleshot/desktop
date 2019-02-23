@@ -17,6 +17,8 @@
 
 using namespace std;
 
+typedef QMap<QString, QVariant> DbObjectMap;
+
 class AccessDatabase;
 
 class DatabaseObject;
@@ -99,6 +101,16 @@ public:
     QString orderBy;
     int limit = -1;
 
+    SqlSelection(const SqlSelection &other)
+    {
+
+    }
+
+    explicit SqlSelection()
+    {
+
+    }
+
     void bindWhereClause(QSqlQuery &query) const;
 
     QString generateSpecifierClause(bool fromStatement = true) const;
@@ -139,13 +151,12 @@ public:
 
 class DatabaseObject : public QObject {
 Q_OBJECT
-
 public:
     explicit DatabaseObject(QObject *parent = nullptr);
 
-    virtual SqlSelection *getWhere() = 0;
+    virtual SqlSelection getWhere() const = 0;
 
-    virtual QSqlRecord getValues(AccessDatabase *db) = 0;
+    virtual DbObjectMap getValues() const = 0;
 
     virtual void onGeneratingValues(const QSqlRecord &record) = 0;
 
@@ -183,7 +194,7 @@ public:
 
             if (query.first())
                 do {
-                    T* dbObject = new T;
+                    T *dbObject = new T;
                     dbObject->onGeneratingValues(query.record());
 
                     resultList->append(dbObject);
@@ -198,28 +209,34 @@ public:
 
 public slots:
 
-    bool contains(DatabaseObject *dbObject);
+    bool contains(const DatabaseObject &dbObject);
 
     void doSynchronized(const std::function<void(AccessDatabase *)> &listener)
     {
         listener(this);
     }
 
-    bool insert(DatabaseObject *dbObject);
+    bool insert(DatabaseObject &dbObject);
 
-    bool publish(DatabaseObject *dbObject);
+    bool publish(DatabaseObject &dbObject);
 
-    bool reconstructRemote(DatabaseObject *dbObject);
+    bool reconstructRemote(DatabaseObject &dbObject);
 
-    void reconstruct(DatabaseObject *dbObject);
+    void reconstruct(DatabaseObject &dbObject);
 
-    bool remove(SqlSelection *selection);
+    QSqlRecord record(const DatabaseObject& object);
 
-    bool remove(DatabaseObject *dbObject);
+    QSqlRecord record(const DatabaseObject& object, const QSqlTableModel &tableModel);
 
-    bool update(DatabaseObject *dbObject);
+    QSqlRecord record(const DbObjectMap& objectMap, const QSqlTableModel &tableModel);
 
-    bool update(SqlSelection *selection, const QSqlRecord &record);
+    bool remove(const SqlSelection &selection);
+
+    bool remove(DatabaseObject &dbObject);
+
+    bool update(DatabaseObject &dbObject);
+
+    bool update(const SqlSelection &selection, const DbObjectMap &record);
 
 signals:
 
@@ -241,16 +258,22 @@ public:
         connect(this, &AccessDatabaseSignaller::publish, db, &AccessDatabase::publish, Qt::BlockingQueuedConnection);
         connect(this, &AccessDatabaseSignaller::reconstruct,
                 db, &AccessDatabase::reconstructRemote, Qt::BlockingQueuedConnection);
-        connect(this, SIGNAL(remove(SqlSelection * )), db, SLOT(remove(SqlSelection * )), Qt::BlockingQueuedConnection);
-        connect(this, SIGNAL(remove(DatabaseObject * )),
-                db, SLOT(remove(DatabaseObject * )), Qt::BlockingQueuedConnection);
-        connect(this,
-                SIGNAL(update(SqlSelection * ,
-                               const QSqlRecord & )),
-                db, SLOT(update(SqlSelection * ,
-                                 const QSqlRecord & )), Qt::BlockingQueuedConnection);
-        connect(this, SIGNAL(update(DatabaseObject * )),
-                db, SLOT(update(DatabaseObject * )), Qt::BlockingQueuedConnection);
+
+        connect(this, SIGNAL(remove(
+                                     const SqlSelection & )),
+                db, SLOT(remove(
+                                 const SqlSelection & )), Qt::BlockingQueuedConnection);
+
+        connect(this, SIGNAL(remove(DatabaseObject & )),
+                db, SLOT(remove(DatabaseObject & )), Qt::BlockingQueuedConnection);
+
+        connect(this, SIGNAL(update(
+                                     const SqlSelection &, const QSqlRecord & )),
+                db, SLOT(update(
+                                 const SqlSelection &, const QSqlRecord & )), Qt::BlockingQueuedConnection);
+
+        connect(this, SIGNAL(update(DatabaseObject & )),
+                db, SLOT(update(DatabaseObject & )), Qt::BlockingQueuedConnection);
     }
 
     void operator<<(const std::function<void(AccessDatabase *)> &listener)
@@ -260,25 +283,25 @@ public:
 
 signals:
 
-    bool contains(DatabaseObject *dbObject);
+    bool contains(const DatabaseObject &dbObject);
 
     void doNonDirect(const std::function<void(AccessDatabase *)> &listener);
 
     void doSynchronized(const std::function<void(AccessDatabase *)> &listener);
 
-    bool insert(DatabaseObject *dbObject);
+    bool insert(DatabaseObject &dbObject);
 
-    bool publish(DatabaseObject *dbObject);
+    bool publish(DatabaseObject &dbObject);
 
-    bool reconstruct(DatabaseObject *dbObject);
+    bool reconstruct(DatabaseObject &dbObject);
 
-    bool remove(SqlSelection *selection);
+    bool remove(const SqlSelection &selection);
 
-    bool remove(DatabaseObject *dbObject);
+    bool remove(DatabaseObject &dbObject);
 
-    bool update(DatabaseObject *dbObject);
+    bool update(DatabaseObject &dbObject);
 
-    bool update(SqlSelection *selection, const QSqlRecord &values);
+    bool update(const SqlSelection &selection, const QSqlRecord &values);
 };
 
 #endif // ACCESSDATABASE_H

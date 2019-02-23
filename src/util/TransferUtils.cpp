@@ -218,7 +218,7 @@ AssigneeInfo TransferUtils::getInfo(const TransferAssignee &assignee)
     return AssigneeInfo();
 }
 
-QList<AssigneeInfo *> TransferUtils::getAllAssigneeInfo(const TransferGroup &group)
+QList<AssigneeInfo> TransferUtils::getAllAssigneeInfo(const TransferGroup &group)
 {
     SqlSelection selection;
 
@@ -226,11 +226,11 @@ QList<AssigneeInfo *> TransferUtils::getAllAssigneeInfo(const TransferGroup &gro
     selection.setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
     selection.whereArgs << group.groupId;
 
-    QList<AssigneeInfo *> returnedList;
+    QList<AssigneeInfo> returnedList;
     auto *assigneeList = gDatabase->castQuery(selection, TransferAssignee());
 
     for (auto *assignee : *assigneeList)
-        returnedList.append(new AssigneeInfo(getInfo(*assignee)));
+        returnedList << getInfo(*assignee);
 
     delete assigneeList;
 

@@ -34,11 +34,15 @@ public:
 
     explicit NetworkDevice(const QString &deviceId = nullptr, QObject *parent = nullptr);
 
-    SqlSelection *getWhere() override;
+    SqlSelection getWhere() const override;
 
-    QSqlRecord getValues(AccessDatabase *db) override;
+    DbObjectMap getValues() const override;
 
     void onGeneratingValues(const QSqlRecord &record) override;
+
+    void operator=(const NetworkDevice& other) {
+        brand = other.brand;
+    }
 };
 
 class DeviceConnection : public DatabaseObject {
@@ -54,9 +58,9 @@ public:
 
     explicit DeviceConnection(const QHostAddress &hostAddress, QObject *parent = nullptr);
 
-    SqlSelection *getWhere() override;
+    SqlSelection getWhere() const override;
 
-    QSqlRecord getValues(AccessDatabase *db) override;
+    DbObjectMap getValues() const override;
 
     void onGeneratingValues(const QSqlRecord &record) override;
 };

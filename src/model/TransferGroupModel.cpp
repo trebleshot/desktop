@@ -5,7 +5,7 @@
 #include "TransferGroupModel.h"
 
 TransferGroupModel::TransferGroupModel(QObject *parent)
-        : QAbstractTableModel(parent), m_list(new QList<TransferGroupInfo *>)
+        : QAbstractTableModel(parent)
 {
     SqlSelection selection;
 
@@ -14,15 +14,18 @@ TransferGroupModel::TransferGroupModel(QObject *parent)
 
     auto *dbList = gDatabase->castQuery(selection, TransferGroup());
 
-    for (auto *transferGroup : *dbList)
-        m_list->append(new TransferGroupInfo(TransferUtils::getInfo(*transferGroup)));
+    for (auto *transferGroup : *dbList) {
+        const TransferGroupInfo &constTransferGroup(TransferUtils::getInfo(*transferGroup));
+        m_list.append(constTransferGroup);
+    }
+
 
     delete dbList;
 }
 
 TransferGroupModel::~TransferGroupModel()
 {
-    delete m_list;
+    //delete m_list;
 }
 
 int TransferGroupModel::columnCount(const QModelIndex &parent) const
@@ -32,7 +35,7 @@ int TransferGroupModel::columnCount(const QModelIndex &parent) const
 
 int TransferGroupModel::rowCount(const QModelIndex &parent) const
 {
-    return m_list->size();
+    return m_list.size();
 }
 
 QVariant TransferGroupModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -61,20 +64,22 @@ QVariant TransferGroupModel::headerData(int section, Qt::Orientation orientation
 QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole) {
-        auto *currentGroup = m_list->at(index.row());
+        const auto &currentGroup = m_list.at(index.row());
 
         switch (index.column()) {
             case ColumnNames::Devices: {
                 QString devicesString;
 
-                if (currentGroup->assignees.empty())
+                if (currentGroup.assignees.empty())
                     devicesString.append("-");
                 else {
-                    for (auto *assigneeInfo : currentGroup->assignees) {
+                    for (const auto &assigneeInfo : currentGroup.assignees) {
                         if (devicesString.length() > 0)
                             devicesString.append(",");
 
-                        devicesString.append(assigneeInfo->device.nickname);
+                        devicesString.append(assigneeInfo.device.nickname);
+
+                        qDebug() << assigneeInfo.assignee.groupId;
                     }
                 }
 
@@ -82,12 +87,12 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
             }
             case ColumnNames::Status:
                 return QString("%1 of %2")
-                        .arg(currentGroup->completed)
-                        .arg(currentGroup->total);
+                        .arg(currentGroup.completed)
+                        .arg(currentGroup.total);
             case ColumnNames::Size:
-                return TransferUtils::sizeExpression(currentGroup->totalBytes, false);
+                return TransferUtils::sizeExpression(currentGroup.totalBytes, false);
             case ColumnNames::Date:
-                return QDateTime::fromTime_t(static_cast<uint>(currentGroup->group.dateCreated))
+                return QDateTime::fromTime_t(static_cast<uint>(currentGroup.group.dateCreated))
                         .toString("ddd, d MMM");
             default:
                 return QString("Data id %1x%2")
@@ -97,8 +102,8 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
     } else if (role == Qt::DecorationRole) {
         switch (index.column()) {
             case ColumnNames::Devices: {
-                auto *currentGroup = m_list->at(index.row());
-                return QIcon(currentGroup->hasIncoming
+                const auto &currentGroup = m_list.at(index.row());
+                return QIcon(currentGroup.hasIncoming
                              ? ":/icon/arrow_down"
                              : ":/icon/arrow_up");
             }
