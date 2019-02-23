@@ -154,11 +154,17 @@ Q_OBJECT
 public:
     explicit DatabaseObject(QObject *parent = nullptr);
 
+    void generateValues(const QSqlRecord &record) const;
+
+    virtual void operator=(const DatabaseObject& object) {
+        onGeneratingValues(object.getValues());
+    };
+
     virtual SqlSelection getWhere() const = 0;
 
     virtual DbObjectMap getValues() const = 0;
 
-    virtual void onGeneratingValues(const QSqlRecord &record) = 0;
+    virtual void onGeneratingValues(const DbObjectMap &record) = 0;
 
     virtual void onUpdatingObject(AccessDatabase *db)
     {}
@@ -195,7 +201,7 @@ public:
             if (query.first())
                 do {
                     T *dbObject = new T;
-                    dbObject->onGeneratingValues(query.record());
+                    dbObject->generateValues(query.record());
 
                     resultList->append(dbObject);
                 } while (query.next());
@@ -224,11 +230,11 @@ public slots:
 
     void reconstruct(DatabaseObject &dbObject);
 
-    QSqlRecord record(const DatabaseObject& object);
+    QSqlRecord record(const DatabaseObject &object);
 
-    QSqlRecord record(const DatabaseObject& object, const QSqlTableModel &tableModel);
+    QSqlRecord record(const DatabaseObject &object, const QSqlTableModel &tableModel);
 
-    QSqlRecord record(const DbObjectMap& objectMap, const QSqlTableModel &tableModel);
+    QSqlRecord record(const DbObjectMap &objectMap, const QSqlTableModel &tableModel);
 
     bool remove(const SqlSelection &selection);
 

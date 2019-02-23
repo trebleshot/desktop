@@ -19,7 +19,6 @@ TransferGroupModel::TransferGroupModel(QObject *parent)
         m_list.append(constTransferGroup);
     }
 
-
     delete dbList;
 }
 

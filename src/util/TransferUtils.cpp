@@ -9,17 +9,17 @@
 #include "TransferUtils.h"
 #include "AppUtils.h"
 
-SqlSelection *TransferUtils::createSqlSelection(quint32 groupId, const QString &deviceId,
+SqlSelection TransferUtils::createSqlSelection(quint32 groupId, const QString &deviceId,
                                                 TransferObject::Flag flag, bool equals)
 {
-    auto *sqlSelection = new SqlSelection;
-    sqlSelection->setTableName(DbStructure::TABLE_TRANSFER);
+    SqlSelection sqlSelection;
+    sqlSelection.setTableName(DbStructure::TABLE_TRANSFER);
 
     QString sqlStatement = QString("%1 = ? AND %2 = ?")
             .arg(DbStructure::FIELD_TRANSFER_GROUPID)
             .arg(DbStructure::FIELD_TRANSFER_DEVICEID);
 
-    sqlSelection->whereArgs << groupId
+    sqlSelection.whereArgs << groupId
                             << deviceId;
 
     if (flag != TransferObject::Flag::Any) {
@@ -27,10 +27,10 @@ SqlSelection *TransferUtils::createSqlSelection(quint32 groupId, const QString &
                                     .arg(DbStructure::FIELD_TRANSFER_FLAG)
                                     .arg(equals ? "==" : "!="));
 
-        sqlSelection->whereArgs << flag;
+        sqlSelection.whereArgs << flag;
     }
 
-    sqlSelection->setWhere(sqlStatement);
+    sqlSelection.setWhere(sqlStatement);
 
     return sqlSelection;
 }
@@ -70,7 +70,7 @@ bool TransferUtils::firstAvailableTransfer(TransferObject *object, quint32 group
     auto taskResult = query.first();
 
     if (taskResult)
-        object->onGeneratingValues(query.record());
+        object->generateValues(query.record());
     else
         qDebug() << query.lastError() << endl << query.executedQuery();
 

@@ -30,7 +30,7 @@ DbObjectMap TextStreamObject::getValues() const
     };
 }
 
-void TextStreamObject::onGeneratingValues(const QSqlRecord &record)
+void TextStreamObject::onGeneratingValues(const DbObjectMap &record)
 {
     this->text = record.value(DbStructure::FIELD_CLIPBOARD_TEXT).toString();
     this->dateCreated = record.value(DbStructure::FIELD_CLIPBOARD_TIME).toLongLong();

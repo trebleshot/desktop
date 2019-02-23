@@ -39,7 +39,7 @@ SqlSelection NetworkDevice::getWhere() const
     return selection;
 }
 
-void NetworkDevice::onGeneratingValues(const QSqlRecord &record)
+void NetworkDevice::onGeneratingValues(const DbObjectMap &record)
 {
     this->brand = record.value(DbStructure::FIELD_DEVICES_BRAND).toString();
     this->model = record.value(DbStructure::FIELD_DEVICES_MODEL).toString();
@@ -106,7 +106,7 @@ DbObjectMap DeviceConnection::getValues() const
     };
 }
 
-void DeviceConnection::onGeneratingValues(const QSqlRecord &record)
+void DeviceConnection::onGeneratingValues(const DbObjectMap &record)
 {
     this->deviceId = record.value(DbStructure::FIELD_DEVICECONNECTION_DEVICEID).toString();
     this->adapterName = record.value(DbStructure::FIELD_DEVICECONNECTION_ADAPTERNAME).toString();

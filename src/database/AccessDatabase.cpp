@@ -110,10 +110,13 @@ bool AccessDatabase::contains(const DatabaseObject &dbObject)
 bool AccessDatabase::insert(DatabaseObject &dbObject)
 {
     QSqlTableModel *model = DbStructure::gatherTableModel(this, &dbObject);
-    bool wasSuccessful = model->insertRecord(-1, record(dbObject, *model));
+    bool state = model->insertRecord(-1, record(dbObject, *model));
+
+    if (state)
+        dbObject.onInsertingObject(this);
 
     delete model;
-    return wasSuccessful;
+    return state;
 }
 
 bool AccessDatabase::publish(DatabaseObject &dbObject)
@@ -143,7 +146,7 @@ void AccessDatabase::reconstruct(DatabaseObject &dbObject)
     if (!query.first())
         throw ReconstructionException();
 
-    dbObject.onGeneratingValues(query.record());
+    dbObject.generateValues(query.record());
 }
 
 bool AccessDatabase::remove(const SqlSelection &selection)
@@ -153,12 +156,22 @@ bool AccessDatabase::remove(const SqlSelection &selection)
 
 bool AccessDatabase::remove(DatabaseObject &dbObject)
 {
-    return remove(dbObject.getWhere());
+    if (remove(dbObject.getWhere())) {
+        dbObject.onRemovingObject(this);
+        return true;
+    }
+
+    return false;
 }
 
 bool AccessDatabase::update(DatabaseObject &dbObject)
 {
-    return update(dbObject.getWhere(), dbObject.getValues());
+    if (update(dbObject.getWhere(), dbObject.getValues())) {
+        dbObject.onUpdatingObject(this);
+        return true;
+    }
+
+    return false;
 }
 
 bool AccessDatabase::update(const SqlSelection &selection, const DbObjectMap &map)
@@ -451,4 +464,26 @@ QSqlQuery SqlSelection::toUpdateQuery(const QSqlRecord &record) const
 DatabaseObject::DatabaseObject(QObject *parent)
         : QObject(parent)
 {
+}
+
+
+/***
+     * This method generates another mapping just to load this class.
+     *
+     * A better way would be;
+     * A- A method that accepts field name and its name and loading in a switch statement
+     * B- Passive mapping that always exists and have a reference for an object like Q_VARIABLE
+     * During compilation they are all created so that they can always accept map
+     *
+     * (key (readable name) => value (reference)).
+     */
+void DatabaseObject::generateValues(const QSqlRecord &record) const
+{
+    DbObjectMap map;
+
+    //todo: This is not the best way to handle this
+    for (int pos = 0; pos < record.count(); pos++) {
+        const QSqlField &thisField = record.field(pos);
+        map.insert(thisField.name(), thisField.value());
+    }
 }

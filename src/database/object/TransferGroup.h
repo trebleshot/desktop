@@ -29,7 +29,7 @@ public:
 
     DbObjectMap getValues() const override;
 
-    void onGeneratingValues(const QSqlRecord &record) override;
+    void onGeneratingValues(const DbObjectMap &record) override;
 };
 
 class TransferAssignee : public DatabaseObject {
@@ -52,7 +52,7 @@ public:
 
     DbObjectMap getValues() const override;
 
-    void onGeneratingValues(const QSqlRecord &record) override;
+    void onGeneratingValues(const DbObjectMap &record) override;
 };
 
 #endif //TREBLESHOT_TRANSFERGROUP_H

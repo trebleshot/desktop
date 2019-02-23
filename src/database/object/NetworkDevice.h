@@ -38,11 +38,7 @@ public:
 
     DbObjectMap getValues() const override;
 
-    void onGeneratingValues(const QSqlRecord &record) override;
-
-    void operator=(const NetworkDevice& other) {
-        brand = other.brand;
-    }
+    void onGeneratingValues(const DbObjectMap &record) override;
 };
 
 class DeviceConnection : public DatabaseObject {
@@ -62,7 +58,7 @@ public:
 
     DbObjectMap getValues() const override;
 
-    void onGeneratingValues(const QSqlRecord &record) override;
+    void onGeneratingValues(const DbObjectMap &record) override;
 };
 
 

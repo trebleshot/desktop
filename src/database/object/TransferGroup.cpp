@@ -33,11 +33,11 @@ DbObjectMap TransferGroup::getValues() const
     };
 }
 
-void TransferGroup::onGeneratingValues(const QSqlRecord &record)
+void TransferGroup::onGeneratingValues(const DbObjectMap &record)
 {
-    groupId = record.field(DbStructure::FIELD_TRANSFERGROUP_ID).value().toUInt();
-    dateCreated = record.field(DbStructure::FIELD_TRANSFERGROUP_DATECREATED).value().toLongLong();
-    savePath = record.field(DbStructure::FIELD_TRANSFERGROUP_SAVEPATH).value().toString();
+    groupId = record.value(DbStructure::FIELD_TRANSFERGROUP_ID).toUInt();
+    dateCreated = record.value(DbStructure::FIELD_TRANSFERGROUP_DATECREATED).toLongLong();
+    savePath = record.value(DbStructure::FIELD_TRANSFERGROUP_SAVEPATH).toString();
 }
 
 TransferAssignee::TransferAssignee(quint32 groupId, const QString &deviceId, const QString &connectionAdapter,
@@ -74,7 +74,7 @@ DbObjectMap TransferAssignee::getValues() const
     };
 }
 
-void TransferAssignee::onGeneratingValues(const QSqlRecord &record)
+void TransferAssignee::onGeneratingValues(const DbObjectMap &record)
 {
     this->deviceId = record.value(DbStructure::FIELD_TRANSFERASSIGNEE_DEVICEID).toString();
     this->groupId = record.value(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID).toUInt();

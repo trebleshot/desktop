@@ -20,7 +20,7 @@ public:
 
     DbObjectMap getValues() const override;
 
-    void onGeneratingValues(const QSqlRecord &record) override;
+    void onGeneratingValues(const DbObjectMap &record) override;
 };
 
 

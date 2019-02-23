@@ -50,20 +50,20 @@ SqlSelection TransferObject::getWhere() const
     return selection;
 }
 
-void TransferObject::onGeneratingValues(const QSqlRecord &record)
+void TransferObject::onGeneratingValues(const DbObjectMap &record)
 {
-    accessPort = record.field(DbStructure::FIELD_TRANSFER_ACCESSPORT).value().toInt();
-    file = record.field(DbStructure::FIELD_TRANSFER_FILE).value().toString();
-    directory = record.field(DbStructure::FIELD_TRANSFER_DIRECTORY).value().toString();
-    flag = (Flag) record.field(DbStructure::FIELD_TRANSFER_FLAG).value().toInt();
-    groupId = record.field(DbStructure::FIELD_TRANSFER_GROUPID).value().toUInt();
-    deviceId = record.field(DbStructure::FIELD_TRANSFER_DEVICEID).value().toString();
-    requestId = record.field(DbStructure::FIELD_TRANSFER_ID).value().toUInt();
-    fileMimeType = record.field(DbStructure::FIELD_TRANSFER_MIME).value().toString();
-    friendlyName = record.field(DbStructure::FIELD_TRANSFER_NAME).value().toString();
-    fileSize = record.field(DbStructure::FIELD_TRANSFER_SIZE).value().toUInt();
-    skippedBytes = record.field(DbStructure::FIELD_TRANSFER_SKIPPEDBYTES).value().toUInt();
-    type = (Type) record.field(DbStructure::FIELD_TRANSFER_TYPE).value().toInt();
+    accessPort = record.value(DbStructure::FIELD_TRANSFER_ACCESSPORT).toInt();
+    file = record.value(DbStructure::FIELD_TRANSFER_FILE).toString();
+    directory = record.value(DbStructure::FIELD_TRANSFER_DIRECTORY).toString();
+    flag = (Flag) record.value(DbStructure::FIELD_TRANSFER_FLAG).toInt();
+    groupId = record.value(DbStructure::FIELD_TRANSFER_GROUPID).toUInt();
+    deviceId = record.value(DbStructure::FIELD_TRANSFER_DEVICEID).toString();
+    requestId = record.value(DbStructure::FIELD_TRANSFER_ID).toUInt();
+    fileMimeType = record.value(DbStructure::FIELD_TRANSFER_MIME).toString();
+    friendlyName = record.value(DbStructure::FIELD_TRANSFER_NAME).toString();
+    fileSize = record.value(DbStructure::FIELD_TRANSFER_SIZE).toUInt();
+    skippedBytes = record.value(DbStructure::FIELD_TRANSFER_SKIPPEDBYTES).toUInt();
+    type = (Type) record.value(DbStructure::FIELD_TRANSFER_TYPE).toInt();
 }
 
 bool TransferObject::isDivisionObject() const

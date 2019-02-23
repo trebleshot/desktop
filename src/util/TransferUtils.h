@@ -39,9 +39,11 @@ public:
         this->valid = true;
     }
 
-    void operator=(const AssigneeInfo &other) {
+    void operator=(const AssigneeInfo &other)
+    {
         this->device = other.device;
-
+        this->assignee = other.assignee;
+        this->valid = other.valid;
     }
 };
 
@@ -75,19 +77,29 @@ struct TransferGroupInfo {
         this->hasOutgoing = hasOutgoing;
         this->totalBytes = totalBytes;
         this->completedBytes = completedBytes;
-    };
+    }
 
-    void operator=(const TransferGroupInfo &other)
+    TransferGroupInfo& operator=(const TransferGroupInfo &other)
     {
+        this->group = other.group;
+        this->assignees = other.assignees;
+        this->total = other.total;
+        this->completed = other.completed;
+        this->hasError = other.hasError;
+        this->hasIncoming = other.hasIncoming;
+        this->hasOutgoing = other.hasOutgoing;
+        this->totalBytes = other.totalBytes;
+        this->completedBytes = other.completedBytes;
 
+        return *this;
     }
 };
 
 class TransferUtils {
 public:
-    static SqlSelection *createSqlSelection(quint32 groupId, const QString &deviceId,
-                                            TransferObject::Flag flag = TransferObject::Flag::Any,
-                                            bool equals = true);
+    static SqlSelection createSqlSelection(quint32 groupId, const QString &deviceId,
+                                           TransferObject::Flag flag = TransferObject::Flag::Any,
+                                           bool equals = true);
 
     static TransferObject *firstAvailableTransfer(quint32 groupId, const QString &deviceId);
 
