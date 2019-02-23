@@ -93,60 +93,58 @@ namespace CoolSocket {
         cout << this << " : Exited write sequence" << endl;
     }
 
-    Response *ActiveConnection::receive()
+    Response ActiveConnection::receive()
     {
         cout << this << " : Entered read sequence" << endl;
 
+        Response response;
         size_t headerPosition = string::npos;
-        auto *response = new Response;
-        auto *headerData = new string;
-        auto *contentData = new string;
+        string headerData;
+        string contentData;
 
         time_t lastDataAvailable = clock();
 
         while (m_activeSocket->isReadable()) {
             if (headerPosition == string::npos) {
                 if (m_activeSocket->waitForReadyRead(2000)) {
-                    headerData->append(m_activeSocket->readAll());
+                    headerData.append(m_activeSocket->readAll());
                     lastDataAvailable = clock();
                 }
 
-                headerPosition = headerData->find(COOLSOCKET_HEADER_DIVIDER);
+                headerPosition = headerData.find(COOLSOCKET_HEADER_DIVIDER);
 
                 if (headerPosition != string::npos) {
-                    size_t dividerOccupiedSize
-                            = sizeof COOLSOCKET_HEADER_DIVIDER + headerPosition - 1;
+                    size_t dividerOccupiedSize = sizeof COOLSOCKET_HEADER_DIVIDER + headerPosition - 1;
 
-                    if (headerData->length() > dividerOccupiedSize)
-                        contentData->append(headerData->substr(dividerOccupiedSize));
+                    if (headerData.length() > dividerOccupiedSize)
+                        contentData.append(headerData.substr(dividerOccupiedSize));
 
-                    headerData->resize(headerPosition);
+                    headerData.resize(headerPosition);
 
-                    QJsonObject jsonObject
-                            = QJsonDocument::fromJson(QByteArray::fromStdString(*headerData))
-                                    .object();
+                    QJsonObject jsonObject = QJsonDocument::fromJson(QByteArray::fromStdString(headerData))
+                            .object();
 
                     if (jsonObject.contains(QString(COOLSOCKET_KEYWORD_LENGTH))) {
-                        response->length = (jsonObject.value(QString(COOLSOCKET_KEYWORD_LENGTH)))
+                        response.length = (jsonObject.value(QString(COOLSOCKET_KEYWORD_LENGTH)))
                                 .toInt();
                     } else
                         break;
 
-                    response->headerIndex = &jsonObject;
+                    response.headerIndex = jsonObject;
                 }
 
-                if (headerData->length() > COOLSOCKET_HEADER_HEAP_SIZE) {
-                    cerr << "Header exceeds heap size: " << headerData->length();
+                if (headerData.length() > COOLSOCKET_HEADER_HEAP_SIZE) {
+                    cerr << "Header exceeds heap size: " << headerData.length();
                     throw exception();
                 }
             } else {
                 if (m_activeSocket->waitForReadyRead(2000)) {
-                    contentData->append(m_activeSocket->readAll());
+                    contentData.append(m_activeSocket->readAll());
                     lastDataAvailable = clock();
                 }
 
-                if (contentData->length() >= response->length) {
-                    response->response = new QString(QByteArray::fromStdString(*contentData));
+                if (contentData.length() >= response.length) {
+                    response.response = QByteArray::fromStdString(contentData);
                     break;
                 }
             }

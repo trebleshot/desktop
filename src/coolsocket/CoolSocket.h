@@ -124,28 +124,35 @@ namespace CoolSocket {
         }
 
         int getTimeout()
-        { return m_timeout; }
+        {
+            return m_timeout;
+        }
 
         void setTimeout(int msecs)
-        { this->m_timeout = msecs; }
+        {
+            this->m_timeout = msecs;
+        }
 
         void reply(const QJsonObject &reply);
 
         void reply(const char *reply);
 
-        Response *receive();
+        Response receive();
     };
 
-    class Response : public QObject {
-    Q_OBJECT
+    class Response {
     public:
-        QString *response;
-        QJsonObject *headerIndex;
-        qsizetype length;
+        QString response;
+        QJsonObject headerIndex;
+        string::size_type length = 0;
+
+        Response() = default;
+
+        virtual ~Response() = default;
 
         QJsonObject asJson() const
         {
-            return QJsonDocument::fromJson(QByteArray::fromStdString(response->toStdString()))
+            return QJsonDocument::fromJson(QByteArray::fromStdString(response.toStdString()))
                     .object();
         }
     };
@@ -165,7 +172,9 @@ namespace CoolSocket {
         }
 
         QTcpServer *getTcpServer()
-        { return m_tcpServer; }
+        {
+            return m_tcpServer;
+        }
 
         void setTcpServer(QTcpServer *server);
 
@@ -194,8 +203,7 @@ namespace CoolSocket {
     Q_OBJECT
 
     public:
-        explicit Client(QObject *parent = nullptr)
-                : QObject(parent)
+        explicit Client(QObject *parent = nullptr) : QObject(parent)
         {
         }
 

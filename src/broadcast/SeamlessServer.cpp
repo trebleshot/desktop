@@ -18,8 +18,8 @@ SeamlessServer::SeamlessServer(QObject *parent)
 void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
 {
     try {
-        CoolSocket::Response *mainRequest = connection->receive();
-        QJsonObject mainRequestJSON = mainRequest->asJson();
+        const auto &mainRequest = connection->receive();
+        const auto &mainRequestJSON = mainRequest.asJson();
         QString deviceId = mainRequestJSON.contains(KEYWORD_TRANSFER_DEVICE_ID)
                            ? mainRequestJSON.value(KEYWORD_TRANSFER_DEVICE_ID).toString()
                            : nullptr;
@@ -51,13 +51,12 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
         }
 
         while (connection->getSocket()->isOpen()) {
-            CoolSocket::Response *response = connection->receive();
+            const auto &response = connection->receive();
 
-            if (response->response == nullptr
-                || response->length <= 0)
+            if (response.response == nullptr || response.length <= 0)
                 return;
 
-            QJsonObject request = response->asJson();
+            const QJsonObject &request = response.asJson();
             QJsonObject reply;
 
             {

@@ -59,10 +59,7 @@ void SeamlessClient::run()
 
                 activeConnection->reply(initialConnection);
 
-                auto *response = activeConnection->receive();
-                auto resultObject = response->asJson();
-
-                delete response;
+                const auto &resultObject = activeConnection->receive().asJson();
 
                 qDebug() << "Will evaluate the result" << resultObject;
 
@@ -84,10 +81,7 @@ void SeamlessClient::run()
                 groupInfoJson.insert(KEYWORD_TRANSFER_DEVICE_ID, AppUtils::getDeviceId());
 
                 activeConnection->reply(groupInfoJson);
-                auto *response = activeConnection->receive();
-                auto request = response->asJson();
-
-                delete response;
+                const auto &request = activeConnection->receive().asJson();
 
                 if (!request.value(KEYWORD_RESULT).toBool(false)) {
                     QString errorCode = request.value(KEYWORD_ERROR).toString(nullptr);
@@ -120,9 +114,9 @@ void SeamlessClient::run()
                             QFile currentFile(TransferUtils::getIncomingFilePath(group, transferObject));
                             currentFile.open(QFile::OpenModeFlag::Append);
 
-                            auto *tcpServer = new QTcpServer;
+                            QTcpServer tcpServer;
 
-                            tcpServer->listen();
+                            tcpServer.listen();
 
                             {
                                 QJsonObject reply;
@@ -130,7 +124,7 @@ void SeamlessClient::run()
                                 reply.insert(KEYWORD_TRANSFER_REQUEST_ID,
                                              QVariant(transferObject.requestId).toString());
                                 reply.insert(KEYWORD_TRANSFER_GROUP_ID, QVariant(transferObject.id).toString());
-                                reply.insert(KEYWORD_TRANSFER_SOCKET_PORT, tcpServer->serverPort());
+                                reply.insert(KEYWORD_TRANSFER_SOCKET_PORT, tcpServer.serverPort());
                                 reply.insert(KEYWORD_RESULT, true);
 
                                 if (currentFile.size() > 0) {
@@ -142,10 +136,7 @@ void SeamlessClient::run()
                             }
 
                             {
-                                auto *fileResponse = activeConnection->receive();
-                                auto fileResponseJSON = fileResponse->asJson();
-
-                                delete fileResponse;
+                                const auto &fileResponseJSON = activeConnection->receive().asJson();
 
                                 if (!fileResponseJSON.value(KEYWORD_RESULT).toBool(false)) {
                                     if (fileResponseJSON.contains(KEYWORD_TRANSFER_JOB_DONE)
@@ -189,10 +180,10 @@ void SeamlessClient::run()
 
                                     if (canContinue) {
                                         // We do receive the file here ...
-                                        tcpServer->waitForNewConnection(TIMEOUT_SOCKET_DEFAULT);
+                                        tcpServer.waitForNewConnection(TIMEOUT_SOCKET_DEFAULT);
 
-                                        if (tcpServer->hasPendingConnections()) {
-                                            auto *socket = tcpServer->nextPendingConnection();
+                                        if (tcpServer.hasPendingConnections()) {
+                                            auto *socket = tcpServer.nextPendingConnection();
                                             auto lastDataAvailable = clock();
                                             auto fileSize = static_cast<qint64>(transferObject.fileSize);
 

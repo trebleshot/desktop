@@ -15,13 +15,11 @@ CommunicationServer::CommunicationServer(QObject *parent)
 void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 {
     connection->setTimeout(3000);
-    CoolSocket::Response *response = nullptr;
     NetworkDevice device;
 
     try {
-        response = connection->receive();
-        QJsonObject responseJSON = QJsonDocument::fromJson(
-                QByteArray::fromStdString(response->response->toStdString())).object();
+        auto response = connection->receive();
+        auto responseJSON = response.asJson();
         QJsonObject replyJSON = QJsonObject();
 
         AppUtils::applyDeviceToJSON(replyJSON);
@@ -40,10 +38,8 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                     deviceSerial = responseJSON.value(KEYWORD_DEVICE_INFO_SERIAL).toString();
                 }
 
-                delete response;
-
                 response = connection->receive();
-                responseJSON = response->asJson();
+                responseJSON = response.asJson();
             } else {
                 return;
             }
@@ -187,13 +183,11 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
         pushReply(connection, replyJSON, result);
     } catch (const exception &e) {
-        qDebug() << "An error occurred: "
+        qDebug() << "An error occurred:"
                  << e.what();
     } catch (...) {
         qDebug() << "An unknown error occurred";
     }
-
-    delete response;
 }
 
 void CommunicationServer::pushReply(CoolSocket::ActiveConnection *activeConnection,

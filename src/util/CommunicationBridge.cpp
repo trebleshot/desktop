@@ -72,11 +72,7 @@ NetworkDevice CommunicationBridge::loadDevice(const QHostAddress &hostAddress)
 NetworkDevice CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *connection)
 {
     try {
-        CoolSocket::Response *response = connection->receive();
-        QJsonObject receivedJSON = QJsonDocument::fromJson(QByteArray::fromStdString(
-                response->response->toStdString())).object();
-
-        return NetworkDeviceLoader::loadFrom(receivedJSON);
+        return NetworkDeviceLoader::loadFrom(connection->receive().asJson());
     } catch (exception &e) {
         throw exception();
     }

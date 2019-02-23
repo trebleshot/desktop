@@ -136,7 +136,6 @@ public:
 
 class DatabaseObject {
 public:
-
     DatabaseObject() = default;
 
     virtual ~DatabaseObject() = default;
