@@ -29,10 +29,8 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
 
-    ~NetworkDeviceModel() override;
-
 protected:
-    QList<NetworkDevice *> *m_list;
+    QList<NetworkDevice> m_list;
 };
 
 

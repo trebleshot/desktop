@@ -139,7 +139,7 @@ public:
 class DatabaseObject {
 
 public:
-    DatabaseObject(const DatabaseObject& other) = default;
+    DatabaseObject(const DatabaseObject &other) = default;
 
     explicit DatabaseObject() = default;
 
@@ -174,14 +174,14 @@ Q_OBJECT
 public:
     explicit AccessDatabase(QSqlDatabase *db, QObject *parent = nullptr);
 
-    static QMap<QString, QSqlRecord> *getPassiveTables();
+    static QMap<QString, QSqlRecord> getPassiveTables();
 
     QSqlDatabase *getDatabase();
 
     template<typename T>
-    QList<T *> *castQuery(const SqlSelection &sqlSelection, const T &classInstance)
+    QList<T> castQuery(const SqlSelection &sqlSelection, const T &classInstance)
     {
-        auto *resultList = new QList<T *>();
+        QList<T> resultList;
 
         if (std::is_base_of<DatabaseObject, T>().value) {
             QSqlQuery query = sqlSelection.toSelectionQuery();
@@ -190,10 +190,9 @@ public:
 
             if (query.first())
                 do {
-                    T *dbObject = new T;
-                    dbObject->generateValues(query.record());
-
-                    resultList->append(dbObject);
+                    T dbObject;
+                    dbObject.generateValues(query.record());
+                    resultList.append(dbObject);
                 } while (query.next());
         } else
             qDebug() << "Received an unknown class type which should have been a base DatabaseObject";

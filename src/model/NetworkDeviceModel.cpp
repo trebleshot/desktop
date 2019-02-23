@@ -19,11 +19,6 @@ NetworkDeviceModel::NetworkDeviceModel(QObject *parent)
     delete selection;
 }
 
-NetworkDeviceModel::~NetworkDeviceModel()
-{
-    delete m_list;
-}
-
 int NetworkDeviceModel::columnCount(const QModelIndex &parent) const
 {
     return ColumnNames::__itemCount;
@@ -31,7 +26,7 @@ int NetworkDeviceModel::columnCount(const QModelIndex &parent) const
 
 int NetworkDeviceModel::rowCount(const QModelIndex &parent) const
 {
-    return m_list->size();
+    return m_list.size();
 }
 
 QVariant NetworkDeviceModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -58,17 +53,17 @@ QVariant NetworkDeviceModel::headerData(int section, Qt::Orientation orientation
 QVariant NetworkDeviceModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole) {
-        const auto &thisDevice = m_list->at(index.row());
+        const auto &thisDevice = m_list.at(index.row());
 
         switch (index.column()) {
             case ColumnNames::Name:
-                return thisDevice->nickname;
+                return thisDevice.nickname;
             case ColumnNames::Status:
-                return thisDevice->isRestricted
+                return thisDevice.isRestricted
                        ? QString("Restricted")
                        : QString("Normal");
             case ColumnNames::LastUsageDate:
-                return QDateTime::fromTime_t(static_cast<uint>(thisDevice->lastUsageTime))
+                return QDateTime::fromTime_t(static_cast<uint>(thisDevice.lastUsageTime))
                         .toString("ddd, d MMM");
             default:
                 return QString("Data id %1x%2")

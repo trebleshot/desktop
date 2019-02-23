@@ -12,13 +12,10 @@ TransferGroupModel::TransferGroupModel(QObject *parent)
     selection.setTableName(DbStructure::TABLE_TRANSFERGROUP);
     selection.setOrderBy(DbStructure::FIELD_TRANSFERGROUP_DATECREATED, false);
 
-    auto *dbList = gDatabase->castQuery(selection, TransferGroup());
+    const auto &dbList = gDatabase->castQuery(selection, TransferGroup());
 
-    for (auto *transferGroup : *dbList) {
-        m_list << TransferUtils::getInfo(*transferGroup);
-    }
-
-    delete dbList;
+    for (const auto &transferGroup : dbList)
+        m_list << TransferUtils::getInfo(transferGroup);
 }
 
 int TransferGroupModel::columnCount(const QModelIndex &parent) const

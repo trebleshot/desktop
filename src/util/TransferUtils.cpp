@@ -175,30 +175,28 @@ TransferGroupInfo TransferUtils::getInfo(const TransferGroup &group)
     selection.setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFER_GROUPID));
     selection.whereArgs << group.groupId;
 
-    auto *list = gDatabase->castQuery(selection, TransferObject());
+    const auto &list = gDatabase->castQuery(selection, TransferObject());
 
-    TransferGroupInfo groupInfo(group, getAllAssigneeInfo(group), list->size());
+    TransferGroupInfo groupInfo(group, getAllAssigneeInfo(group), list.size());
 
-    for (auto *object: *list) {
+    for (const auto &object: list) {
         if (!groupInfo.hasError
-            && (object->flag == TransferObject::Flag::Interrupted || object->flag == TransferObject::Flag::Removed))
+            && (object.flag == TransferObject::Flag::Interrupted || object.flag == TransferObject::Flag::Removed))
             groupInfo.hasError = true;
 
-        groupInfo.totalBytes += object->fileSize;
+        groupInfo.totalBytes += object.fileSize;
 
-        if (object->flag == TransferObject::Flag::Done) {
+        if (object.flag == TransferObject::Flag::Done) {
             groupInfo.completed++;
-            groupInfo.completedBytes += object->fileSize;
+            groupInfo.completedBytes += object.fileSize;
         }
 
-        if (!groupInfo.hasIncoming && object->type == TransferObject::Type::Incoming)
+        if (!groupInfo.hasIncoming && object.type == TransferObject::Type::Incoming)
             groupInfo.hasIncoming = true;
 
-        if (!groupInfo.hasOutgoing && object->type == TransferObject::Type::Outgoing)
+        if (!groupInfo.hasOutgoing && object.type == TransferObject::Type::Outgoing)
             groupInfo.hasOutgoing = true;
     }
-
-    delete list;
 
     return groupInfo;
 }
@@ -227,12 +225,10 @@ QList<AssigneeInfo> TransferUtils::getAllAssigneeInfo(const TransferGroup &group
     selection.whereArgs << group.groupId;
 
     QList<AssigneeInfo> returnedList;
-    auto *assigneeList = gDatabase->castQuery(selection, TransferAssignee());
+    const auto &assigneeList = gDatabase->castQuery(selection, TransferAssignee());
 
-    for (auto *assignee : *assigneeList)
-        returnedList << getInfo(*assignee);
-
-    delete assigneeList;
+    for (const auto &assignee : assigneeList)
+        returnedList << getInfo(assignee);
 
     return returnedList;
 }

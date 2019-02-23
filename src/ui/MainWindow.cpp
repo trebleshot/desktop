@@ -62,16 +62,16 @@ MainWindow::MainWindow(QWidget *parent)
             sqlSelection.setTableName(DbStructure::TABLE_TRANSFERASSIGNEE);
             sqlSelection.setOrderBy(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID, false);
 
-            auto *assigneeList = gDatabase->castQuery(sqlSelection, TransferAssignee());
+            const auto &assigneeList = gDatabase->castQuery(sqlSelection, TransferAssignee());
 
-            if (assigneeList->first() != nullptr) {
-                auto *assignee = assigneeList->first();
-                auto *client = new SeamlessClient(assignee->deviceId, assignee->groupId);
+            if (!assigneeList.empty()) {
+                const auto &assignee = assigneeList.first();
+                auto *client = new SeamlessClient(assignee.deviceId, assignee.groupId);
 
                 qDebug() << "Randomly starting a receive process for device"
-                         << assignee->deviceId
+                         << assignee.deviceId
                          << "for group id"
-                         << assignee->groupId;
+                         << assignee.groupId;
 
                 client->start();
             } else {
