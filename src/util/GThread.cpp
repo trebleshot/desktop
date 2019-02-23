@@ -4,7 +4,7 @@
 
 #include "GThread.h"
 
-GThread::GThread(const std::function<void(GThread*)> &function, QObject *parent)
+GThread::GThread(const std::function<void(GThread *)> &function, QObject *parent)
         : QThread(parent), m_callback(function)
 {
 

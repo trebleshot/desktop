@@ -14,7 +14,7 @@
 
 class AppUtils {
 public:
-    static bool applyAdapterName(DeviceConnection *connection);
+    static bool applyAdapterName(DeviceConnection &connection);
 
     static void applyDeviceToJSON(QJsonObject &object);
 
@@ -26,7 +26,7 @@ public:
 
     static QString getDeviceId();
 
-    static NetworkDevice *getLocalDevice();
+    static NetworkDevice getLocalDevice();
 
     static AccessDatabase *newDatabaseInstance(QObject *parent = nullptr);
 };

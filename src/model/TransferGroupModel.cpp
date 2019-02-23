@@ -68,8 +68,6 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
                             devicesString.append(",");
 
                         devicesString.append(assigneeInfo.device.nickname);
-
-                        qDebug() << assigneeInfo.assignee.groupId;
                     }
                 }
 

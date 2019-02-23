@@ -41,7 +41,7 @@ public:
     QString deviceId;
     time_t lastCheckedDate = 0;
 
-    explicit DeviceConnection() = default;
+    DeviceConnection() = default;
 
     explicit DeviceConnection(const QString &deviceId, const QString &adapterName);
 

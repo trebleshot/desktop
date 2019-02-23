@@ -11,9 +11,9 @@
 #include "AppUtils.h"
 #include "NetworkDeviceLoader.h"
 
-bool AppUtils::applyAdapterName(DeviceConnection *connection)
+bool AppUtils::applyAdapterName(DeviceConnection &connection)
 {
-    quint32 ipv4Address = connection->hostAddress.toIPv4Address();
+    quint32 ipv4Address = connection.hostAddress.toIPv4Address();
 
     if (ipv4Address <= 0)
         return false;
@@ -34,35 +34,33 @@ bool AppUtils::applyAdapterName(DeviceConnection *connection)
                 continue;
 
             if (broadcast - 255 < ipv4Address && broadcast >= ipv4Address) {
-                connection->adapterName = interfaceName;
+                connection.adapterName = interfaceName;
                 return true;
             }
         }
     }
 
-    connection->adapterName = nullptr;
+    connection.adapterName = nullptr;
 
     return false;
 }
 
 void AppUtils::applyDeviceToJSON(QJsonObject &object)
 {
-    NetworkDevice *device = getLocalDevice();
+    const NetworkDevice &device = getLocalDevice();
     QJsonObject deviceInfo;
     QJsonObject appInfo;
 
-    deviceInfo.insert(KEYWORD_DEVICE_INFO_SERIAL, device->deviceId);
-    deviceInfo.insert(KEYWORD_DEVICE_INFO_BRAND, device->brand);
-    deviceInfo.insert(KEYWORD_DEVICE_INFO_MODEL, device->model);
-    deviceInfo.insert(KEYWORD_DEVICE_INFO_USER, device->nickname);
+    deviceInfo.insert(KEYWORD_DEVICE_INFO_SERIAL, device.deviceId);
+    deviceInfo.insert(KEYWORD_DEVICE_INFO_BRAND, device.brand);
+    deviceInfo.insert(KEYWORD_DEVICE_INFO_MODEL, device.model);
+    deviceInfo.insert(KEYWORD_DEVICE_INFO_USER, device.nickname);
 
-    appInfo.insert(KEYWORD_APP_INFO_VERSION_CODE, device->versionNumber);
-    appInfo.insert(KEYWORD_APP_INFO_VERSION_NAME, device->versionName);
+    appInfo.insert(KEYWORD_APP_INFO_VERSION_CODE, device.versionNumber);
+    appInfo.insert(KEYWORD_APP_INFO_VERSION_NAME, device.versionName);
 
     object.insert(KEYWORD_APP_INFO, appInfo);
     object.insert(KEYWORD_DEVICE_INFO, deviceInfo);
-
-    delete device;
 }
 
 AccessDatabase *AppUtils::getDatabase()
@@ -93,15 +91,15 @@ QSettings &AppUtils::getDefaultSettings()
     return settings;
 }
 
-NetworkDevice *AppUtils::getLocalDevice()
+NetworkDevice AppUtils::getLocalDevice()
 {
-    NetworkDevice *thisDevice = new NetworkDevice(getDeviceId());
+    NetworkDevice thisDevice(getDeviceId());
 
-    thisDevice->brand = getDeviceTypeName();
-    thisDevice->model = getDeviceNameForOS();
-    thisDevice->nickname = getUserNickname();
-    thisDevice->versionName = getApplicationVersion();
-    thisDevice->versionNumber = getApplicationVersionCode();
+    thisDevice.brand = getDeviceTypeName();
+    thisDevice.model = getDeviceNameForOS();
+    thisDevice.nickname = getUserNickname();
+    thisDevice.versionName = getApplicationVersion();
+    thisDevice.versionNumber = getApplicationVersionCode();
 
     return thisDevice;
 }

@@ -26,72 +26,70 @@ QString NetworkDeviceLoader::convertToInet4Address(int ipv4Address, bool parentO
     return inet4Address;
 }
 
-DeviceConnection *NetworkDeviceLoader::processConnection(NetworkDevice *device,
-                                                         const QHostAddress &hostAddress)
+DeviceConnection NetworkDeviceLoader::processConnection(NetworkDevice &device,
+                                                        const QHostAddress &hostAddress)
 {
-    auto *connection = new DeviceConnection(hostAddress);
+    DeviceConnection connection(hostAddress);
 
     processConnection(device, connection);
 
     return connection;
 }
 
-void NetworkDeviceLoader::processConnection(NetworkDevice *device,
-                                            DeviceConnection *connection)
+void NetworkDeviceLoader::processConnection(NetworkDevice &device,
+                                            DeviceConnection &connection)
 {
-    if (!AppUtils::applyAdapterName(connection) && !gDbSignal->reconstruct(*connection))
-        connection->adapterName = KEYWORD_UNKNOWN_INTERFACE;
+    if (!AppUtils::applyAdapterName(connection) && !gDbSignal->reconstruct(connection))
+        connection.adapterName = KEYWORD_UNKNOWN_INTERFACE;
 
-    time(&connection->lastCheckedDate);
-    connection->deviceId = device->deviceId;
+    time(&connection.lastCheckedDate);
+    connection.deviceId = device.deviceId;
 
     qDebug() << "Processing connection for device"
-             << device->deviceId
+             << device.deviceId
              << "with connection name"
-             << connection->hostAddress.toString();
+             << connection.hostAddress.toString();
 
-    auto *selection = new SqlSelection();
+    SqlSelection selection;
 
-    selection->setTableName(DbStructure::TABLE_DEVICECONNECTION);
-    selection->setWhere(QString("`%1` = ? AND (`%2` = ? OR `%3` = ?)")
+    selection.setTableName(DbStructure::TABLE_DEVICECONNECTION);
+    selection.setWhere(QString("`%1` = ? AND (`%2` = ? OR `%3` = ?)")
                                .arg(DbStructure::FIELD_DEVICECONNECTION_DEVICEID)
                                .arg(DbStructure::FIELD_DEVICECONNECTION_ADAPTERNAME)
                                .arg(DbStructure::FIELD_DEVICECONNECTION_IPADDRESS));
 
-    selection->whereArgs << QVariant(connection->deviceId)
-                            << QVariant(connection->adapterName)
-                            << QVariant(NetworkDeviceLoader::convertToInet4Address(connection->hostAddress));
+    selection.whereArgs << QVariant(connection.deviceId)
+                        << QVariant(connection.adapterName)
+                        << QVariant(NetworkDeviceLoader::convertToInet4Address(connection.hostAddress));
 
-    gDbSignal->remove(*selection);
-    gDbSignal->publish(*connection);
+    gDbSignal->remove(selection);
+    gDbSignal->publish(connection);
 }
 
 void NetworkDeviceLoader::loadAsynchronously(QObject *sender,
                                              const QHostAddress &hostAddress,
-                                             const std::function<void(NetworkDevice *)> &listener)
+                                             const std::function<void(const NetworkDevice &)> &listener)
 {
     GThread::startIndependent([sender, hostAddress, listener](GThread *thisThread) {
         listener(load(sender, hostAddress));
     });
 }
 
-NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QHostAddress &hostAddress)
+NetworkDevice NetworkDeviceLoader::load(QObject *sender, const QHostAddress &hostAddress)
 {
     try {
         auto *bridge = new CommunicationBridge(sender);
-        auto *device = bridge->loadDevice(hostAddress);
+        auto device = bridge->loadDevice(hostAddress);
 
-        if (device->deviceId != nullptr) {
-            NetworkDevice *localDevice = AppUtils::getLocalDevice();
-            DeviceConnection *connection = processConnection(device, hostAddress);
+        if (device.deviceId != nullptr) {
+            const NetworkDevice &localDevice = AppUtils::getLocalDevice();
 
-            if (localDevice->deviceId != device->deviceId) {
-                time(&device->lastUsageTime);
-                gDbSignal->publish(*device);
+            processConnection(device, hostAddress);
+
+            if (localDevice.deviceId != device.deviceId) {
+                time(&device.lastUsageTime);
+                gDbSignal->publish(device);
             }
-
-            delete localDevice;
-            delete connection;
         }
 
         delete bridge;
@@ -100,27 +98,27 @@ NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QHostAddress &ho
         // do nothing
     }
 
-    return nullptr;
+    return NetworkDevice();
 }
 
-NetworkDevice *NetworkDeviceLoader::loadFrom(const QJsonObject jsonIndex)
+NetworkDevice NetworkDeviceLoader::loadFrom(const QJsonObject &jsonIndex)
 {
     QJsonObject deviceInfo = jsonIndex.value(KEYWORD_DEVICE_INFO).toObject();
     QJsonObject appInfo = jsonIndex.value(KEYWORD_APP_INFO).toObject();
 
-    NetworkDevice *networkDevice = new NetworkDevice(deviceInfo.value(KEYWORD_DEVICE_INFO_SERIAL).toString());
+    NetworkDevice networkDevice(deviceInfo.value(KEYWORD_DEVICE_INFO_SERIAL).toString());
 
-    gDbSignal->reconstruct(*networkDevice);
+    gDbSignal->reconstruct(networkDevice);
 
-    time(&networkDevice->lastUsageTime);
-    networkDevice->brand = deviceInfo.value(KEYWORD_DEVICE_INFO_BRAND).toString();
-    networkDevice->model = deviceInfo.value(KEYWORD_DEVICE_INFO_MODEL).toString();
-    networkDevice->nickname = deviceInfo.value(KEYWORD_DEVICE_INFO_USER).toString();
-    networkDevice->versionNumber = appInfo.value(KEYWORD_APP_INFO_VERSION_CODE).toInt();
-    networkDevice->versionName = appInfo.value(KEYWORD_APP_INFO_VERSION_NAME).toString();
+    time(&networkDevice.lastUsageTime);
+    networkDevice.brand = deviceInfo.value(KEYWORD_DEVICE_INFO_BRAND).toString();
+    networkDevice.model = deviceInfo.value(KEYWORD_DEVICE_INFO_MODEL).toString();
+    networkDevice.nickname = deviceInfo.value(KEYWORD_DEVICE_INFO_USER).toString();
+    networkDevice.versionNumber = appInfo.value(KEYWORD_APP_INFO_VERSION_CODE).toInt();
+    networkDevice.versionName = appInfo.value(KEYWORD_APP_INFO_VERSION_NAME).toString();
 
-    if (networkDevice->nickname.length() > NICKNAME_LENGTH_MAX)
-        networkDevice->nickname = networkDevice->nickname.left(NICKNAME_LENGTH_MAX - 1);
+    if (networkDevice.nickname.length() > NICKNAME_LENGTH_MAX)
+        networkDevice.nickname = networkDevice.nickname.left(NICKNAME_LENGTH_MAX - 1);
 
     return networkDevice;
 }

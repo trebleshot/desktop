@@ -13,10 +13,10 @@ namespace Ui {
 }
 
 class ManageDevicesDialog : public QDialog {
-    Q_OBJECT
+Q_OBJECT
 
 public:
-    explicit ManageDevicesDialog(QWidget* parent);
+    explicit ManageDevicesDialog(QWidget *parent);
 
 protected:
     Ui::ManageDevicesDialog *m_ui;

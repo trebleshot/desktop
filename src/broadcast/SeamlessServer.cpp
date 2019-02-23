@@ -107,7 +107,7 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
                             if (skippedBytes > 0)
                                 file->seek(skippedBytes);
 
-                            auto* socket = new QTcpSocket;
+                            auto *socket = new QTcpSocket;
 
                             {
                                 // Establish the connection to the socket that will receive the file

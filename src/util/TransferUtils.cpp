@@ -10,7 +10,7 @@
 #include "AppUtils.h"
 
 SqlSelection TransferUtils::createSqlSelection(quint32 groupId, const QString &deviceId,
-                                                TransferObject::Flag flag, bool equals)
+                                               TransferObject::Flag flag, bool equals)
 {
     SqlSelection sqlSelection;
     sqlSelection.setTableName(DbStructure::TABLE_TRANSFER);
@@ -20,7 +20,7 @@ SqlSelection TransferUtils::createSqlSelection(quint32 groupId, const QString &d
             .arg(DbStructure::FIELD_TRANSFER_DEVICEID);
 
     sqlSelection.whereArgs << groupId
-                            << deviceId;
+                           << deviceId;
 
     if (flag != TransferObject::Flag::Any) {
         sqlStatement.append(QString("AND %1 %2 ?")
@@ -35,46 +35,44 @@ SqlSelection TransferUtils::createSqlSelection(quint32 groupId, const QString &d
     return sqlSelection;
 }
 
-TransferObject *TransferUtils::firstAvailableTransfer(quint32 groupId, const QString &deviceId)
+TransferObject TransferUtils::firstAvailableTransfer(quint32 groupId, const QString &deviceId)
 {
-    TransferObject *object = new TransferObject;
+    TransferObject object;
     firstAvailableTransfer(object, groupId, deviceId);
 
     return object;
 }
 
-bool TransferUtils::firstAvailableTransfer(TransferObject *object, quint32 groupId, const QString &deviceId)
+bool TransferUtils::firstAvailableTransfer(TransferObject &object, quint32 groupId, const QString &deviceId)
 {
-    auto *selection = new SqlSelection;
+    SqlSelection selection;
 
-    selection->tableName = DbStructure::TABLE_TRANSFER;
-    selection->setWhere(QString("`%1` = ? AND `%2` = ? AND `%3` = ? AND `%4` = ?")
-                                .arg(DbStructure::FIELD_TRANSFER_GROUPID)
-                                .arg(DbStructure::FIELD_TRANSFER_DEVICEID)
-                                .arg(DbStructure::FIELD_TRANSFER_FLAG)
-                                .arg(DbStructure::FIELD_TRANSFER_TYPE));
-    selection->setLimit(1);
-    selection->setOrderBy(QString("`%1` ASC, `%2` ASC")
-                                  .arg(DbStructure::FIELD_TRANSFER_DIRECTORY)
-                                  .arg(DbStructure::FIELD_TRANSFER_NAME));
+    selection.tableName = DbStructure::TABLE_TRANSFER;
+    selection.setWhere(QString("`%1` = ? AND `%2` = ? AND `%3` = ? AND `%4` = ?")
+                               .arg(DbStructure::FIELD_TRANSFER_GROUPID)
+                               .arg(DbStructure::FIELD_TRANSFER_DEVICEID)
+                               .arg(DbStructure::FIELD_TRANSFER_FLAG)
+                               .arg(DbStructure::FIELD_TRANSFER_TYPE));
+    selection.setLimit(1);
+    selection.setOrderBy(QString("`%1` ASC, `%2` ASC")
+                                 .arg(DbStructure::FIELD_TRANSFER_DIRECTORY)
+                                 .arg(DbStructure::FIELD_TRANSFER_NAME));
 
-    selection->whereArgs << groupId
-                         << deviceId
-                         << TransferObject::Flag::Pending
-                         << TransferObject::Type::Incoming;
+    selection.whereArgs << groupId
+                        << deviceId
+                        << TransferObject::Flag::Pending
+                        << TransferObject::Type::Incoming;
 
-    auto query = selection->toSelectionQuery();
+    auto query = selection.toSelectionQuery();
 
     query.exec();
 
     auto taskResult = query.first();
 
     if (taskResult)
-        object->generateValues(query.record());
+        object.generateValues(query.record());
     else
         qDebug() << query.lastError() << endl << query.executedQuery();
-
-    delete selection;
 
     return taskResult;
 }
@@ -94,23 +92,23 @@ QString TransferUtils::getDefaultSavePath()
     return downloadsFolder;
 }
 
-QString TransferUtils::getSavePath(TransferGroup *group)
+QString TransferUtils::getSavePath(const TransferGroup &group)
 {
-    return (group->savePath != nullptr && group->savePath.length() > 0 && QDir().mkdir(group->savePath))
-           ? group->savePath
+    return (group.savePath != nullptr && group.savePath.length() > 0 && QDir().mkdir(group.savePath))
+           ? group.savePath
            : getDefaultSavePath();
 }
 
-QString TransferUtils::getIncomingFilePath(TransferGroup *transferGroup, TransferObject *object)
+QString TransferUtils::getIncomingFilePath(const TransferGroup &transferGroup, const TransferObject &object)
 {
     QDir savePath(getSavePath(transferGroup));
 
-    if (object->directory != nullptr && object->directory.length() > 0) {
-        savePath.mkpath(object->directory);
-        savePath.setPath(savePath.filePath(object->directory));
+    if (object.directory != nullptr && object.directory.length() > 0) {
+        savePath.mkpath(object.directory);
+        savePath.setPath(savePath.filePath(object.directory));
     }
 
-    return savePath.filePath(object->file);
+    return savePath.filePath(object.file);
 }
 
 QString TransferUtils::getUniqueFileName(const QString &filePath, bool tryActualFile)
@@ -138,8 +136,6 @@ QString TransferUtils::getUniqueFileName(const QString &filePath, bool tryActual
                         .arg(exceed)
                         .arg(fileExtension));
 
-        qDebug() << newName;
-
         if (!QFile::exists(newName))
             return newName;
     }
@@ -147,22 +143,22 @@ QString TransferUtils::getUniqueFileName(const QString &filePath, bool tryActual
     return fileName;
 }
 
-QString TransferUtils::saveIncomingFile(TransferGroup *group, TransferObject *object)
+QString TransferUtils::saveIncomingFile(const TransferGroup &group, TransferObject &object)
 {
     QFile file(getIncomingFilePath(group, object));
     QFileInfo fileInfo(file);
-    QString uniqueName = getUniqueFileName(fileInfo.dir().filePath(object->friendlyName), true);
+    QString uniqueName = getUniqueFileName(fileInfo.dir().filePath(object.friendlyName), true);
     QFile uniqueFile(uniqueName);
     QFileInfo uniqueFileInfo(uniqueFile);
 
     if (file.exists()) {
         if (file.rename(uniqueFile.fileName()))
-            object->file = uniqueFileInfo.fileName();
+            object.file = uniqueFileInfo.fileName();
     }
 
-    object->flag = TransferObject::Flag::Done;
+    object.flag = TransferObject::Flag::Done;
 
-    gDatabase->publish(*object);
+    gDatabase->publish(object);
 
     return QString();
 }

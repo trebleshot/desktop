@@ -101,8 +101,6 @@ public:
     QString orderBy;
     int limit = -1;
 
-    SqlSelection(const SqlSelection &other) = default;
-
     explicit SqlSelection() = default;
 
     void bindWhereClause(QSqlQuery &query) const;
@@ -137,19 +135,13 @@ public:
 };
 
 class DatabaseObject {
-
 public:
-    DatabaseObject(const DatabaseObject &other) = default;
 
-    explicit DatabaseObject() = default;
+    DatabaseObject() = default;
+
+    virtual ~DatabaseObject() = default;
 
     void generateValues(const QSqlRecord &record);
-
-    DatabaseObject &operator=(const DatabaseObject &object)
-    {
-        onGeneratingValues(object.getValues());
-        return *this;
-    }
 
     virtual SqlSelection getWhere() const = 0;
 

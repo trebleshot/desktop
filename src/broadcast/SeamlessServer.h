@@ -13,7 +13,7 @@ class SeamlessServer : public CoolSocket::Server {
 Q_OBJECT
 
 public:
-    explicit SeamlessServer(QObject* parent = nullptr);
+    explicit SeamlessServer(QObject *parent = nullptr);
 
     void connected(CoolSocket::ActiveConnection *connection) override;
 };

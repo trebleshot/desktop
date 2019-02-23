@@ -15,7 +15,7 @@ Q_OBJECT
 public:
     explicit GThread(const std::function<void(GThread *)> &function, QObject *parent = nullptr);
 
-    static GThread* startIndependent(const std::function<void(GThread *)> &function, QObject *parent = nullptr);
+    static GThread *startIndependent(const std::function<void(GThread *)> &function, QObject *parent = nullptr);
 
 protected:
     void run() override;

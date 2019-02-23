@@ -24,15 +24,15 @@ struct AssigneeInfo {
     bool valid = false;
 
 public:
-    AssigneeInfo(const AssigneeInfo &other) = default;
-
     AssigneeInfo()
     {
         this->valid = false;
     }
 
-    AssigneeInfo(const NetworkDevice &device, const TransferAssignee &assignee) : device(device), assignee(assignee)
+    AssigneeInfo(const NetworkDevice &device, const TransferAssignee &assignee)
     {
+        this->device = device;
+        this->assignee = assignee;
         this->valid = true;
     }
 };
@@ -48,15 +48,12 @@ struct TransferGroupInfo {
     size_t totalBytes = 0;
     size_t completedBytes = 0;
 
-    TransferGroupInfo() = default;
-
-    TransferGroupInfo(const TransferGroupInfo &other) = default;
-
     TransferGroupInfo(const TransferGroup &group, const QList<AssigneeInfo> &assignees, int total = 0,
                       int completed = 0, bool hasError = false, bool hasIncoming = false, bool hasOutgoing = false,
-                      size_t totalBytes = 0, size_t completedBytes = 0) : group(group)
+                      size_t totalBytes = 0, size_t completedBytes = 0)
     {
-        this->assignees << assignees;
+        this->group = group;
+        this->assignees = assignees;
         this->total = total;
         this->completed = completed;
         this->hasError = hasError;
@@ -73,15 +70,15 @@ public:
                                            TransferObject::Flag flag = TransferObject::Flag::Any,
                                            bool equals = true);
 
-    static TransferObject *firstAvailableTransfer(quint32 groupId, const QString &deviceId);
+    static TransferObject firstAvailableTransfer(quint32 groupId, const QString &deviceId);
 
-    static bool firstAvailableTransfer(TransferObject *object, quint32 groupId, const QString &deviceId);
+    static bool firstAvailableTransfer(TransferObject &object, quint32 groupId, const QString &deviceId);
 
     static QString getDefaultSavePath();
 
-    static QString getIncomingFilePath(TransferGroup *transferGroup, TransferObject *object);
+    static QString getIncomingFilePath(const TransferGroup &transferGroup, const TransferObject &object);
 
-    static QString getSavePath(TransferGroup *group);
+    static QString getSavePath(const TransferGroup &group);
 
     static QString getUniqueFileName(const QString &filePath, bool tryActualFile);
 
@@ -91,7 +88,7 @@ public:
 
     static AssigneeInfo getInfo(const TransferAssignee &assignee);
 
-    static QString saveIncomingFile(TransferGroup *group, TransferObject *object);
+    static QString saveIncomingFile(const TransferGroup &group, TransferObject &object);
 
     static QString sizeExpression(size_t size, bool notUseByte);
 };

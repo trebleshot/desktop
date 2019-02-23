@@ -18,38 +18,38 @@ void SeamlessClient::run()
 {
     qDebug() << "== SeamlessClient ==";
 
-    auto *localDevice = AppUtils::getLocalDevice();
-    auto *device = new NetworkDevice(m_deviceId);
-    auto *group = new TransferGroup(m_groupId);
-    auto *assignee = new TransferAssignee(m_groupId, m_deviceId, nullptr);
-    auto *connection = new DeviceConnection(); // Adapter name will be passed when assignee reconstruction is successful
+    const auto &localDevice = AppUtils::getLocalDevice();
+    NetworkDevice device(m_deviceId);
+    TransferGroup group(m_groupId);
+    TransferAssignee assignee(m_groupId, m_deviceId, nullptr);
+    DeviceConnection connection; // Adapter name will be passed when assignee reconstruction is successful
     auto *client = new CommunicationBridge;
     bool retry = false;
 
-    auto connectionLambda = [connection, assignee]() -> DeviceConnection * {
-        connection->deviceId = assignee->deviceId;
-        connection->adapterName = assignee->connectionAdapter;
+    auto connectionLambda = [&connection, &assignee]() -> DeviceConnection & {
+        connection.deviceId = assignee.deviceId;
+        connection.adapterName = assignee.connectionAdapter;
 
         return connection;
     };
 
-    if (gDbSignal->reconstruct(*device)
-        && gDbSignal->reconstruct(*group)
-        && gDbSignal->reconstruct(*assignee)
-        && gDbSignal->reconstruct(*connectionLambda())) {
+    if (gDbSignal->reconstruct(device)
+        && gDbSignal->reconstruct(group)
+        && gDbSignal->reconstruct(assignee)
+        && gDbSignal->reconstruct(connectionLambda())) {
 
         client->setDevice(device);
 
         try {
             {
                 qDebug() << "Receive process for"
-                         << device->nickname
+                         << device.nickname
                          << "for group"
-                         << group->groupId
+                         << group.groupId
                          << "with connection"
-                         << connection->hostAddress.toString()
+                         << connection.hostAddress.toString()
                          << "of adapter"
-                         << connection->adapterName;
+                         << connection.adapterName;
 
                 auto *activeConnection = client->communicate(device, connection);
 
@@ -74,7 +74,7 @@ void SeamlessClient::run()
             }
 
             {
-                auto *activeConnection = CoolSocket::Client::openConnection(this, connection->hostAddress,
+                auto *activeConnection = CoolSocket::Client::openConnection(this, connection.hostAddress,
                                                                             PORT_SEAMLESS, TIMEOUT_SOCKET_DEFAULT);
 
                 qDebug() << "Seamless port is open";
@@ -110,10 +110,10 @@ void SeamlessClient::run()
                         if (interrupted())
                             break;
 
-                        TransferObject *transferObject = new TransferObject;
+                        TransferObject transferObject;
                         bool constStatus = false;
 
-                        gDbSignal->doSynchronized([this, transferObject, &constStatus](AccessDatabase *db) {
+                        gDbSignal->doSynchronized([this, &transferObject, &constStatus](AccessDatabase *db) {
                             constStatus = TransferUtils::firstAvailableTransfer(transferObject, m_groupId, m_deviceId);
                         });
 
@@ -129,13 +129,13 @@ void SeamlessClient::run()
                                 QJsonObject reply;
 
                                 reply.insert(KEYWORD_TRANSFER_REQUEST_ID,
-                                             QVariant(transferObject->requestId).toString());
-                                reply.insert(KEYWORD_TRANSFER_GROUP_ID, QVariant(transferObject->groupId).toString());
+                                             QVariant(transferObject.requestId).toString());
+                                reply.insert(KEYWORD_TRANSFER_GROUP_ID, QVariant(transferObject.groupId).toString());
                                 reply.insert(KEYWORD_TRANSFER_SOCKET_PORT, tcpServer->serverPort());
                                 reply.insert(KEYWORD_RESULT, true);
 
                                 if (currentFile.size() > 0) {
-                                    transferObject->skippedBytes = static_cast<size_t>(currentFile.size());
+                                    transferObject.skippedBytes = static_cast<size_t>(currentFile.size());
                                     reply.insert(KEYWORD_SKIPPED_BYTES, currentFile.size());
                                 }
 
@@ -163,12 +163,12 @@ void SeamlessClient::run()
                                             qDebug() << "Sender says error" << error << "occurred";
 
                                             if (error == KEYWORD_ERROR_NOT_FOUND)
-                                                transferObject->flag = TransferObject::Flag::Removed;
+                                                transferObject.flag = TransferObject::Flag::Removed;
                                             else if (error == KEYWORD_ERROR_UNKNOWN
                                                      || error == KEYWORD_ERROR_NOT_ACCESSIBLE)
-                                                transferObject->flag = TransferObject::Flag::Interrupted;
+                                                transferObject.flag = TransferObject::Flag::Interrupted;
                                         } else {
-                                            transferObject->flag = TransferObject::Flag::Interrupted;
+                                            transferObject.flag = TransferObject::Flag::Interrupted;
                                         }
                                     }
                                 } else {
@@ -179,10 +179,10 @@ void SeamlessClient::run()
                                                 .toVariant()
                                                 .toUInt();
 
-                                        if (currentSize != transferObject->fileSize
+                                        if (currentSize != transferObject.fileSize
                                             && currentFile.size() > 0) {
-                                            transferObject->fileSize = currentSize;
-                                            transferObject->flag = TransferObject::Flag::Removed;
+                                            transferObject.fileSize = currentSize;
+                                            transferObject.flag = TransferObject::Flag::Removed;
 
                                             canContinue = false;
                                         }
@@ -194,8 +194,8 @@ void SeamlessClient::run()
 
                                         if (tcpServer->hasPendingConnections()) {
                                             auto *socket = tcpServer->nextPendingConnection();
-                                            clock_t lastDataAvailable = clock();
-                                            qint64 fileSize = static_cast<qint64>(transferObject->fileSize);
+                                            auto lastDataAvailable = clock();
+                                            auto fileSize = static_cast<qint64>(transferObject.fileSize);
 
                                             while (socket->isReadable() && currentFile.size() < fileSize) {
                                                 if (socket->waitForReadyRead(2000)) {
@@ -210,20 +210,20 @@ void SeamlessClient::run()
                                                 }
                                             }
 
-                                            if (currentFile.size() == transferObject->fileSize) {
-                                                gDbSignal->doSynchronized([group, transferObject](AccessDatabase *db) {
+                                            if (currentFile.size() == transferObject.fileSize) {
+                                                gDbSignal->doSynchronized([&group, &transferObject](
+                                                        AccessDatabase *db) {
                                                     TransferUtils::saveIncomingFile(group, transferObject);
                                                 });
                                             } else {
-                                                transferObject->flag = TransferObject::Flag::Interrupted;
-                                                gDbSignal->publish(*transferObject);
+                                                transferObject.flag = TransferObject::Flag::Interrupted;
+                                                gDbSignal->publish(transferObject);
                                             }
                                         }
                                     }
                                 }
                             }
                         } else {
-                            delete transferObject;
                             break;
                         }
                     }
@@ -240,11 +240,6 @@ void SeamlessClient::run()
     }
 
     delete client;
-    delete connection;
-    delete assignee;
-    delete group;
-    delete device;
-    delete localDevice;
 
     qDebug() << "-- SeamlessClient --";
 }

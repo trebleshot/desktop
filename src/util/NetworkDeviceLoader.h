@@ -21,15 +21,15 @@ public:
 
     static void loadAsynchronously(QObject *sender,
                                    const QHostAddress &hostAddress,
-                                   const std::function<void(NetworkDevice *)> &listener);
+                                   const std::function<void(const NetworkDevice &)> &listener);
 
-    static NetworkDevice *load(QObject *sender, const QHostAddress &hostAddress);
+    static NetworkDevice load(QObject *sender, const QHostAddress &hostAddress);
 
-    static NetworkDevice *loadFrom(QJsonObject jsonIndex);
+    static NetworkDevice loadFrom(const QJsonObject &jsonIndex);
 
-    static DeviceConnection *processConnection(NetworkDevice *device, const QHostAddress &hostAddress);
+    static DeviceConnection processConnection(NetworkDevice &device, const QHostAddress &hostAddress);
 
-    static void processConnection(NetworkDevice *device, DeviceConnection *connection);
+    static void processConnection(NetworkDevice &device, DeviceConnection &connection);
 };
 
 

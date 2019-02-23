@@ -1,5 +1,4 @@
 #include <src/util/AppUtils.h>
-#include "Config.h"
 
 QString getDeviceTypeName()
 {

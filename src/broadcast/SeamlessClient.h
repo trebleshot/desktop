@@ -16,7 +16,8 @@ class SeamlessClient : public QThread {
 public:
     explicit SeamlessClient(const QString &deviceId, quint32 groupId, QObject *parent = nullptr);
 
-    bool interrupted() {
+    bool interrupted()
+    {
         return m_interrupted;
     }
 

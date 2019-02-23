@@ -16,7 +16,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 {
     connection->setTimeout(3000);
     CoolSocket::Response *response = nullptr;
-    NetworkDevice *device = nullptr;
+    NetworkDevice device;
 
     try {
         response = connection->receive();
@@ -50,31 +50,26 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         }
 
         if (deviceSerial != nullptr) {
-            auto *testDevice = new NetworkDevice(deviceSerial);
+            device.deviceId = deviceSerial;
 
-            if (gDbSignal->reconstruct(*testDevice)) {
-                if (!testDevice->isRestricted)
+            if (gDbSignal->reconstruct(device)) {
+                if (!device.isRestricted)
                     shouldContinue = true;
-
-                device = testDevice;
             } else {
-                delete testDevice;
-
                 device = NetworkDeviceLoader::load(
                         this,
                         connection->getSocket()->peerAddress());
 
-                device->isTrusted = false;
-                device->isRestricted = true;
+                device.isTrusted = false;
+                device.isRestricted = true;
 
                 shouldContinue = true;
 
-                gDbSignal->publish(*device);
+                gDbSignal->publish(device);
             }
 
-            DeviceConnection *deviceConnection =
-                    NetworkDeviceLoader::processConnection(device,
-                                                           connection->getSocket()->peerAddress());
+            const DeviceConnection &deviceConnection =
+                    NetworkDeviceLoader::processConnection(device, connection->getSocket()->peerAddress());
 
             if (!shouldContinue) {
                 replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ALLOWED);
@@ -98,18 +93,17 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                         GThread::startIndependent([this, filesIndex, groupId, device, deviceConnection](
                                 GThread *thisThread) {
-                            auto *transferGroup = new TransferGroup(groupId);
-                            auto *transferAssignee =
-                                    new TransferAssignee(transferGroup->groupId,
-                                                         device->deviceId,
-                                                         deviceConnection->adapterName);
+                            TransferGroup transferGroup(groupId);
+                            TransferAssignee transferAssignee(transferGroup.groupId,
+                                                              device.deviceId,
+                                                              deviceConnection.adapterName);
 
-                            bool usePublishing = gDbSignal->reconstruct(*transferGroup);
+                            bool usePublishing = gDbSignal->reconstruct(transferGroup);
 
-                            time(&transferGroup->dateCreated);
+                            time(&transferGroup.dateCreated);
 
-                            gDbSignal->publish(*transferGroup);
-                            gDbSignal->publish(*transferAssignee);
+                            gDbSignal->publish(transferGroup);
+                            gDbSignal->publish(transferAssignee);
 
                             int filesTotal = 0;
 
@@ -119,7 +113,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                         = new TransferObject(transferIndex.value(KEYWORD_TRANSFER_REQUEST_ID)
                                                                      .toVariant()
                                                                      .toUInt(),
-                                                             device->deviceId,
+                                                             device.deviceId,
                                                              TransferObject::Incoming);
 
                                 transferObject->flag = TransferObject::Flag::Pending;
@@ -144,10 +138,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                             }
 
                             if (filesTotal > 0)
-                                    emit transferRequest(device->deviceId, transferGroup->groupId, filesTotal);
-
-                            delete transferGroup;
-                            delete transferAssignee;
+                                    emit transferRequest(device.deviceId, transferGroup.groupId, filesTotal);
                         }, this);
                     }
                 } else if (request == KEYWORD_REQUEST_RESPONSE) {
@@ -157,27 +148,24 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                 .toUInt();
                         const bool isAccepted = responseJSON.value(KEYWORD_TRANSFER_IS_ACCEPTED).toBool(false);
 
-                        auto *transferGroup = new TransferGroup(groupId);
-                        auto *transferAssignee = new TransferAssignee(groupId, device->deviceId);
+                        TransferGroup transferGroup(groupId);
+                        TransferAssignee transferAssignee(groupId, device.deviceId);
 
-                        if (gDbSignal->reconstruct(*transferGroup)
-                            && gDbSignal->reconstruct(*transferAssignee)) {
+                        if (gDbSignal->reconstruct(transferGroup)
+                            && gDbSignal->reconstruct(transferAssignee)) {
 
                             if (!isAccepted)
-                                gDbSignal->remove(*transferGroup);
+                                gDbSignal->remove(transferGroup);
 
                             result = true;
                         }
-
-                        delete transferGroup;
-                        delete transferAssignee;
                     }
                 } else if (request == KEYWORD_REQUEST_CLIPBOARD) {
                     if (responseJSON.contains(KEYWORD_TRANSFER_CLIPBOARD_TEXT)) {
                         auto text = responseJSON
                                 .value(KEYWORD_TRANSFER_CLIPBOARD_TEXT)
                                 .toString();
-                        emit textReceived(text, device->deviceId);
+                        emit textReceived(text, device.deviceId);
 
                         auto *textObject = new TextStreamObject;
                         textObject->text = text;
@@ -205,7 +193,6 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         qDebug() << "An unknown error occurred";
     }
 
-    delete device;
     delete response;
 }
 

@@ -3,13 +3,11 @@
 //
 
 #include "CommunicationBridge.h"
-#include "AppUtils.h"
 
-CoolSocket::ActiveConnection *
-CommunicationBridge::communicate(NetworkDevice *targetDevice, DeviceConnection *targetConnection)
+CoolSocket::ActiveConnection *CommunicationBridge::communicate(NetworkDevice &targetDevice,
+                                                               const DeviceConnection &targetConnection)
 {
-    CoolSocket::ActiveConnection *connection
-            = connectWithHandshake(targetConnection->hostAddress, false);
+    CoolSocket::ActiveConnection *connection = connectWithHandshake(targetConnection.hostAddress, false);
 
     communicate(connection, targetDevice);
 
@@ -17,7 +15,7 @@ CommunicationBridge::communicate(NetworkDevice *targetDevice, DeviceConnection *
 }
 
 CoolSocket::ActiveConnection *CommunicationBridge::communicate(
-        CoolSocket::ActiveConnection *connection, NetworkDevice *device)
+        CoolSocket::ActiveConnection *connection, NetworkDevice &device)
 {
     updateDeviceIfOkay(connection, device);
     return connection;
@@ -40,7 +38,7 @@ CoolSocket::ActiveConnection *CommunicationBridge::connectWithHandshake(const QH
     return handshake(connect(hostAddress), handshakeOnly);
 }
 
-NetworkDevice *CommunicationBridge::getDevice()
+NetworkDevice CommunicationBridge::getDevice()
 {
     return this->m_device;
 }
@@ -54,9 +52,9 @@ CoolSocket::ActiveConnection *CommunicationBridge::handshake(
         replyJSON.insert(KEYWORD_HANDSHAKE_REQUIRED, true);
         replyJSON.insert(KEYWORD_HANDSHAKE_ONLY, handshakeOnly);
         replyJSON.insert(KEYWORD_DEVICE_INFO_SERIAL, getDeviceId());
-        replyJSON.insert(KEYWORD_DEVICE_SECURE_KEY, m_device == nullptr
+        replyJSON.insert(KEYWORD_DEVICE_SECURE_KEY, m_device.deviceId == nullptr
                                                     ? m_secureKey
-                                                    : m_device->tmpSecureKey);
+                                                    : m_device.tmpSecureKey);
 
         connection->reply(QJsonDocument(replyJSON).toJson().toStdString().c_str());
     } catch (exception &e) {
@@ -66,12 +64,12 @@ CoolSocket::ActiveConnection *CommunicationBridge::handshake(
     return connection;
 }
 
-NetworkDevice *CommunicationBridge::loadDevice(const QHostAddress &hostAddress)
+NetworkDevice CommunicationBridge::loadDevice(const QHostAddress &hostAddress)
 {
     return loadDevice(connectWithHandshake(hostAddress, true));
 }
 
-NetworkDevice *CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *connection)
+NetworkDevice CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *connection)
 {
     try {
         CoolSocket::Response *response = connection->receive();
@@ -84,7 +82,7 @@ NetworkDevice *CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *con
     }
 }
 
-void CommunicationBridge::setDevice(NetworkDevice *device)
+void CommunicationBridge::setDevice(const NetworkDevice &device)
 {
     this->m_device = device;
 }
@@ -94,24 +92,21 @@ void CommunicationBridge::setSecureKey(int key)
     this->m_secureKey = key;
 }
 
-NetworkDevice *CommunicationBridge::updateDeviceIfOkay(
-        CoolSocket::ActiveConnection *activeConnection, NetworkDevice *device)
+NetworkDevice CommunicationBridge::updateDeviceIfOkay(
+        CoolSocket::ActiveConnection *activeConnection, NetworkDevice &device)
 {
-    NetworkDevice *loadedDevice = loadDevice(activeConnection);
-    DeviceConnection *connection
-            = NetworkDeviceLoader::processConnection(loadedDevice, activeConnection
-                    ->getSocket()
-                    ->peerAddress());
+    NetworkDevice loadedDevice = loadDevice(activeConnection);
 
-    delete connection;
+    NetworkDeviceLoader::processConnection(loadedDevice, activeConnection->getSocket()->peerAddress());
 
-    if (device->deviceId != loadedDevice->deviceId) {
-        qDebug() << "Compared" << device->nickname << "with" << loadedDevice->nickname;
+    if (device.deviceId != loadedDevice.deviceId) {
+        qDebug() << "Compared" << device.nickname << "with" << loadedDevice.nickname;
         throw exception();
-    }
-    else {
-        time(&loadedDevice->lastUsageTime);
-        gDbSignal->publish(*loadedDevice);
+    } else {
+        device = loadedDevice;
+
+        time(&loadedDevice.lastUsageTime);
+        gDbSignal->publish(loadedDevice);
         setDevice(loadedDevice);
     }
 

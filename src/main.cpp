@@ -1,9 +1,6 @@
 #include "src/build.h"
 #include "src/ui/MainWindow.h"
 
-#include <QFileDialog>
-#include <src/util/TransferUtils.h>
-
 int main(int argc, char *argv[])
 {
     QApplication application(argc, argv);

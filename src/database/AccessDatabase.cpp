@@ -1,6 +1,5 @@
 #include <c++/7/bits/unique_ptr.h>
 #include <src/util/AppUtils.h>
-#include "AccessDatabase.h"
 #include "ReconstructionException.h"
 
 using DbStructure::generateField;

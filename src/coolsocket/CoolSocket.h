@@ -143,7 +143,8 @@ namespace CoolSocket {
         QJsonObject *headerIndex;
         qsizetype length;
 
-        QJsonObject asJson() const {
+        QJsonObject asJson() const
+        {
             return QJsonDocument::fromJson(QByteArray::fromStdString(response->toStdString()))
                     .object();
         }
@@ -157,9 +158,6 @@ namespace CoolSocket {
 
     public:
         explicit ServerWorker(Server *server, QObject *parent = nullptr);
-
-        ~ServerWorker() override
-        = default;
 
         bool isServing()
         {

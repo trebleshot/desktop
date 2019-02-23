@@ -193,7 +193,7 @@ void MainWindow::showTransferRequest(const QString &deviceId, quint32 groupId, i
 
 void MainWindow::manageDevices()
 {
-    auto* manageDevices = new ManageDevicesDialog(this);
+    auto *manageDevices = new ManageDevicesDialog(this);
 
     manageDevices->show();
 }
