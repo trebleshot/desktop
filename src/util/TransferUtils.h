@@ -1,5 +1,9 @@
 #include <utility>
 
+#include <utility>
+
+#include <utility>
+
 //
 // Created by veli on 2/12/19.
 //
@@ -33,7 +37,7 @@ public:
 
 struct TransferGroupInfo {
     TransferGroup group;
-    QList<AssigneeInfo> assignees;
+    QList<AssigneeInfo *> assignees;
     int total = 0;
     int completed = 0;
     bool hasError = false;
@@ -49,7 +53,7 @@ struct TransferGroupInfo {
 
     }
 
-    TransferGroupInfo(const TransferGroup &group, QList<AssigneeInfo> assignees, int total = 0,
+    TransferGroupInfo(const TransferGroup &group, QList<AssigneeInfo *> assignees, int total = 0,
                       int completed = 0, bool hasError = false, bool hasIncoming = false, bool hasOutgoing = false,
                       size_t totalBytes = 0, size_t completedBytes = 0) : group(group), assignees(std::move(assignees))
     {
