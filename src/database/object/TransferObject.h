@@ -34,11 +34,11 @@ public:
     explicit TransferObject(quint32 requestId = 0, const QString &deviceId = nullptr,
                             const Type &type = Type::Incoming, QObject *parent = nullptr);
 
-    bool isDivisionObject();
+    bool isDivisionObject() const;
 
-    SqlSelection *getWhere() override;
+    SqlSelection getWhere() const override;
 
-    QSqlRecord getValues(AccessDatabase *db) override;
+    DbObjectMap getValues() const override;
 
     void onGeneratingValues(const QSqlRecord &record) override;
 };

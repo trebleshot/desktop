@@ -36,9 +36,9 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
             auto *group = new TransferGroup(groupId);
 
             // device might be null because this was introduced in build 91
-            if (device != nullptr && !gDbSignal->reconstruct(device)) {
+            if (device != nullptr && !gDbSignal->reconstruct(*device)) {
                 reply.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ALLOWED);
-            } else if (!gDbSignal->reconstruct(group)) {
+            } else if (!gDbSignal->reconstruct(*group)) {
                 reply.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_FOUND);
             } else {
                 reply.insert(KEYWORD_RESULT, true);
@@ -77,7 +77,7 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
                                     .toVariant()
                                     .toUInt(), deviceId, TransferObject::Type::Outgoing);
 
-                    if (gDbSignal->reconstruct(transferObject)) {
+                    if (gDbSignal->reconstruct(*transferObject)) {
                         quint16 serverPort = static_cast<quint16>(request.value(KEYWORD_TRANSFER_SOCKET_PORT)
                                 .toVariant()
                                 .toUInt());
@@ -87,7 +87,7 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
                                               ? request.value(KEYWORD_SKIPPED_BYTES).toVariant().toUInt()
                                               : 0;
 
-                        gDbSignal->update(transferObject);
+                        gDbSignal->update(*transferObject);
 
                         auto *file = new QFile(transferObject->file);
 

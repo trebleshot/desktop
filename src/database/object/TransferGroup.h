@@ -18,16 +18,16 @@ public:
     time_t dateCreated;
     QString savePath;
 
-    explicit TransferGroup(const TransferGroup &group)
+    TransferGroup(const TransferGroup &group)
     {
 
     }
 
     explicit TransferGroup(quint32 groupId = 0, QObject *parent = nullptr);
 
-    SqlSelection *getWhere() override;
+    SqlSelection getWhere() const override;
 
-    QSqlRecord getValues(AccessDatabase *db) override;
+    DbObjectMap getValues() const override;
 
     void onGeneratingValues(const QSqlRecord &record) override;
 };
@@ -48,9 +48,9 @@ public:
                               const QString &connectionAdapter = nullptr,
                               QObject *parent = nullptr);
 
-    SqlSelection *getWhere() override;
+    SqlSelection getWhere() const override;
 
-    QSqlRecord getValues(AccessDatabase *db) override;
+    DbObjectMap getValues() const override;
 
     void onGeneratingValues(const QSqlRecord &record) override;
 };

@@ -16,27 +16,11 @@ public:
 
     explicit TextStreamObject(int id = 0, const QString &text = nullptr, QObject *parent = nullptr);
 
-    SqlSelection *getWhere() override;
+    SqlSelection getWhere() const override;
 
-    QSqlRecord getValues(AccessDatabase *db) override;
+    DbObjectMap getValues() const override;
 
     void onGeneratingValues(const QSqlRecord &record) override;
-
-    void onUpdatingObject(AccessDatabase *db) override
-    {
-        DatabaseObject::onUpdatingObject(db);
-    }
-
-    void onInsertingObject(AccessDatabase *db) override
-    {
-        DatabaseObject::onInsertingObject(db);
-    }
-
-    void onRemovingObject(AccessDatabase *db) override
-    {
-        DatabaseObject::onRemovingObject(db);
-    }
-
 };
 
 

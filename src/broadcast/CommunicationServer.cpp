@@ -52,7 +52,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         if (deviceSerial != nullptr) {
             auto *testDevice = new NetworkDevice(deviceSerial);
 
-            if (gDbSignal->reconstruct(testDevice)) {
+            if (gDbSignal->reconstruct(*testDevice)) {
                 if (!testDevice->isRestricted)
                     shouldContinue = true;
 
@@ -69,7 +69,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                 shouldContinue = true;
 
-                gDbSignal->publish(device);
+                gDbSignal->publish(*device);
             }
 
             DeviceConnection *deviceConnection =
@@ -104,12 +104,12 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                                          device->deviceId,
                                                          deviceConnection->adapterName);
 
-                            bool usePublishing = gDbSignal->reconstruct(transferGroup);
+                            bool usePublishing = gDbSignal->reconstruct(*transferGroup);
 
                             time(&transferGroup->dateCreated);
 
-                            gDbSignal->publish(transferGroup);
-                            gDbSignal->publish(transferAssignee);
+                            gDbSignal->publish(*transferGroup);
+                            gDbSignal->publish(*transferAssignee);
 
                             int filesTotal = 0;
 
@@ -136,8 +136,8 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                 if (transferIndex.contains(KEYWORD_INDEX_DIRECTORY))
                                     transferObject->directory = transferIndex.value(KEYWORD_INDEX_DIRECTORY).toString();
 
-                                if (usePublishing ? gDbSignal->publish(transferObject)
-                                                  : gDbSignal->insert(transferObject))
+                                if (usePublishing ? gDbSignal->publish(*transferObject)
+                                                  : gDbSignal->insert(*transferObject))
                                     filesTotal++;
 
                                 delete transferObject;
@@ -160,11 +160,11 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                         auto *transferGroup = new TransferGroup(groupId);
                         auto *transferAssignee = new TransferAssignee(groupId, device->deviceId);
 
-                        if (gDbSignal->reconstruct(transferGroup)
-                            && gDbSignal->reconstruct(transferAssignee)) {
+                        if (gDbSignal->reconstruct(*transferGroup)
+                            && gDbSignal->reconstruct(*transferAssignee)) {
 
                             if (!isAccepted)
-                                gDbSignal->remove(transferGroup);
+                                gDbSignal->remove(*transferGroup);
 
                             result = true;
                         }
@@ -184,7 +184,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                         textObject->id = qrand();
                         time(&textObject->dateCreated);
 
-                        gDbSignal->publish(textObject);
+                        gDbSignal->publish(*textObject);
                         delete textObject;
 
                         result = true;

@@ -161,9 +161,12 @@ bool AccessDatabase::update(DatabaseObject &dbObject)
     return update(dbObject.getWhere(), dbObject.getValues());
 }
 
-bool AccessDatabase::update(const SqlSelection &selection, const DbObjectMap &record)
+bool AccessDatabase::update(const SqlSelection &selection, const DbObjectMap &map)
 {
-    QSqlQuery updateQuery = selection.toUpdateQuery(record);
+    auto *tableModel = DbStructure::gatherTableModel(this, selection.tableName);
+    QSqlQuery updateQuery = selection.toUpdateQuery(record(map, *tableModel));
+
+    delete tableModel;
     return updateQuery.exec();
 }
 

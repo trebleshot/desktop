@@ -162,7 +162,7 @@ QString TransferUtils::saveIncomingFile(TransferGroup *group, TransferObject *ob
 
     object->flag = TransferObject::Flag::Done;
 
-    gDatabase->publish(object);
+    gDatabase->publish(*object);
 
     return QString();
 }
@@ -208,7 +208,7 @@ AssigneeInfo TransferUtils::getInfo(const TransferAssignee &assignee)
     try {
         auto *device = new NetworkDevice(assignee.deviceId);
 
-        gDatabase->reconstruct(device);
+        gDatabase->reconstruct(*device);
 
         return AssigneeInfo(*device, assignee);
     } catch (...) {

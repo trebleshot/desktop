@@ -33,10 +33,10 @@ void SeamlessClient::run()
         return connection;
     };
 
-    if (gDbSignal->reconstruct(device)
-        && gDbSignal->reconstruct(group)
-        && gDbSignal->reconstruct(assignee)
-        && gDbSignal->reconstruct(connectionLambda())) {
+    if (gDbSignal->reconstruct(*device)
+        && gDbSignal->reconstruct(*group)
+        && gDbSignal->reconstruct(*assignee)
+        && gDbSignal->reconstruct(*connectionLambda())) {
 
         client->setDevice(device);
 
@@ -102,9 +102,11 @@ void SeamlessClient::run()
                             QSqlRecord record = DbStructure::gatherTableModel(
                                     database, DbStructure::TABLE_TRANSFER)->record();
 
-                            record.setValue(DbStructure::FIELD_TRANSFER_FLAG, QVariant(TransferObject::Flag::Removed));
+                            DbObjectMap {
+                                    {DbStructure::FIELD_TRANSFER_FLAG, QVariant(TransferObject::Flag::Removed)}
+                            };
 
-                            gDbSignal->update(sqlSelection, record);
+                            gDbSignal->update(*sqlSelection, record);
                         });
                     }
                 } else {
@@ -218,7 +220,7 @@ void SeamlessClient::run()
                                                 });
                                             } else {
                                                 transferObject->flag = TransferObject::Flag::Interrupted;
-                                                gDbSignal->publish(transferObject);
+                                                gDbSignal->publish(*transferObject);
                                             }
                                         }
                                     }

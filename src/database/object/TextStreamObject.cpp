@@ -10,26 +10,24 @@ TextStreamObject::TextStreamObject(int id, const QString &text, QObject *parent)
 
 }
 
-SqlSelection *TextStreamObject::getWhere()
+SqlSelection TextStreamObject::getWhere() const
 {
-    auto *selection = new SqlSelection;
+    SqlSelection selection;
 
-    selection->setTableName(DbStructure::TABLE_CLIPBOARD);
-    selection->setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_CLIPBOARD_ID));
-    selection->whereArgs << this->id;
+    selection.setTableName(DbStructure::TABLE_CLIPBOARD);
+    selection.setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_CLIPBOARD_ID));
+    selection.whereArgs << this->id;
 
     return selection;
 }
 
-QSqlRecord TextStreamObject::getValues(AccessDatabase *db)
+DbObjectMap TextStreamObject::getValues() const
 {
-    QSqlRecord record = DbStructure::gatherTableModel(db, this)->record();
-
-    record.setValue(DbStructure::FIELD_CLIPBOARD_ID, this->id);
-    record.setValue(DbStructure::FIELD_CLIPBOARD_TEXT, this->text);
-    record.setValue(DbStructure::FIELD_CLIPBOARD_TIME, (qlonglong) this->dateCreated);
-
-    return record;
+    return DbObjectMap{
+            {DbStructure::FIELD_CLIPBOARD_ID,   this->id},
+            {DbStructure::FIELD_CLIPBOARD_TEXT, this->text},
+            {DbStructure::FIELD_CLIPBOARD_TIME, (qlonglong) this->dateCreated}
+    };
 }
 
 void TextStreamObject::onGeneratingValues(const QSqlRecord &record)

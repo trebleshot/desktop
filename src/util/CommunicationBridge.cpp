@@ -111,7 +111,7 @@ NetworkDevice *CommunicationBridge::updateDeviceIfOkay(
     }
     else {
         time(&loadedDevice->lastUsageTime);
-        gDbSignal->publish(loadedDevice);
+        gDbSignal->publish(*loadedDevice);
         setDevice(loadedDevice);
     }
 

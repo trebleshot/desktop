@@ -240,7 +240,7 @@ public slots:
 
 signals:
 
-    bool signalPublish(DatabaseObject *);
+    bool signalPublish(DatabaseObject &);
 };
 
 class AccessDatabaseSignaller : public QObject {

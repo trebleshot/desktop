@@ -130,7 +130,7 @@ void MainWindow::showReceivedText(const QString &text, const QString &deviceId)
     auto *device = new NetworkDevice(deviceId);
 
     try {
-        gDatabase->reconstruct(device);
+        gDatabase->reconstruct(*device);
 
         auto *messageBox = new QMessageBox(this);
 
@@ -159,7 +159,7 @@ void MainWindow::showTransferRequest(const QString &deviceId, quint32 groupId, i
     auto *device = new NetworkDevice(deviceId);
 
     try {
-        gDatabase->reconstruct(device);
+        gDatabase->reconstruct(*device);
 
         auto *messageBox = new QMessageBox(this);
 

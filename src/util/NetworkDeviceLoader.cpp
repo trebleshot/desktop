@@ -39,7 +39,7 @@ DeviceConnection *NetworkDeviceLoader::processConnection(NetworkDevice *device,
 void NetworkDeviceLoader::processConnection(NetworkDevice *device,
                                             DeviceConnection *connection)
 {
-    if (!AppUtils::applyAdapterName(connection) && !gDbSignal->reconstruct(connection))
+    if (!AppUtils::applyAdapterName(connection) && !gDbSignal->reconstruct(*connection))
         connection->adapterName = KEYWORD_UNKNOWN_INTERFACE;
 
     time(&connection->lastCheckedDate);
@@ -62,8 +62,8 @@ void NetworkDeviceLoader::processConnection(NetworkDevice *device,
                             << QVariant(connection->adapterName)
                             << QVariant(NetworkDeviceLoader::convertToInet4Address(connection->hostAddress));
 
-    gDbSignal->remove(selection);
-    gDbSignal->publish(connection);
+    gDbSignal->remove(*selection);
+    gDbSignal->publish(*connection);
 }
 
 void NetworkDeviceLoader::loadAsynchronously(QObject *sender,
@@ -87,7 +87,7 @@ NetworkDevice *NetworkDeviceLoader::load(QObject *sender, const QHostAddress &ho
 
             if (localDevice->deviceId != device->deviceId) {
                 time(&device->lastUsageTime);
-                gDbSignal->publish(device);
+                gDbSignal->publish(*device);
             }
 
             delete localDevice;
@@ -110,7 +110,7 @@ NetworkDevice *NetworkDeviceLoader::loadFrom(const QJsonObject jsonIndex)
 
     NetworkDevice *networkDevice = new NetworkDevice(deviceInfo.value(KEYWORD_DEVICE_INFO_SERIAL).toString());
 
-    gDbSignal->reconstruct(networkDevice);
+    gDbSignal->reconstruct(*networkDevice);
 
     time(&networkDevice->lastUsageTime);
     networkDevice->brand = deviceInfo.value(KEYWORD_DEVICE_INFO_BRAND).toString();
