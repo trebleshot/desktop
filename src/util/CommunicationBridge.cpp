@@ -92,8 +92,8 @@ void CommunicationBridge::setSecureKey(int key)
     this->m_secureKey = key;
 }
 
-NetworkDevice CommunicationBridge::updateDeviceIfOkay(
-        CoolSocket::ActiveConnection *activeConnection, NetworkDevice &device)
+NetworkDevice CommunicationBridge::updateDeviceIfOkay(CoolSocket::ActiveConnection *activeConnection,
+                                                      NetworkDevice &device)
 {
     NetworkDevice loadedDevice = loadDevice(activeConnection);
 

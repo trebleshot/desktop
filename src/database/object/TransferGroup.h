@@ -13,7 +13,7 @@ class TransferAssignee;
 
 class TransferGroup : public DatabaseObject {
 public:
-    quint32 groupId = 0;
+    quint32 id = 0;
     time_t dateCreated = 0;
     QString savePath;
 

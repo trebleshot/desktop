@@ -38,61 +38,61 @@ QMap<QString, QSqlRecord> AccessDatabase::getPassiveTables()
 
     if (dbMap.count() <= 0) {
         QSqlRecord tableTransfer;
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_ID, QVariant::Int, false));
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_GROUPID, QVariant::Int, false));
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_DEVICEID, QVariant::String, true));
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_FILE, QVariant::String, true));
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_NAME, QVariant::String, false));
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_SIZE, QVariant::Int, true));
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_MIME, QVariant::String, true));
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_TYPE, QVariant::String, false));
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_DIRECTORY, QVariant::String, true));
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_ACCESSPORT, QVariant::Int, true));
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_SKIPPEDBYTES, QVariant::Size, false));
-        tableTransfer.append(generateField(DbStructure::FIELD_TRANSFER_FLAG, QVariant::Int, true));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_ID, QVariant::Int, false));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_GROUPID, QVariant::Int, false));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_DEVICEID, QVariant::String, true));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_FILE, QVariant::String, true));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_NAME, QVariant::String, false));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_SIZE, QVariant::Int, true));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_MIME, QVariant::String, true));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_TYPE, QVariant::String, false));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_DIRECTORY, QVariant::String, true));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_ACCESSPORT, QVariant::Int, true));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_SKIPPEDBYTES, QVariant::Size, false));
+        tableTransfer.append(generateField(DB_FIELD_TRANSFER_FLAG, QVariant::Int, true));
 
         QSqlRecord tableGroup;
-        tableGroup.append(generateField(DbStructure::FIELD_TRANSFERGROUP_ID, QVariant::Int, false));
-        tableGroup.append(generateField(DbStructure::FIELD_TRANSFERGROUP_DATECREATED, QVariant::Time, false));
-        tableGroup.append(generateField(DbStructure::FIELD_TRANSFERGROUP_SAVEPATH, QVariant::String, true));
+        tableGroup.append(generateField(DB_FIELD_TRANSFERGROUP_ID, QVariant::Int, false));
+        tableGroup.append(generateField(DB_FIELD_TRANSFERGROUP_DATECREATED, QVariant::Time, false));
+        tableGroup.append(generateField(DB_FIELD_TRANSFERGROUP_SAVEPATH, QVariant::String, true));
 
         QSqlRecord tableDevices;
-        tableDevices.append(generateField(DbStructure::FIELD_DEVICES_ID, QVariant::String, false));
-        tableDevices.append(generateField(DbStructure::FIELD_DEVICES_USER, QVariant::String, false));
-        tableDevices.append(generateField(DbStructure::FIELD_DEVICES_BRAND, QVariant::String, false));
-        tableDevices.append(generateField(DbStructure::FIELD_DEVICES_MODEL, QVariant::String, false));
-        tableDevices.append(generateField(DbStructure::FIELD_DEVICES_BUILDNAME, QVariant::String, false));
-        tableDevices.append(generateField(DbStructure::FIELD_DEVICES_BUILDNUMBER, QVariant::Int, false));
-        tableDevices.append(generateField(DbStructure::FIELD_DEVICES_LASTUSAGETIME, QVariant::Time, false));
-        tableDevices.append(generateField(DbStructure::FIELD_DEVICES_ISRESTRICTED, QVariant::Bool, false));
-        tableDevices.append(generateField(DbStructure::FIELD_DEVICES_ISTRUSTED, QVariant::Bool, false));
-        tableDevices.append(generateField(DbStructure::FIELD_DEVICES_ISLOCALADDRESS, QVariant::Bool, false));
-        tableDevices.append(generateField(DbStructure::FIELD_DEVICES_TMPSECUREKEY, QVariant::Int, true));
+        tableDevices.append(generateField(DB_FIELD_DEVICES_ID, QVariant::String, false));
+        tableDevices.append(generateField(DB_FIELD_DEVICES_USER, QVariant::String, false));
+        tableDevices.append(generateField(DB_FIELD_DEVICES_BRAND, QVariant::String, false));
+        tableDevices.append(generateField(DB_FIELD_DEVICES_MODEL, QVariant::String, false));
+        tableDevices.append(generateField(DB_FIELD_DEVICES_BUILDNAME, QVariant::String, false));
+        tableDevices.append(generateField(DB_FIELD_DEVICES_BUILDNUMBER, QVariant::Int, false));
+        tableDevices.append(generateField(DB_FIELD_DEVICES_LASTUSAGETIME, QVariant::Time, false));
+        tableDevices.append(generateField(DB_FIELD_DEVICES_ISRESTRICTED, QVariant::Bool, false));
+        tableDevices.append(generateField(DB_FIELD_DEVICES_ISTRUSTED, QVariant::Bool, false));
+        tableDevices.append(generateField(DB_FIELD_DEVICES_ISLOCALADDRESS, QVariant::Bool, false));
+        tableDevices.append(generateField(DB_FIELD_DEVICES_TMPSECUREKEY, QVariant::Int, true));
 
         QSqlRecord tableConnection;
-        tableConnection.append(generateField(DbStructure::FIELD_DEVICECONNECTION_IPADDRESS, QVariant::String, false));
-        tableConnection.append(generateField(DbStructure::FIELD_DEVICECONNECTION_DEVICEID, QVariant::String, false));
-        tableConnection.append(generateField(DbStructure::FIELD_DEVICECONNECTION_ADAPTERNAME, QVariant::String, false));
-        tableConnection.append(generateField(DbStructure::FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant::Time, false));
+        tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_IPADDRESS, QVariant::String, false));
+        tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_DEVICEID, QVariant::String, false));
+        tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_ADAPTERNAME, QVariant::String, false));
+        tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant::Time, false));
 
         QSqlRecord tableClipboard;
-        tableClipboard.append(generateField(DbStructure::FIELD_CLIPBOARD_ID, QVariant::Int, false));
-        tableClipboard.append(generateField(DbStructure::FIELD_CLIPBOARD_TEXT, QVariant::String, false));
-        tableClipboard.append(generateField(DbStructure::FIELD_CLIPBOARD_TIME, QVariant::Time, false));
+        tableClipboard.append(generateField(DB_FIELD_CLIPBOARD_ID, QVariant::Int, false));
+        tableClipboard.append(generateField(DB_FIELD_CLIPBOARD_TEXT, QVariant::String, false));
+        tableClipboard.append(generateField(DB_FIELD_CLIPBOARD_TIME, QVariant::Time, false));
 
         QSqlRecord tableAssignee;
-        tableAssignee.append(generateField(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID, QVariant::Int, false));
-        tableAssignee.append(generateField(DbStructure::FIELD_TRANSFERASSIGNEE_DEVICEID, QVariant::String, false));
-        tableAssignee.append(generateField(DbStructure::FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER, QVariant::String, true));
-        tableAssignee.append(generateField(DbStructure::FIELD_TRANSFERASSIGNEE_ISCLONE, QVariant::Bool, true));
+        tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_GROUPID, QVariant::Int, false));
+        tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_DEVICEID, QVariant::String, false));
+        tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER, QVariant::String, true));
+        tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_ISCLONE, QVariant::Bool, true));
 
-        dbMap.insert(QString(DbStructure::TABLE_TRANSFER), tableTransfer);
-        dbMap.insert(QString(DbStructure::DIVIS_TRANSFER), tableTransfer); // Generate division table
-        dbMap.insert(QString(DbStructure::TABLE_TRANSFERGROUP), tableGroup);
-        dbMap.insert(QString(DbStructure::TABLE_DEVICES), tableDevices);
-        dbMap.insert(QString(DbStructure::TABLE_CLIPBOARD), tableClipboard);
-        dbMap.insert(QString(DbStructure::TABLE_TRANSFERASSIGNEE), tableAssignee);
-        dbMap.insert(QString(DbStructure::TABLE_DEVICECONNECTION), tableConnection);
+        dbMap.insert(QString(DB_TABLE_TRANSFER), tableTransfer);
+        dbMap.insert(QString(DB_DIVIS_TRANSFER), tableTransfer); // Generate division table
+        dbMap.insert(QString(DB_TABLE_TRANSFERGROUP), tableGroup);
+        dbMap.insert(QString(DB_TABLE_DEVICES), tableDevices);
+        dbMap.insert(QString(DB_TABLE_CLIPBOARD), tableClipboard);
+        dbMap.insert(QString(DB_TABLE_TRANSFERASSIGNEE), tableAssignee);
+        dbMap.insert(QString(DB_TABLE_DEVICECONNECTION), tableConnection);
     }
 
     return dbMap;

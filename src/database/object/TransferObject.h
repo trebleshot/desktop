@@ -26,13 +26,12 @@ public:
     size_t fileSize;
     size_t skippedBytes;
     quint32 requestId;
-    quint32 groupId;
+    quint32 id;
     int accessPort;
     Type type;
     Flag flag;
 
-    explicit TransferObject(quint32 requestId = 0, const QString &deviceId = nullptr,
-                            const Type &type = Type::Incoming);
+    explicit TransferObject(quint32 id = 0, const QString &deviceId = nullptr, const Type &type = Type::Incoming);
 
     bool isDivisionObject() const;
 

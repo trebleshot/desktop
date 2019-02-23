@@ -59,8 +59,8 @@ MainWindow::MainWindow(QWidget *parent)
             qDebug() << "Debug process";
 
             SqlSelection sqlSelection;
-            sqlSelection.setTableName(DbStructure::TABLE_TRANSFERASSIGNEE);
-            sqlSelection.setOrderBy(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID, false);
+            sqlSelection.setTableName(DB_TABLE_TRANSFERASSIGNEE);
+            sqlSelection.setOrderBy(DB_FIELD_TRANSFERASSIGNEE_GROUPID, false);
 
             const auto &assigneeList = gDatabase->castQuery(sqlSelection, TransferAssignee());
 

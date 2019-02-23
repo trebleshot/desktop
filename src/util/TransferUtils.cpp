@@ -13,18 +13,18 @@ SqlSelection TransferUtils::createSqlSelection(quint32 groupId, const QString &d
                                                TransferObject::Flag flag, bool equals)
 {
     SqlSelection sqlSelection;
-    sqlSelection.setTableName(DbStructure::TABLE_TRANSFER);
+    sqlSelection.setTableName(DB_TABLE_TRANSFER);
 
     QString sqlStatement = QString("%1 = ? AND %2 = ?")
-            .arg(DbStructure::FIELD_TRANSFER_GROUPID)
-            .arg(DbStructure::FIELD_TRANSFER_DEVICEID);
+            .arg(DB_FIELD_TRANSFER_GROUPID)
+            .arg(DB_FIELD_TRANSFER_DEVICEID);
 
     sqlSelection.whereArgs << groupId
                            << deviceId;
 
     if (flag != TransferObject::Flag::Any) {
         sqlStatement.append(QString("AND %1 %2 ?")
-                                    .arg(DbStructure::FIELD_TRANSFER_FLAG)
+                                    .arg(DB_FIELD_TRANSFER_FLAG)
                                     .arg(equals ? "==" : "!="));
 
         sqlSelection.whereArgs << flag;
@@ -47,16 +47,16 @@ bool TransferUtils::firstAvailableTransfer(TransferObject &object, quint32 group
 {
     SqlSelection selection;
 
-    selection.tableName = DbStructure::TABLE_TRANSFER;
+    selection.tableName = DB_TABLE_TRANSFER;
     selection.setWhere(QString("`%1` = ? AND `%2` = ? AND `%3` = ? AND `%4` = ?")
-                               .arg(DbStructure::FIELD_TRANSFER_GROUPID)
-                               .arg(DbStructure::FIELD_TRANSFER_DEVICEID)
-                               .arg(DbStructure::FIELD_TRANSFER_FLAG)
-                               .arg(DbStructure::FIELD_TRANSFER_TYPE));
+                               .arg(DB_FIELD_TRANSFER_GROUPID)
+                               .arg(DB_FIELD_TRANSFER_DEVICEID)
+                               .arg(DB_FIELD_TRANSFER_FLAG)
+                               .arg(DB_FIELD_TRANSFER_TYPE));
     selection.setLimit(1);
     selection.setOrderBy(QString("`%1` ASC, `%2` ASC")
-                                 .arg(DbStructure::FIELD_TRANSFER_DIRECTORY)
-                                 .arg(DbStructure::FIELD_TRANSFER_NAME));
+                                 .arg(DB_FIELD_TRANSFER_DIRECTORY)
+                                 .arg(DB_FIELD_TRANSFER_NAME));
 
     selection.whereArgs << groupId
                         << deviceId
@@ -167,9 +167,9 @@ TransferGroupInfo TransferUtils::getInfo(const TransferGroup &group)
 {
     SqlSelection selection;
 
-    selection.setTableName(DbStructure::TABLE_TRANSFER);
-    selection.setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFER_GROUPID));
-    selection.whereArgs << group.groupId;
+    selection.setTableName(DB_TABLE_TRANSFER);
+    selection.setWhere(QString("`%1` = ?").arg(DB_FIELD_TRANSFER_GROUPID));
+    selection.whereArgs << group.id;
 
     const auto &list = gDatabase->castQuery(selection, TransferObject());
 
@@ -216,9 +216,9 @@ QList<AssigneeInfo> TransferUtils::getAllAssigneeInfo(const TransferGroup &group
 {
     SqlSelection selection;
 
-    selection.setTableName(DbStructure::TABLE_TRANSFERASSIGNEE);
-    selection.setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_TRANSFERASSIGNEE_GROUPID));
-    selection.whereArgs << group.groupId;
+    selection.setTableName(DB_TABLE_TRANSFERASSIGNEE);
+    selection.setWhere(QString("`%1` = ?").arg(DB_FIELD_TRANSFERASSIGNEE_GROUPID));
+    selection.whereArgs << group.id;
 
     QList<AssigneeInfo> returnedList;
     const auto &assigneeList = gDatabase->castQuery(selection, TransferAssignee());

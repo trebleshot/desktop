@@ -11,8 +11,8 @@ NetworkDeviceModel::NetworkDeviceModel(QObject *parent)
 {
     auto *selection = new SqlSelection();
 
-    selection->setTableName(DbStructure::TABLE_DEVICES);
-    selection->setOrderBy(DbStructure::FIELD_DEVICES_LASTUSAGETIME, false);
+    selection->setTableName(DB_TABLE_DEVICES);
+    selection->setOrderBy(DB_FIELD_DEVICES_LASTUSAGETIME, false);
 
     m_list = gDatabase->castQuery(*selection, NetworkDevice());
 

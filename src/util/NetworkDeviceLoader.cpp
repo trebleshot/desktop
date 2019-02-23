@@ -52,11 +52,11 @@ void NetworkDeviceLoader::processConnection(NetworkDevice &device,
 
     SqlSelection selection;
 
-    selection.setTableName(DbStructure::TABLE_DEVICECONNECTION);
+    selection.setTableName(DB_TABLE_DEVICECONNECTION);
     selection.setWhere(QString("`%1` = ? AND (`%2` = ? OR `%3` = ?)")
-                               .arg(DbStructure::FIELD_DEVICECONNECTION_DEVICEID)
-                               .arg(DbStructure::FIELD_DEVICECONNECTION_ADAPTERNAME)
-                               .arg(DbStructure::FIELD_DEVICECONNECTION_IPADDRESS));
+                               .arg(DB_FIELD_DEVICECONNECTION_DEVICEID)
+                               .arg(DB_FIELD_DEVICECONNECTION_ADAPTERNAME)
+                               .arg(DB_FIELD_DEVICECONNECTION_IPADDRESS));
 
     selection.whereArgs << QVariant(connection.deviceId)
                         << QVariant(connection.adapterName)

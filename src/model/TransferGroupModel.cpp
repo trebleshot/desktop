@@ -9,8 +9,8 @@ TransferGroupModel::TransferGroupModel(QObject *parent)
 {
     SqlSelection selection;
 
-    selection.setTableName(DbStructure::TABLE_TRANSFERGROUP);
-    selection.setOrderBy(DbStructure::FIELD_TRANSFERGROUP_DATECREATED, false);
+    selection.setTableName(DB_TABLE_TRANSFERGROUP);
+    selection.setOrderBy(DB_FIELD_TRANSFERGROUP_DATECREATED, false);
 
     const auto &dbList = gDatabase->castQuery(selection, TransferGroup());
 

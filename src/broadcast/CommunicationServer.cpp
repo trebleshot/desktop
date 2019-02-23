@@ -94,7 +94,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                         GThread::startIndependent([this, filesIndex, groupId, device, deviceConnection](
                                 GThread *thisThread) {
                             TransferGroup transferGroup(groupId);
-                            TransferAssignee transferAssignee(transferGroup.groupId,
+                            TransferAssignee transferAssignee(transferGroup.id,
                                                               device.deviceId,
                                                               deviceConnection.adapterName);
 
@@ -117,7 +117,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                                              TransferObject::Incoming);
 
                                 transferObject->flag = TransferObject::Flag::Pending;
-                                transferObject->groupId = groupId;
+                                transferObject->id = groupId;
                                 transferObject->friendlyName = transferIndex.value(KEYWORD_INDEX_FILE_NAME).toString();
                                 transferObject->file = QString("%1-%2.tshare")
                                         .arg(transferObject->requestId)
@@ -138,7 +138,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                             }
 
                             if (filesTotal > 0)
-                                    emit transferRequest(device.deviceId, transferGroup.groupId, filesTotal);
+                                    emit transferRequest(device.deviceId, transferGroup.id, filesTotal);
                         }, this);
                     }
                 } else if (request == KEYWORD_REQUEST_RESPONSE) {

@@ -18,13 +18,12 @@ void SeamlessClient::run()
 {
     qDebug() << "== SeamlessClient ==";
 
-    const auto &localDevice = AppUtils::getLocalDevice();
+    bool retry = false;
     NetworkDevice device(m_deviceId);
     TransferGroup group(m_groupId);
     TransferAssignee assignee(m_groupId, m_deviceId, nullptr);
     DeviceConnection connection; // Adapter name will be passed when assignee reconstruction is successful
     auto *client = new CommunicationBridge;
-    bool retry = false;
 
     auto connectionLambda = [&connection, &assignee]() -> DeviceConnection & {
         connection.deviceId = assignee.deviceId;
@@ -45,7 +44,7 @@ void SeamlessClient::run()
                 qDebug() << "Receive process for"
                          << device.nickname
                          << "for group"
-                         << group.groupId
+                         << group.id
                          << "with connection"
                          << connection.hostAddress.toString()
                          << "of adapter"
@@ -101,7 +100,7 @@ void SeamlessClient::run()
                                                                                   TransferObject::Flag::Done, false);
 
                             gDbSignal->update(sqlSelection, DbObjectMap{
-                                    {DbStructure::FIELD_TRANSFER_FLAG, QVariant(TransferObject::Flag::Removed)}
+                                    {DB_FIELD_TRANSFER_FLAG, QVariant(TransferObject::Flag::Removed)}
                             });
                         });
                     }
@@ -130,7 +129,7 @@ void SeamlessClient::run()
 
                                 reply.insert(KEYWORD_TRANSFER_REQUEST_ID,
                                              QVariant(transferObject.requestId).toString());
-                                reply.insert(KEYWORD_TRANSFER_GROUP_ID, QVariant(transferObject.groupId).toString());
+                                reply.insert(KEYWORD_TRANSFER_GROUP_ID, QVariant(transferObject.id).toString());
                                 reply.insert(KEYWORD_TRANSFER_SOCKET_PORT, tcpServer->serverPort());
                                 reply.insert(KEYWORD_RESULT, true);
 

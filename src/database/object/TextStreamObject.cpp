@@ -14,8 +14,8 @@ SqlSelection TextStreamObject::getWhere() const
 {
     SqlSelection selection;
 
-    selection.setTableName(DbStructure::TABLE_CLIPBOARD);
-    selection.setWhere(QString("`%1` = ?").arg(DbStructure::FIELD_CLIPBOARD_ID));
+    selection.setTableName(DB_TABLE_CLIPBOARD);
+    selection.setWhere(QString("`%1` = ?").arg(DB_FIELD_CLIPBOARD_ID));
     selection.whereArgs << this->id;
 
     return selection;
@@ -24,15 +24,15 @@ SqlSelection TextStreamObject::getWhere() const
 DbObjectMap TextStreamObject::getValues() const
 {
     return DbObjectMap{
-            {DbStructure::FIELD_CLIPBOARD_ID,   this->id},
-            {DbStructure::FIELD_CLIPBOARD_TEXT, this->text},
-            {DbStructure::FIELD_CLIPBOARD_TIME, (qlonglong) this->dateCreated}
+            {DB_FIELD_CLIPBOARD_ID,   this->id},
+            {DB_FIELD_CLIPBOARD_TEXT, this->text},
+            {DB_FIELD_CLIPBOARD_TIME, (qlonglong) this->dateCreated}
     };
 }
 
 void TextStreamObject::onGeneratingValues(const DbObjectMap &record)
 {
-    this->text = record.value(DbStructure::FIELD_CLIPBOARD_TEXT).toString();
-    this->dateCreated = record.value(DbStructure::FIELD_CLIPBOARD_TIME).toLongLong();
-    this->id = record.value(DbStructure::FIELD_CLIPBOARD_ID).toInt();
+    this->text = record.value(DB_FIELD_CLIPBOARD_TEXT).toString();
+    this->dateCreated = record.value(DB_FIELD_CLIPBOARD_TIME).toLongLong();
+    this->id = record.value(DB_FIELD_CLIPBOARD_ID).toInt();
 }
