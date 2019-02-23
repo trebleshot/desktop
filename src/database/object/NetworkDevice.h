@@ -20,16 +20,15 @@ public:
     QString nickname;
     QString deviceId;
     QString versionName;
-    int versionNumber;
-    int tmpSecureKey;
-    time_t lastUsageTime;
+    int versionNumber = 0;
+    int tmpSecureKey = 0;
+    time_t lastUsageTime = 0;
     bool isTrusted = false;
     bool isRestricted = false;
     bool isLocalAddress = false;
 
-    NetworkDevice(const NetworkDevice &device)
-    {
-
+    NetworkDevice(const NetworkDevice &device) {
+        onGeneratingValues(device.getValues());
     }
 
     explicit NetworkDevice(const QString &deviceId = nullptr, QObject *parent = nullptr);

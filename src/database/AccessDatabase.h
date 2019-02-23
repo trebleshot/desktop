@@ -156,9 +156,11 @@ public:
 
     void generateValues(const QSqlRecord &record);
 
-    virtual void operator=(const DatabaseObject& object) {
+    DatabaseObject &operator=(const DatabaseObject &object)
+    {
         onGeneratingValues(object.getValues());
-    };
+        return *this;
+    }
 
     virtual SqlSelection getWhere() const = 0;
 

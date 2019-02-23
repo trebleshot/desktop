@@ -31,8 +31,6 @@ public:
 
     explicit TransferGroupModel(QObject *parent = nullptr);
 
-    ~TransferGroupModel() override;
-
     int columnCount(const QModelIndex &parent) const override;
 
     int rowCount(const QModelIndex &parent) const override;

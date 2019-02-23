@@ -34,14 +34,14 @@ public:
 
 class TransferAssignee : public DatabaseObject {
 public:
-    quint32 groupId;
+    quint32 groupId = 0;
     QString deviceId;
     QString connectionAdapter;
     bool isClone = false;
 
     TransferAssignee(const TransferAssignee &assignee)
     {
-
+        onGeneratingValues(assignee.getValues());
     }
 
     explicit TransferAssignee(quint32 groupId = 0, const QString &deviceId = nullptr,

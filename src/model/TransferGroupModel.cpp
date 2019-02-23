@@ -15,16 +15,10 @@ TransferGroupModel::TransferGroupModel(QObject *parent)
     auto *dbList = gDatabase->castQuery(selection, TransferGroup());
 
     for (auto *transferGroup : *dbList) {
-        const TransferGroupInfo &constTransferGroup(TransferUtils::getInfo(*transferGroup));
-        m_list.append(constTransferGroup);
+        m_list << TransferUtils::getInfo(*transferGroup);
     }
 
     delete dbList;
-}
-
-TransferGroupModel::~TransferGroupModel()
-{
-    //delete m_list;
 }
 
 int TransferGroupModel::columnCount(const QModelIndex &parent) const

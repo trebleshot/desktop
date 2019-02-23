@@ -24,9 +24,9 @@ struct AssigneeInfo {
     bool valid = false;
 
 public:
-    AssigneeInfo(const AssigneeInfo &info)
+    AssigneeInfo(const AssigneeInfo &other) : device(other.device), assignee(other.assignee)
     {
-
+        valid = other.valid;
     }
 
     AssigneeInfo()
@@ -37,13 +37,6 @@ public:
     AssigneeInfo(const NetworkDevice &device, const TransferAssignee &assignee) : device(device), assignee(assignee)
     {
         this->valid = true;
-    }
-
-    void operator=(const AssigneeInfo &other)
-    {
-        this->device = other.device;
-        this->assignee = other.assignee;
-        this->valid = other.valid;
     }
 };
 
@@ -60,16 +53,22 @@ struct TransferGroupInfo {
 
     TransferGroupInfo() = default;
 
-    TransferGroupInfo(const TransferGroupInfo &other)
+    TransferGroupInfo(const TransferGroupInfo &other) : group(other.group), assignees(other.assignees)
     {
-
+        total = other.total;
+        completed = other.completed;
+        hasError = other.hasError;
+        hasIncoming = other.hasIncoming;
+        hasOutgoing = other.hasOutgoing;
+        totalBytes = other.totalBytes;
+        completedBytes = other.completedBytes;
     }
 
     TransferGroupInfo(const TransferGroup &group, const QList<AssigneeInfo> &assignees, int total = 0,
                       int completed = 0, bool hasError = false, bool hasIncoming = false, bool hasOutgoing = false,
                       size_t totalBytes = 0, size_t completedBytes = 0) : group(group)
     {
-        this->assignees.append(assignees);
+        this->assignees << assignees;
         this->total = total;
         this->completed = completed;
         this->hasError = hasError;
@@ -77,21 +76,6 @@ struct TransferGroupInfo {
         this->hasOutgoing = hasOutgoing;
         this->totalBytes = totalBytes;
         this->completedBytes = completedBytes;
-    }
-
-    TransferGroupInfo& operator=(const TransferGroupInfo &other)
-    {
-        this->group = other.group;
-        this->assignees = other.assignees;
-        this->total = other.total;
-        this->completed = other.completed;
-        this->hasError = other.hasError;
-        this->hasIncoming = other.hasIncoming;
-        this->hasOutgoing = other.hasOutgoing;
-        this->totalBytes = other.totalBytes;
-        this->completedBytes = other.completedBytes;
-
-        return *this;
     }
 };
 
