@@ -4,8 +4,8 @@
 
 #include "TextStreamObject.h"
 
-TextStreamObject::TextStreamObject(int id, const QString &text, QObject *parent)
-        : DatabaseObject(parent), id(id), text(text)
+TextStreamObject::TextStreamObject(int id, const QString &text)
+        : DatabaseObject(), id(id), text(text)
 {
 
 }

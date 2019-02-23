@@ -12,8 +12,6 @@
 class DeviceConnection;
 
 class NetworkDevice : public DatabaseObject {
-Q_OBJECT
-
 public:
     QString brand;
     QString model;
@@ -27,11 +25,7 @@ public:
     bool isRestricted = false;
     bool isLocalAddress = false;
 
-    NetworkDevice(const NetworkDevice &device) {
-        onGeneratingValues(device.getValues());
-    }
-
-    explicit NetworkDevice(const QString &deviceId = nullptr, QObject *parent = nullptr);
+    explicit NetworkDevice(const QString &deviceId = nullptr);
 
     SqlSelection getWhere() const override;
 
@@ -45,13 +39,13 @@ public:
     QString adapterName;
     QHostAddress hostAddress;
     QString deviceId;
-    time_t lastCheckedDate;
+    time_t lastCheckedDate = 0;
 
-    explicit DeviceConnection(QObject *parent = nullptr);
+    explicit DeviceConnection() = default;
 
-    explicit DeviceConnection(const QString &deviceId, const QString &adapterName, QObject *parent = nullptr);
+    explicit DeviceConnection(const QString &deviceId, const QString &adapterName);
 
-    explicit DeviceConnection(const QHostAddress &hostAddress, QObject *parent = nullptr);
+    explicit DeviceConnection(const QHostAddress &hostAddress);
 
     SqlSelection getWhere() const override;
 

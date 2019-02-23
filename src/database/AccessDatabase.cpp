@@ -461,12 +461,6 @@ QSqlQuery SqlSelection::toUpdateQuery(const QSqlRecord &record) const
     return query;
 }
 
-DatabaseObject::DatabaseObject(QObject *parent)
-        : QObject(parent)
-{
-}
-
-
 /***
      * This method generates another mapping just to load this class.
      *

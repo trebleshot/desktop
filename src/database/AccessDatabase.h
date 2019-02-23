@@ -89,7 +89,7 @@ namespace DbStructure {
     extern QSqlTableModel *gatherTableModel(AccessDatabase *db, const QString &tableName);
 }
 
-class SqlSelection : public QObject {
+class SqlSelection {
 public:
     QString tag;
     QString tableName;
@@ -101,15 +101,9 @@ public:
     QString orderBy;
     int limit = -1;
 
-    SqlSelection(const SqlSelection &other)
-    {
+    SqlSelection(const SqlSelection &other) = default;
 
-    }
-
-    explicit SqlSelection()
-    {
-
-    }
+    explicit SqlSelection() = default;
 
     void bindWhereClause(QSqlQuery &query) const;
 
@@ -142,17 +136,12 @@ public:
     QSqlQuery toUpdateQuery(const QSqlRecord &query) const;
 };
 
-class SqlSelectionConst : public QObject {
-Q_OBJECT
+class DatabaseObject {
 
 public:
+    DatabaseObject(const DatabaseObject& other) = default;
 
-};
-
-class DatabaseObject : public QObject {
-Q_OBJECT
-public:
-    explicit DatabaseObject(QObject *parent = nullptr);
+    explicit DatabaseObject() = default;
 
     void generateValues(const QSqlRecord &record);
 
@@ -180,7 +169,6 @@ public:
 
 class AccessDatabase : public QObject {
 Q_OBJECT
-
     QSqlDatabase *db;
 
 public:

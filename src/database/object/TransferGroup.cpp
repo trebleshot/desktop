@@ -6,8 +6,7 @@
 
 #include "TransferGroup.h"
 
-TransferGroup::TransferGroup(quint32 groupId, QObject *parent)
-        : DatabaseObject(parent)
+TransferGroup::TransferGroup(quint32 groupId) : DatabaseObject()
 {
     this->groupId = groupId;
 }
@@ -40,9 +39,8 @@ void TransferGroup::onGeneratingValues(const DbObjectMap &record)
     savePath = record.value(DbStructure::FIELD_TRANSFERGROUP_SAVEPATH).toString();
 }
 
-TransferAssignee::TransferAssignee(quint32 groupId, const QString &deviceId, const QString &connectionAdapter,
-                                   QObject *parent)
-        : DatabaseObject(parent)
+TransferAssignee::TransferAssignee(quint32 groupId, const QString &deviceId, const QString &connectionAdapter)
+        : DatabaseObject()
 {
     this->groupId = groupId;
     this->deviceId = deviceId;

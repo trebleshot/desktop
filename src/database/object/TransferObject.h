@@ -32,7 +32,7 @@ public:
     Flag flag;
 
     explicit TransferObject(quint32 requestId = 0, const QString &deviceId = nullptr,
-                            const Type &type = Type::Incoming, QObject *parent = nullptr);
+                            const Type &type = Type::Incoming);
 
     bool isDivisionObject() const;
 

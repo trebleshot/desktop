@@ -1,7 +1,7 @@
 #include "TransferObject.h"
 
-TransferObject::TransferObject(quint32 requestId, const QString &deviceId, const Type &type, QObject *parent)
-        : DatabaseObject(parent)
+TransferObject::TransferObject(quint32 requestId, const QString &deviceId, const Type &type)
+        : DatabaseObject()
 {
     this->requestId = requestId;
     this->deviceId = deviceId;

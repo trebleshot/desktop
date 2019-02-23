@@ -24,10 +24,7 @@ struct AssigneeInfo {
     bool valid = false;
 
 public:
-    AssigneeInfo(const AssigneeInfo &other) : device(other.device), assignee(other.assignee)
-    {
-        valid = other.valid;
-    }
+    AssigneeInfo(const AssigneeInfo &other) = default;
 
     AssigneeInfo()
     {
@@ -53,16 +50,7 @@ struct TransferGroupInfo {
 
     TransferGroupInfo() = default;
 
-    TransferGroupInfo(const TransferGroupInfo &other) : group(other.group), assignees(other.assignees)
-    {
-        total = other.total;
-        completed = other.completed;
-        hasError = other.hasError;
-        hasIncoming = other.hasIncoming;
-        hasOutgoing = other.hasOutgoing;
-        totalBytes = other.totalBytes;
-        completedBytes = other.completedBytes;
-    }
+    TransferGroupInfo(const TransferGroupInfo &other) = default;
 
     TransferGroupInfo(const TransferGroup &group, const QList<AssigneeInfo> &assignees, int total = 0,
                       int completed = 0, bool hasError = false, bool hasIncoming = false, bool hasOutgoing = false,

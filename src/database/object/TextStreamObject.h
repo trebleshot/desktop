@@ -8,13 +8,12 @@
 #include <src/database/AccessDatabase.h>
 
 class TextStreamObject : public DatabaseObject {
-Q_OBJECT
 public:
     int id;
     QString text;
     time_t dateCreated;
 
-    explicit TextStreamObject(int id = 0, const QString &text = nullptr, QObject *parent = nullptr);
+    explicit TextStreamObject(int id = 0, const QString &text = nullptr);
 
     SqlSelection getWhere() const override;
 

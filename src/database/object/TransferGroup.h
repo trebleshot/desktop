@@ -12,18 +12,12 @@
 class TransferAssignee;
 
 class TransferGroup : public DatabaseObject {
-Q_OBJECT
 public:
-    quint32 groupId;
-    time_t dateCreated;
+    quint32 groupId = 0;
+    time_t dateCreated = 0;
     QString savePath;
 
-    TransferGroup(const TransferGroup &group)
-    {
-
-    }
-
-    explicit TransferGroup(quint32 groupId = 0, QObject *parent = nullptr);
+    explicit TransferGroup(quint32 groupId = 0);
 
     SqlSelection getWhere() const override;
 
@@ -39,14 +33,8 @@ public:
     QString connectionAdapter;
     bool isClone = false;
 
-    TransferAssignee(const TransferAssignee &assignee)
-    {
-        onGeneratingValues(assignee.getValues());
-    }
-
     explicit TransferAssignee(quint32 groupId = 0, const QString &deviceId = nullptr,
-                              const QString &connectionAdapter = nullptr,
-                              QObject *parent = nullptr);
+                              const QString &connectionAdapter = nullptr);
 
     SqlSelection getWhere() const override;
 

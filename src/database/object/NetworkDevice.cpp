@@ -4,15 +4,15 @@
 #include "NetworkDevice.h"
 #include <src/util/NetworkDeviceLoader.h>
 
-NetworkDevice::NetworkDevice(const QString &deviceId, QObject *parent)
-        : DatabaseObject(parent)
+NetworkDevice::NetworkDevice(const QString &deviceId)
+        : DatabaseObject()
 {
     this->deviceId = deviceId;
 }
 
 DbObjectMap NetworkDevice::getValues() const
 {
-    return DbObjectMap {
+    return DbObjectMap{
             {DbStructure::FIELD_DEVICES_BRAND,          QVariant(this->brand)},
             {DbStructure::FIELD_DEVICES_MODEL,          QVariant(this->model)},
             {DbStructure::FIELD_DEVICES_USER,           QVariant(this->nickname)},
@@ -54,20 +54,15 @@ void NetworkDevice::onGeneratingValues(const DbObjectMap &record)
     this->isLocalAddress = record.value(DbStructure::FIELD_DEVICES_ISLOCALADDRESS) == 1;
 }
 
-DeviceConnection::DeviceConnection(QObject *parent) : DatabaseObject(parent)
-{
-
-}
-
-DeviceConnection::DeviceConnection(const QString &deviceId, const QString &adapterName, QObject *parent)
-        : DatabaseObject(parent)
+DeviceConnection::DeviceConnection(const QString &deviceId, const QString &adapterName)
+        : DatabaseObject()
 {
     this->deviceId = deviceId;
     this->adapterName = adapterName;
 }
 
-DeviceConnection::DeviceConnection(const QHostAddress &hostAddress, QObject *parent)
-        : DatabaseObject(parent)
+DeviceConnection::DeviceConnection(const QHostAddress &hostAddress)
+        : DatabaseObject()
 {
     this->hostAddress = hostAddress;
 }
