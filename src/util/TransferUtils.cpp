@@ -9,7 +9,7 @@
 #include "TransferUtils.h"
 #include "AppUtils.h"
 
-SqlSelection TransferUtils::createSqlSelection(quint32 groupId, const QString &deviceId,
+SqlSelection TransferUtils::createSqlSelection(groupid groupId, const QString &deviceId,
                                                TransferObject::Flag flag, bool equals)
 {
     SqlSelection sqlSelection;
@@ -35,7 +35,7 @@ SqlSelection TransferUtils::createSqlSelection(quint32 groupId, const QString &d
     return sqlSelection;
 }
 
-TransferObject TransferUtils::firstAvailableTransfer(quint32 groupId, const QString &deviceId)
+TransferObject TransferUtils::firstAvailableTransfer(groupid groupId, const QString &deviceId)
 {
     TransferObject object;
     firstAvailableTransfer(object, groupId, deviceId);
@@ -43,7 +43,7 @@ TransferObject TransferUtils::firstAvailableTransfer(quint32 groupId, const QStr
     return object;
 }
 
-bool TransferUtils::firstAvailableTransfer(TransferObject &object, quint32 groupId, const QString &deviceId)
+bool TransferUtils::firstAvailableTransfer(TransferObject &object, groupid groupId, const QString &deviceId)
 {
     SqlSelection selection;
 
@@ -165,15 +165,17 @@ QString TransferUtils::saveIncomingFile(const TransferGroup &group, TransferObje
 
 TransferGroupInfo TransferUtils::getInfo(const TransferGroup &group)
 {
+    const auto &assignees = getAllAssigneeInfo(group);
+
     SqlSelection selection;
 
-    selection.setTableName(DB_TABLE_TRANSFER);
+    selection.setTableName(assignees.empty() ? DB_DIVIS_TRANSFER : DB_TABLE_TRANSFER);
     selection.setWhere(QString("`%1` = ?").arg(DB_FIELD_TRANSFER_GROUPID));
     selection.whereArgs << group.id;
 
     const auto &list = gDatabase->castQuery(selection, TransferObject());
 
-    TransferGroupInfo groupInfo(group, getAllAssigneeInfo(group), list.size());
+    TransferGroupInfo groupInfo(group, assignees, list.size());
 
     for (const auto &object: list) {
         if (!groupInfo.hasError

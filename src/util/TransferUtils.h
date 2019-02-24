@@ -66,13 +66,13 @@ struct TransferGroupInfo {
 
 class TransferUtils {
 public:
-    static SqlSelection createSqlSelection(quint32 groupId, const QString &deviceId,
+    static SqlSelection createSqlSelection(groupid groupId, const QString &deviceId,
                                            TransferObject::Flag flag = TransferObject::Flag::Any,
                                            bool equals = true);
 
-    static TransferObject firstAvailableTransfer(quint32 groupId, const QString &deviceId);
+    static TransferObject firstAvailableTransfer(groupid groupId, const QString &deviceId);
 
-    static bool firstAvailableTransfer(TransferObject &object, quint32 groupId, const QString &deviceId);
+    static bool firstAvailableTransfer(TransferObject &object, groupid groupId, const QString &deviceId);
 
     static QString getDefaultSavePath();
 

@@ -15,55 +15,55 @@
 #include <QVariant>
 #include <iostream>
 
-#define DB_TABLE_TRANSFER QString("transfer")
-#define DB_DIVIS_TRANSFER QString("divisTansfer")
-#define DB_FIELD_TRANSFER_ID QString("id")
-#define DB_FIELD_TRANSFER_FILE QString("file")
-#define DB_FIELD_TRANSFER_NAME QString("name")
-#define DB_FIELD_TRANSFER_SIZE QString("size")
-#define DB_FIELD_TRANSFER_MIME QString("mime")
-#define DB_FIELD_TRANSFER_TYPE QString("type")
-#define DB_FIELD_TRANSFER_DIRECTORY QString("directory")
-#define DB_FIELD_TRANSFER_SKIPPEDBYTES QString("skippedBytes")
-#define DB_FIELD_TRANSFER_DEVICEID QString("deviceId")
-#define DB_FIELD_TRANSFER_GROUPID QString("groupId")
-#define DB_FIELD_TRANSFER_FLAG QString("flag")
-#define DB_FIELD_TRANSFER_ACCESSPORT QString("accessPort")
+#define DB_TABLE_TRANSFER "transfer"
+#define DB_DIVIS_TRANSFER "divisTansfer"
+#define DB_FIELD_TRANSFER_ID "id"
+#define DB_FIELD_TRANSFER_FILE "file"
+#define DB_FIELD_TRANSFER_NAME "name"
+#define DB_FIELD_TRANSFER_SIZE "size"
+#define DB_FIELD_TRANSFER_MIME "mime"
+#define DB_FIELD_TRANSFER_TYPE "type"
+#define DB_FIELD_TRANSFER_DIRECTORY "directory"
+#define DB_FIELD_TRANSFER_SKIPPEDBYTES "skippedBytes"
+#define DB_FIELD_TRANSFER_DEVICEID "deviceId"
+#define DB_FIELD_TRANSFER_GROUPID "groupId"
+#define DB_FIELD_TRANSFER_FLAG "flag"
+#define DB_FIELD_TRANSFER_ACCESSPORT "accessPort"
 
-#define DB_TABLE_TRANSFERGROUP QString("transferGroup")
-#define DB_FIELD_TRANSFERGROUP_ID QString("id")
-#define DB_FIELD_TRANSFERGROUP_SAVEPATH QString("savePath")
-#define DB_FIELD_TRANSFERGROUP_DATECREATED QString("dateCreated")
+#define DB_TABLE_TRANSFERGROUP "transferGroup"
+#define DB_FIELD_TRANSFERGROUP_ID "id"
+#define DB_FIELD_TRANSFERGROUP_SAVEPATH "savePath"
+#define DB_FIELD_TRANSFERGROUP_DATECREATED "dateCreated"
 
-#define DB_TABLE_DEVICES QString("devices")
-#define DB_FIELD_DEVICES_ID QString("deviceId")
-#define DB_FIELD_DEVICES_USER QString("user")
-#define DB_FIELD_DEVICES_BRAND QString("brand")
-#define DB_FIELD_DEVICES_MODEL QString("model")
-#define DB_FIELD_DEVICES_BUILDNAME QString("buildName")
-#define DB_FIELD_DEVICES_BUILDNUMBER QString("buildNumber")
-#define DB_FIELD_DEVICES_LASTUSAGETIME QString("lastUsedTime")
-#define DB_FIELD_DEVICES_ISRESTRICTED QString("isRestricted")
-#define DB_FIELD_DEVICES_ISTRUSTED QString("isTrusted")
-#define DB_FIELD_DEVICES_ISLOCALADDRESS QString("isLocalAddress")
-#define DB_FIELD_DEVICES_TMPSECUREKEY QString("tmpSecureKey")
+#define DB_TABLE_DEVICES "devices"
+#define DB_FIELD_DEVICES_ID "deviceId"
+#define DB_FIELD_DEVICES_USER "user"
+#define DB_FIELD_DEVICES_BRAND "brand"
+#define DB_FIELD_DEVICES_MODEL "model"
+#define DB_FIELD_DEVICES_BUILDNAME "buildName"
+#define DB_FIELD_DEVICES_BUILDNUMBER "buildNumber"
+#define DB_FIELD_DEVICES_LASTUSAGETIME "lastUsedTime"
+#define DB_FIELD_DEVICES_ISRESTRICTED "isRestricted"
+#define DB_FIELD_DEVICES_ISTRUSTED "isTrusted"
+#define DB_FIELD_DEVICES_ISLOCALADDRESS "isLocalAddress"
+#define DB_FIELD_DEVICES_TMPSECUREKEY "tmpSecureKey"
 
-#define DB_TABLE_DEVICECONNECTION QString("deviceConnection")
-#define DB_FIELD_DEVICECONNECTION_IPADDRESS QString("ipAddress")
-#define DB_FIELD_DEVICECONNECTION_DEVICEID QString("deviceId")
-#define DB_FIELD_DEVICECONNECTION_ADAPTERNAME QString("adapterName")
-#define DB_FIELD_DEVICECONNECTION_LASTCHECKEDDATE QString("lastCheckedDate")
+#define DB_TABLE_DEVICECONNECTION "deviceConnection"
+#define DB_FIELD_DEVICECONNECTION_IPADDRESS "ipAddress"
+#define DB_FIELD_DEVICECONNECTION_DEVICEID "deviceId"
+#define DB_FIELD_DEVICECONNECTION_ADAPTERNAME "adapterName"
+#define DB_FIELD_DEVICECONNECTION_LASTCHECKEDDATE "lastCheckedDate"
 
-#define DB_TABLE_CLIPBOARD QString("clipboard")
-#define DB_FIELD_CLIPBOARD_ID QString("id")
-#define DB_FIELD_CLIPBOARD_TEXT QString("text")
-#define DB_FIELD_CLIPBOARD_TIME QString("time")
+#define DB_TABLE_CLIPBOARD "clipboard"
+#define DB_FIELD_CLIPBOARD_ID "id"
+#define DB_FIELD_CLIPBOARD_TEXT "text"
+#define DB_FIELD_CLIPBOARD_TIME "time"
 
-#define DB_TABLE_TRANSFERASSIGNEE QString("transferAssignee")
-#define DB_FIELD_TRANSFERASSIGNEE_GROUPID QString("groupId")
-#define DB_FIELD_TRANSFERASSIGNEE_DEVICEID QString("deviceId")
-#define DB_FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER QString("connectionAdapter")
-#define DB_FIELD_TRANSFERASSIGNEE_ISCLONE QString("isClone")
+#define DB_TABLE_TRANSFERASSIGNEE "transferAssignee"
+#define DB_FIELD_TRANSFERASSIGNEE_GROUPID "groupId"
+#define DB_FIELD_TRANSFERASSIGNEE_DEVICEID "deviceId"
+#define DB_FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER "connectionAdapter"
+#define DB_FIELD_TRANSFERASSIGNEE_ISCLONE "isClone"
 
 using namespace std;
 
@@ -82,7 +82,7 @@ namespace DbStructure {
 
     extern QString generateTableCreationSql(const QString &tableName, const QSqlRecord &record, bool mayExist = false);
 
-    extern const char *transformType(const QVariant::Type &type);
+    extern QString transformType(const QVariant::Type &type);
 
     extern QSqlTableModel *gatherTableModel(const DatabaseObject &dbObject);
 

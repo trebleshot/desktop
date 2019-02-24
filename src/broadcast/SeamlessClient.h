@@ -8,13 +8,14 @@
 #include <QtCore/QThread>
 #include <QFile>
 #include <src/util/Interrupter.h>
+#include <src/database/object/TransferGroup.h>
 
 class SeamlessClient : public QThread, public Interrupter {
-    quint32 m_groupId = 0;
+    groupid m_groupId = 0;
     QString m_deviceId;
 
 public:
-    explicit SeamlessClient(const QString &deviceId, quint32 groupId, QObject *parent = nullptr);
+    explicit SeamlessClient(const QString &deviceId, groupid groupId, QObject *parent = nullptr);
 
 protected:
     void run() override;

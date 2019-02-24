@@ -9,7 +9,7 @@
 #include <src/util/TransferUtils.h>
 #include "SeamlessClient.h"
 
-SeamlessClient::SeamlessClient(const QString &deviceId, quint32 groupId, QObject *parent)
+SeamlessClient::SeamlessClient(const QString &deviceId, groupid groupId, QObject *parent)
         : QThread(parent), m_groupId(groupId), m_deviceId(deviceId)
 {
 }
@@ -116,8 +116,8 @@ void SeamlessClient::run()
                                 QJsonObject reply;
 
                                 reply.insert(KEYWORD_TRANSFER_REQUEST_ID,
-                                             QVariant(transferObject.requestId).toString());
-                                reply.insert(KEYWORD_TRANSFER_GROUP_ID, QVariant(transferObject.id).toString());
+                                             QVariant(transferObject.id).toString());
+                                reply.insert(KEYWORD_TRANSFER_GROUP_ID, QVariant(transferObject.groupId).toString());
                                 reply.insert(KEYWORD_TRANSFER_SOCKET_PORT, tcpServer.serverPort());
                                 reply.insert(KEYWORD_RESULT, true);
 

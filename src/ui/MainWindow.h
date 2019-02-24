@@ -33,6 +33,7 @@ protected:
 protected:
     Ui::MainWindow *m_ui;
     CommunicationServer *m_commServer;
+    TransferGroupModel* m_groupModel;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -51,7 +52,7 @@ public slots:
 
     void showReceivedText(const QString &text, const QString &deviceId);
 
-    void showTransferRequest(const QString &deviceId, quint32 groupId, int filesTotal);
+    void showTransferRequest(const QString &deviceId, groupid groupId, int filesTotal);
 
     void transferItemActivated(QModelIndex modelIndex);
 

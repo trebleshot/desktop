@@ -1,10 +1,15 @@
 #include <QtGui/QDesktopServices>
 #include <src/broadcast/SeamlessClient.h>
+#include <QtCore/QDir>
+#include <QtCore/QMimeDatabase>
+#include <QRandomGenerator>
 #include "MainWindow.h"
 #include "ManageDevicesDialog.h"
+#include "ShowTransferDialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
-        : QMainWindow(parent), m_ui(new Ui::MainWindow), m_commServer(new CommunicationServer)
+        : QMainWindow(parent), m_ui(new Ui::MainWindow),
+          m_commServer(new CommunicationServer), m_groupModel(new TransferGroupModel())
 {
     m_ui->setupUi(this);
 
@@ -47,15 +52,12 @@ MainWindow::MainWindow(QWidget *parent)
 
         m_commServer->start(0);
         m_ui->label->setText(QString("TrebleShot will not receive files"));
-
-        auto *model = new TransferGroupModel();
+        m_ui->treeView->setModel(m_groupModel);
 
         connect(m_ui->treeView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
         connect(m_ui->actionAbout_TrebleShot, SIGNAL(triggered(bool)), this, SLOT(about()));
         connect(m_ui->actionAbout_Qt, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
         connect(m_ui->actionManage_devices, &QAction::triggered, this, &MainWindow::manageDevices);
-
-        m_ui->treeView->setModel(model);
 
         connect(m_ui->actionStart_receiver, &QAction::triggered, []() {
             qDebug() << "Debug process";
@@ -101,14 +103,63 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 
 void MainWindow::dropEvent(QDropEvent *event)
 {
-    QMessageBox box;
+    if (event->mimeData()->hasUrls()) {
+        const auto &urlList = event->mimeData()->urls();
+        bool hasValidFiles = false;
+        auto groupId = QRandomGenerator::global()->bounded(static_cast<groupid>(time(nullptr)), sizeof(int));
+        requestid requestId = groupId + 1;
+        TransferGroup group(groupId);
+        QMimeDatabase mimeDb;
 
-    box.setWindowTitle("Proposed event");
+        time(&group.dateCreated);
 
-    box.setText(event->mimeData()->text());
-    box.exec();
+        if (gDatabase->getDatabase()->transaction()) {
+            for (const auto &url : urlList) {
+                const auto &fileName = url.toLocalFile();
+                QFileInfo fileInfo = fileName;
 
-    event->acceptProposedAction();
+                if (fileInfo.exists()) {
+                    hasValidFiles = true;
+
+                    if (fileInfo.isFile()) {
+                        QFile file(fileName);
+                        TransferObject object(requestId++, nullptr, TransferObject::Type::Outgoing);
+
+                        object.groupId = groupId;
+                        object.friendlyName = fileInfo.completeBaseName();
+                        object.file = fileName;
+                        object.fileSize = static_cast<size_t>(file.size());
+                        object.fileMimeType = mimeDb.mimeTypeForFile(fileInfo).name();
+                        object.flag = TransferObject::Flag::Pending;
+
+                        file.close();
+
+                        gDatabase->insert(object);
+                    }
+                }
+            }
+
+            gDatabase->getDatabase()->commit();
+        } else {
+            QMessageBox error;
+            error.setText(tr("Could not add the files right now. Try again."));
+
+            error.show();
+        }
+
+        if (hasValidFiles) {
+            gDatabase->insert(group);
+
+            event->acceptProposedAction();
+
+            QMessageBox box;
+
+            box.setWindowTitle("Proposed event");
+
+            box.setText(event->mimeData()->text());
+            box.exec();
+        }
+    }
 }
 
 void MainWindow::failureDialogFinished(int state)
@@ -120,6 +171,10 @@ void MainWindow::transferItemActivated(QModelIndex modelIndex)
 {
     qDebug() << "transferItemActivated(): row=" << modelIndex.row()
              << "column=" << modelIndex.column();
+
+    const auto &data = m_groupModel->list().at(modelIndex.row());
+
+    ShowTransferWidget(this, data.group.id).exec();
 }
 
 void MainWindow::about()
@@ -169,7 +224,7 @@ void MainWindow::showReceivedText(const QString &text, const QString &deviceId)
     }
 }
 
-void MainWindow::showTransferRequest(const QString &deviceId, quint32 groupId, int filesTotal)
+void MainWindow::showTransferRequest(const QString &deviceId, groupid groupId, int filesTotal)
 {
     NetworkDevice device(deviceId);
 
@@ -180,8 +235,8 @@ void MainWindow::showTransferRequest(const QString &deviceId, quint32 groupId, i
 
         messageBox.setWindowTitle(QString("File receive request from %1").arg(device.nickname));
         messageBox.setText(QString("%1 wants to you send you files, %2 in total. Do you want to receive now?")
-                                    .arg(device.nickname)
-                                    .arg(filesTotal));
+                                   .arg(device.nickname)
+                                   .arg(filesTotal));
         messageBox.addButton(QMessageBox::StandardButton::Ignore);
 
         messageBox.exec();

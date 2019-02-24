@@ -2,6 +2,9 @@
 #define TRANSFEROBJECT_H
 
 #include "src/database/AccessDatabase.h"
+#include "TransferGroup.h"
+
+typedef quint32 requestid;
 
 class TransferObject : public DatabaseObject {
 public:
@@ -11,7 +14,7 @@ public:
     };
 
     enum Flag {
-        Any = -1,
+        Any = -1, // Should not be passed as a value. Aimed to be used for TransferUtils::firstAvailableTransfer
         Interrupted,
         Pending,
         Removed,
@@ -25,13 +28,13 @@ public:
     QString deviceId;
     size_t fileSize;
     size_t skippedBytes;
-    quint32 requestId;
-    quint32 id;
+    requestid id;
+    groupid groupId;
     int accessPort;
     Type type;
     Flag flag;
 
-    explicit TransferObject(quint32 id = 0, const QString &deviceId = nullptr, const Type &type = Type::Incoming);
+    explicit TransferObject(requestid id = 0, const QString &deviceId = nullptr, const Type &type = Type::Incoming);
 
     bool isDivisionObject() const;
 

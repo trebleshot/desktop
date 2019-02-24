@@ -70,56 +70,56 @@ qt5_add_resources(QRCS
 qt5_wrap_ui(UI_HEADERS
         src/ui/MainWindow.ui
         src/ui/ManageDevicesDialog.ui
-        src/ui/ShowTransferWidget.ui
+        src/ui/ShowTransferDialog.ui
         src/dialog/WelcomeDialog.ui)
 
 set(UTIL_LIBRARY
         src/build.h
         src/broadcast/CommunicationServer.h
         src/broadcast/CommunicationServer.cpp
-        src/config/Config.h
-        src/config/Config.cpp
-        src/coolsocket/CoolSocket.h
-        src/coolsocket/CoolSocket.cpp
-        src/config/Keyword.h
-        src/database/AccessDatabase.h
-        src/database/AccessDatabase.cpp
-        src/database/object/TransferObject.h
-        src/database/object/TransferObject.cpp
-        src/database/object/TransferGroup.h
-        src/database/object/TransferGroup.cpp
-        src/database/object/NetworkDevice.h
-        src/database/object/NetworkDevice.cpp
-        src/util/NetworkDeviceLoader.h
-        src/util/NetworkDeviceLoader.cpp
-        src/util/CommunicationBridge.h
-        src/util/CommunicationBridge.cpp
-        src/util/AppUtils.h
-        src/util/AppUtils.cpp
-        src/dialog/WelcomeDialog.h
-        src/dialog/WelcomeDialog.cpp
-        src/model/TransferGroupModel.h
-        src/model/TransferGroupModel.cpp
-        src/util/GThread.h
-        src/util/GThread.cpp
         src/broadcast/SeamlessServer.h
         src/broadcast/SeamlessServer.cpp
         src/broadcast/SeamlessClient.h
         src/broadcast/SeamlessClient.cpp
-        src/util/TransferUtils.h
-        src/util/TransferUtils.cpp
-        src/database/object/TextStreamObject.h
-        src/database/object/TextStreamObject.cpp
-        src/ui/ShowTransferWidget.h
-        src/ui/ShowTransferWidget.cpp
-        src/ui/ManageDevicesDialog.h
-        src/ui/ManageDevicesDialog.cpp
-        src/model/NetworkDeviceModel.h
-        src/model/NetworkDeviceModel.cpp
+        src/config/Config.h
+        src/config/Config.cpp
+        src/config/Keyword.h
+        src/coolsocket/CoolSocket.h
+        src/coolsocket/CoolSocket.cpp
+        src/database/AccessDatabase.h
+        src/database/AccessDatabase.cpp
         src/database/ReconstructionException.h
         src/database/ReconstructionException.cpp
+        src/database/object/NetworkDevice.h
+        src/database/object/NetworkDevice.cpp
+        src/database/object/TextStreamObject.h
+        src/database/object/TextStreamObject.cpp
+        src/database/object/TransferObject.h
+        src/database/object/TransferObject.cpp
+        src/database/object/TransferGroup.h
+        src/database/object/TransferGroup.cpp
+        src/dialog/WelcomeDialog.h
+        src/dialog/WelcomeDialog.cpp
+        src/model/NetworkDeviceModel.h
+        src/model/NetworkDeviceModel.cpp
+        src/model/TransferGroupModel.h
+        src/model/TransferGroupModel.cpp
+        src/ui/ShowTransferDialog.h
+        src/ui/ShowTransferDialog.cpp
+        src/ui/ManageDevicesDialog.h
+        src/ui/ManageDevicesDialog.cpp
+        src/util/AppUtils.h
+        src/util/AppUtils.cpp
+        src/util/GThread.h
+        src/util/GThread.cpp
+        src/util/CommunicationBridge.h
+        src/util/CommunicationBridge.cpp
         src/util/Interrupter.h
-        src/util/Interrupter.cpp)
+        src/util/Interrupter.cpp
+        src/util/NetworkDeviceLoader.h
+        src/util/NetworkDeviceLoader.cpp
+        src/util/TransferUtils.h
+        src/util/TransferUtils.cpp)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)

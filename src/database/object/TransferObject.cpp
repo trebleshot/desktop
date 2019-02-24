@@ -1,9 +1,9 @@
 #include "TransferObject.h"
 
-TransferObject::TransferObject(quint32 id, const QString &deviceId, const Type &type)
+TransferObject::TransferObject(requestid id, const QString &deviceId, const Type &type)
         : DatabaseObject()
 {
-    this->requestId = id;
+    this->id = id;
     this->deviceId = deviceId;
     this->type = type;
 }
@@ -15,8 +15,8 @@ DbObjectMap TransferObject::getValues() const
             {DB_FIELD_TRANSFER_DIRECTORY,    QVariant(directory)},
             {DB_FIELD_TRANSFER_FILE,         QVariant(file)},
             {DB_FIELD_TRANSFER_FLAG,         QVariant(flag)},
-            {DB_FIELD_TRANSFER_GROUPID,      QVariant(id)},
-            {DB_FIELD_TRANSFER_ID,           QVariant(requestId)},
+            {DB_FIELD_TRANSFER_GROUPID,      QVariant(groupId)},
+            {DB_FIELD_TRANSFER_ID,           QVariant(id)},
             {DB_FIELD_TRANSFER_MIME,         QVariant(fileMimeType)},
             {DB_FIELD_TRANSFER_NAME,         QVariant(friendlyName)},
             {DB_FIELD_TRANSFER_SIZE,         QVariant((uint) fileSize)},
@@ -43,7 +43,7 @@ SqlSelection TransferObject::getWhere() const
                                    .arg(DB_FIELD_TRANSFER_DEVICEID));
     }
 
-    selection.whereArgs << this->requestId
+    selection.whereArgs << this->id
                         << this->type
                         << this->deviceId;
 
@@ -56,9 +56,9 @@ void TransferObject::onGeneratingValues(const DbObjectMap &record)
     file = record.value(DB_FIELD_TRANSFER_FILE).toString();
     directory = record.value(DB_FIELD_TRANSFER_DIRECTORY).toString();
     flag = (Flag) record.value(DB_FIELD_TRANSFER_FLAG).toInt();
-    id = record.value(DB_FIELD_TRANSFER_GROUPID).toUInt();
+    groupId = record.value(DB_FIELD_TRANSFER_GROUPID).toUInt();
     deviceId = record.value(DB_FIELD_TRANSFER_DEVICEID).toString();
-    requestId = record.value(DB_FIELD_TRANSFER_ID).toUInt();
+    id = record.value(DB_FIELD_TRANSFER_ID).toUInt();
     fileMimeType = record.value(DB_FIELD_TRANSFER_MIME).toString();
     friendlyName = record.value(DB_FIELD_TRANSFER_NAME).toString();
     fileSize = record.value(DB_FIELD_TRANSFER_SIZE).toUInt();

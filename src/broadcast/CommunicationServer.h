@@ -6,6 +6,7 @@
 #include "src/config/Keyword.h"
 #include <QApplication>
 #include <src/util/AppUtils.h>
+#include <src/database/object/TransferGroup.h>
 
 class CommunicationServer : public CoolSocket::Server {
 Q_OBJECT
@@ -21,7 +22,7 @@ signals:
 
     void textReceived(const QString &text, const QString &deviceId);
 
-    void transferRequest(const QString &deviceId, quint32 groupId, int filesTotal);
+    void transferRequest(const QString &deviceId, groupid groupId, int filesTotal);
 };
 
 #endif // COMMUNICATIONSERVER_H

@@ -9,15 +9,17 @@
 #include <QtCore/QString>
 #include <src/database/AccessDatabase.h>
 
+typedef quint32 groupid;
+
 class TransferAssignee;
 
 class TransferGroup : public DatabaseObject {
 public:
-    quint32 id = 0;
+    groupid id = 0;
     time_t dateCreated = 0;
     QString savePath;
 
-    explicit TransferGroup(quint32 groupId = 0);
+    explicit TransferGroup(groupid groupId = 0);
 
     SqlSelection getWhere() const override;
 
@@ -28,12 +30,12 @@ public:
 
 class TransferAssignee : public DatabaseObject {
 public:
-    quint32 groupId = 0;
+    groupid groupId = 0;
     QString deviceId;
     QString connectionAdapter;
     bool isClone = false;
 
-    explicit TransferAssignee(quint32 groupId = 0, const QString &deviceId = nullptr,
+    explicit TransferAssignee(groupid groupId = 0, const QString &deviceId = nullptr,
                               const QString &connectionAdapter = nullptr);
 
     SqlSelection getWhere() const override;

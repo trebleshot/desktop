@@ -23,7 +23,7 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
         QString deviceId = mainRequestJSON.contains(KEYWORD_TRANSFER_DEVICE_ID)
                            ? mainRequestJSON.value(KEYWORD_TRANSFER_DEVICE_ID).toString()
                            : nullptr;
-        quint32 groupId = mainRequestJSON.value(KEYWORD_TRANSFER_GROUP_ID)
+        groupid groupId = mainRequestJSON.value(KEYWORD_TRANSFER_GROUP_ID)
                 .toVariant()
                 .toUInt();
 

@@ -211,7 +211,7 @@ QSqlField DbStructure::generateField(const QString &key, const QVariant::Type &t
     return field;
 }
 
-const char *DbStructure::transformType(const QVariant::Type &type)
+QString DbStructure::transformType(const QVariant::Type &type)
 {
     switch (type) {
         case QVariant::Bool:
@@ -287,7 +287,6 @@ QSqlTableModel *DbStructure::gatherTableModel(const QString &tableName)
 
     return model;
 }
-
 
 void SqlSelection::bindWhereClause(QSqlQuery &query) const
 {
@@ -465,7 +464,7 @@ QSqlQuery SqlSelection::toUpdateQuery(const QSqlRecord &record) const
      * This method generates another mapping just to load this class.
      *
      * A better way would be;
-     * A- A method that accepts field name and its name and loading in a switch statement
+     * A- A method that accepts field name and its value and loading them in a switch statement
      * B- Passive mapping that always exists and have a reference for an object like Q_VARIABLE
      * During compilation they are all created so that they can always accept map
      *

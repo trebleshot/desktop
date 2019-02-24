@@ -75,7 +75,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                 if (request == KEYWORD_REQUEST_TRANSFER) {
                     if (responseJSON.contains(KEYWORD_FILES_INDEX)
                         && responseJSON.contains(KEYWORD_TRANSFER_GROUP_ID)) {
-                        const quint32 &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID)
+                        const groupid &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID)
                                 .toVariant()
                                 .toUInt();
 
@@ -98,6 +98,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                             time(&transferGroup.dateCreated);
 
+                            if ()
                             gDbSignal->publish(transferGroup);
                             gDbSignal->publish(transferAssignee);
 
@@ -113,10 +114,10 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                                              TransferObject::Incoming);
 
                                 transferObject->flag = TransferObject::Flag::Pending;
-                                transferObject->id = groupId;
+                                transferObject->groupId = groupId;
                                 transferObject->friendlyName = transferIndex.value(KEYWORD_INDEX_FILE_NAME).toString();
                                 transferObject->file = QString("%1-%2.tshare")
-                                        .arg(transferObject->requestId)
+                                        .arg(transferObject->id)
                                         .arg(transferObject->deviceId);
                                 transferObject->fileMimeType = transferIndex.value(KEYWORD_INDEX_FILE_MIME).toString();
                                 transferObject->fileSize = transferIndex.value(KEYWORD_INDEX_FILE_SIZE)
@@ -139,7 +140,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                     }
                 } else if (request == KEYWORD_REQUEST_RESPONSE) {
                     if (responseJSON.contains(KEYWORD_TRANSFER_GROUP_ID)) {
-                        const quint32 &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID)
+                        const groupid &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID)
                                 .toVariant()
                                 .toUInt();
                         const bool isAccepted = responseJSON.value(KEYWORD_TRANSFER_IS_ACCEPTED).toBool(false);

@@ -15,10 +15,13 @@
 #include <QIcon>
 #include <QtGui/QIconEngine>
 #include <src/database/object/TransferObject.h>
+#include <QtCore/QMutex>
 
-class TransferGroupModel
-        : public QAbstractTableModel {
+class TransferGroupModel : public QAbstractTableModel {
+Q_OBJECT
+
     QList<TransferGroupInfo> m_list;
+    QMutex m_mutex;
 
 public:
     enum ColumnNames {
@@ -38,6 +41,10 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
     QVariant data(const QModelIndex &index, int role) const override;
+
+    const QList<TransferGroupInfo>& list() {
+        return m_list;
+    }
 };
 
 

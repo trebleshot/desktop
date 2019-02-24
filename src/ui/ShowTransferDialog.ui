@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ShowTransferWidget</class>
- <widget class="QWidget" name="ShowTransferWidget">
+ <class>ShowTransferDialog</class>
+ <widget class="QDialog" name="ShowTransferDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Show Transfer</string>
   </property>
  </widget>
  <resources/>
