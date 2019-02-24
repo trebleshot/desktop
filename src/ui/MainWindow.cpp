@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
                            .arg(QApplication::applicationName())
                            .arg(QApplication::applicationVersion()));
 
-    if (AppUtils::getDatabase() != nullptr) {
+    if (AppUtils::getDatabase() == nullptr) {
         auto *error = new QMessageBox(this);
 
         error->setWindowTitle("Database error");
@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
                                    "Try restarting the application to solve the problem."));
 
             error->show();
-            connect(this, SIGNAL(destroyed()), error, SLOT(deleteLater()));
+            connect(this, &MainWindow::destroyed, error, &QObject::deleteLater);
         });
 
         m_commServer->start(0);
