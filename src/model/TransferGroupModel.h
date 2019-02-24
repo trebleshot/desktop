@@ -42,7 +42,8 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
 
-    const QList<TransferGroupInfo>& list() {
+    const QList<TransferGroupInfo> &list()
+    {
         return m_list;
     }
 };

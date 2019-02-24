@@ -7,9 +7,8 @@
 
 #include <ctime>
 #include <QtCore/QString>
+#include <src/config/Config.h>
 #include <src/database/AccessDatabase.h>
-
-typedef quint32 groupid;
 
 class TransferAssignee;
 

@@ -1,4 +1,6 @@
 #include <src/util/AppUtils.h>
+#include "Config.h"
+
 
 QString getDeviceTypeName()
 {
@@ -52,4 +54,10 @@ QString getUserNickname()
     return AppUtils::getDefaultSettings()
             .value("nickname", QString("TrebleShot on %1").arg(getDeviceNameForOS()))
             .toString();
+}
+
+void initAppEnvironment()
+{
+    qRegisterMetaType<groupid>("groupid");
+    qRegisterMetaType<requestid>("requestid");
 }

@@ -105,7 +105,6 @@ void MainWindow::dropEvent(QDropEvent *event)
 {
     if (event->mimeData()->hasUrls()) {
         const auto &urlList = event->mimeData()->urls();
-        bool hasValidFiles = false;
         auto groupId = QRandomGenerator::global()->bounded(static_cast<groupid>(time(nullptr)), sizeof(int));
         requestid requestId = groupId + 1;
         TransferGroup group(groupId);
@@ -113,31 +112,14 @@ void MainWindow::dropEvent(QDropEvent *event)
 
         time(&group.dateCreated);
 
+        QList<TransferObject> transferMap;
+
+        for (const auto &url : urlList)
+            transferMap << TransferUtils::createTransferMap(group, mimeDb, requestId, url.toLocalFile());
+
         if (gDatabase->getDatabase()->transaction()) {
-            for (const auto &url : urlList) {
-                const auto &fileName = url.toLocalFile();
-                QFileInfo fileInfo = fileName;
-
-                if (fileInfo.exists()) {
-                    hasValidFiles = true;
-
-                    if (fileInfo.isFile()) {
-                        QFile file(fileName);
-                        TransferObject object(requestId++, nullptr, TransferObject::Type::Outgoing);
-
-                        object.groupId = groupId;
-                        object.friendlyName = fileInfo.completeBaseName();
-                        object.file = fileName;
-                        object.fileSize = static_cast<size_t>(file.size());
-                        object.fileMimeType = mimeDb.mimeTypeForFile(fileInfo).name();
-                        object.flag = TransferObject::Flag::Pending;
-
-                        file.close();
-
-                        gDatabase->insert(object);
-                    }
-                }
-            }
+            for (auto &transferObject : transferMap)
+                gDatabase->insert(transferObject);
 
             gDatabase->getDatabase()->commit();
         } else {
@@ -147,7 +129,7 @@ void MainWindow::dropEvent(QDropEvent *event)
             error.show();
         }
 
-        if (hasValidFiles) {
+        if (!transferMap.empty()) {
             gDatabase->insert(group);
 
             event->acceptProposedAction();

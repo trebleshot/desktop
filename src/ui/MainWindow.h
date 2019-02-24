@@ -33,7 +33,7 @@ protected:
 protected:
     Ui::MainWindow *m_ui;
     CommunicationServer *m_commServer;
-    TransferGroupModel* m_groupModel;
+    TransferGroupModel *m_groupModel;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);

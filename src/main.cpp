@@ -1,9 +1,12 @@
-#include "src/build.h"
-#include "src/ui/MainWindow.h"
+#include <src/build.h>
+#include <src/config/Config.h>
+#include <src/ui/MainWindow.h>
 
 int main(int argc, char *argv[])
 {
     QApplication application(argc, argv);
+
+    initAppEnvironment();
 
     //todo: Implement language support
     /**

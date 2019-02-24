@@ -26,9 +26,9 @@ SqlSelection TransferGroup::getWhere() const
 DbObjectMap TransferGroup::getValues() const
 {
     return DbObjectMap{
-            {DB_FIELD_TRANSFERGROUP_ID,          QVariant(id)},
-            {DB_FIELD_TRANSFERGROUP_DATECREATED, QVariant((qlonglong) dateCreated)},
-            {DB_FIELD_TRANSFERGROUP_SAVEPATH,    QVariant(savePath)}
+            {DB_FIELD_TRANSFERGROUP_ID,          id},
+            {DB_FIELD_TRANSFERGROUP_DATECREATED, (qlonglong) dateCreated},
+            {DB_FIELD_TRANSFERGROUP_SAVEPATH,    savePath}
     };
 }
 

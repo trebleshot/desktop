@@ -13,6 +13,9 @@
 #include <QApplication>
 #include <QString>
 
+typedef quint32 groupid;
+typedef quint32 requestid;
+
 QString getApplicationVersion();
 
 unsigned short getApplicationVersionCode();
@@ -24,5 +27,7 @@ QString getUserNickname();
 QString getDeviceTypeName();
 
 QString getDeviceNameForOS();
+
+void initAppEnvironment();
 
 #endif // CONFIG_H

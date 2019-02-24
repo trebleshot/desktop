@@ -35,6 +35,52 @@ SqlSelection TransferUtils::createSqlSelection(groupid groupId, const QString &d
     return sqlSelection;
 }
 
+
+QList<TransferObject> TransferUtils::createTransferMap(const TransferGroup &group, const QMimeDatabase &mimeDatabase,
+                                                       requestid &requestId, const QString &filePath,
+                                                       const QString &directory)
+{
+    QList<TransferObject> resultList;
+    QFileInfo fileInfo = filePath;
+
+    qDebug() << filePath << directory;
+
+    if (fileInfo.isFile()) {
+        QFile file(filePath);
+        TransferObject object(requestId++, nullptr, TransferObject::Type::Outgoing);
+
+        object.groupId = group.id;
+        object.friendlyName = fileInfo.fileName();
+        object.file = filePath;
+        object.fileSize = static_cast<size_t>(file.size());
+        object.fileMimeType = mimeDatabase.mimeTypeForFile(fileInfo).name();
+        object.flag = TransferObject::Flag::Pending;
+
+        if (!directory.isEmpty())
+            object.directory = directory;
+
+        file.close();
+
+        resultList << object;
+    } else if (fileInfo.isDir()) {
+        QDir dir = filePath;
+        QString currentDirectory;
+
+        if (!directory.isEmpty())
+            currentDirectory.append(QString("%1%2").arg(directory).arg(QDir::separator()));
+
+        currentDirectory.append(dir.dirName());
+
+        const auto &entries = dir.entryList(QDir::AllDirs | QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst);
+
+        for (const auto &thisEntry : entries)
+            resultList << createTransferMap(group, mimeDatabase, requestId, dir.filePath(thisEntry), currentDirectory);
+    }
+
+    return resultList;
+}
+
+
 TransferObject TransferUtils::firstAvailableTransfer(groupid groupId, const QString &deviceId)
 {
     TransferObject object;

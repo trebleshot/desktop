@@ -13,17 +13,17 @@ NetworkDevice::NetworkDevice(const QString &deviceId)
 DbObjectMap NetworkDevice::getValues() const
 {
     return DbObjectMap{
-            {DB_FIELD_DEVICES_BRAND,          QVariant(this->brand)},
-            {DB_FIELD_DEVICES_MODEL,          QVariant(this->model)},
-            {DB_FIELD_DEVICES_USER,           QVariant(this->nickname)},
-            {DB_FIELD_DEVICES_ID,             QVariant(this->deviceId)},
-            {DB_FIELD_DEVICES_BUILDNAME,      QVariant(this->versionName)},
-            {DB_FIELD_DEVICES_BUILDNUMBER,    QVariant(this->versionNumber)},
-            {DB_FIELD_DEVICES_TMPSECUREKEY,   QVariant(this->tmpSecureKey)},
-            {DB_FIELD_DEVICES_LASTUSAGETIME,  QVariant((qlonglong) this->lastUsageTime)},
-            {DB_FIELD_DEVICES_ISTRUSTED,      QVariant(this->isTrusted ? 1 : 0)},
-            {DB_FIELD_DEVICES_ISRESTRICTED,   QVariant(this->isRestricted ? 1 : 0)},
-            {DB_FIELD_DEVICES_ISLOCALADDRESS, QVariant(this->isLocalAddress ? 1 : 0)}
+            {DB_FIELD_DEVICES_BRAND,          this->brand},
+            {DB_FIELD_DEVICES_MODEL,          this->model},
+            {DB_FIELD_DEVICES_USER,           this->nickname},
+            {DB_FIELD_DEVICES_ID,             this->deviceId},
+            {DB_FIELD_DEVICES_BUILDNAME,      this->versionName},
+            {DB_FIELD_DEVICES_BUILDNUMBER,    this->versionNumber},
+            {DB_FIELD_DEVICES_TMPSECUREKEY,   this->tmpSecureKey},
+            {DB_FIELD_DEVICES_LASTUSAGETIME,  (qlonglong) this->lastUsageTime},
+            {DB_FIELD_DEVICES_ISTRUSTED,      this->isTrusted ? 1 : 0},
+            {DB_FIELD_DEVICES_ISRESTRICTED,   this->isRestricted ? 1 : 0},
+            {DB_FIELD_DEVICES_ISLOCALADDRESS, this->isLocalAddress ? 1 : 0}
     };
 }
 
@@ -97,7 +97,7 @@ DbObjectMap DeviceConnection::getValues() const
             {DB_FIELD_DEVICECONNECTION_ADAPTERNAME,     adapterName},
             {DB_FIELD_DEVICECONNECTION_IPADDRESS,       NetworkDeviceLoader::convertToInet4Address(
                     hostAddress.toIPv4Address())},
-            {DB_FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant((qlonglong) lastCheckedDate)},
+            {DB_FIELD_DEVICECONNECTION_LASTCHECKEDDATE, (qlonglong) lastCheckedDate},
     };
 }
 

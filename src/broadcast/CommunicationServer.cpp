@@ -98,20 +98,21 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                             time(&transferGroup.dateCreated);
 
-                            if ()
                             gDbSignal->publish(transferGroup);
                             gDbSignal->publish(transferAssignee);
 
                             int filesTotal = 0;
 
+                            QList<TransferObject *> objectList;
+
                             for (const auto &iterator : filesIndex) {
                                 const QJsonObject &transferIndex = iterator.toObject();
-                                auto *transferObject
-                                        = new TransferObject(transferIndex.value(KEYWORD_TRANSFER_REQUEST_ID)
-                                                                     .toVariant()
-                                                                     .toUInt(),
-                                                             device.deviceId,
-                                                             TransferObject::Incoming);
+                                auto *transferObject = new TransferObject(transferIndex
+                                                                                  .value(KEYWORD_TRANSFER_REQUEST_ID)
+                                                                                  .toVariant()
+                                                                                  .toUInt(),
+                                                                          device.deviceId,
+                                                                          TransferObject::Incoming);
 
                                 transferObject->flag = TransferObject::Flag::Pending;
                                 transferObject->groupId = groupId;
@@ -127,12 +128,27 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                 if (transferIndex.contains(KEYWORD_INDEX_DIRECTORY))
                                     transferObject->directory = transferIndex.value(KEYWORD_INDEX_DIRECTORY).toString();
 
-                                if (usePublishing ? gDbSignal->publish(*transferObject)
-                                                  : gDbSignal->insert(*transferObject))
-                                    filesTotal++;
-
-                                delete transferObject;
+                                objectList << transferObject;
                             }
+
+                            gDbSignal->doSynchronized([&objectList, &usePublishing, &filesTotal](AccessDatabase *db) {
+                                if (db->getDatabase()->transaction()) {
+                                    if (usePublishing)
+                                        for (auto *dbObject : objectList) {
+                                            if (db->publish(*dbObject))
+                                                filesTotal++;
+                                        }
+                                    else
+                                        for (auto *dbObject : objectList) {
+                                            if (db->insert(*dbObject))
+                                                filesTotal++;
+                                        }
+
+                                    db->getDatabase()->commit();
+                                }
+                            });
+
+                            qDeleteAll(objectList);
 
                             if (filesTotal > 0)
                                     emit transferRequest(device.deviceId, transferGroup.id, filesTotal);

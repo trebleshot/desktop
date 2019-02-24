@@ -11,18 +11,18 @@ TransferObject::TransferObject(requestid id, const QString &deviceId, const Type
 DbObjectMap TransferObject::getValues() const
 {
     return DbObjectMap{
-            {DB_FIELD_TRANSFER_ACCESSPORT,   QVariant(accessPort)},
-            {DB_FIELD_TRANSFER_DIRECTORY,    QVariant(directory)},
-            {DB_FIELD_TRANSFER_FILE,         QVariant(file)},
-            {DB_FIELD_TRANSFER_FLAG,         QVariant(flag)},
-            {DB_FIELD_TRANSFER_GROUPID,      QVariant(groupId)},
-            {DB_FIELD_TRANSFER_ID,           QVariant(id)},
-            {DB_FIELD_TRANSFER_MIME,         QVariant(fileMimeType)},
-            {DB_FIELD_TRANSFER_NAME,         QVariant(friendlyName)},
-            {DB_FIELD_TRANSFER_SIZE,         QVariant((uint) fileSize)},
-            {DB_FIELD_TRANSFER_SKIPPEDBYTES, QVariant((uint) skippedBytes)},
-            {DB_FIELD_TRANSFER_TYPE,         QVariant(type)},
-            {DB_FIELD_TRANSFER_DEVICEID,     QVariant(deviceId)}
+            {DB_FIELD_TRANSFER_ACCESSPORT,   accessPort},
+            {DB_FIELD_TRANSFER_DIRECTORY,    directory},
+            {DB_FIELD_TRANSFER_FILE,         file},
+            {DB_FIELD_TRANSFER_FLAG,         flag},
+            {DB_FIELD_TRANSFER_GROUPID,      groupId},
+            {DB_FIELD_TRANSFER_ID,           id},
+            {DB_FIELD_TRANSFER_MIME,         fileMimeType},
+            {DB_FIELD_TRANSFER_NAME,         friendlyName},
+            {DB_FIELD_TRANSFER_SIZE,         (uint) fileSize},
+            {DB_FIELD_TRANSFER_SKIPPEDBYTES, (uint) skippedBytes},
+            {DB_FIELD_TRANSFER_TYPE,         type},
+            {DB_FIELD_TRANSFER_DEVICEID,     deviceId}
     };
 }
 

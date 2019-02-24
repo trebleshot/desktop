@@ -16,6 +16,9 @@
 #include <src/database/object/TransferObject.h>
 #include <QtCore/QFile>
 #include <src/database/object/TransferGroup.h>
+#include <QtCore/QFileInfo>
+#include <QtCore/QDir>
+#include <QtCore/QMimeDatabase>
 #include "src/database/object/NetworkDevice.h"
 
 struct AssigneeInfo {
@@ -69,6 +72,12 @@ public:
     static SqlSelection createSqlSelection(groupid groupId, const QString &deviceId,
                                            TransferObject::Flag flag = TransferObject::Flag::Any,
                                            bool equals = true);
+
+    static QList<TransferObject> createTransferMap(const TransferGroup &group,
+                                                   const QMimeDatabase &mimeDatabase,
+                                                   requestid &requestId,
+                                                   const QString &filePath,
+                                                   const QString &directory = nullptr);
 
     static TransferObject firstAvailableTransfer(groupid groupId, const QString &deviceId);
 
