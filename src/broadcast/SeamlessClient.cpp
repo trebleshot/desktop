@@ -55,12 +55,12 @@ void SeamlessClient::run()
 
                 const auto &resultObject = activeConnection->receive().asJson();
 
+                delete activeConnection;
+
                 qDebug() << "Will evaluate the result" << resultObject;
 
                 if (!resultObject.value(KEYWORD_RESULT).toBool(false))
                     throw exception();
-
-                delete activeConnection;
             }
 
             {
@@ -223,9 +223,4 @@ void SeamlessClient::run()
     delete client;
 
     qDebug() << "-- SeamlessClient --";
-}
-
-void SeamlessClient::interrupt()
-{
-    m_interrupted = true;
 }

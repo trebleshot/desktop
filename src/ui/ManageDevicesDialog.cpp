@@ -6,11 +6,14 @@
 #include "ManageDevicesDialog.h"
 
 ManageDevicesDialog::ManageDevicesDialog(QWidget *parent)
-        : QDialog(parent), m_ui(new Ui::ManageDevicesDialog)
+        : QDialog(parent), m_ui(new Ui::ManageDevicesDialog), m_deviceModel(new NetworkDeviceModel())
 {
     m_ui->setupUi(this);
+    m_ui->treeView->setModel(m_deviceModel);
+}
 
-    auto *deviceModel = new NetworkDeviceModel();
-
-    m_ui->treeView->setModel(deviceModel);
+ManageDevicesDialog::~ManageDevicesDialog()
+{
+    delete m_ui;
+    delete m_deviceModel;
 }

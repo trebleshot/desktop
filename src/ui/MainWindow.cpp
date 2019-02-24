@@ -101,12 +101,12 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 
 void MainWindow::dropEvent(QDropEvent *event)
 {
-    auto *box = new QMessageBox;
+    QMessageBox box;
 
-    box->setWindowTitle("Proposed event");
+    box.setWindowTitle("Proposed event");
 
-    box->setText(event->mimeData()->text());
-    box->show();
+    box.setText(event->mimeData()->text());
+    box.exec();
 
     event->acceptProposedAction();
 }
@@ -124,20 +124,18 @@ void MainWindow::transferItemActivated(QModelIndex modelIndex)
 
 void MainWindow::about()
 {
-    auto *about = new QMessageBox(this);
+    QMessageBox about(this);
 
-    about->setWindowTitle(QString("About TrebleShot"));
-    about->setText(QString("TrebleShot is a cross platform file transferring tool."));
-    about->addButton(QMessageBox::StandardButton::Close);
-    QPushButton *buttonMoreInfo = about->addButton(QString("More info"), QMessageBox::ButtonRole::ActionRole);
+    about.setWindowTitle(QString("About TrebleShot"));
+    about.setText(QString("TrebleShot is a cross platform file transferring tool."));
+    about.addButton(QMessageBox::StandardButton::Close);
+    QPushButton *buttonMoreInfo = about.addButton(QString("More info"), QMessageBox::ButtonRole::ActionRole);
 
     connect(buttonMoreInfo, &QPushButton::pressed, []() {
         QDesktopServices::openUrl(QUrl(URI_APP_HOME));
     });
 
-    connect(this, SIGNAL(destroyed()), about, SLOT(deleteLater()));
-
-    about->show();
+    about.exec();
 }
 
 void MainWindow::aboutQt()
@@ -147,73 +145,52 @@ void MainWindow::aboutQt()
 
 void MainWindow::showReceivedText(const QString &text, const QString &deviceId)
 {
-    auto *device = new NetworkDevice(deviceId);
+    NetworkDevice device(deviceId);
 
     try {
-        gDatabase->reconstruct(*device);
+        gDatabase->reconstruct(device);
 
-        auto *messageBox = new QMessageBox(this);
+        QMessageBox messageBox(this);
 
-        messageBox->setWindowTitle(QString("Text received from %1").arg(device->nickname));
-        messageBox->setText(text);
-        messageBox->addButton(QMessageBox::StandardButton::Close);
+        messageBox.setWindowTitle(QString("Text received from %1").arg(device.nickname));
+        messageBox.setText(text);
+        messageBox.addButton(QMessageBox::StandardButton::Close);
 
-        QPushButton *buttonCopy = messageBox->addButton(QString("Copy to clipboard"), QMessageBox::ButtonRole::ActionRole);
+        QPushButton *buttonCopy = messageBox.addButton(QString("Copy to clipboard"), QMessageBox::ButtonRole::ActionRole);
 
         connect(buttonCopy, &QPushButton::pressed, [text]() {
             QClipboard *clipboard = QApplication::clipboard();
             clipboard->setText(text);
         });
-        connect(this, SIGNAL(destroyed()), messageBox, SLOT(deleteLater()));
 
-        messageBox->show();
+        messageBox.exec();
     } catch (...) {
         // do nothing
     }
-
-    delete device;
 }
 
 void MainWindow::showTransferRequest(const QString &deviceId, quint32 groupId, int filesTotal)
 {
-    auto *device = new NetworkDevice(deviceId);
+    NetworkDevice device(deviceId);
 
     try {
-        gDatabase->reconstruct(*device);
+        gDatabase->reconstruct(device);
 
-        auto *messageBox = new QMessageBox(this);
+        QMessageBox messageBox(this);
 
-        messageBox->setWindowTitle(QString("File receive request from %1").arg(device->nickname));
-        messageBox->setText(QString("%1 wants to you send you files, %2 in total. Do you want to receive now?")
-                                    .arg(device->nickname)
+        messageBox.setWindowTitle(QString("File receive request from %1").arg(device.nickname));
+        messageBox.setText(QString("%1 wants to you send you files, %2 in total. Do you want to receive now?")
+                                    .arg(device.nickname)
                                     .arg(filesTotal));
-        messageBox->addButton(QMessageBox::StandardButton::Ignore);
+        messageBox.addButton(QMessageBox::StandardButton::Ignore);
 
-        /*
-        messageBox->addButton(QMessageBox::StandardButton::Later);
-
-        QPushButton *buttonCopy = messageBox->addButton(QString("Copy to clipboard"), QMessageBox::ButtonRole::ActionRole);
-
-        connect(buttonCopy, &QPushButton::pressed, [text]() {
-            QClipboard *clipboard = QApplication::clipboard();
-            clipboard->setText(text);
-        });
-         */
-
-        connect(this, SIGNAL(destroyed()), messageBox, SLOT(deleteLater()));
-
-        messageBox->show();
-
+        messageBox.exec();
     } catch (...) {
         // do nothing
     }
-
-    delete device;
 }
 
 void MainWindow::manageDevices()
 {
-    auto *manageDevices = new ManageDevicesDialog(this);
-
-    manageDevices->show();
+    ManageDevicesDialog(this).exec();
 }

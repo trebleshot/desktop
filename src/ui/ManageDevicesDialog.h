@@ -6,6 +6,7 @@
 #define TREBLESHOT_MANAGEDEVICESWIDGET_H
 
 #include <QDialog>
+#include <src/model/NetworkDeviceModel.h>
 #include "ui_ManageDevicesDialog.h"
 
 namespace Ui {
@@ -18,8 +19,11 @@ Q_OBJECT
 public:
     explicit ManageDevicesDialog(QWidget *parent);
 
+    ~ManageDevicesDialog() override;
+
 protected:
     Ui::ManageDevicesDialog *m_ui;
+    NetworkDeviceModel *m_deviceModel;
 };
 
 

@@ -7,26 +7,17 @@
 
 #include <QtCore/QThread>
 #include <QFile>
+#include <src/util/Interrupter.h>
 
-class SeamlessClient : public QThread {
+class SeamlessClient : public QThread, public Interrupter {
     quint32 m_groupId = 0;
     QString m_deviceId;
-    bool m_interrupted = false;
 
 public:
     explicit SeamlessClient(const QString &deviceId, quint32 groupId, QObject *parent = nullptr);
 
-    bool interrupted()
-    {
-        return m_interrupted;
-    }
-
 protected:
     void run() override;
-
-public slots:
-
-    void interrupt();
 };
 
 
