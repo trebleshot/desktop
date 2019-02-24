@@ -26,6 +26,11 @@ namespace Ui {
 class MainWindow : public QMainWindow {
 Q_OBJECT
 protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+
+    void dropEvent(QDropEvent *event) override;
+
+protected:
     Ui::MainWindow *m_ui;
     CommunicationServer *m_commServer;
 

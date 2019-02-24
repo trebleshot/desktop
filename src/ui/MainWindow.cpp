@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     m_ui->setupUi(this);
 
+    setAcceptDrops(true);
+
     setWindowTitle(QString("%1 - %2")
                            .arg(QApplication::applicationName())
                            .arg(QApplication::applicationVersion()));
@@ -89,6 +91,24 @@ MainWindow::~MainWindow()
 {
     delete m_ui;
     delete m_commServer;
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasUrls())
+        event->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    auto *box = new QMessageBox;
+
+    box->setWindowTitle("Proposed event");
+
+    box->setText(event->mimeData()->text());
+    box->show();
+
+    event->acceptProposedAction();
 }
 
 void MainWindow::failureDialogFinished(int state)

@@ -41,14 +41,8 @@ void SeamlessClient::run()
 
         try {
             {
-                qDebug() << "Receive process for"
-                         << device.nickname
-                         << "for group"
-                         << group.id
-                         << "with connection"
-                         << connection.hostAddress.toString()
-                         << "of adapter"
-                         << connection.adapterName;
+                qDebug() << "Receive process for" << device.nickname << "for group" << group.id << "with connection"
+                         << connection.hostAddress.toString() << "of adapter" << connection.adapterName;
 
                 auto *activeConnection = client->communicate(device, connection);
 
@@ -169,8 +163,7 @@ void SeamlessClient::run()
                                                 .toVariant()
                                                 .toUInt();
 
-                                        if (currentSize != transferObject.fileSize
-                                            && currentFile.size() > 0) {
+                                        if (currentSize != transferObject.fileSize && currentFile.size() > 0) {
                                             transferObject.fileSize = currentSize;
                                             transferObject.flag = TransferObject::Flag::Removed;
 
@@ -223,10 +216,8 @@ void SeamlessClient::run()
             qDebug() << "Connection failed to the server";
         }
     } else {
-        qDebug() << "Could not produce information within given group id"
-                 << m_groupId
-                 << "and device id"
-                 << m_deviceId;
+        qDebug() << "Could not produce information within given group id" << m_groupId
+                 << "and device id" << m_deviceId;
     }
 
     delete client;

@@ -9,14 +9,12 @@
 NetworkDeviceModel::NetworkDeviceModel(QObject *parent)
         : QAbstractTableModel(parent)
 {
-    auto *selection = new SqlSelection();
+    SqlSelection selection;
 
-    selection->setTableName(DB_TABLE_DEVICES);
-    selection->setOrderBy(DB_FIELD_DEVICES_LASTUSAGETIME, false);
+    selection.setTableName(DB_TABLE_DEVICES);
+    selection.setOrderBy(DB_FIELD_DEVICES_LASTUSAGETIME, false);
 
-    m_list = gDatabase->castQuery(*selection, NetworkDevice());
-
-    delete selection;
+    m_list = gDatabase->castQuery(selection, NetworkDevice());
 }
 
 int NetworkDeviceModel::columnCount(const QModelIndex &parent) const
