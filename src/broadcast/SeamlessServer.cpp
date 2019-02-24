@@ -69,42 +69,38 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
                         // processHolder.builder.getTransferProgress().interrupt();
                     }
                 } else {
-                    //todo: Previous else statement should be an else if statement similar to the condition below
-                    // !processHolder.builder.getTransferProgress().isInterrupted()
-                    auto *transferObject = new TransferObject(
-                            request.value(KEYWORD_TRANSFER_REQUEST_ID)
-                                    .toVariant()
-                                    .toUInt(), deviceId, TransferObject::Type::Outgoing);
+                    if (interrupted())
+                        break;
 
-                    if (gDbSignal->reconstruct(*transferObject)) {
+                    TransferObject transferObject(request.value(KEYWORD_TRANSFER_REQUEST_ID).toVariant().toUInt(),
+                                                  deviceId, TransferObject::Type::Outgoing);
+
+                    if (gDbSignal->reconstruct(transferObject)) {
                         quint16 serverPort = static_cast<quint16>(request.value(KEYWORD_TRANSFER_SOCKET_PORT)
                                 .toVariant()
                                 .toUInt());
 
-                        //todo: Check whether size_t is unsigned integer or long int
                         size_t skippedBytes = request.contains(KEYWORD_SKIPPED_BYTES)
                                               ? request.value(KEYWORD_SKIPPED_BYTES).toVariant().toUInt()
                                               : 0;
 
-                        gDbSignal->update(*transferObject);
+                        gDbSignal->update(transferObject);
 
-                        auto *file = new QFile(transferObject->file);
+                        auto *file = new QFile(transferObject.file);
 
                         if (file->exists()) {
-                            transferObject->accessPort = serverPort;
-                            transferObject->skippedBytes = skippedBytes;
+                            transferObject.accessPort = serverPort;
+                            transferObject.skippedBytes = skippedBytes;
 
                             reply.insert(KEYWORD_RESULT, true);
 
-                            if (transferObject->fileSize != file->size()) {
+                            if (transferObject.fileSize != file->size()) {
                                 reply.insert(KEYWORD_SIZE_CHANGED, file->size());
-                                //todo: Somehow qt manages to use unsigned values for this.
-                                // Check whether it is a good practise to update size types to qint64
-                                transferObject->fileSize = file->size();
+                                transferObject.fileSize = static_cast<size_t>(file->size());
                             }
 
                             if (skippedBytes > 0)
-                                file->seek(skippedBytes);
+                                file->seek(static_cast<qint64>(skippedBytes));
 
                             auto *socket = new QTcpSocket;
 
@@ -139,7 +135,7 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
                         reply.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_FOUND);
                         reply.insert(KEYWORD_FLAG_GROUP_EXISTS, true);
 
-                        transferObject->flag = TransferObject::Flag::Removed;
+                        transferObject.flag = TransferObject::Flag::Removed;
                     }
                 }
             }

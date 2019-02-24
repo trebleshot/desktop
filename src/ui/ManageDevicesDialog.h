@@ -26,5 +26,4 @@ protected:
     NetworkDeviceModel *m_deviceModel;
 };
 
-
 #endif //TREBLESHOT_MANAGEDEVICESWIDGET_H

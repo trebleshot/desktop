@@ -24,3 +24,8 @@ GThread *GThread::startIndependent(const std::function<void(GThread *)> &functio
 
     return thread;
 }
+
+void GThread::interrupt()
+{
+    Interrupter::interrupt();
+}

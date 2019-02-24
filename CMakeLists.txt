@@ -68,6 +68,8 @@ qt5_add_resources(QRCS
         assets/resources.qrc)
 
 qt5_wrap_ui(UI_HEADERS
+        src/ui/DeviceChooserDialog.ui
+        src/ui/FileAdditionProgressDialog.ui
         src/ui/MainWindow.ui
         src/ui/ManageDevicesDialog.ui
         src/ui/ShowTransferDialog.ui
@@ -104,6 +106,8 @@ set(UTIL_LIBRARY
         src/model/NetworkDeviceModel.cpp
         src/model/TransferGroupModel.h
         src/model/TransferGroupModel.cpp
+        src/ui/DeviceChooserDialog.h
+        src/ui/DeviceChooserDialog.cpp
         src/ui/ShowTransferDialog.h
         src/ui/ShowTransferDialog.cpp
         src/ui/ManageDevicesDialog.h
@@ -119,7 +123,7 @@ set(UTIL_LIBRARY
         src/util/NetworkDeviceLoader.h
         src/util/NetworkDeviceLoader.cpp
         src/util/TransferUtils.h
-        src/util/TransferUtils.cpp)
+        src/util/TransferUtils.cpp src/ui/FileAdditionProgressDialog.cpp src/ui/FileAdditionProgressDialog.h)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)

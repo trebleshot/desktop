@@ -125,8 +125,9 @@ namespace CoolSocket {
                             .object();
 
                     if (jsonObject.contains(QString(COOLSOCKET_KEYWORD_LENGTH))) {
-                        response.length = (jsonObject.value(QString(COOLSOCKET_KEYWORD_LENGTH)))
-                                .toInt();
+                        response.length = jsonObject.value(QString(COOLSOCKET_KEYWORD_LENGTH))
+                                .toVariant()
+                                .toUInt();
                     } else
                         break;
 

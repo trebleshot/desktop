@@ -6,6 +6,8 @@
 #include "MainWindow.h"
 #include "ManageDevicesDialog.h"
 #include "ShowTransferDialog.h"
+#include "DeviceChooserDialog.h"
+#include "FileAdditionProgressDialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_ui(new Ui::MainWindow),
@@ -104,43 +106,8 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 void MainWindow::dropEvent(QDropEvent *event)
 {
     if (event->mimeData()->hasUrls()) {
-        const auto &urlList = event->mimeData()->urls();
-        auto groupId = QRandomGenerator::global()->bounded(static_cast<groupid>(time(nullptr)), sizeof(int));
-        requestid requestId = groupId + 1;
-        TransferGroup group(groupId);
-        QMimeDatabase mimeDb;
-
-        time(&group.dateCreated);
-
-        QList<TransferObject> transferMap;
-
-        for (const auto &url : urlList)
-            transferMap << TransferUtils::createTransferMap(group, mimeDb, requestId, url.toLocalFile());
-
-        if (gDatabase->getDatabase()->transaction()) {
-            for (auto &transferObject : transferMap)
-                gDatabase->insert(transferObject);
-
-            gDatabase->getDatabase()->commit();
-        } else {
-            QMessageBox error;
-            error.setText(tr("Could not add the files right now. Try again."));
-
-            error.show();
-        }
-
-        if (!transferMap.empty()) {
-            gDatabase->insert(group);
-
-            event->acceptProposedAction();
-
-            QMessageBox box;
-
-            box.setWindowTitle("Proposed event");
-
-            box.setText(event->mimeData()->text());
-            box.exec();
-        }
+        event->acceptProposedAction();
+        FileAdditionProgressDialog(this, event->mimeData()->urls()).exec();
     }
 }
 
