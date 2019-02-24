@@ -26,13 +26,13 @@ public:
     QString fileMimeType;
     QString directory;
     QString deviceId;
-    size_t fileSize;
-    size_t skippedBytes;
-    requestid id;
-    groupid groupId;
-    int accessPort;
-    Type type;
-    Flag flag;
+    size_t fileSize = 0;
+    size_t skippedBytes = 0;
+    requestid id = 0;
+    groupid groupId = 0;
+    int accessPort = 0;
+    Type type = Type::Incoming;
+    Flag flag = Flag::Pending;
 
     explicit TransferObject(requestid id = 0, const QString &deviceId = nullptr, const Type &type = Type::Incoming);
 
