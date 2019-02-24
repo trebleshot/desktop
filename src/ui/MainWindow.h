@@ -46,8 +46,6 @@ public slots:
 
     void aboutQt();
 
-    void failureDialogFinished(int state);
-
     void manageDevices();
 
     void showReceivedText(const QString &text, const QString &deviceId);

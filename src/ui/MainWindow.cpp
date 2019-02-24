@@ -21,16 +21,16 @@ MainWindow::MainWindow(QWidget *parent)
                            .arg(QApplication::applicationName())
                            .arg(QApplication::applicationVersion()));
 
-    if (AppUtils::getDatabase() == nullptr) {
-        auto *errorMessage = new QMessageBox(this);
+    if (AppUtils::getDatabase() != nullptr) {
+        auto *error = new QMessageBox(this);
 
-        errorMessage->setWindowTitle("Database error");
-        errorMessage->setText("The database used to store information did not open. Refer to the development notes. "
-                              "The program will force close.");
+        error->setWindowTitle("Database error");
+        error->setText("The database used to store information did not open. Refer to the development notes. "
+                       "The program will force close.");
 
-        errorMessage->show();
+        error->show();
 
-        connect(errorMessage, SIGNAL(finished(int)), this, SLOT(failureDialogFinished(int)));
+        connect(error, &QMessageBox::finished, this, &MainWindow::close);
     } else {
         connect(m_commServer, &CoolSocket::Server::serverStarted, [this]() {
             m_ui->label->setText(QString("TrebleShot is ready to accept files"));
@@ -42,14 +42,14 @@ MainWindow::MainWindow(QWidget *parent)
         });
 
         connect(m_commServer, &CoolSocket::Server::serverFailure, [this]() {
-            auto *errorMessage = new QMessageBox(this);
+            auto *error = new QMessageBox(this);
 
-            errorMessage->setWindowTitle(QString("Server error"));
-            errorMessage->setText(QString("TrebleShot server has returned with an error. "
-                                          "Try restarting the application to solve the problem."));
+            error->setWindowTitle(QString("Server error"));
+            error->setText(QString("TrebleShot server has returned with an error. "
+                                   "Try restarting the application to solve the problem."));
 
-            errorMessage->show();
-            connect(this, SIGNAL(destroyed()), errorMessage, SLOT(deleteLater()));
+            error->show();
+            connect(this, SIGNAL(destroyed()), error, SLOT(deleteLater()));
         });
 
         m_commServer->start(0);
@@ -109,11 +109,6 @@ void MainWindow::dropEvent(QDropEvent *event)
         event->acceptProposedAction();
         FileAdditionProgressDialog(this, event->mimeData()->urls()).exec();
     }
-}
-
-void MainWindow::failureDialogFinished(int state)
-{
-    close();
 }
 
 void MainWindow::transferItemActivated(QModelIndex modelIndex)
