@@ -43,12 +43,7 @@ void NetworkDeviceLoader::processConnection(NetworkDevice &device,
         connection.adapterName = KEYWORD_UNKNOWN_INTERFACE;
 
     time(&connection.lastCheckedDate);
-    connection.deviceId = device.deviceId;
-
-    qDebug() << "Processing connection for device"
-             << device.deviceId
-             << "with connection name"
-             << connection.hostAddress.toString();
+    connection.deviceId = device.id;
 
     SqlSelection selection;
 
@@ -81,12 +76,12 @@ NetworkDevice NetworkDeviceLoader::load(QObject *sender, const QHostAddress &hos
         auto *bridge = new CommunicationBridge(sender);
         auto device = bridge->loadDevice(hostAddress);
 
-        if (device.deviceId != nullptr) {
+        if (device.id != nullptr) {
             const NetworkDevice &localDevice = AppUtils::getLocalDevice();
 
             processConnection(device, hostAddress);
 
-            if (localDevice.deviceId != device.deviceId) {
+            if (localDevice.id != device.id) {
                 time(&device.lastUsageTime);
                 gDbSignal->publish(device);
             }

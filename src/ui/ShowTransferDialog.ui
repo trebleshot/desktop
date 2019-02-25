@@ -13,6 +13,11 @@
   <property name="windowTitle">
    <string>Show Transfer</string>
   </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTreeView" name="treeView"/>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

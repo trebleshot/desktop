@@ -158,7 +158,7 @@ public:
         // Implement by overriding
     }
 
-    virtual void onRemovingObject(AccessDatabase *db)
+    virtual void onRemovingObject(AccessDatabase *db, DatabaseObject *parent = nullptr)
     {
         // Implement by overriding
     }
@@ -175,33 +175,44 @@ public:
 
     QSqlDatabase *getDatabase();
 
-    template<typename T>
+    template<typename T = DatabaseObject>
     QList<T> castQuery(const SqlSelection &sqlSelection, const T &classInstance)
     {
         QList<T> resultList;
+        QSqlQuery query = sqlSelection.toSelectionQuery();
 
-        if (std::is_base_of<DatabaseObject, T>().value) {
-            QSqlQuery query = sqlSelection.toSelectionQuery();
+        query.exec();
 
-            query.exec();
-
-            if (query.first())
-                do {
-                    T dbObject;
-                    dbObject.generateValues(query.record());
-                    resultList.append(dbObject);
-                } while (query.next());
-        } else
-            qDebug() << "Received an unknown class type which should have been a base DatabaseObject";
+        if (query.first())
+            do {
+                T dbObject;
+                dbObject.generateValues(query.record());
+                resultList.append(dbObject);
+            } while (query.next());
 
         return resultList;
     }
 
     void initialize();
 
+    template<typename T = DatabaseObject>
+    bool removeAsObject(const SqlSelection &selection, const T &type, DatabaseObject *parent = nullptr)
+    {
+        const QList<T> &objects = castQuery(selection, type);
+
+        for (auto resultingObject : objects)
+            resultingObject.onRemovingObject(this, parent);
+
+        return remove(selection);
+    }
+
 public slots:
 
+    bool commit();
+
     bool contains(const DatabaseObject &dbObject);
+
+    bool contains(const SqlSelection &dbObject);
 
     void doSynchronized(const std::function<void(AccessDatabase *)> &listener)
     {
@@ -212,7 +223,7 @@ public slots:
 
     bool publish(DatabaseObject &dbObject);
 
-    bool reconstructRemote(DatabaseObject &dbObject);
+    bool reconstructSilently(DatabaseObject &dbObject);
 
     void reconstruct(DatabaseObject &dbObject);
 
@@ -225,6 +236,8 @@ public slots:
     bool remove(const SqlSelection &selection);
 
     bool remove(DatabaseObject &dbObject);
+
+    bool transaction();
 
     bool update(DatabaseObject &dbObject);
 
@@ -242,14 +255,22 @@ public:
     explicit AccessDatabaseSignaller(AccessDatabase *db, QObject *parent = nullptr)
             : QObject(parent)
     {
-        connect(this, &AccessDatabaseSignaller::contains, db, &AccessDatabase::contains, Qt::BlockingQueuedConnection);
+        connect(this, &AccessDatabaseSignaller::commit, db, &AccessDatabase::commit, Qt::BlockingQueuedConnection);
+        connect(this, SIGNAL(contains(
+                                     const DatabaseObject & )),
+                db, SLOT(contains(
+                                 const DatabaseObject & )), Qt::BlockingQueuedConnection);
+        connect(this, SIGNAL(contains(
+                                     const SqlSelection & )),
+                db, SLOT(contains(
+                                 const SqlSelection & )), Qt::BlockingQueuedConnection);
         connect(this, &AccessDatabaseSignaller::doNonDirect, db, &AccessDatabase::doSynchronized);
         connect(this, &AccessDatabaseSignaller::doSynchronized, db, &AccessDatabase::doSynchronized,
                 Qt::BlockingQueuedConnection);
         connect(this, &AccessDatabaseSignaller::insert, db, &AccessDatabase::insert, Qt::BlockingQueuedConnection);
         connect(this, &AccessDatabaseSignaller::publish, db, &AccessDatabase::publish, Qt::BlockingQueuedConnection);
         connect(this, &AccessDatabaseSignaller::reconstruct,
-                db, &AccessDatabase::reconstructRemote, Qt::BlockingQueuedConnection);
+                db, &AccessDatabase::reconstructSilently, Qt::BlockingQueuedConnection);
 
         connect(this, SIGNAL(remove(
                                      const SqlSelection & )),
@@ -258,6 +279,8 @@ public:
 
         connect(this, SIGNAL(remove(DatabaseObject & )),
                 db, SLOT(remove(DatabaseObject & )), Qt::BlockingQueuedConnection);
+
+        connect(this, &AccessDatabaseSignaller::transaction, db, &AccessDatabase::transaction, Qt::BlockingQueuedConnection);
 
         connect(this, SIGNAL(update(
                                      const SqlSelection &, const DbObjectMap & )),
@@ -275,7 +298,11 @@ public:
 
 signals:
 
+    bool commit();
+
     bool contains(const DatabaseObject &dbObject);
+
+    bool contains(const SqlSelection &selection);
 
     void doNonDirect(const std::function<void(AccessDatabase *)> &listener);
 
@@ -290,6 +317,8 @@ signals:
     bool remove(const SqlSelection &selection);
 
     bool remove(DatabaseObject &dbObject);
+
+    bool transaction();
 
     bool update(DatabaseObject &dbObject);
 

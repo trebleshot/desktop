@@ -2,21 +2,22 @@
 // Created by veli on 9/25/18.
 //
 #include "NetworkDevice.h"
+#include "TransferGroup.h"
 #include <src/util/NetworkDeviceLoader.h>
 
-NetworkDevice::NetworkDevice(const QString &deviceId)
+NetworkDevice::NetworkDevice(const QString &id)
         : DatabaseObject()
 {
-    this->deviceId = deviceId;
+    this->id = id;
 }
 
 DbObjectMap NetworkDevice::getValues() const
 {
     return DbObjectMap{
+            {DB_FIELD_DEVICES_ID,             this->id},
             {DB_FIELD_DEVICES_BRAND,          this->brand},
             {DB_FIELD_DEVICES_MODEL,          this->model},
             {DB_FIELD_DEVICES_USER,           this->nickname},
-            {DB_FIELD_DEVICES_ID,             this->deviceId},
             {DB_FIELD_DEVICES_BUILDNAME,      this->versionName},
             {DB_FIELD_DEVICES_BUILDNUMBER,    this->versionNumber},
             {DB_FIELD_DEVICES_TMPSECUREKEY,   this->tmpSecureKey},
@@ -34,17 +35,17 @@ SqlSelection NetworkDevice::getWhere() const
     selection.setTableName(DB_TABLE_DEVICES);
     selection.setWhere(QString("`%1` = ?").arg(DB_FIELD_DEVICES_ID));
 
-    selection.whereArgs << this->deviceId;
+    selection.whereArgs << this->id;
 
     return selection;
 }
 
 void NetworkDevice::onGeneratingValues(const DbObjectMap &record)
 {
+    this->id = record.value(DB_FIELD_DEVICES_ID).toString();
     this->brand = record.value(DB_FIELD_DEVICES_BRAND).toString();
     this->model = record.value(DB_FIELD_DEVICES_MODEL).toString();
     this->nickname = record.value(DB_FIELD_DEVICES_USER).toString();
-    this->deviceId = record.value(DB_FIELD_DEVICES_ID).toString();
     this->versionName = record.value(DB_FIELD_DEVICES_BUILDNAME).toString();
     this->versionNumber = record.value(DB_FIELD_DEVICES_BUILDNUMBER).toInt();
     this->tmpSecureKey = record.value(DB_FIELD_DEVICES_TMPSECUREKEY).toInt();
@@ -52,6 +53,41 @@ void NetworkDevice::onGeneratingValues(const DbObjectMap &record)
     this->isTrusted = record.value(DB_FIELD_DEVICES_ISTRUSTED).toInt() == 1;
     this->isRestricted = record.value(DB_FIELD_DEVICES_ISRESTRICTED) == 1;
     this->isLocalAddress = record.value(DB_FIELD_DEVICES_ISLOCALADDRESS) == 1;
+}
+
+void NetworkDevice::onRemovingObject(AccessDatabase *db, DatabaseObject *parent)
+{
+    DatabaseObject::onRemovingObject(db, parent);
+
+    SqlSelection connection;
+    connection.setTableName(DB_TABLE_DEVICECONNECTION);
+    connection.setWhere(QString("%1 = ?").arg(DB_FIELD_DEVICECONNECTION_DEVICEID));
+    connection.whereArgs << id;
+
+    db->remove(connection);
+
+    SqlSelection assignee;
+    assignee.setTableName(DB_TABLE_TRANSFERASSIGNEE);
+    assignee.setWhere(QString("%1 = ?").arg(DB_FIELD_TRANSFERASSIGNEE_DEVICEID));
+    assignee.whereArgs << id;
+
+    const QList<TransferAssignee> &assigneeList = db->castQuery(assignee, TransferAssignee());
+
+    for (auto thisAssignee : assigneeList) {
+        db->remove(thisAssignee);
+        TransferGroup group(thisAssignee.groupId);
+
+        if (db->reconstructSilently(group))
+        {
+            SqlSelection leftAssignee;
+            leftAssignee.setTableName(DB_TABLE_TRANSFERASSIGNEE);
+            leftAssignee.setWhere(QString("%1 = ?").arg(DB_FIELD_TRANSFERASSIGNEE_GROUPID));
+            leftAssignee.whereArgs << group.id;
+
+            if (!db->contains(leftAssignee))
+                db->remove(group);
+        }
+    }
 }
 
 DeviceConnection::DeviceConnection(const QString &deviceId, const QString &adapterName)

@@ -46,6 +46,8 @@ public slots:
 
     void aboutQt();
 
+    void filesAdded();
+
     void manageDevices();
 
     void showReceivedText(const QString &text, const QString &deviceId);

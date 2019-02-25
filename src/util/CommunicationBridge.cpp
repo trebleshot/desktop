@@ -14,8 +14,8 @@ CoolSocket::ActiveConnection *CommunicationBridge::communicate(NetworkDevice &ta
     return connection;
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::communicate(
-        CoolSocket::ActiveConnection *connection, NetworkDevice &device)
+CoolSocket::ActiveConnection *CommunicationBridge::communicate(CoolSocket::ActiveConnection *connection,
+                                                               NetworkDevice &device)
 {
     updateDeviceIfOkay(connection, device);
     return connection;
@@ -43,8 +43,8 @@ NetworkDevice CommunicationBridge::getDevice()
     return this->m_device;
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::handshake(
-        CoolSocket::ActiveConnection *connection, bool handshakeOnly)
+CoolSocket::ActiveConnection *CommunicationBridge::handshake(CoolSocket::ActiveConnection *connection,
+                                                             bool handshakeOnly)
 {
     try {
         QJsonObject replyJSON;
@@ -52,7 +52,7 @@ CoolSocket::ActiveConnection *CommunicationBridge::handshake(
         replyJSON.insert(KEYWORD_HANDSHAKE_REQUIRED, true);
         replyJSON.insert(KEYWORD_HANDSHAKE_ONLY, handshakeOnly);
         replyJSON.insert(KEYWORD_DEVICE_INFO_SERIAL, getDeviceId());
-        replyJSON.insert(KEYWORD_DEVICE_SECURE_KEY, m_device.deviceId == nullptr
+        replyJSON.insert(KEYWORD_DEVICE_SECURE_KEY, m_device.id == nullptr
                                                     ? m_secureKey
                                                     : m_device.tmpSecureKey);
 
@@ -95,7 +95,7 @@ NetworkDevice CommunicationBridge::updateDeviceIfOkay(CoolSocket::ActiveConnecti
 
     NetworkDeviceLoader::processConnection(loadedDevice, activeConnection->getSocket()->peerAddress());
 
-    if (device.deviceId != loadedDevice.deviceId) {
+    if (device.id != loadedDevice.id) {
         qDebug() << "Compared" << device.nickname << "with" << loadedDevice.nickname;
         throw exception();
     } else {

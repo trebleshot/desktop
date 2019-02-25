@@ -20,18 +20,19 @@ public:
 
     ~FileAdditionProgressDialog() override;
 
-    void task(GThread* thread);
+    void task(GThread *thread, const QList<QUrl> &urls);
 
 public slots:
-    void taskProgress(int max, int progress, const QString& text);
+
+    void taskProgress(int max, int progress, const QString &text);
 
 signals:
+
     void filesAdded(groupid groupId);
 
 protected:
     Ui::FileAdditionProgressDialog *m_ui;
-    GThread m_thread;
-    QList<QUrl> m_urls;
+    GThread *m_thread;
 };
 
 

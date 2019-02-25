@@ -43,6 +43,8 @@ public:
     DbObjectMap getValues() const override;
 
     void onGeneratingValues(const DbObjectMap &record) override;
+
+    void onRemovingObject(AccessDatabase *db, DatabaseObject* parent) override;
 };
 
 #endif // TRANSFEROBJECT_H

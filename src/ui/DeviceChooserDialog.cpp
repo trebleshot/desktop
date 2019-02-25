@@ -6,12 +6,14 @@
 #include "DeviceChooserDialog.h"
 
 DeviceChooserDialog::DeviceChooserDialog(QWidget *parent)
-        : QDialog(parent), m_ui(new Ui::DeviceChooserDialog)
+        : QDialog(parent), m_ui(new Ui::DeviceChooserDialog), m_deviceModel(new NetworkDeviceModel)
 {
     m_ui->setupUi(this);
+    m_ui->treeView->setModel(m_deviceModel);
 }
 
 DeviceChooserDialog::~DeviceChooserDialog()
 {
     delete m_ui;
+    delete m_deviceModel;
 }

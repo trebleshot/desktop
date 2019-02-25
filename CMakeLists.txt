@@ -108,6 +108,8 @@ set(UTIL_LIBRARY
         src/model/TransferGroupModel.cpp
         src/ui/DeviceChooserDialog.h
         src/ui/DeviceChooserDialog.cpp
+        src/ui/FileAdditionProgressDialog.h
+        src/ui/FileAdditionProgressDialog.cpp
         src/ui/ShowTransferDialog.h
         src/ui/ShowTransferDialog.cpp
         src/ui/ManageDevicesDialog.h
@@ -123,7 +125,7 @@ set(UTIL_LIBRARY
         src/util/NetworkDeviceLoader.h
         src/util/NetworkDeviceLoader.cpp
         src/util/TransferUtils.h
-        src/util/TransferUtils.cpp src/ui/FileAdditionProgressDialog.cpp src/ui/FileAdditionProgressDialog.h)
+        src/util/TransferUtils.cpp)
 
 add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)

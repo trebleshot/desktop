@@ -1,3 +1,4 @@
+#include <src/util/TransferUtils.h>
 #include "TransferObject.h"
 
 TransferObject::TransferObject(requestid id, const QString &deviceId, const Type &type)
@@ -6,6 +7,11 @@ TransferObject::TransferObject(requestid id, const QString &deviceId, const Type
     this->id = id;
     this->deviceId = deviceId;
     this->type = type;
+}
+
+bool TransferObject::isDivisionObject() const
+{
+    return deviceId == nullptr;
 }
 
 DbObjectMap TransferObject::getValues() const
@@ -66,7 +72,24 @@ void TransferObject::onGeneratingValues(const DbObjectMap &record)
     type = (Type) record.value(DB_FIELD_TRANSFER_TYPE).toInt();
 }
 
-bool TransferObject::isDivisionObject() const
+void TransferObject::onRemovingObject(AccessDatabase *db, DatabaseObject *parent)
 {
-    return deviceId == nullptr;
+    DatabaseObject::onRemovingObject(db);
+
+    if (type != Type::Incoming || flag != Flag::Interrupted)
+        return;
+
+    {
+        TransferGroup *castGroup = parent == nullptr ? nullptr : dynamic_cast<TransferGroup *>(parent);
+        TransferGroup group = castGroup == nullptr ? TransferGroup(groupId) : *castGroup;
+
+        if (castGroup == nullptr)
+            if (!db->reconstructSilently(group))
+                return;
+
+        QFileInfo incomingFile = TransferUtils::getIncomingFilePath(group, *this);
+
+        if (incomingFile.isFile())
+            QFile::remove(incomingFile.filePath());
+    }
 }

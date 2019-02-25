@@ -2,7 +2,6 @@
 #include <src/broadcast/SeamlessClient.h>
 #include <QtCore/QDir>
 #include <QtCore/QMimeDatabase>
-#include <QRandomGenerator>
 #include "MainWindow.h"
 #include "ManageDevicesDialog.h"
 #include "ShowTransferDialog.h"
@@ -54,7 +53,16 @@ MainWindow::MainWindow(QWidget *parent)
 
         m_commServer->start(0);
         m_ui->label->setText(QString("TrebleShot will not receive files"));
+        m_ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
         m_ui->treeView->setModel(m_groupModel);
+
+        connect(m_ui->treeView, &QTreeView::customContextMenuRequested, [this](const QPoint &point) {
+            QMenu menu(m_ui->treeView);
+
+            menu.addAction(m_ui->actionStart_receiver);
+
+            menu.exec(m_ui->treeView->viewport()->mapToGlobal(point));
+        });
 
         connect(m_ui->treeView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
         connect(m_ui->actionAbout_TrebleShot, SIGNAL(triggered(bool)), this, SLOT(about()));
@@ -94,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete m_ui;
+    delete m_groupModel;
     delete m_commServer;
 }
 
@@ -107,18 +116,19 @@ void MainWindow::dropEvent(QDropEvent *event)
 {
     if (event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
-        FileAdditionProgressDialog(this, event->mimeData()->urls()).exec();
+
+        FileAdditionProgressDialog progressDialog(this, event->mimeData()->urls());
+
+        connect(&progressDialog, &FileAdditionProgressDialog::filesAdded, this, &MainWindow::filesAdded);
+
+        progressDialog.exec();
     }
 }
 
 void MainWindow::transferItemActivated(QModelIndex modelIndex)
 {
-    qDebug() << "transferItemActivated(): row=" << modelIndex.row()
-             << "column=" << modelIndex.column();
-
     const auto &data = m_groupModel->list().at(modelIndex.row());
-
-    ShowTransferWidget(this, data.group.id).exec();
+    ShowTransferDialog(this, data.group.id).exec();
 }
 
 void MainWindow::about()
@@ -140,6 +150,11 @@ void MainWindow::about()
 void MainWindow::aboutQt()
 {
     QApplication::aboutQt();
+}
+
+void MainWindow::filesAdded()
+{
+    DeviceChooserDialog(this).exec();
 }
 
 void MainWindow::showReceivedText(const QString &text, const QString &deviceId)

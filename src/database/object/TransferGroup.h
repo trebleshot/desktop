@@ -25,6 +25,10 @@ public:
     DbObjectMap getValues() const override;
 
     void onGeneratingValues(const DbObjectMap &record) override;
+
+    void onInsertingObject(AccessDatabase *db) override;
+
+    void onRemovingObject(AccessDatabase *db, DatabaseObject* parent) override;
 };
 
 class TransferAssignee : public DatabaseObject {
@@ -42,6 +46,8 @@ public:
     DbObjectMap getValues() const override;
 
     void onGeneratingValues(const DbObjectMap &record) override;
+
+    void onRemovingObject(AccessDatabase *db, DatabaseObject *parent) override;
 };
 
 #endif //TREBLESHOT_TRANSFERGROUP_H

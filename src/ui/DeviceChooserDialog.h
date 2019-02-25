@@ -6,6 +6,7 @@
 #define TREBLESHOT_DEVICECHOOSERDIALOG_H
 
 #include <QtWidgets/QDialog>
+#include <src/model/NetworkDeviceModel.h>
 
 namespace Ui {
     class DeviceChooserDialog;
@@ -21,6 +22,7 @@ public:
 
 protected:
     Ui::DeviceChooserDialog *m_ui;
+    NetworkDeviceModel* m_deviceModel;
 };
 
 

@@ -51,7 +51,7 @@ void AppUtils::applyDeviceToJSON(QJsonObject &object)
     QJsonObject deviceInfo;
     QJsonObject appInfo;
 
-    deviceInfo.insert(KEYWORD_DEVICE_INFO_SERIAL, device.deviceId);
+    deviceInfo.insert(KEYWORD_DEVICE_INFO_SERIAL, device.id);
     deviceInfo.insert(KEYWORD_DEVICE_INFO_BRAND, device.brand);
     deviceInfo.insert(KEYWORD_DEVICE_INFO_MODEL, device.model);
     deviceInfo.insert(KEYWORD_DEVICE_INFO_USER, device.nickname);

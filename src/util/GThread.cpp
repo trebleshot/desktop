@@ -4,10 +4,10 @@
 
 #include "GThread.h"
 
-GThread::GThread(const std::function<void(GThread *)> &function, QObject *parent)
+GThread::GThread(const std::function<void(GThread *)> &function, bool deleteOnFinish, QObject *parent)
         : QThread(parent), m_callback(function)
 {
-
+    connect(this, &GThread::finished, this, &GThread::deleteLater);
 }
 
 void GThread::run()
@@ -25,7 +25,7 @@ GThread *GThread::startIndependent(const std::function<void(GThread *)> &functio
     return thread;
 }
 
-void GThread::interrupt()
+void GThread::notifyInterrupt()
 {
     Interrupter::interrupt();
 }

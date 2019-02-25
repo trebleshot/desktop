@@ -13,13 +13,13 @@ namespace Ui {
     class ShowTransferDialog;
 }
 
-class ShowTransferWidget : public QDialog {
+class ShowTransferDialog : public QDialog {
 Q_OBJECT
 
 public:
-    explicit ShowTransferWidget(QWidget *parentWindow, groupid groupId);
+    explicit ShowTransferDialog(QWidget *parentWindow, groupid groupId);
 
-    ~ShowTransferWidget() override;
+    ~ShowTransferDialog() override;
 
 protected:
     Ui::ShowTransferDialog *m_ui;

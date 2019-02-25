@@ -7,10 +7,8 @@ using DbStructure::generateTableCreationSql;
 using DbStructure::transformType;
 
 AccessDatabase::AccessDatabase(QSqlDatabase *db, QObject *parent)
-        : QObject(parent)
+        : QObject(parent), db(db)
 {
-    this->db = db;
-
     connect(this, &AccessDatabase::signalPublish, this, &AccessDatabase::publish);
 }
 
@@ -98,22 +96,30 @@ QMap<QString, QSqlRecord> AccessDatabase::getPassiveTables()
     return dbMap;
 }
 
+bool AccessDatabase::commit()
+{
+    return getDatabase()->commit();
+}
+
 bool AccessDatabase::contains(const DatabaseObject &dbObject)
 {
-    QSqlQuery query = dbObject.getWhere().toSelectionQuery();
+    return contains(dbObject.getWhere());
+}
 
+bool AccessDatabase::contains(const SqlSelection &selection)
+{
+    QSqlQuery query = selection.toSelectionQuery();
     query.exec();
 
-    return query.next();
+    return query.first();
 }
 
 bool AccessDatabase::insert(DatabaseObject &dbObject)
 {
+    dbObject.onInsertingObject(this);
+
     QSqlTableModel *model = DbStructure::gatherTableModel(dbObject);
     bool state = model->insertRecord(-1, record(dbObject, *model));
-
-    if (state)
-        dbObject.onInsertingObject(this);
 
     delete model;
     return state;
@@ -125,7 +131,7 @@ bool AccessDatabase::publish(DatabaseObject &dbObject)
            || this->insert(dbObject);
 }
 
-bool AccessDatabase::reconstructRemote(DatabaseObject &dbObject)
+bool AccessDatabase::reconstructSilently(DatabaseObject &dbObject)
 {
     try {
         reconstruct(dbObject);
@@ -157,21 +163,22 @@ bool AccessDatabase::remove(const SqlSelection &selection)
 bool AccessDatabase::remove(DatabaseObject &dbObject)
 {
     if (remove(dbObject.getWhere())) {
-        dbObject.onRemovingObject(this);
+        dbObject.onRemovingObject(this, nullptr);
         return true;
     }
 
     return false;
 }
 
+bool AccessDatabase::transaction()
+{
+    return getDatabase()->transaction();
+}
+
 bool AccessDatabase::update(DatabaseObject &dbObject)
 {
-    if (update(dbObject.getWhere(), dbObject.getValues())) {
-        dbObject.onUpdatingObject(this);
-        return true;
-    }
-
-    return false;
+    dbObject.onUpdatingObject(this);
+    return update(dbObject.getWhere(), dbObject.getValues());
 }
 
 bool AccessDatabase::update(const SqlSelection &selection, const DbObjectMap &map)
@@ -296,32 +303,32 @@ void SqlSelection::bindWhereClause(QSqlQuery &query) const
 
 QString SqlSelection::generateSpecifierClause(bool fromStatement) const
 {
-    QString queryString = QString();
+    QString queryString;
 
     if (fromStatement) {
-        queryString += " from `";
-        queryString += this->tableName;
-        queryString += "`";
+        queryString.append(" from `");
+        queryString.append(this->tableName);
+        queryString.append("`");
     }
 
     if (this->where.length() > 0) {
-        queryString += " where ";
-        queryString += this->where;
+        queryString.append(" where ");
+        queryString.append(this->where);
     }
 
     if (this->groupBy.length() > 0) {
-        queryString += " group by ";
-        queryString += this->groupBy;
+        queryString.append(" group by ");
+        queryString.append(this->groupBy);
     }
 
     if (this->orderBy.length() > 0) {
-        queryString += " order by ";
-        queryString += this->orderBy;
+        queryString.append(" order by ");
+        queryString.append(this->orderBy);
     }
 
     if (this->limit != -1) {
-        queryString += " limit ";
-        queryString += std::to_string(this->limit).c_str();
+        queryString.append(" limit ");
+        queryString.append(QString(this->limit));
     }
 
     return queryString;
@@ -335,9 +342,9 @@ void SqlSelection::setHaving(const QString &having)
 void SqlSelection::setGroupBy(const QString &field, bool ascending)
 {
     this->groupBy = "`";
-    this->groupBy += field;
-    this->groupBy += "`";
-    this->groupBy += ascending ? " asc" : " desc";
+    this->groupBy.append(field);
+    this->groupBy.append("`");
+    this->groupBy.append(ascending ? " asc" : " desc");
 }
 
 void SqlSelection::setGroupBy(const QString &orderBy)
@@ -353,9 +360,9 @@ void SqlSelection::setLimit(int limit)
 void SqlSelection::setOrderBy(const QString &field, bool ascending)
 {
     this->orderBy = "`";
-    this->orderBy += field;
-    this->orderBy += "`";
-    this->orderBy += ascending ? " asc" : " desc";
+    this->orderBy.append(field);
+    this->orderBy.append("`");
+    this->orderBy.append(ascending ? " asc" : " desc");
 }
 
 void SqlSelection::setOrderBy(const QString &field)
@@ -376,10 +383,9 @@ void SqlSelection::setWhere(const QString &whereString)
 QSqlQuery SqlSelection::toDeletionQuery() const
 {
     QString queryString = "delete";
-    queryString += generateSpecifierClause();
+    queryString.append(generateSpecifierClause());
 
     QSqlQuery query;
-
     query.prepare(queryString);
 
     bindWhereClause(query);
@@ -389,17 +395,17 @@ QSqlQuery SqlSelection::toDeletionQuery() const
 
 QSqlQuery SqlSelection::toInsertionQuery() const
 {
+    // Not implement since not required
     return QSqlQuery();
 }
 
 QSqlQuery SqlSelection::toSelectionQuery() const
 {
     QString queryString = "select ";
-    queryString += this->toSelectionColumns();
-    queryString += generateSpecifierClause();
+    queryString.append(this->toSelectionColumns());
+    queryString.append(generateSpecifierClause());
 
     QSqlQuery query;
-
     query.prepare(queryString);
 
     bindWhereClause(query);
@@ -412,15 +418,15 @@ QString SqlSelection::toSelectionColumns() const
     QString output = QString();
 
     if (this->columns.empty())
-        output += "*";
+        output.append("*");
     else if (!this->columns.empty())
         for (const QString &item : this->columns) {
             if (output.length() > 0)
-                output += ", ";
+                output.append(", ");
 
-            output += "`";
-            output += item;
-            output += "`";
+            output.append("`");
+            output.append(item);
+            output.append("`");
         }
 
     return output;
@@ -430,25 +436,25 @@ QSqlQuery SqlSelection::toUpdateQuery(const QSqlRecord &record) const
 {
     QSqlQuery query;
     QString queryString = "update `";
-    queryString += this->tableName;
-    queryString += "` set ";
+    queryString.append(this->tableName);
+    queryString.append("` set ");
     QString updateIndex = QString();
 
     for (int iterator = 0; iterator < record.count(); iterator++) {
         QSqlField currentField = record.field(iterator);
 
         if (updateIndex.length() > 0)
-            updateIndex += ", ";
+            updateIndex.append(", ");
 
-        updateIndex += "`";
-        updateIndex += currentField.name();
-        updateIndex += "` = ?";
+        updateIndex.append("`");
+        updateIndex.append(currentField.name());
+        updateIndex.append("` = ?");
 
         query.addBindValue(currentField.value());
     }
 
-    queryString += updateIndex;
-    queryString += generateSpecifierClause(false);
+    queryString.append(updateIndex);
+    queryString.append(generateSpecifierClause(false));
 
     query.prepare(queryString);
 

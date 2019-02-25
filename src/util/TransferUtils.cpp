@@ -43,8 +43,6 @@ QList<TransferObject> TransferUtils::createTransferMap(const TransferGroup &grou
     QList<TransferObject> resultList;
     QFileInfo fileInfo = filePath;
 
-    qDebug() << filePath << directory;
-
     if (fileInfo.isFile()) {
         QFile file(filePath);
         TransferObject object(requestId++, nullptr, TransferObject::Type::Outgoing);
@@ -279,7 +277,7 @@ QList<AssigneeInfo> TransferUtils::getAllAssigneeInfo(const TransferGroup &group
 
 QString TransferUtils::sizeExpression(size_t bytes, bool notUseByte)
 {
-    int unit = notUseByte ? 1000 : 1024;
+    size_t unit = notUseByte ? 1000 : 1024;
 
     if (bytes < unit)
         return QString("%1 B").arg(bytes);

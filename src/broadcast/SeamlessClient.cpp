@@ -52,7 +52,6 @@ void SeamlessClient::run()
                 initialConnection.insert(KEYWORD_REQUEST, KEYWORD_REQUEST_HANDSHAKE);
 
                 activeConnection->reply(initialConnection);
-
                 const auto &resultObject = activeConnection->receive().asJson();
 
                 delete activeConnection;

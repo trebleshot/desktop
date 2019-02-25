@@ -16,7 +16,7 @@ public:
     QString brand;
     QString model;
     QString nickname;
-    QString deviceId;
+    QString id;
     QString versionName;
     int versionNumber = 0;
     int tmpSecureKey = 0;
@@ -25,13 +25,15 @@ public:
     bool isRestricted = false;
     bool isLocalAddress = false;
 
-    explicit NetworkDevice(const QString &deviceId = nullptr);
+    explicit NetworkDevice(const QString &id = nullptr);
 
     SqlSelection getWhere() const override;
 
     DbObjectMap getValues() const override;
 
     void onGeneratingValues(const DbObjectMap &record) override;
+
+    void onRemovingObject(AccessDatabase *db, DatabaseObject *parent) override;
 };
 
 class DeviceConnection : public DatabaseObject {
@@ -52,6 +54,8 @@ public:
     DbObjectMap getValues() const override;
 
     void onGeneratingValues(const DbObjectMap &record) override;
+
+
 };
 
 

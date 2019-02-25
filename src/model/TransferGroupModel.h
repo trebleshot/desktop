@@ -22,7 +22,6 @@ Q_OBJECT
 
     QList<TransferGroupInfo> m_list;
     QMutex m_mutex;
-
 public:
     enum ColumnNames {
         Devices,

@@ -46,7 +46,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
         }
 
         if (deviceSerial != nullptr) {
-            device.deviceId = deviceSerial;
+            device.id = deviceSerial;
 
             if (gDbSignal->reconstruct(device)) {
                 if (!device.isRestricted)
@@ -91,12 +91,10 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                 GThread *thisThread) {
                             TransferGroup transferGroup(groupId);
                             TransferAssignee transferAssignee(transferGroup.id,
-                                                              device.deviceId,
+                                                              device.id,
                                                               deviceConnection.adapterName);
 
                             bool usePublishing = gDbSignal->reconstruct(transferGroup);
-
-                            time(&transferGroup.dateCreated);
 
                             gDbSignal->publish(transferGroup);
                             gDbSignal->publish(transferAssignee);
@@ -111,7 +109,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                                                                   .value(KEYWORD_TRANSFER_REQUEST_ID)
                                                                                   .toVariant()
                                                                                   .toUInt(),
-                                                                          device.deviceId,
+                                                                          device.id,
                                                                           TransferObject::Incoming);
 
                                 transferObject->flag = TransferObject::Flag::Pending;
@@ -151,7 +149,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                             qDeleteAll(objectList);
 
                             if (filesTotal > 0)
-                                    emit transferRequest(device.deviceId, transferGroup.id, filesTotal);
+                                    emit transferRequest(device.id, transferGroup.id, filesTotal);
                         }, this);
                     }
                 } else if (request == KEYWORD_REQUEST_RESPONSE) {
@@ -162,7 +160,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                         const bool isAccepted = responseJSON.value(KEYWORD_TRANSFER_IS_ACCEPTED).toBool(false);
 
                         TransferGroup transferGroup(groupId);
-                        TransferAssignee transferAssignee(groupId, device.deviceId);
+                        TransferAssignee transferAssignee(groupId, device.id);
 
                         if (gDbSignal->reconstruct(transferGroup)
                             && gDbSignal->reconstruct(transferAssignee)) {
@@ -178,7 +176,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                         auto text = responseJSON
                                 .value(KEYWORD_TRANSFER_CLIPBOARD_TEXT)
                                 .toString();
-                        emit textReceived(text, device.deviceId);
+                        emit textReceived(text, device.id);
 
                         auto *textObject = new TextStreamObject;
                         textObject->text = text;
