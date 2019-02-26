@@ -68,10 +68,10 @@ void SeamlessClient::run()
 
                 qDebug() << "Seamless port is open";
 
-                QJsonObject groupInfoJson;
-
-                groupInfoJson.insert(KEYWORD_TRANSFER_GROUP_ID, QVariant(m_groupId).toString());
-                groupInfoJson.insert(KEYWORD_TRANSFER_DEVICE_ID, AppUtils::getDeviceId());
+                QJsonObject groupInfoJson {
+                        {KEYWORD_TRANSFER_GROUP_ID, QVariant(m_groupId).toLongLong()},
+                        {KEYWORD_TRANSFER_DEVICE_ID, AppUtils::getDeviceId()}
+                };
 
                 activeConnection->reply(groupInfoJson);
                 const auto &request = activeConnection->receive().asJson();
@@ -112,13 +112,12 @@ void SeamlessClient::run()
                             tcpServer.listen();
 
                             {
-                                QJsonObject reply;
-
-                                reply.insert(KEYWORD_TRANSFER_REQUEST_ID,
-                                             QVariant(transferObject.id).toString());
-                                reply.insert(KEYWORD_TRANSFER_GROUP_ID, QVariant(transferObject.groupId).toString());
-                                reply.insert(KEYWORD_TRANSFER_SOCKET_PORT, tcpServer.serverPort());
-                                reply.insert(KEYWORD_RESULT, true);
+                                QJsonObject reply{
+                                        {KEYWORD_TRANSFER_REQUEST_ID,  QVariant(transferObject.id).toLongLong()},
+                                        {KEYWORD_TRANSFER_GROUP_ID,    QVariant(transferObject.groupId).toLongLong()},
+                                        {KEYWORD_TRANSFER_SOCKET_PORT, tcpServer.serverPort()},
+                                        {KEYWORD_RESULT,               true}
+                                };
 
                                 if (currentFile.size() > 0) {
                                     transferObject.skippedBytes = static_cast<size_t>(currentFile.size());

@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QMimeData>
 #include <QSqlDatabase>
+#include <QSqlError>
 #include <QSqlField>
 #include <QSqlQuery>
 #include <QSqlRecord>

@@ -18,6 +18,7 @@
 #include <QtWidgets/QAbstractButton>
 #include <QPushButton>
 #include <QClipboard>
+#include <src/broadcast/SeamlessServer.h>
 
 namespace Ui {
     class MainWindow;
@@ -32,6 +33,7 @@ protected:
 
 protected:
     Ui::MainWindow *m_ui;
+    SeamlessServer *m_seamlessServer;
     CommunicationServer *m_commServer;
     TransferGroupModel *m_groupModel;
 
@@ -46,9 +48,9 @@ public slots:
 
     void aboutQt();
 
-    void deviceForAddedFiles(QList<NetworkDevice> devices, groupid groupId);
+    void deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devices);
 
-    void filesAdded();
+    void filesAdded(groupid groupId);
 
     void manageDevices();
 

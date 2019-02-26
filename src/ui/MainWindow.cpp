@@ -10,7 +10,8 @@
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_ui(new Ui::MainWindow),
-          m_commServer(new CommunicationServer), m_groupModel(new TransferGroupModel())
+          m_seamlessServer(new SeamlessServer), m_commServer(new CommunicationServer),
+          m_groupModel(new TransferGroupModel())
 {
     m_ui->setupUi(this);
 
@@ -52,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
         });
 
         m_commServer->start(0);
+        m_seamlessServer->start(0);
         m_ui->label->setText(QString("TrebleShot will not receive files"));
         m_ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
         m_ui->treeView->setModel(m_groupModel);
@@ -150,9 +152,9 @@ void MainWindow::aboutQt()
     QApplication::aboutQt();
 }
 
-void MainWindow::deviceForAddedFiles(QList<NetworkDevice> devices, groupid groupId)
+void MainWindow::deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devices)
 {
-    auto *gThread = new GThread([&devices, &groupId](GThread *thread) {
+    auto *gThread = new GThread([groupId, devices](GThread *thread) {
         QList<TransferObject> objectList;
 
         {
@@ -166,8 +168,8 @@ void MainWindow::deviceForAddedFiles(QList<NetworkDevice> devices, groupid group
             });
         }
 
-        if (objectList.empty()) {
-            qDebug() << "deviceForAddedFiles << Empty object list";
+        if (objectList.empty() || devices.empty()) {
+            qDebug() << "deviceForAddedFiles << Empty object list" << objectList.size() << devices.size();
             return;
         }
 
@@ -185,6 +187,7 @@ void MainWindow::deviceForAddedFiles(QList<NetworkDevice> devices, groupid group
 
             if (gDbSignal->contains(deviceSelection)) {
                 qDebug() << "deviceForAddedFiles << Already contains for" << device.nickname;
+                passedDevices << device;
             } else {
                 if (gDbSignal->transaction()) {
                     for (auto &object : objectList) {
@@ -198,7 +201,7 @@ void MainWindow::deviceForAddedFiles(QList<NetworkDevice> devices, groupid group
             }
         }
 
-        for (const auto &thisDevice : passedDevices) {
+        for (auto &thisDevice : passedDevices) {
             SqlSelection connectionSelection;
             connectionSelection.setTableName(DB_TABLE_DEVICECONNECTION);
             connectionSelection.setWhere(QString("%1 = ?").arg(DB_FIELD_DEVICES_ID));
@@ -215,34 +218,59 @@ void MainWindow::deviceForAddedFiles(QList<NetworkDevice> devices, groupid group
                 qDebug() << "deviceForAddedFiles << No connection for" << thisDevice.nickname;
             } else {
                 bool shouldTryNext = true;
-                for (const auto &thisConnection : connections) {
-                    try {
-                        CommunicationBridge bridge;
-                        bridge.setDevice(thisDevice);
 
-                        TransferAssignee assignee(groupId, thisDevice.id, thisConnection.adapterName);
-                        QJsonObject thisObject{
-                                {KEYWORD_REQUEST, KEYWORD_REQUEST_TRANSFER},
-                                {KEYWORD_TRANSFER_GROUP_ID, QVariant(groupId).toString()}
+                for (const auto &thisConnection : connections) {
+                    CoolSocket::ActiveConnection *connection = nullptr;
+                    CommunicationBridge bridge;
+                    bridge.setDevice(thisDevice);
+
+                    TransferAssignee assignee(groupId, thisDevice.id, thisConnection.adapterName);
+                    QJsonObject thisObject{
+                            {KEYWORD_REQUEST, KEYWORD_REQUEST_TRANSFER},
+                            {KEYWORD_TRANSFER_GROUP_ID, QVariant(groupId).toLongLong()}
+                    };
+
+                    QJsonArray filesIndex;
+
+                    for (const auto &object : objectList) {
+                        QJsonObject jsonObject {
+                            {KEYWORD_INDEX_FILE_NAME, object.friendlyName},
+                            {KEYWORD_INDEX_FILE_SIZE, QVariant((qulonglong) object.fileSize).toLongLong()},
+                            {KEYWORD_TRANSFER_REQUEST_ID, QVariant(object.id).toLongLong()},
+                            {KEYWORD_INDEX_FILE_MIME, object.fileMimeType}
                         };
 
-                        QJsonArray filesIndex;
+                        if (object.directory != nullptr)
+                            jsonObject.insert(KEYWORD_INDEX_DIRECTORY, object.directory);
 
-                        for (const auto &object : objectList) {
-                            filesIndex += {
-                                    {
-                                            {KEYWORD_INDEX_FILE_NAME, object.friendlyName},
-                                            {KEYWORD_INDEX_FILE_SIZE, QVariant((qulonglong) object.fileSize).toString()},
-                                            {KEYWORD_TRANSFER_REQUEST_ID, QVariant(object.id).toString()},
-                                            {KEYWORD_INDEX_FILE_MIME, object.fileMimeType}
-                                    }
-                            };
+                        filesIndex.append(jsonObject);
+                    }
+
+                    thisObject.insert(KEYWORD_FILES_INDEX, filesIndex);
+
+                    try {
+                        connection = bridge.communicate(thisDevice, thisConnection);
+                        shouldTryNext = false;
+
+                        connection->reply(thisObject);
+
+                        {
+                            const QJsonObject& thisReply = connection->receive().asJson();
+
+                            if (thisReply.value(KEYWORD_RESULT).toBool(false)) {
+                                qDebug() << "deviceForAddedFiles << Successful for" << thisDevice.nickname;
+                                gDbSignal->publish(assignee);
+                            } else
+                                qDebug() << "deviceForAddedFiles << Failed for <<" << thisDevice.nickname << thisReply;
                         }
-
-                        thisObject.insert(KEYWORD_FILES_INDEX, filesIndex);
                     } catch (...) {
                         // do nothing
                     }
+
+                    delete connection;
+
+                    if (!shouldTryNext)
+                        break;
                 }
             }
         }
@@ -253,9 +281,9 @@ void MainWindow::deviceForAddedFiles(QList<NetworkDevice> devices, groupid group
 }
 
 
-void MainWindow::filesAdded()
+void MainWindow::filesAdded(groupid groupId)
 {
-    DeviceChooserDialog dialog(this, groupid);
+    DeviceChooserDialog dialog(this, groupId);
     connect(&dialog, &DeviceChooserDialog::devicesSelected, this, &MainWindow::deviceForAddedFiles);
     dialog.exec();
 }

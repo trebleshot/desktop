@@ -111,7 +111,12 @@ bool AccessDatabase::contains(const SqlSelection &selection)
     QSqlQuery query = selection.toSelectionQuery();
     query.exec();
 
-    return query.first();
+    const auto &lastError = query.lastError();
+
+    if (lastError.type() != QSqlError::ErrorType::NoError)
+        qDebug() << lastError << endl << query.executedQuery();
+
+    return query.next();
 }
 
 bool AccessDatabase::insert(DatabaseObject &dbObject)
@@ -328,7 +333,7 @@ QString SqlSelection::generateSpecifierClause(bool fromStatement) const
 
     if (this->limit != -1) {
         queryString.append(" limit ");
-        queryString.append(QString(this->limit));
+        queryString.append(QVariant(this->limit).toString());
     }
 
     return queryString;

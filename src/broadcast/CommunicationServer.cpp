@@ -154,7 +154,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
 
                         if (gDbSignal->reconstruct(transferGroup) && gDbSignal->reconstruct(transferAssignee)) {
                             if (!isAccepted)
-                                gDbSignal->remove(transferGroup);
+                                gDbSignal->remove(transferAssignee);
 
                             result = true;
                         }

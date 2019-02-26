@@ -6,6 +6,7 @@
 #define TREBLESHOT_DEVICECHOOSERDIALOG_H
 
 #include <QtWidgets/QDialog>
+#include <QPushButton>
 #include <src/database/object/TransferGroup.h>
 #include <src/model/NetworkDeviceModel.h>
 
@@ -31,7 +32,7 @@ public slots:
     void selectionAccepted();
 
 signals:
-    void devicesSelected(QList<NetworkDevice> selectedDevices, groupid groupId);
+    void devicesSelected(groupid groupId, QList<NetworkDevice> devices);
 
 protected:
     Ui::DeviceChooserDialog *m_ui;
