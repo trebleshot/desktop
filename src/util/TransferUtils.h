@@ -20,6 +20,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QMimeDatabase>
 #include "src/database/object/NetworkDevice.h"
+#include "GThread.h"
 
 struct AssigneeInfo {
     NetworkDevice device;
@@ -73,11 +74,9 @@ public:
                                            TransferObject::Flag flag = TransferObject::Flag::Any,
                                            bool equals = true);
 
-    static QList<TransferObject> createTransferMap(const TransferGroup &group,
-                                                   const QMimeDatabase &mimeDatabase,
-                                                   requestid &requestId,
-                                                   const QString &filePath,
-                                                   const QString &directory = nullptr);
+    static void createTransferMap(GThread *thread, QList<TransferObject>* objectList,
+                                  const TransferGroup &group, const QMimeDatabase &mimeDatabase,
+                                  requestid &requestId, const QString &filePath, const QString &directory = nullptr);
 
     static TransferObject firstAvailableTransfer(groupid groupId, const QString &deviceId);
 

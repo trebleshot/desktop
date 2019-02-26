@@ -158,7 +158,7 @@ public:
         // Implement by overriding
     }
 
-    virtual void onRemovingObject(AccessDatabase *db, DatabaseObject *parent = nullptr)
+    virtual void onRemovingObject(AccessDatabase *db, DatabaseObject *parent)
     {
         // Implement by overriding
     }

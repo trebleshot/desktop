@@ -1,5 +1,4 @@
 #include <src/util/TransferUtils.h>
-#include "TransferObject.h"
 
 TransferObject::TransferObject(requestid id, const QString &deviceId, const Type &type)
         : DatabaseObject()
@@ -74,7 +73,7 @@ void TransferObject::onGeneratingValues(const DbObjectMap &record)
 
 void TransferObject::onRemovingObject(AccessDatabase *db, DatabaseObject *parent)
 {
-    DatabaseObject::onRemovingObject(db);
+    DatabaseObject::onRemovingObject(db, parent);
 
     if (type != Type::Incoming || flag != Flag::Interrupted)
         return;

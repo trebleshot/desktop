@@ -1,17 +1,17 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "src/database/AccessDatabase.h"
-#include "src/broadcast/CommunicationServer.h"
-#include "src/coolsocket/CoolSocket.h"
+#include "ui_MainWindow.h"
+#include <src/database/AccessDatabase.h>
+#include <src/broadcast/CommunicationServer.h>
+#include <src/coolsocket/CoolSocket.h>
 #include <QMainWindow>
 #include <iostream>
-#include "ui_MainWindow.h"
-
 #include <QDesktopWidget>
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QSqlDriver>
+#include <QtCore/QJsonArray>
 #include <src/dialog/WelcomeDialog.h>
 #include <src/model/TransferGroupModel.h>
 #include <src/util/NetworkDeviceLoader.h>
@@ -45,6 +45,8 @@ public slots:
     void about();
 
     void aboutQt();
+
+    void deviceForAddedFiles(QList<NetworkDevice> devices, groupid groupId);
 
     void filesAdded();
 

@@ -118,9 +118,7 @@ void MainWindow::dropEvent(QDropEvent *event)
         event->acceptProposedAction();
 
         FileAdditionProgressDialog progressDialog(this, event->mimeData()->urls());
-
         connect(&progressDialog, &FileAdditionProgressDialog::filesAdded, this, &MainWindow::filesAdded);
-
         progressDialog.exec();
     }
 }
@@ -152,9 +150,114 @@ void MainWindow::aboutQt()
     QApplication::aboutQt();
 }
 
+void MainWindow::deviceForAddedFiles(QList<NetworkDevice> devices, groupid groupId)
+{
+    auto *gThread = new GThread([&devices, &groupId](GThread *thread) {
+        QList<TransferObject> objectList;
+
+        {
+            SqlSelection selection;
+            selection.setTableName(DB_DIVIS_TRANSFER);
+            selection.setWhere(QString("%1 = ?").arg(DB_FIELD_TRANSFER_GROUPID));
+            selection.whereArgs << groupId;
+
+            gDbSignal->doSynchronized([&selection, &objectList](AccessDatabase *db) {
+                objectList << db->castQuery(selection, TransferObject());
+            });
+        }
+
+        if (objectList.empty()) {
+            qDebug() << "deviceForAddedFiles << Empty object list";
+            return;
+        }
+
+        QList<NetworkDevice> passedDevices;
+
+        for (const NetworkDevice &device : devices) {
+            SqlSelection deviceSelection;
+            deviceSelection.setTableName(DB_TABLE_TRANSFER);
+            deviceSelection.setWhere(QString("%1 = ? AND %2 = ? AND %3 = ?")
+                                             .arg(DB_FIELD_TRANSFER_GROUPID)
+                                             .arg(DB_FIELD_TRANSFER_DEVICEID)
+                                             .arg(DB_FIELD_TRANSFER_TYPE));
+            deviceSelection.whereArgs << groupId << device.id << TransferObject::Type::Outgoing;
+            deviceSelection.setLimit(1);
+
+            if (gDbSignal->contains(deviceSelection)) {
+                qDebug() << "deviceForAddedFiles << Already contains for" << device.nickname;
+            } else {
+                if (gDbSignal->transaction()) {
+                    for (auto &object : objectList) {
+                        object.deviceId = device.id;
+                        gDbSignal->insert(object);
+                    }
+
+                    gDbSignal->commit();
+                    passedDevices << device;
+                }
+            }
+        }
+
+        for (const auto &thisDevice : passedDevices) {
+            SqlSelection connectionSelection;
+            connectionSelection.setTableName(DB_TABLE_DEVICECONNECTION);
+            connectionSelection.setWhere(QString("%1 = ?").arg(DB_FIELD_DEVICES_ID));
+            connectionSelection.setOrderBy(DB_FIELD_DEVICECONNECTION_LASTCHECKEDDATE, false);
+            connectionSelection.whereArgs << thisDevice.id;
+
+            QList<DeviceConnection> connections;
+
+            gDbSignal->doSynchronized([&connectionSelection, &connections](AccessDatabase *db) {
+                connections << db->castQuery(connectionSelection, DeviceConnection());
+            });
+
+            if (connections.empty()) {
+                qDebug() << "deviceForAddedFiles << No connection for" << thisDevice.nickname;
+            } else {
+                bool shouldTryNext = true;
+                for (const auto &thisConnection : connections) {
+                    try {
+                        CommunicationBridge bridge;
+                        bridge.setDevice(thisDevice);
+
+                        TransferAssignee assignee(groupId, thisDevice.id, thisConnection.adapterName);
+                        QJsonObject thisObject{
+                                {KEYWORD_REQUEST, KEYWORD_REQUEST_TRANSFER},
+                                {KEYWORD_TRANSFER_GROUP_ID, QVariant(groupId).toString()}
+                        };
+
+                        QJsonArray filesIndex;
+
+                        for (const auto &object : objectList) {
+                            filesIndex += {
+                                    {
+                                            {KEYWORD_INDEX_FILE_NAME, object.friendlyName},
+                                            {KEYWORD_INDEX_FILE_SIZE, QVariant((qulonglong) object.fileSize).toString()},
+                                            {KEYWORD_TRANSFER_REQUEST_ID, QVariant(object.id).toString()},
+                                            {KEYWORD_INDEX_FILE_MIME, object.fileMimeType}
+                                    }
+                            };
+                        }
+
+                        thisObject.insert(KEYWORD_FILES_INDEX, filesIndex);
+                    } catch (...) {
+                        // do nothing
+                    }
+                }
+            }
+        }
+
+    }, true);
+
+    gThread->start();
+}
+
+
 void MainWindow::filesAdded()
 {
-    DeviceChooserDialog(this).exec();
+    DeviceChooserDialog dialog(this, groupid);
+    connect(&dialog, &DeviceChooserDialog::devicesSelected, this, &MainWindow::deviceForAddedFiles);
+    dialog.exec();
 }
 
 void MainWindow::showReceivedText(const QString &text, const QString &deviceId)

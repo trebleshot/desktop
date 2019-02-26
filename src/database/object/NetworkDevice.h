@@ -13,10 +13,10 @@ class DeviceConnection;
 
 class NetworkDevice : public DatabaseObject {
 public:
+    QString id;
     QString brand;
     QString model;
     QString nickname;
-    QString id;
     QString versionName;
     int versionNumber = 0;
     int tmpSecureKey = 0;
@@ -54,8 +54,6 @@ public:
     DbObjectMap getValues() const override;
 
     void onGeneratingValues(const DbObjectMap &record) override;
-
-
 };
 
 

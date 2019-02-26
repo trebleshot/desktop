@@ -14,6 +14,7 @@
 #include <QtWidgets/QMessageBox>
 #include "FileAdditionProgressDialog.h"
 #include "DeviceChooserDialog.h"
+#include <QtCore/qalgorithms.h>
 
 FileAdditionProgressDialog::FileAdditionProgressDialog(QWidget *parent, const QList<QUrl> &urls)
         : QDialog(parent), m_ui(new Ui::FileAdditionProgressDialog)
@@ -48,7 +49,7 @@ void FileAdditionProgressDialog::task(GThread *thread, const QList<QUrl> &urls)
                 if (thread->interrupted())
                     throw exception();
 
-                transferMap << TransferUtils::createTransferMap(group, mimeDb, requestId, url.toLocalFile());
+                TransferUtils::createTransferMap(thread, &transferMap, group, mimeDb, requestId, url.toLocalFile());
                 emit thread->statusUpdate(urls.size(), position++, url.toLocalFile());
             }
         }
@@ -81,12 +82,14 @@ void FileAdditionProgressDialog::task(GThread *thread, const QList<QUrl> &urls)
     } catch (...) {
         // do nothing
     }
-
 }
 
 void FileAdditionProgressDialog::taskProgress(int max, int progress, const QString &text)
 {
-    m_ui->progressBar->setMaximum(max);
-    m_ui->progressBar->setValue(progress);
+    if (max >= 0 && progress >= 0) {
+        m_ui->progressBar->setMaximum(max);
+        m_ui->progressBar->setValue(progress);
+    }
+
     m_ui->label->setText(text);
 }

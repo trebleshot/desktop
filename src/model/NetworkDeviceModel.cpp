@@ -72,3 +72,8 @@ QVariant NetworkDeviceModel::data(const QModelIndex &index, int role) const
 
     return QVariant();
 }
+
+const QList<NetworkDevice> *NetworkDeviceModel::list()
+{
+    return &m_list;
+}

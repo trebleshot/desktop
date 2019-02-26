@@ -75,15 +75,9 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                 if (request == KEYWORD_REQUEST_TRANSFER) {
                     if (responseJSON.contains(KEYWORD_FILES_INDEX)
                         && responseJSON.contains(KEYWORD_TRANSFER_GROUP_ID)) {
-                        const groupid &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID)
-                                .toVariant()
-                                .toUInt();
-
-                        const QJsonArray &filesIndex
-                                = QJsonDocument::fromJson(
-                                        QByteArray::fromStdString(responseJSON.value(KEYWORD_FILES_INDEX)
-                                                                          .toString()
-                                                                          .toStdString())).array();
+                        const groupid &groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID).toVariant().toUInt();
+                        const QJsonArray &filesIndex = QJsonDocument::fromJson(QByteArray::fromStdString(
+                                responseJSON.value(KEYWORD_FILES_INDEX).toString().toStdString())).array();
 
                         result = true;
 
@@ -129,24 +123,20 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                                 objectList << transferObject;
                             }
 
-                            gDbSignal->doSynchronized([&objectList, &usePublishing, &filesTotal](AccessDatabase *db) {
-                                if (db->getDatabase()->transaction()) {
-                                    if (usePublishing)
-                                        for (auto *dbObject : objectList) {
-                                            if (db->publish(*dbObject))
-                                                filesTotal++;
-                                        }
-                                    else
-                                        for (auto *dbObject : objectList) {
-                                            if (db->insert(*dbObject))
-                                                filesTotal++;
-                                        }
+                            if (gDbSignal->transaction()) {
+                                if (usePublishing)
+                                    for (auto *dbObject : objectList) {
+                                        if (gDbSignal->publish(*dbObject))
+                                            filesTotal++;
+                                    }
+                                else
+                                    for (auto *dbObject : objectList) {
+                                        if (gDbSignal->insert(*dbObject))
+                                            filesTotal++;
+                                    }
 
-                                    db->getDatabase()->commit();
-                                }
-                            });
-
-                            qDeleteAll(objectList);
+                                gDbSignal->commit();
+                            }
 
                             if (filesTotal > 0)
                                     emit transferRequest(device.id, transferGroup.id, filesTotal);
@@ -162,9 +152,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                         TransferGroup transferGroup(groupId);
                         TransferAssignee transferAssignee(groupId, device.id);
 
-                        if (gDbSignal->reconstruct(transferGroup)
-                            && gDbSignal->reconstruct(transferAssignee)) {
-
+                        if (gDbSignal->reconstruct(transferGroup) && gDbSignal->reconstruct(transferAssignee)) {
                             if (!isAccepted)
                                 gDbSignal->remove(transferGroup);
 
@@ -173,9 +161,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
                     }
                 } else if (request == KEYWORD_REQUEST_CLIPBOARD) {
                     if (responseJSON.contains(KEYWORD_TRANSFER_CLIPBOARD_TEXT)) {
-                        auto text = responseJSON
-                                .value(KEYWORD_TRANSFER_CLIPBOARD_TEXT)
-                                .toString();
+                        auto text = responseJSON.value(KEYWORD_TRANSFER_CLIPBOARD_TEXT).toString();
                         emit textReceived(text, device.id);
 
                         auto *textObject = new TextStreamObject;
@@ -205,9 +191,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
     }
 }
 
-void CommunicationServer::pushReply(CoolSocket::ActiveConnection *activeConnection,
-                                    QJsonObject &json,
-                                    bool result)
+void CommunicationServer::pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject &json, bool result)
 {
     json.insert(KEYWORD_RESULT, result);
     activeConnection->reply(json);

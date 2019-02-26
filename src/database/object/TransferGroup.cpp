@@ -46,7 +46,7 @@ void TransferGroup::onInsertingObject(AccessDatabase *db)
 
 void TransferGroup::onRemovingObject(AccessDatabase *db, DatabaseObject *parent)
 {
-    DatabaseObject::onRemovingObject(db);
+    DatabaseObject::onRemovingObject(db, parent);
 
     SqlSelection assignee;
     assignee.setTableName(DB_TABLE_TRANSFERASSIGNEE);

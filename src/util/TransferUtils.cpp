@@ -36,11 +36,14 @@ SqlSelection TransferUtils::createSqlSelection(groupid groupId, const QString &d
 }
 
 
-QList<TransferObject> TransferUtils::createTransferMap(const TransferGroup &group, const QMimeDatabase &mimeDatabase,
-                                                       requestid &requestId, const QString &filePath,
-                                                       const QString &directory)
+void TransferUtils::createTransferMap(GThread *thread, QList<TransferObject> *objectList, const TransferGroup &group,
+                                      const QMimeDatabase &mimeDatabase, requestid &requestId, const QString &filePath,
+                                      const QString &directory)
 {
-    QList<TransferObject> resultList;
+    if (thread->interrupted())
+        return;
+
+    emit thread->statusUpdate(-1, -1, directory);
     QFileInfo fileInfo = filePath;
 
     if (fileInfo.isFile()) {
@@ -59,7 +62,7 @@ QList<TransferObject> TransferUtils::createTransferMap(const TransferGroup &grou
 
         file.close();
 
-        resultList << object;
+        *objectList << object;
     } else if (fileInfo.isDir()) {
         QDir dir = filePath;
         QString currentDirectory;
@@ -71,13 +74,12 @@ QList<TransferObject> TransferUtils::createTransferMap(const TransferGroup &grou
 
         const auto &entries = dir.entryList(QDir::AllDirs | QDir::AllEntries | QDir::NoDotAndDotDot, QDir::DirsFirst);
 
-        for (const auto &thisEntry : entries)
-            resultList << createTransferMap(group, mimeDatabase, requestId, dir.filePath(thisEntry), currentDirectory);
+        for (const auto &thisEntry : entries) {
+            createTransferMap(thread, objectList, group, mimeDatabase, requestId, dir.filePath(thisEntry),
+                              currentDirectory);
+        }
     }
-
-    return resultList;
 }
-
 
 TransferObject TransferUtils::firstAvailableTransfer(groupid groupId, const QString &deviceId)
 {
@@ -246,11 +248,11 @@ TransferGroupInfo TransferUtils::getInfo(const TransferGroup &group)
 AssigneeInfo TransferUtils::getInfo(const TransferAssignee &assignee)
 {
     try {
-        auto *device = new NetworkDevice(assignee.deviceId);
+        NetworkDevice device(assignee.deviceId);
 
-        gDatabase->reconstruct(*device);
+        gDatabase->reconstruct(device);
 
-        return AssigneeInfo(*device, assignee);
+        return AssigneeInfo(device, assignee);
     } catch (...) {
         // do nothing
     }
