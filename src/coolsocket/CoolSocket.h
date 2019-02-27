@@ -4,6 +4,7 @@
 #define COOLSOCKET_KEYWORD_LENGTH "length"
 #define COOLSOCKET_HEADER_DIVIDER "\nHEADER_END\n"
 #define COOLSOCKET_HEADER_HEAP_SIZE 8196
+#define COOLSOCKET_NO_TIMEOUT -1
 
 #include <QDataStream>
 #include <QHostAddress>
@@ -36,7 +37,8 @@ namespace CoolSocket {
 
     class Server : public QObject {
     Q_OBJECT
-        quint16 m_port;
+        int m_timeout = COOLSOCKET_NO_TIMEOUT;
+        quint16 m_port = 0;
         QHostAddress m_hostAddress;
         QPointer<ServerWorker> m_worker;
         QList<RequestHandler *> m_ongoingTasks;
@@ -48,7 +50,8 @@ namespace CoolSocket {
         }
 
     public:
-        explicit Server(QHostAddress hostAddress, quint16 port = 0, QObject *parent = nullptr);
+        explicit Server(QHostAddress hostAddress, quint16 port = 0, int timeout = COOLSOCKET_NO_TIMEOUT,
+                        QObject *parent = nullptr);
 
         friend class ServerWorker;
 
@@ -58,24 +61,34 @@ namespace CoolSocket {
 
         friend class RequestHandler;
 
-        QHostAddress getHostAddress()
-        { return m_hostAddress; }
+        virtual void connected(ActiveConnection *connection) = 0;
 
-        ServerWorker *getWorker()
-        { return m_worker; }
+        QHostAddress hostAddress() const
+        {
+            return m_hostAddress;
+        }
 
-        quint16 getPort()
-        { return m_port; }
+        quint16 port() const
+        {
+            return m_port;
+        }
 
-        bool isServing();
+        bool serving();
 
         void setHostAddress(const QHostAddress &hostAddress)
         {
-            this->m_hostAddress = hostAddress;
+            m_hostAddress = hostAddress;
         }
 
         void setPort(quint16 port)
-        { this->m_port = port; }
+        {
+            m_port = port;
+        }
+
+        void setTimeout(int timeout)
+        {
+            m_timeout = timeout;
+        }
 
         bool start(int blockingTime = -1);
 
@@ -83,17 +96,25 @@ namespace CoolSocket {
 
         void stop(int blockingTime = -1);
 
-        virtual void connected(ActiveConnection *connection) = 0;
+        int timeout()
+        {
+            return m_timeout;
+        }
+
+        ServerWorker *worker() const
+        {
+            return m_worker;
+        }
 
     signals:
+
+        void clientConnected(ActiveConnection *connection);
 
         void serverStarted();
 
         void serverStopped();
 
         void serverFailure();
-
-        void clientConnected(ActiveConnection *connection);
     };
 
     class ActiveConnection : public QObject {
@@ -166,12 +187,12 @@ namespace CoolSocket {
     public:
         explicit ServerWorker(Server *server, QObject *parent = nullptr);
 
-        bool isServing()
+        bool serving()
         {
             return isRunning() && m_serverListening;
         }
 
-        QTcpServer *getTcpServer()
+        QTcpServer *tcpServer()
         {
             return m_tcpServer;
         }

@@ -23,8 +23,7 @@ CoolSocket::ActiveConnection *CommunicationBridge::communicate(CoolSocket::Activ
 
 CoolSocket::ActiveConnection *CommunicationBridge::connect(const QHostAddress &hostAddress)
 {
-    return Client::openConnection(this, hostAddress, PORT_COMMUNICATION_DEFAULT,
-                                  PORT_COMMUNICATION_DEFAULT);
+    return Client::openConnection(this, hostAddress, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT);
 }
 
 CoolSocket::ActiveConnection *CommunicationBridge::connect(DeviceConnection *connection)

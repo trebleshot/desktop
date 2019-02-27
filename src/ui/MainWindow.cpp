@@ -233,11 +233,11 @@ void MainWindow::deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devic
                     QJsonArray filesIndex;
 
                     for (const auto &object : objectList) {
-                        QJsonObject jsonObject {
-                            {KEYWORD_INDEX_FILE_NAME, object.friendlyName},
-                            {KEYWORD_INDEX_FILE_SIZE, QVariant((qulonglong) object.fileSize).toLongLong()},
-                            {KEYWORD_TRANSFER_REQUEST_ID, QVariant(object.id).toLongLong()},
-                            {KEYWORD_INDEX_FILE_MIME, object.fileMimeType}
+                        QJsonObject jsonObject{
+                                {KEYWORD_INDEX_FILE_NAME,     object.friendlyName},
+                                {KEYWORD_INDEX_FILE_SIZE,     QVariant((qulonglong) object.fileSize).toLongLong()},
+                                {KEYWORD_TRANSFER_REQUEST_ID, QVariant(object.id).toLongLong()},
+                                {KEYWORD_INDEX_FILE_MIME,     object.fileMimeType}
                         };
 
                         if (object.directory != nullptr)
@@ -255,7 +255,7 @@ void MainWindow::deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devic
                         connection->reply(thisObject);
 
                         {
-                            const QJsonObject& thisReply = connection->receive().asJson();
+                            const QJsonObject &thisReply = connection->receive().asJson();
 
                             if (thisReply.value(KEYWORD_RESULT).toBool(false)) {
                                 qDebug() << "deviceForAddedFiles << Successful for" << thisDevice.nickname;
@@ -265,6 +265,8 @@ void MainWindow::deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devic
                         }
                     } catch (...) {
                         // do nothing
+                        qDebug() << "deviceForAddedFiles << Error" << thisDevice.nickname << thisConnection.adapterName;
+                        qDebug() << "deviceForAddedFiles << Continue ?? " << shouldTryNext;
                     }
 
                     delete connection;

@@ -1,61 +1,61 @@
 ﻿#include "CoolSocket.h"
 
 namespace CoolSocket {
-    Server::Server(QHostAddress hostAddress, quint16 port, QObject *parent)
+    Server::Server(QHostAddress hostAddress, quint16 port, int timeout, QObject *parent)
             : QObject(parent)
     {
         setWorker(new ServerWorker(this));
-
-        this->setHostAddress(hostAddress);
-        this->setPort(port);
+        setTimeout(timeout);
+        setHostAddress(hostAddress);
+        setPort(port);
     }
 
-    bool Server::isServing()
+    bool Server::serving()
     {
-        return getWorker()->isServing();
+        return worker()->serving();
     }
 
     bool Server::start(int blockingTime)
     {
-        if (isServing())
+        if (serving())
             return true;
 
-        getWorker()->start();
+        worker()->start();
 
         if (blockingTime >= 0) {
             time_t timeout = clock() + blockingTime;
-            while (!isServing() && timeout >= clock()) {
+            while (!serving() && timeout >= clock()) {
             }
         }
 
-        return getWorker()->isServing();
+        return worker()->serving();
     }
 
     bool Server::startEnsured(int blockingTime)
     {
         start(blockingTime);
 
-        if (blockingTime >= 0 && getWorker() != nullptr) {
+        if (blockingTime >= 0 && worker() != nullptr) {
             time_t timeout = clock() + blockingTime;
-            while (getWorker()->getTcpServer() != nullptr
-                   && !getWorker()->getTcpServer()->isListening()
+            while (worker()->tcpServer() != nullptr
+                   && !worker()->tcpServer()->isListening()
                    && timeout >= clock()) {
             }
         }
 
-        return getWorker() != nullptr
-               && getWorker()->getTcpServer() != nullptr
-               && getWorker()->getTcpServer()->isListening();
+        return worker() != nullptr
+               && worker()->tcpServer() != nullptr
+               && worker()->tcpServer()->isListening();
     }
 
     void Server::stop(int blockingTime)
     {
-        if (getWorker()->isRunning()) {
-            getWorker()->requestInterruption();
+        if (worker()->isRunning()) {
+            worker()->requestInterruption();
 
             if (blockingTime >= 0) {
                 time_t timeout = clock() + blockingTime;
-                while (getWorker()->isServing() && timeout >= clock()) {
+                while (worker()->serving() && timeout >= clock()) {
                 }
             }
         }
@@ -68,15 +68,13 @@ namespace CoolSocket {
 
     void ActiveConnection::reply(const char *reply)
     {
-        cout << this << " : Entered write sequence" << endl;
+        qDebug() << this << " : Entered write sequence";
 
         QByteArray replyImpl(reply);
 
         QJsonObject headerIndex{
-                {QString(COOLSOCKET_KEYWORD_LENGTH), QJsonValue(replyImpl.length())}
+                {QString(COOLSOCKET_KEYWORD_LENGTH), QJsonValue(replyImpl.size())}
         };
-
-        time_t startTime = clock();
 
         m_activeSocket->write(QJsonDocument(headerIndex).toJson());
         m_activeSocket->write(COOLSOCKET_HEADER_DIVIDER);
@@ -86,23 +84,25 @@ namespace CoolSocket {
         m_activeSocket->flush();
 
         while (m_activeSocket->bytesToWrite() != 0) {
-            if (getTimeout() >= 0 && (clock() - startTime) > getTimeout())
+            if (!m_activeSocket->waitForBytesWritten(getTimeout() < 1000 ? 1000 : getTimeout())) {
+                qDebug() << this << "Timed out !!!";
                 throw exception();
+            }
         }
 
-        cout << this << " : Exited write sequence" << endl;
+        qDebug() << this << " : Exited write sequence";
     }
 
     Response ActiveConnection::receive()
     {
-        cout << this << " : Entered read sequence" << endl;
+        qDebug() << this << " : Entered read sequence";
 
         Response response;
         size_t headerPosition = string::npos;
         string headerData;
         string contentData;
 
-        time_t lastDataAvailable = clock();
+        clock_t lastDataAvailable = clock();
 
         while (m_activeSocket->isReadable()) {
             if (headerPosition == string::npos) {
@@ -135,7 +135,7 @@ namespace CoolSocket {
                 }
 
                 if (headerData.length() > COOLSOCKET_HEADER_HEAP_SIZE) {
-                    cerr << "Header exceeds heap size: " << headerData.length();
+                    qDebug() << "Header exceeds heap size: " << headerData.length();
                     throw exception();
                 }
             } else {
@@ -154,7 +154,7 @@ namespace CoolSocket {
                 throw exception();
         }
 
-        cout << this << " : Exited read sequence" << endl;
+        qDebug() << this << " : Exited read sequence";
 
         return response;
     }
@@ -162,8 +162,8 @@ namespace CoolSocket {
     ServerWorker::ServerWorker(Server *server, QObject *parent)
             : QThread(parent)
     {
-        this->m_server = server;
-        this->setTcpServer(new QTcpServer());
+        m_server = server;
+        setTcpServer(new QTcpServer());
     }
 
     void ServerWorker::setTcpServer(QTcpServer *server)
@@ -176,17 +176,17 @@ namespace CoolSocket {
         try {
             this->setTcpServer(new QTcpServer());
 
-            if (getTcpServer()->listen(m_server->getHostAddress(), m_server->getPort())) {
+            if (tcpServer()->listen(m_server->hostAddress(), m_server->port())) {
                 emit m_server->serverStarted();
 
-                while (!isInterruptionRequested() && getTcpServer()->isListening()) {
+                while (!isInterruptionRequested() && tcpServer()->isListening()) {
                     this->m_serverListening = true;
 
-                    getTcpServer()->waitForNewConnection(2000);
+                    tcpServer()->waitForNewConnection(2000);
 
-                    if (getTcpServer()->hasPendingConnections()) {
-                        QTcpSocket *socket = getTcpServer()->nextPendingConnection();
-                        auto *activeConnection = new ActiveConnection(socket);
+                    if (tcpServer()->hasPendingConnections()) {
+                        QTcpSocket *socket = tcpServer()->nextPendingConnection();
+                        auto *activeConnection = new ActiveConnection(socket, m_server->timeout());
                         auto *handler = new RequestHandler(m_server, activeConnection);
 
                         handler->start();
@@ -194,7 +194,7 @@ namespace CoolSocket {
                 }
 
                 this->m_serverListening = false;
-                getTcpServer()->close();
+                tcpServer()->close();
 
                 emit m_server->serverStopped();
             }

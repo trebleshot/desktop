@@ -10,7 +10,7 @@
 #include "SeamlessServer.h"
 
 SeamlessServer::SeamlessServer(QObject *parent)
-        : CoolSocket::Server(QHostAddress::Any, PORT_SEAMLESS, parent)
+        : CoolSocket::Server(QHostAddress::Any, PORT_SEAMLESS, TIMEOUT_SOCKET_DEFAULT, parent)
 {
 
 }

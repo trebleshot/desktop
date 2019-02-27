@@ -8,7 +8,7 @@
 #include "CommunicationServer.h"
 
 CommunicationServer::CommunicationServer(QObject *parent)
-        : CoolSocket::Server(QHostAddress::Any, PORT_COMMUNICATION_DEFAULT, parent)
+        : CoolSocket::Server(QHostAddress::Any, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT, parent)
 {
 }
 

@@ -31,5 +31,6 @@ changes by visiting
 * Qt Framework 5.9.6+
 * Run shell command ./build_trebleshot.txt
 
-
-[^]: Have a question? Reach me out *velitasali@protonmail.com* 
+```
+Have a question? Reach me out *velitasali@protonmail.com*
+``` 
