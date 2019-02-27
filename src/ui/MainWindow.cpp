@@ -218,7 +218,7 @@ void MainWindow::deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devic
 
                 for (const auto &thisConnection : connections) {
                     CSActiveConnection *connection = nullptr;
-                    CommunicationBridge bridge;
+                    CommunicationBridge bridge (thread);
                     bridge.setDevice(thisDevice);
 
                     TransferAssignee assignee(groupId, thisDevice.id, thisConnection.adapterName);
@@ -252,7 +252,7 @@ void MainWindow::deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devic
                         connection->reply(thisObject);
 
                         {
-                            const QJsonObject &thisReply = (emit connection->remoteReceive()).asJson();
+                            const QJsonObject &thisReply = connection->receive().asJson();
 
                             if (thisReply.value(KEYWORD_RESULT).toBool(false)) {
                                 qDebug() << "deviceForAddedFiles << Successful for" << thisDevice.nickname;

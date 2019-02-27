@@ -23,7 +23,7 @@ CSActiveConnection *CommunicationBridge::communicate(CSActiveConnection *connect
 
 CSActiveConnection *CommunicationBridge::connect(const QHostAddress &hostAddress)
 {
-    return CSClient::openConnection(this, hostAddress, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT);
+    return CSClient::openConnection(hostAddress, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT, this);
 }
 
 CSActiveConnection *CommunicationBridge::connect(DeviceConnection *connection)
@@ -53,7 +53,7 @@ CSActiveConnection *CommunicationBridge::handshake(CSActiveConnection *connectio
                 {KEYWORD_DEVICE_SECURE_KEY,  m_device.id == nullptr ? m_secureKey : m_device.tmpSecureKey}
         };
 
-        connection->remoteReply(replyJSON);
+        connection->reply(replyJSON);
     } catch (exception &e) {
         throw exception();
     }
@@ -69,7 +69,7 @@ NetworkDevice CommunicationBridge::loadDevice(const QHostAddress &hostAddress)
 NetworkDevice CommunicationBridge::loadDevice(CSActiveConnection *connection)
 {
     try {
-        return NetworkDeviceLoader::loadFrom((emit connection->remoteReceive()).asJson());
+        return NetworkDeviceLoader::loadFrom(connection->receive().asJson());
     } catch (exception &e) {
         throw exception();
     }

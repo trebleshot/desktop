@@ -18,7 +18,7 @@ void CommunicationServer::connected(CSActiveConnection *connection)
     NetworkDevice device;
 
     try {
-        auto response = emit connection->remoteReceive();
+        auto response = connection->receive();
         auto responseJSON = response.asJson();
         QJsonObject replyJSON = QJsonObject();
 
@@ -38,7 +38,7 @@ void CommunicationServer::connected(CSActiveConnection *connection)
                     deviceSerial = responseJSON.value(KEYWORD_DEVICE_INFO_SERIAL).toString();
                 }
 
-                response = emit connection->remoteReceive();
+                response = connection->receive();
                 responseJSON = response.asJson();
             } else {
                 return;
@@ -194,5 +194,5 @@ void CommunicationServer::connected(CSActiveConnection *connection)
 void CommunicationServer::pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result)
 {
     json.insert(KEYWORD_RESULT, result);
-    emit activeConnection->remoteReply(json);
+    activeConnection->reply(json);
 }

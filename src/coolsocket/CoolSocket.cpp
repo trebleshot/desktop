@@ -2,51 +2,47 @@
 #include "CoolSocket.h"
 
 CSServer::CSServer(QHostAddress hostAddress, quint16 port, int timeout, QObject *parent)
-        : QObject(parent), m_server(new QTcpServer(this))
+        : QTcpServer(parent)
 {
     setTimeout(timeout);
     setHostAddress(hostAddress);
     setPort(port);
-
-    connect(m_server, &QTcpServer::newConnection, this, &CSServer::connectionRequest);
 }
 
 CSServer::~CSServer()
 {
     stop();
-    delete m_server;
 }
 
-void CSServer::connectionRequest()
+void CSServer::incomingConnection(qintptr handle)
 {
-    QTcpSocket *socket = server()->nextPendingConnection();
-    auto *connection = new CSActiveConnection(socket, timeout(), this);
+    auto *thread = new GThread([this, handle](GThread *thread) {
+        auto *socket = new QTcpSocket(thread);
+        auto *connection = new CSActiveConnection(socket, timeout(), thread);
 
-    auto *thread = new GThread([this, connection](GThread *thread) {
-        connected(connection);
+        if (socket->setSocketDescriptor(handle) && socket->waitForConnected(TIMEOUT_SOCKET_DEFAULT)) {
+            connected(connection);
+            socket->disconnectFromHost();
+        }
+
         delete connection;
     }, true);
 
     thread->start();
 }
 
-bool CSServer::serving()
-{
-    return server()->isListening();
-}
-
 bool CSServer::start()
 {
-    if (serving())
+    if (isListening())
         return true;
 
-    return server()->listen(hostAddress(), port());
+    return listen(hostAddress(), port());
 }
 
 bool CSServer::stop()
 {
-    server()->close();
-    return !serving();
+    close();
+    return !isListening();
 }
 
 void CSActiveConnection::reply(const QJsonObject &reply)
@@ -147,13 +143,13 @@ CSResponse CSActiveConnection::receive()
     return response;
 }
 
-CSActiveConnection *CSClient::openConnection(const QObject *sender,
-                                             const QHostAddress &hostName,
+CSActiveConnection *CSClient::openConnection(const QHostAddress &hostName,
                                              quint16 port,
-                                             int timeoutMSeconds)
+                                             int timeoutMSeconds,
+                                             QObject *sender)
 {
     auto *socket = new QTcpSocket;
-    auto *connection = new CSActiveConnection(socket);
+    auto *connection = new CSActiveConnection(socket, timeoutMSeconds, sender);
 
     QTcpSocket::connect(sender, SIGNAL(destroyed()), connection, SLOT(deleteLater()));
 

@@ -18,7 +18,7 @@ SeamlessServer::SeamlessServer(QObject *parent)
 void SeamlessServer::connected(CSActiveConnection *connection)
 {
     try {
-        const auto &mainRequest = emit connection->remoteReceive();
+        const auto &mainRequest = connection->receive();
         const auto &mainRequestJSON = mainRequest.asJson();
         QString deviceId = mainRequestJSON.contains(KEYWORD_TRANSFER_DEVICE_ID)
                            ? mainRequestJSON.value(KEYWORD_TRANSFER_DEVICE_ID).toString()
@@ -49,7 +49,7 @@ void SeamlessServer::connected(CSActiveConnection *connection)
         }
 
         while (connection->socket()->isOpen()) {
-            const auto &response = emit connection->remoteReceive();
+            const auto &response = connection->receive();
 
             if (response.response == nullptr || response.length <= 0)
                 return;

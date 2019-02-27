@@ -6,6 +6,7 @@
 #define COOLSOCKET_HEADER_HEAP_SIZE 8196
 #define COOLSOCKET_NO_TIMEOUT -1
 
+#include <src/config/Config.h>
 #include <QDataStream>
 #include <QHostAddress>
 #include <QJsonDocument>
@@ -27,13 +28,11 @@ class CSActiveConnection;
 
 class CSClient;
 
-class CSServer : public QObject {
+class CSServer : public QTcpServer {
 Q_OBJECT
     int m_timeout = COOLSOCKET_NO_TIMEOUT;
     quint16 m_port = 0;
     QHostAddress m_hostAddress;
-    QTcpServer *m_server;
-    QMap<CSActiveConnection *, QTcpSocket *> mConnections;
 
 public:
     explicit CSServer(QHostAddress hostAddress, quint16 port = 0, int timeout = COOLSOCKET_NO_TIMEOUT,
@@ -55,8 +54,6 @@ public:
         return m_port;
     }
 
-    bool serving();
-
     void setHostAddress(const QHostAddress &hostAddress)
     {
         m_hostAddress = hostAddress;
@@ -72,11 +69,6 @@ public:
         m_timeout = timeout;
     }
 
-    QTcpServer *server()
-    {
-        return m_server;
-    }
-
     bool start();
 
     bool stop();
@@ -88,9 +80,9 @@ public:
 
 protected slots:
 
-    void connectionRequest();
-
     virtual void connected(CSActiveConnection *connection) = 0;
+
+    void incomingConnection(qintptr handle) override;
 };
 
 
@@ -105,13 +97,6 @@ public:
     {
         m_socket = socket;
         m_timeout = msecTimeout;
-
-        connect(this, &CSActiveConnection::remoteReceive,
-                this, &CSActiveConnection::receive, Qt::BlockingQueuedConnection);
-        connect(this, SIGNAL(remoteReply(const char * )),
-                this, SLOT(reply(const char * )), Qt::BlockingQueuedConnection);
-        connect(this, SIGNAL(remoteReply(const QJsonObject & )),
-                this, SLOT(reply(const QJsonObject & )), Qt::BlockingQueuedConnection);
     }
 
     ~CSActiveConnection() override
@@ -138,20 +123,12 @@ public:
     }
 
 public slots:
+
     void reply(const QJsonObject &reply);
 
     void reply(const char *reply);
 
     CSResponse receive();
-
-signals:
-
-    CSResponse remoteReceive();
-
-    void remoteReply(const QJsonObject &reply);
-
-    void remoteReply(const char *reply);
-
 };
 
 class CSResponse {
@@ -178,8 +155,8 @@ public:
     {
     }
 
-    static CSActiveConnection *openConnection(const QObject *sender, const QHostAddress &hostName, quint16 port,
-                                              int timeoutMSeconds = 3000);
+    static CSActiveConnection *openConnection(const QHostAddress &hostName, quint16 port,
+                                              int timeoutMSeconds = TIMEOUT_SOCKET_DEFAULT, QObject *sender = nullptr);
 };
 
 #endif // COOLSOCKET_H
