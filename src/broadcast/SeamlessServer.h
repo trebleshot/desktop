@@ -10,13 +10,13 @@
 #include "src/config/Config.h"
 #include "src/config/Keyword.h"
 
-class SeamlessServer : public CoolSocket::Server, public Interrupter {
+class SeamlessServer : public CSServer, public Interrupter {
 Q_OBJECT
 
 public:
     explicit SeamlessServer(QObject *parent = nullptr);
 
-    void connected(CoolSocket::ActiveConnection *connection) override;
+    void connected(CSActiveConnection *connection) override;
 };
 
 

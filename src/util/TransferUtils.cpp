@@ -7,7 +7,6 @@
 #include <QSqlError>
 #include <cmath>
 #include "TransferUtils.h"
-#include "AppUtils.h"
 
 SqlSelection TransferUtils::createSqlSelection(groupid groupId, const QString &deviceId,
                                                TransferObject::Flag flag, bool equals)

@@ -4,34 +4,34 @@
 
 #include "CommunicationBridge.h"
 
-CoolSocket::ActiveConnection *CommunicationBridge::communicate(NetworkDevice &targetDevice,
+CSActiveConnection *CommunicationBridge::communicate(NetworkDevice &targetDevice,
                                                                const DeviceConnection &targetConnection)
 {
-    CoolSocket::ActiveConnection *connection = connectWithHandshake(targetConnection.hostAddress, false);
+    CSActiveConnection *connection = connectWithHandshake(targetConnection.hostAddress, false);
 
     communicate(connection, targetDevice);
 
     return connection;
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::communicate(CoolSocket::ActiveConnection *connection,
+CSActiveConnection *CommunicationBridge::communicate(CSActiveConnection *connection,
                                                                NetworkDevice &device)
 {
     updateDeviceIfOkay(connection, device);
     return connection;
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::connect(const QHostAddress &hostAddress)
+CSActiveConnection *CommunicationBridge::connect(const QHostAddress &hostAddress)
 {
-    return Client::openConnection(this, hostAddress, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT);
+    return CSClient::openConnection(this, hostAddress, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT);
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::connect(DeviceConnection *connection)
+CSActiveConnection *CommunicationBridge::connect(DeviceConnection *connection)
 {
     return connect(connection->hostAddress);
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::connectWithHandshake(const QHostAddress &hostAddress,
+CSActiveConnection *CommunicationBridge::connectWithHandshake(const QHostAddress &hostAddress,
                                                                         bool handshakeOnly)
 {
     return handshake(connect(hostAddress), handshakeOnly);
@@ -42,7 +42,7 @@ NetworkDevice CommunicationBridge::getDevice()
     return this->m_device;
 }
 
-CoolSocket::ActiveConnection *CommunicationBridge::handshake(CoolSocket::ActiveConnection *connection,
+CSActiveConnection *CommunicationBridge::handshake(CSActiveConnection *connection,
                                                              bool handshakeOnly)
 {
     try {
@@ -68,7 +68,7 @@ NetworkDevice CommunicationBridge::loadDevice(const QHostAddress &hostAddress)
     return loadDevice(connectWithHandshake(hostAddress, true));
 }
 
-NetworkDevice CommunicationBridge::loadDevice(CoolSocket::ActiveConnection *connection)
+NetworkDevice CommunicationBridge::loadDevice(CSActiveConnection *connection)
 {
     try {
         return NetworkDeviceLoader::loadFrom(connection->receive().asJson());
@@ -87,12 +87,12 @@ void CommunicationBridge::setSecureKey(int key)
     this->m_secureKey = key;
 }
 
-NetworkDevice CommunicationBridge::updateDeviceIfOkay(CoolSocket::ActiveConnection *activeConnection,
+NetworkDevice CommunicationBridge::updateDeviceIfOkay(CSActiveConnection *activeConnection,
                                                       NetworkDevice &device)
 {
     NetworkDevice loadedDevice = loadDevice(activeConnection);
 
-    NetworkDeviceLoader::processConnection(loadedDevice, activeConnection->getSocket()->peerAddress());
+    NetworkDeviceLoader::processConnection(loadedDevice, activeConnection->socket()->peerAddress());
 
     if (device.id != loadedDevice.id) {
         qDebug() << "Compared" << device.nickname << "with" << loadedDevice.nickname;

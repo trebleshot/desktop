@@ -1,5 +1,4 @@
 #include <src/database/object/NetworkDevice.h>
-#include <src/util/AppUtils.h>
 #include <src/util/NetworkDeviceLoader.h>
 #include <QtCore/QJsonArray>
 #include <src/database/object/TransferGroup.h>
@@ -8,11 +7,11 @@
 #include "CommunicationServer.h"
 
 CommunicationServer::CommunicationServer(QObject *parent)
-        : CoolSocket::Server(QHostAddress::Any, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT, parent)
+        : CSServer(QHostAddress::Any, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT, parent)
 {
 }
 
-void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
+void CommunicationServer::connected(CSActiveConnection *connection)
 {
     connection->setTimeout(3000);
     NetworkDevice device;
@@ -54,7 +53,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
             } else {
                 device = NetworkDeviceLoader::load(
                         this,
-                        connection->getSocket()->peerAddress());
+                        connection->socket()->peerAddress());
 
                 device.isTrusted = false;
                 device.isRestricted = true;
@@ -65,7 +64,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
             }
 
             const DeviceConnection &deviceConnection =
-                    NetworkDeviceLoader::processConnection(device, connection->getSocket()->peerAddress());
+                    NetworkDeviceLoader::processConnection(device, connection->socket()->peerAddress());
 
             if (!shouldContinue) {
                 replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ALLOWED);
@@ -191,7 +190,7 @@ void CommunicationServer::connected(CoolSocket::ActiveConnection *connection)
     }
 }
 
-void CommunicationServer::pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject &json, bool result)
+void CommunicationServer::pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result)
 {
     json.insert(KEYWORD_RESULT, result);
     activeConnection->reply(json);

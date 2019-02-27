@@ -3,7 +3,6 @@
 //
 
 #include <src/database/object/NetworkDevice.h>
-#include <src/util/AppUtils.h>
 #include <src/util/CommunicationBridge.h>
 #include <src/database/object/TransferGroup.h>
 #include <src/util/TransferUtils.h>
@@ -63,13 +62,13 @@ void SeamlessClient::run()
             }
 
             {
-                auto *activeConnection = CoolSocket::Client::openConnection(this, connection.hostAddress,
-                                                                            PORT_SEAMLESS, TIMEOUT_SOCKET_DEFAULT);
+                auto *activeConnection = CSClient::openConnection(this, connection.hostAddress, PORT_SEAMLESS,
+                                                                  TIMEOUT_SOCKET_DEFAULT);
 
                 qDebug() << "Seamless port is open";
 
-                QJsonObject groupInfoJson {
-                        {KEYWORD_TRANSFER_GROUP_ID, QVariant(m_groupId).toLongLong()},
+                QJsonObject groupInfoJson{
+                        {KEYWORD_TRANSFER_GROUP_ID,  QVariant(m_groupId).toLongLong()},
                         {KEYWORD_TRANSFER_DEVICE_ID, AppUtils::getDeviceId()}
                 };
 
@@ -92,7 +91,7 @@ void SeamlessClient::run()
                         });
                     }
                 } else {
-                    while (activeConnection->getSocket()->isOpen()) {
+                    while (activeConnection->socket()->isOpen()) {
                         if (interrupted())
                             break;
 

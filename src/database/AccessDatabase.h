@@ -1,9 +1,7 @@
 #ifndef ACCESSDATABASE_H
 #define ACCESSDATABASE_H
 
-#define gDatabase AppUtils::getDatabase()
-#define gDbSignal emit AppUtils::getDatabaseSignaller()
-
+#include <src/util/AppUtils.h>
 #include <QDebug>
 #include <QMimeData>
 #include <QSqlDatabase>
@@ -15,6 +13,10 @@
 #include <QSqlTableModel>
 #include <QVariant>
 #include <iostream>
+#include "ReconstructionException.h"
+
+#define gDatabase AppUtils::getDatabase()
+#define gDbSignal emit AppUtils::getDatabaseSignaller()
 
 #define DB_TABLE_TRANSFER "transfer"
 #define DB_DIVIS_TRANSFER "divisTansfer"

@@ -32,29 +32,26 @@ MainWindow::MainWindow(QWidget *parent)
 
         connect(error, &QMessageBox::finished, this, &MainWindow::close);
     } else {
-        connect(m_commServer, &CoolSocket::Server::serverStarted, [this]() {
+
+        if (m_commServer->start() && m_seamlessServer->start()) {
             m_ui->label->setText(QString("TrebleShot is ready to accept files"));
+
             QObject::connect(m_commServer, &CommunicationServer::textReceived,
                              this, &MainWindow::showReceivedText);
 
             QObject::connect(m_commServer, &CommunicationServer::transferRequest,
                              this, &MainWindow::showTransferRequest);
-        });
+        } else {
+            m_ui->label->setText(QString("TrebleShot will not receive files"));
 
-        connect(m_commServer, &CoolSocket::Server::serverFailure, [this]() {
             auto *error = new QMessageBox(this);
-
             error->setWindowTitle(QString("Server error"));
             error->setText(QString("TrebleShot server has returned with an error. "
                                    "Try restarting the application to solve the problem."));
-
-            error->show();
             connect(this, &MainWindow::destroyed, error, &QObject::deleteLater);
-        });
+            error->show();
+        }
 
-        m_commServer->start(0);
-        m_seamlessServer->start(0);
-        m_ui->label->setText(QString("TrebleShot will not receive files"));
         m_ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
         m_ui->treeView->setModel(m_groupModel);
 
@@ -220,7 +217,7 @@ void MainWindow::deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devic
                 bool shouldTryNext = true;
 
                 for (const auto &thisConnection : connections) {
-                    CoolSocket::ActiveConnection *connection = nullptr;
+                    CSActiveConnection *connection = nullptr;
                     CommunicationBridge bridge;
                     bridge.setDevice(thisDevice);
 

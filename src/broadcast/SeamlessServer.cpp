@@ -3,19 +3,18 @@
 //
 
 #include <src/database/object/NetworkDevice.h>
-#include <src/util/AppUtils.h>
 #include <src/database/object/TransferGroup.h>
 #include <src/database/object/TransferObject.h>
 #include <QtCore/QFile>
 #include "SeamlessServer.h"
 
 SeamlessServer::SeamlessServer(QObject *parent)
-        : CoolSocket::Server(QHostAddress::Any, PORT_SEAMLESS, TIMEOUT_SOCKET_DEFAULT, parent)
+        : CSServer(QHostAddress::Any, PORT_SEAMLESS, TIMEOUT_SOCKET_DEFAULT, parent)
 {
 
 }
 
-void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
+void SeamlessServer::connected(CSActiveConnection *connection)
 {
     try {
         const auto &mainRequest = connection->receive();
@@ -48,7 +47,7 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
                 return;
         }
 
-        while (connection->getSocket()->isOpen()) {
+        while (connection->socket()->isOpen()) {
             const auto &response = connection->receive();
 
             if (response.response == nullptr || response.length <= 0)
@@ -111,7 +110,7 @@ void SeamlessServer::connected(CoolSocket::ActiveConnection *connection)
 
                             {
                                 // Establish the connection to the socket that will receive the file
-                                socket.connectToHost(connection->getSocket()->peerAddress(), serverPort);
+                                socket.connectToHost(connection->socket()->peerAddress(), serverPort);
 
                                 while (QAbstractSocket::SocketState::ConnectingState == socket.state())
                                     socket.waitForConnected(TIMEOUT_SOCKET_DEFAULT_LARGE);

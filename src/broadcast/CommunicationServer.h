@@ -8,15 +8,15 @@
 #include <src/util/AppUtils.h>
 #include <src/database/object/TransferGroup.h>
 
-class CommunicationServer : public CoolSocket::Server {
+class CommunicationServer : public CSServer {
 Q_OBJECT
 
-    void pushReply(CoolSocket::ActiveConnection *activeConnection, QJsonObject &json, bool result);
+    void pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result);
 
 public:
     explicit CommunicationServer(QObject *parent = nullptr);
 
-    void connected(CoolSocket::ActiveConnection *connection) override;
+    void connected(CSActiveConnection *connection) override;
 
 signals:
 

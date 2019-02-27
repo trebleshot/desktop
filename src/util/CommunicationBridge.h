@@ -12,43 +12,43 @@
 #include <src/database/object/NetworkDevice.h>
 #include <src/util/NetworkDeviceLoader.h>
 
-class CommunicationBridge : public CoolSocket::Client {
+class CommunicationBridge : public CSClient {
     NetworkDevice m_device;
     int m_secureKey = -1;
 
 public:
     explicit CommunicationBridge(QObject *parent = nullptr, const NetworkDevice &target = NetworkDevice())
-            : CoolSocket::Client(parent)
+            : CSClient(parent)
     {
         m_device = target;
     }
 
-    CoolSocket::ActiveConnection *communicate(NetworkDevice &targetDevice,
+    CSActiveConnection *communicate(NetworkDevice &targetDevice,
                                               const DeviceConnection &targetConnection);
 
-    CoolSocket::ActiveConnection *communicate(CoolSocket::ActiveConnection *connection,
+    CSActiveConnection *communicate(CSActiveConnection *connection,
                                               NetworkDevice &device);
 
-    CoolSocket::ActiveConnection *connect(const QHostAddress &hostAddress);
+    CSActiveConnection *connect(const QHostAddress &hostAddress);
 
-    CoolSocket::ActiveConnection *connect(DeviceConnection *connection);
+    CSActiveConnection *connect(DeviceConnection *connection);
 
-    CoolSocket::ActiveConnection *connectWithHandshake(const QHostAddress &hostAddress, bool handshakeOnly);
+    CSActiveConnection *connectWithHandshake(const QHostAddress &hostAddress, bool handshakeOnly);
 
     NetworkDevice getDevice();
 
-    CoolSocket::ActiveConnection *handshake(CoolSocket::ActiveConnection *connection,
+    CSActiveConnection *handshake(CSActiveConnection *connection,
                                             bool handshakeOnly);
 
     NetworkDevice loadDevice(const QHostAddress &hostAddress);
 
-    NetworkDevice loadDevice(CoolSocket::ActiveConnection *connection);
+    NetworkDevice loadDevice(CSActiveConnection *connection);
 
     void setDevice(const NetworkDevice &device);
 
     void setSecureKey(int key);
 
-    NetworkDevice updateDeviceIfOkay(CoolSocket::ActiveConnection *connection,
+    NetworkDevice updateDeviceIfOkay(CSActiveConnection *connection,
                                      NetworkDevice &device);
 };
 

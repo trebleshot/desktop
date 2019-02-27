@@ -21,218 +21,148 @@
 
 using namespace std;
 
-namespace CoolSocket {
+class CSResponse;
 
-    class ServerWorker;
+class CSActiveConnection;
 
-    class Client;
+class CSClient;
 
-    class Server;
+class CSServer : public QObject {
+Q_OBJECT
+    int m_timeout = COOLSOCKET_NO_TIMEOUT;
+    quint16 m_port = 0;
+    QHostAddress m_hostAddress;
+    QTcpServer *m_server;
+    QMap<CSActiveConnection *, QTcpSocket *> mConnections;
 
-    class Response;
+public:
+    explicit CSServer(QHostAddress hostAddress, quint16 port = 0, int timeout = COOLSOCKET_NO_TIMEOUT,
+                      QObject *parent = nullptr);
 
-    class RequestHandler;
+    ~CSServer() override;
 
-    class ActiveConnection;
+    friend class CSActiveConnection;
 
-    class Server : public QObject {
-    Q_OBJECT
-        int m_timeout = COOLSOCKET_NO_TIMEOUT;
-        quint16 m_port = 0;
-        QHostAddress m_hostAddress;
-        QPointer<ServerWorker> m_worker;
-        QList<RequestHandler *> m_ongoingTasks;
+    friend class CSResponse;
 
-    protected:
-        void setWorker(ServerWorker *worker)
-        {
-            this->m_worker = worker;
-        }
+    QHostAddress hostAddress() const
+    {
+        return m_hostAddress;
+    }
 
-    public:
-        explicit Server(QHostAddress hostAddress, quint16 port = 0, int timeout = COOLSOCKET_NO_TIMEOUT,
-                        QObject *parent = nullptr);
+    quint16 port() const
+    {
+        return m_port;
+    }
 
-        friend class ServerWorker;
+    bool serving();
 
-        friend class ActiveConnection;
+    void setHostAddress(const QHostAddress &hostAddress)
+    {
+        m_hostAddress = hostAddress;
+    }
 
-        friend class Response;
+    void setPort(quint16 port)
+    {
+        m_port = port;
+    }
 
-        friend class RequestHandler;
+    void setTimeout(int timeout)
+    {
+        m_timeout = timeout;
+    }
 
-        virtual void connected(ActiveConnection *connection) = 0;
+    QTcpServer *server()
+    {
+        return m_server;
+    }
 
-        QHostAddress hostAddress() const
-        {
-            return m_hostAddress;
-        }
+    bool start();
 
-        quint16 port() const
-        {
-            return m_port;
-        }
+    bool stop();
 
-        bool serving();
+    int timeout()
+    {
+        return m_timeout;
+    }
 
-        void setHostAddress(const QHostAddress &hostAddress)
-        {
-            m_hostAddress = hostAddress;
-        }
+protected slots:
 
-        void setPort(quint16 port)
-        {
-            m_port = port;
-        }
+    void connectionRequest();
 
-        void setTimeout(int timeout)
-        {
-            m_timeout = timeout;
-        }
+    virtual void connected(CSActiveConnection *connection) = 0;
+};
 
-        bool start(int blockingTime = -1);
 
-        bool startEnsured(int blockingTime = -1);
+class CSActiveConnection : public QObject {
+Q_OBJECT
+    int m_timeout = 2000;
+    QTcpSocket *m_socket;
 
-        void stop(int blockingTime = -1);
+public:
+    explicit CSActiveConnection(QTcpSocket *socket, int msecTimeout = 2000, QObject *parent = nullptr)
+            : QObject(parent)
+    {
+        m_socket = socket;
+        m_timeout = msecTimeout;
+    }
 
-        int timeout()
-        {
-            return m_timeout;
-        }
+    ~CSActiveConnection() override
+    {
+        if (this->m_socket->isOpen())
+            this->m_socket->close();
 
-        ServerWorker *worker() const
-        {
-            return m_worker;
-        }
+        delete m_socket;
+    }
 
-    signals:
+    void reply(const QJsonObject &reply);
 
-        void clientConnected(ActiveConnection *connection);
+    void reply(const char *reply);
 
-        void serverStarted();
+    CSResponse receive();
 
-        void serverStopped();
+    void setTimeout(int msecs)
+    {
+        this->m_timeout = msecs;
+    }
 
-        void serverFailure();
-    };
+    QTcpSocket *socket()
+    {
+        return m_socket;
+    }
 
-    class ActiveConnection : public QObject {
-    Q_OBJECT
-        QTcpSocket *m_activeSocket;
-        int m_timeout = 2000;
+    int timeout()
+    {
+        return m_timeout;
+    }
+};
 
-    public:
-        explicit ActiveConnection(QTcpSocket *tcpServer, int msecTimeout = 2000,
-                                  QObject *parent = nullptr)
-                : QObject(parent)
-        {
-            this->m_activeSocket = tcpServer;
-            this->m_timeout = msecTimeout;
-        }
+class CSResponse {
+public:
+    QString response;
+    QJsonObject headerIndex;
+    string::size_type length = 0;
 
-        ~ActiveConnection() override
-        {
-            if (this->m_activeSocket->isOpen())
-                this->m_activeSocket->close();
+    CSResponse() = default;
 
-            delete m_activeSocket;
-        }
+    virtual ~CSResponse() = default;
 
-        QTcpSocket *getSocket()
-        {
-            return m_activeSocket;
-        }
+    QJsonObject asJson() const
+    {
+        return QJsonDocument::fromJson(QByteArray::fromStdString(response.toStdString())).object();
+    }
+};
 
-        int getTimeout()
-        {
-            return m_timeout;
-        }
+class CSClient : public QObject {
+Q_OBJECT
 
-        void setTimeout(int msecs)
-        {
-            this->m_timeout = msecs;
-        }
+public:
+    explicit CSClient(QObject *parent = nullptr) : QObject(parent)
+    {
+    }
 
-        void reply(const QJsonObject &reply);
-
-        void reply(const char *reply);
-
-        Response receive();
-    };
-
-    class Response {
-    public:
-        QString response;
-        QJsonObject headerIndex;
-        string::size_type length = 0;
-
-        Response() = default;
-
-        virtual ~Response() = default;
-
-        QJsonObject asJson() const
-        {
-            return QJsonDocument::fromJson(QByteArray::fromStdString(response.toStdString()))
-                    .object();
-        }
-    };
-
-    class ServerWorker : public QThread {
-    Q_OBJECT
-        QTcpServer *m_tcpServer;
-        Server *m_server;
-        bool m_serverListening = false;
-
-    public:
-        explicit ServerWorker(Server *server, QObject *parent = nullptr);
-
-        bool serving()
-        {
-            return isRunning() && m_serverListening;
-        }
-
-        QTcpServer *tcpServer()
-        {
-            return m_tcpServer;
-        }
-
-        void setTcpServer(QTcpServer *server);
-
-    protected:
-        void run() override;
-    };
-
-    class RequestHandler : public QThread {
-    Q_OBJECT
-        Server *m_server;
-        ActiveConnection *m_connection;
-
-    public:
-        RequestHandler(Server *server, ActiveConnection *connection, QObject *parent = nullptr)
-                : QThread(parent)
-        {
-            this->m_server = server;
-            this->m_connection = connection;
-        }
-
-    protected:
-        void run() override;
-    };
-
-    class Client : public QObject {
-    Q_OBJECT
-
-    public:
-        explicit Client(QObject *parent = nullptr) : QObject(parent)
-        {
-        }
-
-        static ActiveConnection *openConnection(const QObject *sender,
-                                                const QHostAddress &hostName,
-                                                quint16 port,
-                                                int timeoutMSeconds = 3000);
-    };
-}
+    static CSActiveConnection *openConnection(const QObject *sender, const QHostAddress &hostName, quint16 port,
+                                              int timeoutMSeconds = 3000);
+};
 
 #endif // COOLSOCKET_H

@@ -10,11 +10,9 @@
 #include <QtCore/QMimeDatabase>
 #include <src/database/object/TransferObject.h>
 #include <src/util/TransferUtils.h>
-#include <src/util/AppUtils.h>
 #include <QtWidgets/QMessageBox>
 #include "FileAdditionProgressDialog.h"
 #include "DeviceChooserDialog.h"
-#include <QtCore/qalgorithms.h>
 
 FileAdditionProgressDialog::FileAdditionProgressDialog(QWidget *parent, const QList<QUrl> &urls)
         : QDialog(parent), m_ui(new Ui::FileAdditionProgressDialog)
