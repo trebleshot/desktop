@@ -20,16 +20,14 @@ CSServer::~CSServer()
 void CSServer::connectionRequest()
 {
     QTcpSocket *socket = server()->nextPendingConnection();
-    auto *connection = new CSActiveConnection(socket, timeout());
-    connected(connection);
-    delete connection;
-    /*auto *thread = new GThread([this, socket](GThread *thread) {
-        auto *connection = new CSActiveConnection(socket, timeout(), thread);
+    auto *connection = new CSActiveConnection(socket, timeout(), this);
+
+    auto *thread = new GThread([this, connection](GThread *thread) {
         connected(connection);
         delete connection;
     }, true);
 
-    thread->start();*/
+    thread->start();
 }
 
 bool CSServer::serving()

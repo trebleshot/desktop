@@ -6,6 +6,7 @@
 #include <QtCore/QDir>
 #include <QSqlError>
 #include <cmath>
+#include "AppUtils.h"
 #include "TransferUtils.h"
 
 SqlSelection TransferUtils::createSqlSelection(groupid groupId, const QString &deviceId,

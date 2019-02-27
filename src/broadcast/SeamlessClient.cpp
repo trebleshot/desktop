@@ -3,6 +3,7 @@
 //
 
 #include <src/database/object/NetworkDevice.h>
+#include <src/util/AppUtils.h>
 #include <src/util/CommunicationBridge.h>
 #include <src/database/object/TransferGroup.h>
 #include <src/util/TransferUtils.h>

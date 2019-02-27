@@ -5,7 +5,7 @@
 #include "CommunicationBridge.h"
 
 CSActiveConnection *CommunicationBridge::communicate(NetworkDevice &targetDevice,
-                                                               const DeviceConnection &targetConnection)
+                                                     const DeviceConnection &targetConnection)
 {
     CSActiveConnection *connection = connectWithHandshake(targetConnection.hostAddress, false);
 
@@ -15,7 +15,7 @@ CSActiveConnection *CommunicationBridge::communicate(NetworkDevice &targetDevice
 }
 
 CSActiveConnection *CommunicationBridge::communicate(CSActiveConnection *connection,
-                                                               NetworkDevice &device)
+                                                     NetworkDevice &device)
 {
     updateDeviceIfOkay(connection, device);
     return connection;
@@ -32,7 +32,7 @@ CSActiveConnection *CommunicationBridge::connect(DeviceConnection *connection)
 }
 
 CSActiveConnection *CommunicationBridge::connectWithHandshake(const QHostAddress &hostAddress,
-                                                                        bool handshakeOnly)
+                                                              bool handshakeOnly)
 {
     return handshake(connect(hostAddress), handshakeOnly);
 }
@@ -43,19 +43,17 @@ NetworkDevice CommunicationBridge::getDevice()
 }
 
 CSActiveConnection *CommunicationBridge::handshake(CSActiveConnection *connection,
-                                                             bool handshakeOnly)
+                                                   bool handshakeOnly)
 {
     try {
-        QJsonObject replyJSON;
+        QJsonObject replyJSON{
+                {KEYWORD_HANDSHAKE_REQUIRED, true},
+                {KEYWORD_HANDSHAKE_ONLY,     handshakeOnly},
+                {KEYWORD_DEVICE_INFO_SERIAL, getDeviceId()},
+                {KEYWORD_DEVICE_SECURE_KEY,  m_device.id == nullptr ? m_secureKey : m_device.tmpSecureKey}
+        };
 
-        replyJSON.insert(KEYWORD_HANDSHAKE_REQUIRED, true);
-        replyJSON.insert(KEYWORD_HANDSHAKE_ONLY, handshakeOnly);
-        replyJSON.insert(KEYWORD_DEVICE_INFO_SERIAL, getDeviceId());
-        replyJSON.insert(KEYWORD_DEVICE_SECURE_KEY, m_device.id == nullptr
-                                                    ? m_secureKey
-                                                    : m_device.tmpSecureKey);
-
-        connection->reply(QJsonDocument(replyJSON).toJson().toStdString().c_str());
+        connection->remoteReply(replyJSON);
     } catch (exception &e) {
         throw exception();
     }
@@ -71,7 +69,7 @@ NetworkDevice CommunicationBridge::loadDevice(const QHostAddress &hostAddress)
 NetworkDevice CommunicationBridge::loadDevice(CSActiveConnection *connection)
 {
     try {
-        return NetworkDeviceLoader::loadFrom(connection->receive().asJson());
+        return NetworkDeviceLoader::loadFrom((emit connection->remoteReceive()).asJson());
     } catch (exception &e) {
         throw exception();
     }

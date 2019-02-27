@@ -1,4 +1,5 @@
 #include <src/database/object/NetworkDevice.h>
+#include <src/util/AppUtils.h>
 #include <src/util/NetworkDeviceLoader.h>
 #include <QtCore/QJsonArray>
 #include <src/database/object/TransferGroup.h>
@@ -17,7 +18,7 @@ void CommunicationServer::connected(CSActiveConnection *connection)
     NetworkDevice device;
 
     try {
-        auto response = connection->receive();
+        auto response = emit connection->remoteReceive();
         auto responseJSON = response.asJson();
         QJsonObject replyJSON = QJsonObject();
 
@@ -37,7 +38,7 @@ void CommunicationServer::connected(CSActiveConnection *connection)
                     deviceSerial = responseJSON.value(KEYWORD_DEVICE_INFO_SERIAL).toString();
                 }
 
-                response = connection->receive();
+                response = emit connection->remoteReceive();
                 responseJSON = response.asJson();
             } else {
                 return;
@@ -193,5 +194,5 @@ void CommunicationServer::connected(CSActiveConnection *connection)
 void CommunicationServer::pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result)
 {
     json.insert(KEYWORD_RESULT, result);
-    activeConnection->reply(json);
+    emit activeConnection->remoteReply(json);
 }

@@ -105,6 +105,13 @@ public:
     {
         m_socket = socket;
         m_timeout = msecTimeout;
+
+        connect(this, &CSActiveConnection::remoteReceive,
+                this, &CSActiveConnection::receive, Qt::BlockingQueuedConnection);
+        connect(this, SIGNAL(remoteReply(const char * )),
+                this, SLOT(reply(const char * )), Qt::BlockingQueuedConnection);
+        connect(this, SIGNAL(remoteReply(const QJsonObject & )),
+                this, SLOT(reply(const QJsonObject & )), Qt::BlockingQueuedConnection);
     }
 
     ~CSActiveConnection() override
@@ -114,12 +121,6 @@ public:
 
         delete m_socket;
     }
-
-    void reply(const QJsonObject &reply);
-
-    void reply(const char *reply);
-
-    CSResponse receive();
 
     void setTimeout(int msecs)
     {
@@ -135,6 +136,22 @@ public:
     {
         return m_timeout;
     }
+
+public slots:
+    void reply(const QJsonObject &reply);
+
+    void reply(const char *reply);
+
+    CSResponse receive();
+
+signals:
+
+    CSResponse remoteReceive();
+
+    void remoteReply(const QJsonObject &reply);
+
+    void remoteReply(const char *reply);
+
 };
 
 class CSResponse {

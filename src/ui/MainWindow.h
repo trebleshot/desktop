@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "ui_MainWindow.h"
 #include <src/database/AccessDatabase.h>
 #include <src/broadcast/CommunicationServer.h>
 #include <src/coolsocket/CoolSocket.h>
@@ -19,6 +18,7 @@
 #include <QPushButton>
 #include <QClipboard>
 #include <src/broadcast/SeamlessServer.h>
+#include "ui_MainWindow.h"
 
 namespace Ui {
     class MainWindow;

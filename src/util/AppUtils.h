@@ -5,8 +5,9 @@
 #ifndef TREBLESHOT_APPUTILS_H
 #define TREBLESHOT_APPUTILS_H
 
-#include <src/config/Config.h>
-#include <src/config/Keyword.h>
+#include "src/config/Config.h"
+#include "src/config/Keyword.h"
+#include "src/database/AccessDatabase.h"
 #include <QApplication>
 #include <QtCore/QSettings>
 #include <src/database/object/NetworkDevice.h>

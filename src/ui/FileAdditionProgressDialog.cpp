@@ -11,6 +11,7 @@
 #include <src/database/object/TransferObject.h>
 #include <src/util/TransferUtils.h>
 #include <QtWidgets/QMessageBox>
+#include <src/util/AppUtils.h>
 #include "FileAdditionProgressDialog.h"
 #include "DeviceChooserDialog.h"
 

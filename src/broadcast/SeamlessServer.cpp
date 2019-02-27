@@ -6,6 +6,7 @@
 #include <src/database/object/TransferGroup.h>
 #include <src/database/object/TransferObject.h>
 #include <QtCore/QFile>
+#include <src/util/AppUtils.h>
 #include "SeamlessServer.h"
 
 SeamlessServer::SeamlessServer(QObject *parent)
@@ -17,7 +18,7 @@ SeamlessServer::SeamlessServer(QObject *parent)
 void SeamlessServer::connected(CSActiveConnection *connection)
 {
     try {
-        const auto &mainRequest = connection->receive();
+        const auto &mainRequest = emit connection->remoteReceive();
         const auto &mainRequestJSON = mainRequest.asJson();
         QString deviceId = mainRequestJSON.contains(KEYWORD_TRANSFER_DEVICE_ID)
                            ? mainRequestJSON.value(KEYWORD_TRANSFER_DEVICE_ID).toString()
@@ -48,7 +49,7 @@ void SeamlessServer::connected(CSActiveConnection *connection)
         }
 
         while (connection->socket()->isOpen()) {
-            const auto &response = connection->receive();
+            const auto &response = emit connection->remoteReceive();
 
             if (response.response == nullptr || response.length <= 0)
                 return;

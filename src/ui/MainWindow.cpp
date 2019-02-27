@@ -252,7 +252,7 @@ void MainWindow::deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devic
                         connection->reply(thisObject);
 
                         {
-                            const QJsonObject &thisReply = connection->receive().asJson();
+                            const QJsonObject &thisReply = (emit connection->remoteReceive()).asJson();
 
                             if (thisReply.value(KEYWORD_RESULT).toBool(false)) {
                                 qDebug() << "deviceForAddedFiles << Successful for" << thisDevice.nickname;
