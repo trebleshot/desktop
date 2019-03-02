@@ -2,18 +2,19 @@
 // Created by veli on 2/24/19.
 //
 
+#include <iostream>
 #include <QUrl>
 #include <QPushButton>
-#include <src/util/GThread.h>
+#include <QtWidgets/QMessageBox>
 #include <QtCore/QRandomGenerator>
-#include <src/database/object/TransferGroup.h>
 #include <QtCore/QMimeDatabase>
 #include <src/database/object/TransferObject.h>
-#include <src/util/TransferUtils.h>
-#include <QtWidgets/QMessageBox>
+#include <src/database/object/TransferGroup.h>
 #include <src/util/AppUtils.h>
-#include "FileAdditionProgressDialog.h"
+#include <src/util/GThread.h>
+#include <src/util/TransferUtils.h>
 #include "DeviceChooserDialog.h"
+#include "FileAdditionProgressDialog.h"
 
 FileAdditionProgressDialog::FileAdditionProgressDialog(QWidget *parent, const QList<QUrl> &urls)
         : QDialog(parent), m_ui(new Ui::FileAdditionProgressDialog)
@@ -46,7 +47,7 @@ void FileAdditionProgressDialog::task(GThread *thread, const QList<QUrl> &urls)
             int position = 0;
             for (const auto &url : urls) {
                 if (thread->interrupted())
-                    throw exception();
+                    throw std::exception();
 
                 TransferUtils::createTransferMap(thread, &transferMap, group, mimeDb, requestId, url.toLocalFile());
                 emit thread->statusUpdate(urls.size(), position++, url.toLocalFile());
@@ -58,7 +59,7 @@ void FileAdditionProgressDialog::task(GThread *thread, const QList<QUrl> &urls)
                 int position = 0;
                 for (auto &transferObject : transferMap) {
                     if (thread->interrupted())
-                        throw exception();
+                        throw std::exception();
 
                     gDbSignal->insert(transferObject);
                     emit thread->statusUpdate(transferMap.size(), position++, transferObject.friendlyName);

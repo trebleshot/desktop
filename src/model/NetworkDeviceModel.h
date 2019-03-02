@@ -31,6 +31,9 @@ public:
 
     const QList<NetworkDevice> *list();
 
+public slots:
+    void databaseChanged(const SqlSelection& change, ChangeType type);
+
 protected:
     QList<NetworkDevice> m_list;
 };

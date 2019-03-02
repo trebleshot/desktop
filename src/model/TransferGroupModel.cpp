@@ -7,15 +7,8 @@
 TransferGroupModel::TransferGroupModel(QObject *parent)
         : QAbstractTableModel(parent)
 {
-    SqlSelection selection;
-
-    selection.setTableName(DB_TABLE_TRANSFERGROUP);
-    selection.setOrderBy(DB_FIELD_TRANSFERGROUP_DATECREATED, false);
-
-    const auto &dbList = gDatabase->castQuery(selection, TransferGroup());
-
-    for (const auto &transferGroup : dbList)
-        m_list << TransferUtils::getInfo(transferGroup);
+    connect(gDatabase, &AccessDatabase::databaseChanged, this, &TransferGroupModel::databaseChanged);
+    databaseChanged(SqlSelection(), ChangeType::Any);
 }
 
 int TransferGroupModel::columnCount(const QModelIndex &parent) const
@@ -102,4 +95,23 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
     }
 
     return QVariant();
+}
+
+void TransferGroupModel::databaseChanged(const SqlSelection &change, ChangeType changeType)
+{
+    emit layoutAboutToBeChanged();
+
+    m_list.clear();
+
+    SqlSelection selection;
+    selection.setTableName(DB_TABLE_TRANSFERGROUP);
+    selection.setOrderBy(DB_FIELD_TRANSFERGROUP_DATECREATED, false);
+
+    const auto &groupList = gDatabase->castQuery(selection, TransferGroup());
+
+    for (const auto &transferGroup : groupList) {
+        m_list.append(TransferUtils::getInfo(transferGroup));
+    }
+
+    emit layoutChanged();
 }

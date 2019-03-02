@@ -22,7 +22,7 @@ void SeamlessServer::connected(CSActiveConnection *connection)
     try {
         const auto &mainRequest = connection->receive();
         const auto &mainRequestJSON = mainRequest.asJson();
-        QString deviceId = mainRequestJSON.contains(KEYWORD_TRANSFER_DEVICE_ID)
+        const QString &deviceId = mainRequestJSON.contains(KEYWORD_TRANSFER_DEVICE_ID)
                            ? mainRequestJSON.value(KEYWORD_TRANSFER_DEVICE_ID).toString()
                            : nullptr;
         groupid groupId = mainRequestJSON.value(KEYWORD_TRANSFER_GROUP_ID).toVariant().toUInt();

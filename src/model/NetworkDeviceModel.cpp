@@ -9,12 +9,8 @@
 NetworkDeviceModel::NetworkDeviceModel(QObject *parent)
         : QAbstractTableModel(parent)
 {
-    SqlSelection selection;
-
-    selection.setTableName(DB_TABLE_DEVICES);
-    selection.setOrderBy(DB_FIELD_DEVICES_LASTUSAGETIME, false);
-
-    m_list = gDatabase->castQuery(selection, NetworkDevice());
+    connect(gDatabase, &AccessDatabase::databaseChanged, this, &NetworkDeviceModel::databaseChanged);
+    databaseChanged(SqlSelection(), ChangeType::Any);
 }
 
 int NetworkDeviceModel::columnCount(const QModelIndex &parent) const
@@ -25,6 +21,19 @@ int NetworkDeviceModel::columnCount(const QModelIndex &parent) const
 int NetworkDeviceModel::rowCount(const QModelIndex &parent) const
 {
     return m_list.size();
+}
+
+void NetworkDeviceModel::databaseChanged(const SqlSelection &change, ChangeType changeType)
+{
+    emit layoutAboutToBeChanged();
+
+    SqlSelection selection;
+    selection.setTableName(DB_TABLE_DEVICES);
+    selection.setOrderBy(DB_FIELD_DEVICES_LASTUSAGETIME, false);
+
+    m_list = gDatabase->castQuery(selection, NetworkDevice());
+
+    emit layoutChanged();
 }
 
 QVariant NetworkDeviceModel::headerData(int section, Qt::Orientation orientation, int role) const

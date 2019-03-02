@@ -6,22 +6,21 @@
 #define TREBLESHOT_TRANSFERGROUPLISTMODEL_H
 
 #include "src/util/TransferUtils.h"
-#include <QtCore/QAbstractListModel>
 #include <iostream>
-#include <src/util/AppUtils.h>
+#include <src/database/AccessDatabase.h>
 #include <src/database/object/TransferGroup.h>
-#include <QtCore/QDateTime>
+#include <src/database/object/TransferObject.h>
 #include <src/database/object/NetworkDevice.h>
+#include <src/util/AppUtils.h>
+#include <QtCore/QAbstractListModel>
+#include <QtCore/QDateTime>
 #include <QIcon>
 #include <QtGui/QIconEngine>
-#include <src/database/object/TransferObject.h>
 #include <QtCore/QMutex>
 
 class TransferGroupModel : public QAbstractTableModel {
 Q_OBJECT
 
-    QList<TransferGroupInfo> m_list;
-    QMutex m_mutex;
 public:
     enum ColumnNames {
         Devices,
@@ -45,6 +44,14 @@ public:
     {
         return m_list;
     }
+
+public slots:
+
+    void databaseChanged(const SqlSelection &change, ChangeType changeType);
+
+protected:
+    QList<TransferGroupInfo> m_list;
+    QMutex m_mutex;
 };
 
 

@@ -66,8 +66,6 @@
 #define DB_FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER "connectionAdapter"
 #define DB_FIELD_TRANSFERASSIGNEE_ISCLONE "isClone"
 
-using namespace std;
-
 typedef QMap<QString, QVariant> DbObjectMap;
 
 class AccessDatabase;
@@ -75,6 +73,15 @@ class AccessDatabase;
 class DatabaseObject;
 
 class SqlSelection;
+
+class DbChangeSubscriber;
+
+enum ChangeType {
+    Any = -1,
+    Delete,
+    Update,
+    Insert
+};
 
 namespace DbStructure {
     extern QSqlField generateField(const QString &key, const QVariant::Type &type, bool nullable = true);
@@ -245,6 +252,8 @@ public slots:
     bool update(const SqlSelection &selection, const DbObjectMap &record);
 
 signals:
+
+    void databaseChanged(const SqlSelection &, ChangeType);
 
     bool signalPublish(DatabaseObject &);
 };

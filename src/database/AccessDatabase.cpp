@@ -123,8 +123,11 @@ bool AccessDatabase::insert(DatabaseObject &dbObject)
 {
     dbObject.onInsertingObject(this);
 
-    QSqlTableModel *model = DbStructure::gatherTableModel(dbObject);
+    const auto &selection = dbObject.getWhere();
+    QSqlTableModel *model = DbStructure::gatherTableModel(selection.tableName);
     bool state = model->insertRecord(-1, record(dbObject, *model));
+
+    emit databaseChanged(selection, ChangeType::Insert);
 
     delete model;
     return state;
@@ -162,7 +165,10 @@ void AccessDatabase::reconstruct(DatabaseObject &dbObject)
 
 bool AccessDatabase::remove(const SqlSelection &selection)
 {
-    return selection.toDeletionQuery().exec();
+    bool result = selection.toDeletionQuery().exec();
+    emit databaseChanged(selection, ChangeType::Delete);
+
+    return result;
 }
 
 bool AccessDatabase::remove(DatabaseObject &dbObject)
@@ -190,9 +196,12 @@ bool AccessDatabase::update(const SqlSelection &selection, const DbObjectMap &ma
 {
     auto *tableModel = DbStructure::gatherTableModel(selection.tableName);
     QSqlQuery updateQuery = selection.toUpdateQuery(record(map, *tableModel));
+    bool result = updateQuery.exec();
 
     delete tableModel;
-    return updateQuery.exec();
+    emit databaseChanged(selection, ChangeType::Update);
+
+    return result;
 }
 
 QSqlRecord AccessDatabase::record(const DatabaseObject &object, const QSqlTableModel &tableModel)
