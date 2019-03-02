@@ -52,7 +52,7 @@ void CSActiveConnection::reply(const QJsonObject &reply)
 
 void CSActiveConnection::reply(const char *reply)
 {
-    qDebug() << this << " : Entered write sequence";
+    qDebug() << this << "Entered write sequence";
 
     QByteArray replyImpl(reply);
 
@@ -74,12 +74,12 @@ void CSActiveConnection::reply(const char *reply)
         }
     }
 
-    qDebug() << this << " : Exited write sequence";
+    qDebug() << this << "Exited write sequence";
 }
 
 CSResponse CSActiveConnection::receive()
 {
-    qDebug() << this << " : Entered read sequence";
+    qDebug() << this << "Entered read sequence";
 
     CSResponse response;
     size_t headerPosition = string::npos;
@@ -138,7 +138,7 @@ CSResponse CSActiveConnection::receive()
             throw exception();
     }
 
-    qDebug() << this << " : Exited read sequence";
+    qDebug() << this << "Exited read sequence";
 
     return response;
 }

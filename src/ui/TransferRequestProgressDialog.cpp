@@ -15,6 +15,7 @@ TransferRequestProgressDialog::TransferRequestProgressDialog(QWidget *parent, co
     m_thread->start();
 
     connect(m_thread, &GThread::statusUpdate, this, &TransferRequestProgressDialog::statusUpdate);
+    connect(this, &QDialog::finished, m_thread, &GThread::notifyInterrupt);
 }
 
 void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId, const QList<NetworkDevice> &devices)
@@ -41,6 +42,9 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
     QList<NetworkDevice> passedDevices;
 
     for (const NetworkDevice &device : devices) {
+        if (thread->interrupted())
+            break;
+
         SqlSelection deviceSelection;
         deviceSelection.setTableName(DB_TABLE_TRANSFER);
         deviceSelection.setWhere(QString("%1 = ? AND %2 = ? AND %3 = ?")
@@ -71,6 +75,9 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
     }
 
     for (auto &thisDevice : passedDevices) {
+        if (thread->interrupted())
+            break;
+
         SqlSelection connectionSelection;
         connectionSelection.setTableName(DB_TABLE_DEVICECONNECTION);
         connectionSelection.setWhere(QString("%1 = ?").arg(DB_FIELD_DEVICES_ID));
@@ -89,6 +96,9 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
             bool shouldTryNext = true;
 
             for (const auto &thisConnection : connections) {
+                if (thread->interrupted())
+                    break;
+
                 CSActiveConnection *connection = nullptr;
                 CommunicationBridge bridge(thread);
                 bridge.setDevice(thisDevice);
@@ -102,6 +112,9 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
                 QJsonArray filesIndex;
 
                 for (const auto &object : objectList) {
+                    if (thread->interrupted())
+                        break;
+
                     QJsonObject jsonObject{
                             {KEYWORD_INDEX_FILE_NAME,     object.friendlyName},
                             {KEYWORD_INDEX_FILE_SIZE,     QVariant((qulonglong) object.fileSize).toLongLong()},

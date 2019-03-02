@@ -17,6 +17,8 @@ SeamlessServer::SeamlessServer(QObject *parent)
 
 void SeamlessServer::connected(CSActiveConnection *connection)
 {
+    Interrupter interrupter;
+
     try {
         const auto &mainRequest = connection->receive();
         const auto &mainRequestJSON = mainRequest.asJson();
@@ -67,8 +69,8 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                         emit taskDone(groupId, deviceId);
                         break;
                     } else
-                        interrupt();
-                } else if (!interrupted()) {
+                        interrupter.interrupt();
+                } else if (!interrupter.interrupted()) {
                     qDebug() << this << "Entering sending phase";
 
                     transferObject = TransferObject(request.value(KEYWORD_TRANSFER_REQUEST_ID).toVariant().toUInt(),
@@ -129,17 +131,18 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                                     if (socket.bytesToWrite() == 0) {
                                         socket.write(file.read(BUFFER_LENGTH_DEFAULT));
                                         socket.flush();
-                                    } else if (interrupted()
+                                    } else if (interrupter.interrupted()
                                                || (socket.bytesToWrite() > 0
                                                    && !socket.waitForBytesWritten(TIMEOUT_SOCKET_DEFAULT))) {
-                                        qDebug() << this << "Timed out or interrupted:" << interrupted();
+                                        qDebug() << this << "Timed out or interrupted:" << interrupter.interrupted();
                                         throw exception();
                                     }
                                 }
 
+                                qDebug() << this << "I/O Completed";
                                 transferObject.flag = TransferObject::Flag::Interrupted;
                             } catch (...) {
-                                qDebug() << this << "Error occurred";
+                                qDebug() << this << "I/O Error occurred";
                                 transferObject.flag = TransferObject::Flag::Done;
                             }
 
@@ -163,7 +166,9 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 
                         transferObject.flag = TransferObject::Flag::Removed;
                     }
-                } else if (interrupted()) {
+                } else if (interrupter.interrupted()) {
+                    qDebug() << this << "Interrupted";
+
                     connection->reply({
                                               {KEYWORD_RESULT,            false},
                                               {KEYWORD_TRANSFER_JOB_DONE, false}

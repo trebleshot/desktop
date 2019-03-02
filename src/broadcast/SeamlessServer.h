@@ -10,7 +10,7 @@
 #include "src/config/Config.h"
 #include "src/config/Keyword.h"
 
-class SeamlessServer : public CSServer, public Interrupter {
+class SeamlessServer : public CSServer {
 Q_OBJECT
 
 public:
