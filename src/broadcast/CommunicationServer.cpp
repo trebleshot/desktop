@@ -10,10 +10,18 @@
 CommunicationServer::CommunicationServer(QObject *parent)
         : CSServer(QHostAddress::Any, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT, parent)
 {
+    qRegisterMetaType<QHostAddress>("QHostAddress");
 }
 
 void CommunicationServer::connected(CSActiveConnection *connection)
 {
+    if (m_blockedAddresses.contains(connection->socket()->peerAddress()))
+    {
+        qDebug() << this << connection->socket()->peerAddress() << "is denied";
+        connection->socket()->close();
+        return;
+    }
+
     connection->setTimeout(3000);
     NetworkDevice device;
 
@@ -26,7 +34,7 @@ void CommunicationServer::connected(CSActiveConnection *connection)
 
         bool result = false;
         bool shouldContinue = false;
-        QString deviceSerial = nullptr;
+        QString deviceId = nullptr;
 
         if (responseJSON.contains(KEYWORD_HANDSHAKE_REQUIRED)
             && responseJSON.value(KEYWORD_HANDSHAKE_REQUIRED).toBool(false)) {
@@ -35,7 +43,7 @@ void CommunicationServer::connected(CSActiveConnection *connection)
             if (!responseJSON.contains(KEYWORD_HANDSHAKE_ONLY) ||
                 !responseJSON.value(KEYWORD_HANDSHAKE_ONLY).toBool(false)) {
                 if (responseJSON.contains(KEYWORD_DEVICE_INFO_SERIAL)) {
-                    deviceSerial = responseJSON.value(KEYWORD_DEVICE_INFO_SERIAL).toString();
+                    deviceId = responseJSON.value(KEYWORD_DEVICE_INFO_SERIAL).toString();
                 }
 
                 response = connection->receive();
@@ -45,8 +53,8 @@ void CommunicationServer::connected(CSActiveConnection *connection)
             }
         }
 
-        if (deviceSerial != nullptr) {
-            device.id = deviceSerial;
+        if (deviceId != nullptr) {
+            device.id = deviceId;
 
             if (gDbSignal->reconstruct(device)) {
                 if (!device.isRestricted)
@@ -69,6 +77,7 @@ void CommunicationServer::connected(CSActiveConnection *connection)
 
             if (!shouldContinue) {
                 replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ALLOWED);
+                emit deviceBlocked(deviceId, connection->socket()->peerAddress());
             } else if (responseJSON.contains(KEYWORD_REQUEST)) {
                 const QJsonValue &request = responseJSON.value(KEYWORD_REQUEST);
 
@@ -196,4 +205,9 @@ void CommunicationServer::pushReply(CSActiveConnection *activeConnection, QJsonO
 {
     json.insert(KEYWORD_RESULT, result);
     activeConnection->reply(json);
+}
+
+void CommunicationServer::blockAddress(const QHostAddress &address)
+{
+    m_blockedAddresses << address;
 }

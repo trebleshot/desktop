@@ -17,7 +17,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_ui->setupUi(this);
 
     setAcceptDrops(true);
-
     setWindowTitle(QString("%1 - %2")
                            .arg(QApplication::applicationName())
                            .arg(QApplication::applicationVersion()));
@@ -37,11 +36,9 @@ MainWindow::MainWindow(QWidget *parent)
         if (m_commServer->start() && m_seamlessServer->start()) {
             m_ui->label->setText(QString("TrebleShot is ready to accept files"));
 
-            QObject::connect(m_commServer, &CommunicationServer::textReceived,
-                             this, &MainWindow::showReceivedText);
-
-            QObject::connect(m_commServer, &CommunicationServer::transferRequest,
-                             this, &MainWindow::showTransferRequest);
+            connect(m_commServer, &CommunicationServer::textReceived,this, &MainWindow::showReceivedText);
+            connect(m_commServer, &CommunicationServer::transferRequest, this, &MainWindow::showTransferRequest);
+            connect(m_commServer, &CommunicationServer::deviceBlocked, this, &MainWindow::deviceBlocked);
         } else {
             m_ui->label->setText(QString("TrebleShot will not receive files"));
 
@@ -300,4 +297,29 @@ void MainWindow::setStorageLocation()
                                                           TransferUtils::getDefaultSavePath()));
 
     refreshStorageLocation();
+}
+
+void MainWindow::deviceBlocked(const QString &deviceId, const QHostAddress &address)
+{
+    NetworkDevice device(deviceId);
+
+    if (gDatabase->reconstructSilently(device)) {
+        QMessageBox box(this);
+        box.setWindowTitle(device.nickname);
+        box.setText(QString("Restricted %1 trying to communicate with you?").arg(device.nickname));
+        box.addButton(QMessageBox::StandardButton::Ignore);
+        QPushButton *allowButton = box.addButton("Allow", QMessageBox::ButtonRole::AcceptRole);
+        QPushButton *blockButton = box.addButton("Deny for this session", QMessageBox::ButtonRole::RejectRole);
+
+        connect(allowButton, &QPushButton::pressed, [&device]() {
+            device.isRestricted = false;
+            gDatabase->publish(device);
+        });
+
+        connect(blockButton, &QPushButton::pressed, [this, address]() {
+            m_commServer->blockAddress(address);
+        });
+
+        box.exec();
+    }
 }

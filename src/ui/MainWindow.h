@@ -50,6 +50,8 @@ public:
 
     void aboutQt();
 
+    void deviceBlocked(const QString &deviceId, const QHostAddress &address);
+
     void deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devices);
 
     void filesAdded(groupid groupId);
