@@ -3,6 +3,7 @@
 //
 
 #include <ui_DeviceChooserDialog.h>
+#include <src/util/ViewUtils.h>
 #include "DeviceChooserDialog.h"
 
 DeviceChooserDialog::DeviceChooserDialog(QWidget *parent, groupid groupId)
@@ -37,20 +38,10 @@ void DeviceChooserDialog::modelPressed(const QModelIndex &modelIndex)
 
 void DeviceChooserDialog::selectionAccepted()
 {
-    auto *selectionModel = m_ui->treeView->selectionModel();
-
-    if (selectionModel == nullptr) {
-        qDebug() << "Selection model is empty. This might be an error";
-        return;
-    }
-
     QList<NetworkDevice> devices;
 
-    for (const auto &modelIndex : selectionModel->selectedIndexes()) {
-        if (!modelIndex.isValid() || modelIndex.column() != 0)
-            continue;
-
-        devices.append(m_deviceModel->list()->at(modelIndex.row()));
+    for (int row : ViewUtils::getSelectionRows(m_ui->treeView->selectionModel())) {
+        devices.append(m_deviceModel->list()->at(row));
     }
 
     emit devicesSelected(m_groupId, devices);

@@ -19,7 +19,8 @@ Q_OBJECT
     int m_attemptsLeft = 2;
 
 public:
-    explicit SeamlessClient(const QString &deviceId, groupid groupId, QObject *parent = nullptr);
+    explicit SeamlessClient(const QString &deviceId, groupid groupId, bool autoDelete = false,
+                            QObject *parent = nullptr);
 
 signals:
 

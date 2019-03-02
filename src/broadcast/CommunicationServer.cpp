@@ -182,6 +182,7 @@ void CommunicationServer::connected(CSActiveConnection *connection)
             }
         }
 
+
         pushReply(connection, replyJSON, result);
     } catch (const exception &e) {
         qDebug() << "An error occurred:"

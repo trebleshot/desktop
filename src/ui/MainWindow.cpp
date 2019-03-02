@@ -1,6 +1,7 @@
 #include <QtGui/QDesktopServices>
 #include <src/broadcast/SeamlessClient.h>
 #include <QtWidgets/QFileDialog>
+#include <src/util/ViewUtils.h>
 #include "MainWindow.h"
 #include "ManageDevicesDialog.h"
 #include "ShowTransferDialog.h"
@@ -247,35 +248,18 @@ void MainWindow::send()
     if (selectedIndexes.empty())
         return;
 
-    QList<int> ids;
+    const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->treeView->selectionModel());
 
-    for (const auto &index : selectedIndexes) {
-        if (!index.isValid() || index.column() != 0)
-            continue;
-
-        ids << index.row();
-    }
-
-    if (ids.size() > 1) {
-        QMessageBox box;
-        box.setWindowTitle("To many devices selected");
-        box.setText("For consistency, please start transfers one by one.");
-        box.addButton(QMessageBox::StandardButton::Ok);
-        box.exec();
-    } else if (!ids.empty())
+    if (ids.size() == 1)
         filesAdded(m_groupModel->list().at(ids[0]).group.id);
 }
 
 void MainWindow::remove()
 {
-    QItemSelectionModel *selectionModel = m_ui->treeView->selectionModel();
     auto list = m_groupModel->list();
 
-    for (const auto &modelIndex : selectionModel->selectedIndexes()) {
-        if (!modelIndex.isValid() || modelIndex.column() != 0)
-            continue;
-
-        TransferGroup group = list.at(modelIndex.row()).group;
+    for (int row : ViewUtils::getSelectionRows(m_ui->treeView->selectionModel())) {
+        TransferGroup group = list.at(row).group;
         gDatabase->remove(group);
     }
 }
@@ -287,14 +271,7 @@ void MainWindow::updateAvailability()
     if (selectedIndexes.empty())
         return;
 
-    QList<int> ids;
-
-    for (const auto &index : selectedIndexes) {
-        if (!index.isValid() || index.column() != 0)
-            continue;
-
-        ids << index.row();
-    }
+    const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->treeView->selectionModel());
 
     m_ui->actionRemove->setEnabled(!ids.empty());
 

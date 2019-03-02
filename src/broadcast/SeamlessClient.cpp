@@ -9,9 +9,11 @@
 #include <src/util/TransferUtils.h>
 #include "SeamlessClient.h"
 
-SeamlessClient::SeamlessClient(const QString &deviceId, groupid groupId, QObject *parent)
+SeamlessClient::SeamlessClient(const QString &deviceId, groupid groupId, bool autoDelete, QObject *parent)
         : QThread(parent), m_groupId(groupId), m_deviceId(deviceId)
 {
+    if (autoDelete)
+        connect(this, &QThread::finished, this, &QObject::deleteLater);
 }
 
 void SeamlessClient::run()

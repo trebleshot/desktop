@@ -140,10 +140,10 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                                 }
 
                                 qDebug() << this << "I/O Completed";
-                                transferObject.flag = TransferObject::Flag::Interrupted;
+                                transferObject.flag = TransferObject::Flag::Done;
                             } catch (...) {
                                 qDebug() << this << "I/O Error occurred";
-                                transferObject.flag = TransferObject::Flag::Done;
+                                transferObject.flag = TransferObject::Flag::Interrupted;
                             }
 
                             socket.close();
