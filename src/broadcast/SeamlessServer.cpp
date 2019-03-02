@@ -30,13 +30,10 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 
             reply.insert(KEYWORD_RESULT, false);
 
-            auto *device = deviceId != nullptr ? new NetworkDevice(deviceId) : nullptr;
-            auto *group = new TransferGroup(groupId);
-
             // device might be null because this was introduced in build 91
-            if (device != nullptr && !gDbSignal->reconstruct(*device)) {
+            if (deviceId != nullptr && !gDbSignal->contains(NetworkDevice(deviceId))) {
                 reply.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ALLOWED);
-            } else if (!gDbSignal->reconstruct(*group)) {
+            } else if (!gDbSignal->contains(TransferGroup(groupId))) {
                 reply.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_FOUND);
             } else {
                 reply.insert(KEYWORD_RESULT, true);
@@ -56,6 +53,7 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 
             const QJsonObject &request = response.asJson();
             QJsonObject reply;
+            TransferObject transferObject;
 
             qDebug() << request;
 
@@ -63,17 +61,15 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                 if (request.contains(KEYWORD_RESULT) && !request.value(KEYWORD_RESULT).toBool(false)) {
                     if (request.contains(KEYWORD_TRANSFER_JOB_DONE)
                         && request.value(KEYWORD_TRANSFER_JOB_DONE).toBool(false)) {
-                        qDebug() << "Received notified that the transfer is done";
+                        qDebug() << "Receiver notified that the transfer is done";
+                        break;
                     } else
                         interrupt();
-                } else {
-                    if (interrupted())
-                        break;
+                } else if (!interrupted()) {
+                    qDebug() << "Entering sending phase";
 
-                    qDebug() << "Entering send phase";
-
-                    TransferObject transferObject(request.value(KEYWORD_TRANSFER_REQUEST_ID).toVariant().toUInt(),
-                                                  deviceId, TransferObject::Type::Outgoing);
+                    transferObject = TransferObject(request.value(KEYWORD_TRANSFER_REQUEST_ID).toVariant().toUInt(),
+                                                    deviceId, TransferObject::Type::Outgoing);
 
                     if (gDbSignal->reconstruct(transferObject)) {
                         quint16 serverPort = static_cast<quint16>(request.value(KEYWORD_TRANSFER_SOCKET_PORT)
@@ -83,7 +79,7 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                                               ? request.value(KEYWORD_SKIPPED_BYTES).toVariant().toUInt()
                                               : 0;
 
-                        qDebug() << "File sending about to being" << serverPort << skippedBytes << transferObject.file;
+                        qDebug() << "File sending about to begin" << serverPort << skippedBytes << transferObject.file;
                         gDbSignal->update(transferObject);
 
                         QFile file(transferObject.file);
@@ -135,19 +131,37 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 
                             transferObject.flag = TransferObject::Flag::Done;
 
-                            gDbSignal->update(transferObject);
-
                             socket.close();
                             file.close();
+                        } else {
+                            connection->reply({
+                                                      {KEYWORD_RESULT,            false},
+                                                      {KEYWORD_ERROR, KEYWORD_ERROR_NOT_ACCESSIBLE},
+                                                      {KEYWORD_FLAG_GROUP_EXISTS, true}
+                                              });
+
+                            transferObject.flag = TransferObject::Flag::Interrupted;
                         }
                     } else {
-                        reply.insert(KEYWORD_RESULT, false);
-                        reply.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_FOUND);
-                        reply.insert(KEYWORD_FLAG_GROUP_EXISTS, true);
+                        connection->reply({
+                                                  {KEYWORD_RESULT,            false},
+                                                  {KEYWORD_ERROR, KEYWORD_ERROR_NOT_FOUND},
+                                                  {KEYWORD_FLAG_GROUP_EXISTS, true}
+                                          });
 
                         transferObject.flag = TransferObject::Flag::Removed;
                     }
+                } else if (interrupted()) {
+                    connection->reply({
+                                    {KEYWORD_RESULT,            false},
+                                    {KEYWORD_TRANSFER_JOB_DONE, false}
+                            });
+
+                    transferObject.flag = TransferObject::Flag::Interrupted;
                 }
+
+                if (transferObject.id != 0)
+                    gDbSignal->update(transferObject);
             }
         }
     } catch (...) {

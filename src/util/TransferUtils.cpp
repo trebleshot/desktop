@@ -23,7 +23,7 @@ SqlSelection TransferUtils::createSqlSelection(groupid groupId, const QString &d
                            << deviceId;
 
     if (flag != TransferObject::Flag::Any) {
-        sqlStatement.append(QString("AND %1 %2 ?")
+        sqlStatement.append(QString(" AND %1 %2 ?")
                                     .arg(DB_FIELD_TRANSFER_FLAG)
                                     .arg(equals ? "==" : "!="));
 
@@ -138,6 +138,18 @@ QString TransferUtils::getDefaultSavePath()
     return downloadsFolder;
 }
 
+Reason TransferUtils::getErrorReason(QString error)
+{
+    if (error == KEYWORD_ERROR_NOT_FOUND)
+        return Reason::NotFound;
+    else if (error == KEYWORD_ERROR_NOT_ALLOWED)
+        return Reason::Blocked;
+    else if (error == KEYWORD_ERROR_NOT_ACCESSIBLE)
+        return Reason::NotAccessible;
+
+    return Reason::Unknown;
+}
+
 QString TransferUtils::getSavePath(const TransferGroup &group)
 {
     return (group.savePath != nullptr && group.savePath.length() > 0 && QDir().mkdir(group.savePath))
@@ -203,8 +215,6 @@ QString TransferUtils::saveIncomingFile(const TransferGroup &group, TransferObje
     }
 
     object.flag = TransferObject::Flag::Done;
-
-    gDatabase->publish(object);
 
     return QString();
 }

@@ -263,7 +263,7 @@ void MainWindow::deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devic
                     } catch (...) {
                         // do nothing
                         qDebug() << "deviceForAddedFiles << Error" << thisDevice.nickname << thisConnection.adapterName;
-                        qDebug() << "deviceForAddedFiles << Continue ?? " << shouldTryNext;
+                        qDebug() << "deviceForAddedFiles << Continue ??" << shouldTryNext;
                     }
 
                     delete connection;

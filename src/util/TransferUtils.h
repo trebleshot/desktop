@@ -62,6 +62,15 @@ struct TransferGroupInfo {
     }
 };
 
+enum Reason {
+    Unknown,
+    Blocked,
+    Rejected,
+    NotAccessible,
+    NotFound,
+    NoPendingTransfer
+};
+
 class TransferUtils {
 public:
     static SqlSelection createSqlSelection(groupid groupId, const QString &deviceId,
@@ -77,6 +86,8 @@ public:
     static bool firstAvailableTransfer(TransferObject &object, groupid groupId, const QString &deviceId);
 
     static QString getDefaultSavePath();
+
+    static Reason getErrorReason(QString errorCode);
 
     static QString getIncomingFilePath(const TransferGroup &transferGroup, const TransferObject &object);
 
