@@ -73,6 +73,7 @@ qt5_wrap_ui(UI_HEADERS
         src/ui/MainWindow.ui
         src/ui/ManageDevicesDialog.ui
         src/ui/ShowTransferDialog.ui
+        src/ui/TransferRequestProgressDialog.ui
         src/dialog/WelcomeDialog.ui)
 
 set(UTIL_LIBRARY
@@ -114,6 +115,8 @@ set(UTIL_LIBRARY
         src/ui/ShowTransferDialog.cpp
         src/ui/ManageDevicesDialog.h
         src/ui/ManageDevicesDialog.cpp
+        src/ui/TransferRequestProgressDialog.h
+        src/ui/TransferRequestProgressDialog.cpp
         src/util/AppUtils.h
         src/util/AppUtils.cpp
         src/util/GThread.h

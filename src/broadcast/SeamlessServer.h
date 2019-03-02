@@ -17,6 +17,12 @@ public:
     explicit SeamlessServer(QObject *parent = nullptr);
 
     void connected(CSActiveConnection *connection) override;
+
+signals:
+
+    void taskStarted(groupid groupId, QString deviceId);
+
+    void taskDone(groupid groupId, QString deviceId);
 };
 
 

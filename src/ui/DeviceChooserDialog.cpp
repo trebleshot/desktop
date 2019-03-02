@@ -27,6 +27,7 @@ DeviceChooserDialog::~DeviceChooserDialog()
 void DeviceChooserDialog::modelActivated(const QModelIndex &modelIndex)
 {
     selectionAccepted();
+    close();
 }
 
 void DeviceChooserDialog::modelPressed(const QModelIndex &modelIndex)
