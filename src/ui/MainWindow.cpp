@@ -1,7 +1,6 @@
 #include <QtGui/QDesktopServices>
 #include <src/broadcast/SeamlessClient.h>
-#include <QtCore/QDir>
-#include <QtCore/QMimeDatabase>
+#include <QtWidgets/QFileDialog>
 #include "MainWindow.h"
 #include "ManageDevicesDialog.h"
 #include "ShowTransferDialog.h"
@@ -59,15 +58,29 @@ MainWindow::MainWindow(QWidget *parent)
         connect(m_ui->treeView, &QTreeView::customContextMenuRequested, [this](const QPoint &point) {
             QMenu menu(m_ui->treeView);
 
-            menu.addAction(m_ui->actionStart_receiver);
+            const auto &model = m_ui->treeView->indexAt(point);
 
-            menu.exec(m_ui->treeView->viewport()->mapToGlobal(point));
+            if (model.isValid()) {
+                updateAvailability();
+
+                menu.addAction(m_ui->actionStart);
+                menu.addAction(m_ui->actionPause);
+                menu.addSeparator();
+                menu.addAction(m_ui->actionAdd_devices);
+                menu.addAction(m_ui->actionRemove);
+
+                menu.exec(m_ui->treeView->viewport()->mapToGlobal(point));
+            }
         });
 
-        connect(m_ui->treeView, SIGNAL(activated(QModelIndex)), this, SLOT(transferItemActivated(QModelIndex)));
-        connect(m_ui->actionAbout_TrebleShot, SIGNAL(triggered(bool)), this, SLOT(about()));
-        connect(m_ui->actionAbout_Qt, SIGNAL(triggered(bool)), this, SLOT(aboutQt()));
+        connect(m_ui->menuEdit, &QMenu::aboutToShow, this, &MainWindow::updateAvailability);
+        connect(m_ui->treeView, &QTreeView::activated, this, &MainWindow::transferItemActivated);
+        connect(m_ui->actionAbout_TrebleShot, &QAction::triggered, this, &MainWindow::about);
+        connect(m_ui->actionAbout_Qt, &QAction::triggered, this, &MainWindow::aboutQt);
         connect(m_ui->actionManage_devices, &QAction::triggered, this, &MainWindow::manageDevices);
+        connect(m_ui->actionRemove, &QAction::triggered, this, &MainWindow::remove);
+        connect(m_ui->actionAdd_devices, &QAction::triggered, this, &MainWindow::send);
+        connect(m_ui->actionStorage_location, &QAction::triggered, this, &MainWindow::setStorageLocation);
 
         connect(m_ui->actionStart_receiver, &QAction::triggered, []() {
             qDebug() << "Debug process";
@@ -92,6 +105,18 @@ MainWindow::MainWindow(QWidget *parent)
                 qDebug() << "No assignee found to start as debug receiver process";
             }
         });
+
+        refreshStorageLocation();
+
+        {
+            auto thisDevice = AppUtils::getLocalDevice();
+            DeviceConnection connection(thisDevice.id, "unk0");
+
+            connection.hostAddress = QHostAddress("127.0.0.1");
+
+            gDatabase->publish(thisDevice);
+            gDatabase->publish(connection);
+        }
     }
 
     const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
@@ -105,6 +130,7 @@ MainWindow::~MainWindow()
     delete m_groupModel;
     delete m_commServer;
 }
+
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
@@ -212,4 +238,89 @@ void MainWindow::showTransferRequest(const QString &deviceId, groupid groupId, i
 void MainWindow::manageDevices()
 {
     ManageDevicesDialog(this).exec();
+}
+
+void MainWindow::send()
+{
+    const auto &selectedIndexes = m_ui->treeView->selectionModel()->selectedIndexes();
+
+    if (selectedIndexes.empty())
+        return;
+
+    QList<int> ids;
+
+    for (const auto &index : selectedIndexes) {
+        if (!index.isValid() || index.column() != 0)
+            continue;
+
+        ids << index.row();
+    }
+
+    if (ids.size() > 1) {
+        QMessageBox box;
+        box.setWindowTitle("To many devices selected");
+        box.setText("For consistency, please start transfers one by one.");
+        box.addButton(QMessageBox::StandardButton::Ok);
+        box.exec();
+    } else if (!ids.empty())
+        filesAdded(m_groupModel->list().at(ids[0]).group.id);
+}
+
+void MainWindow::remove()
+{
+    QItemSelectionModel *selectionModel = m_ui->treeView->selectionModel();
+    auto list = m_groupModel->list();
+
+    for (const auto &modelIndex : selectionModel->selectedIndexes()) {
+        if (!modelIndex.isValid() || modelIndex.column() != 0)
+            continue;
+
+        TransferGroup group = list.at(modelIndex.row()).group;
+        gDatabase->remove(group);
+    }
+}
+
+void MainWindow::updateAvailability()
+{
+    const auto &selectedIndexes = m_ui->treeView->selectionModel()->selectedIndexes();
+
+    if (selectedIndexes.empty())
+        return;
+
+    QList<int> ids;
+
+    for (const auto &index : selectedIndexes) {
+        if (!index.isValid() || index.column() != 0)
+            continue;
+
+        ids << index.row();
+    }
+
+    m_ui->actionRemove->setEnabled(!ids.empty());
+
+    if (ids.size() == 1) {
+        const auto &item = m_groupModel->list().at(0);
+
+        m_ui->actionStart->setEnabled(item.hasIncoming);
+        m_ui->actionPause->setEnabled(item.hasIncoming);
+        m_ui->actionAdd_devices->setEnabled(item.hasOutgoing);
+    } else {
+        m_ui->actionStart->setEnabled(false);
+        m_ui->actionPause->setEnabled(false);
+        m_ui->actionAdd_devices->setEnabled(false);
+    }
+}
+
+void MainWindow::refreshStorageLocation()
+{
+    m_ui->label_2->setText(TransferUtils::getDefaultSavePath());
+}
+
+void MainWindow::setStorageLocation()
+{
+    AppUtils::getDefaultSettings().setValue(
+            "savePath", QFileDialog::getExistingDirectory(this, "Choose a location where files are put",
+                                                          TransferUtils::getDefaultSavePath()));
+
+    refreshStorageLocation();
 }

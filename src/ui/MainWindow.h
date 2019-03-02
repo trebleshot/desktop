@@ -44,6 +44,8 @@ public:
 
 public slots:
 
+public:
+
     void about();
 
     void aboutQt();
@@ -54,12 +56,21 @@ public slots:
 
     void manageDevices();
 
+    void remove();
+
+    void refreshStorageLocation();
+
+    void send();
+
+    void setStorageLocation();
+
     void showReceivedText(const QString &text, const QString &deviceId);
 
     void showTransferRequest(const QString &deviceId, groupid groupId, int filesTotal);
 
     void transferItemActivated(QModelIndex modelIndex);
 
+    void updateAvailability();
 };
 
 #endif // MAINWINDOW_H

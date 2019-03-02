@@ -56,10 +56,12 @@ void TransferGroup::onRemovingObject(AccessDatabase *db, DatabaseObject *parent)
     SqlSelection divTransfer;
     divTransfer.setTableName(DB_DIVIS_TRANSFER);
     divTransfer.setWhere(QString("%1 = ?").arg(DB_FIELD_TRANSFER_GROUPID));
+    divTransfer.whereArgs << id;
 
     SqlSelection transfer;
     transfer.setTableName(DB_TABLE_TRANSFER);
     transfer.setWhere(QString("%1 = ?").arg(DB_FIELD_TRANSFER_GROUPID));
+    transfer.whereArgs << id;
 
     db->remove(assignee);
     db->remove(divTransfer);

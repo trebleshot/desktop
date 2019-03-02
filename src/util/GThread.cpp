@@ -17,11 +17,8 @@ void GThread::run()
 
 GThread *GThread::startIndependent(const std::function<void(GThread *)> &function, QObject *parent)
 {
-    auto *thread = new GThread(function, parent);
-
-    QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+    auto *thread = new GThread(function, true, parent);
     thread->start();
-
     return thread;
 }
 
