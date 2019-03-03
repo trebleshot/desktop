@@ -27,6 +27,8 @@ void NetworkDeviceModel::databaseChanged(const SqlSelection &change, ChangeType 
 {
     emit layoutAboutToBeChanged();
 
+    m_list.clear();
+
     SqlSelection selection;
     selection.setTableName(DB_TABLE_DEVICES);
     selection.setOrderBy(DB_FIELD_DEVICES_LASTUSAGETIME, false);

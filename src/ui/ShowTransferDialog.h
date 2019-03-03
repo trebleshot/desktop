@@ -8,6 +8,7 @@
 #include <QDialog>
 #include <ui_ShowTransferDialog.h>
 #include <src/database/object/TransferGroup.h>
+#include <src/model/TransferObjectModel.h>
 
 namespace Ui {
     class ShowTransferDialog;
@@ -23,6 +24,8 @@ public:
 
 protected:
     Ui::ShowTransferDialog *m_ui;
+    TransferObjectModel *m_objectModel;
+    groupid m_groupId;
 };
 
 

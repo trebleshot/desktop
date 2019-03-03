@@ -150,6 +150,24 @@ Reason TransferUtils::getErrorReason(QString error)
     return Reason::Unknown;
 }
 
+QString TransferUtils::getFlagString(TransferObject::Flag flag)
+{
+    switch (flag) {
+        case TransferObject::Flag::Any:
+            return QObject::tr("Any");
+        case TransferObject::Flag::Interrupted:
+            return QObject::tr("Interrupted");
+        case TransferObject::Flag::Done:
+            return QObject::tr("Done");
+        case TransferObject::Flag::Pending:
+            return QObject::tr("Pending");
+        case TransferObject::Flag::Removed:
+            return QObject::tr("Removed");
+    }
+
+    return QString();
+}
+
 QString TransferUtils::getSavePath(const TransferGroup &group)
 {
     return (group.savePath != nullptr && group.savePath.length() > 0 && QDir().mkdir(group.savePath))

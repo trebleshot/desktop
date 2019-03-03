@@ -48,16 +48,18 @@ bool AppUtils::applyAdapterName(DeviceConnection &connection)
 void AppUtils::applyDeviceToJSON(QJsonObject &object)
 {
     const NetworkDevice &device = getLocalDevice();
-    QJsonObject deviceInfo;
-    QJsonObject appInfo;
 
-    deviceInfo.insert(KEYWORD_DEVICE_INFO_SERIAL, device.id);
-    deviceInfo.insert(KEYWORD_DEVICE_INFO_BRAND, device.brand);
-    deviceInfo.insert(KEYWORD_DEVICE_INFO_MODEL, device.model);
-    deviceInfo.insert(KEYWORD_DEVICE_INFO_USER, device.nickname);
+    QJsonObject deviceInfo{
+            {KEYWORD_DEVICE_INFO_SERIAL, device.id},
+            {KEYWORD_DEVICE_INFO_BRAND,  device.brand},
+            {KEYWORD_DEVICE_INFO_MODEL,  device.model},
+            {KEYWORD_DEVICE_INFO_USER,   device.nickname}
+    };
 
-    appInfo.insert(KEYWORD_APP_INFO_VERSION_CODE, device.versionNumber);
-    appInfo.insert(KEYWORD_APP_INFO_VERSION_NAME, device.versionName);
+    QJsonObject appInfo{
+            {KEYWORD_APP_INFO_VERSION_CODE, device.versionNumber},
+            {KEYWORD_APP_INFO_VERSION_NAME, device.versionName}
+    };
 
     object.insert(KEYWORD_APP_INFO, appInfo);
     object.insert(KEYWORD_DEVICE_INFO, deviceInfo);
@@ -133,6 +135,6 @@ AccessDatabase *AppUtils::newDatabaseInstance(QObject *parent)
 
 TransferTaskManager *AppUtils::getTransferTaskManager()
 {
-    static auto* taskManager = new TransferTaskManager;
+    static auto *taskManager = new TransferTaskManager;
     return taskManager;
 }

@@ -115,3 +115,8 @@ void TransferGroupModel::databaseChanged(const SqlSelection &change, ChangeType 
 
     emit layoutChanged();
 }
+
+const QList<TransferGroupInfo> &TransferGroupModel::list() const
+{
+    return m_list;
+}

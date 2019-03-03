@@ -48,8 +48,10 @@ MainWindow::MainWindow(QWidget *parent)
 
         m_ui->transfersTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
         m_ui->transfersTreeView->setModel(m_groupModel);
+        m_ui->transfersTreeView->setColumnWidth(0, 160);
         m_ui->devicesTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
         m_ui->devicesTreeView->setModel(m_deviceModel);
+        m_ui->devicesTreeView->setColumnWidth(0, 160);
 
         connect(m_ui->devicesTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::deviceContextMenu);
         connect(m_ui->devicesTreeView, &QTreeView::activated, this, &MainWindow::deviceSelected);

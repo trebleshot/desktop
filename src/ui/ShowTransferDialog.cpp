@@ -5,27 +5,16 @@
 #include "ShowTransferDialog.h"
 
 ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
-        : QDialog(parent), m_ui(new Ui::ShowTransferDialog)
+        : QDialog(parent), m_ui(new Ui::ShowTransferDialog), m_objectModel(new TransferObjectModel(groupId))
 {
+    m_groupId = groupId;
     m_ui->setupUi(this);
-    auto* model = DbStructure::gatherTableModel(DB_DIVIS_TRANSFER);
-
-    model->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    model->setFilter(QString("%1 = %2").arg(DB_FIELD_TRANSFERGROUP_ID).arg(groupId));
-    model->setHeaderData(0, Qt::Horizontal, tr("File name"));
-    model->setHeaderData(1, Qt::Horizontal, tr("Bytes"));
-
-    model->select();
-
-    m_ui->transfersTreeView->setModel(model);
-
-    m_ui->transfersTreeView->hideColumn(0);
-    m_ui->transfersTreeView->hideColumn(1);
-    m_ui->transfersTreeView->hideColumn(2);
-    m_ui->transfersTreeView->hideColumn(3);
+    m_ui->transfersTreeView->setModel(m_objectModel);
+    m_ui->transfersTreeView->setColumnWidth(0, 250);
 }
 
 ShowTransferDialog::~ShowTransferDialog()
 {
     delete m_ui;
+    delete m_objectModel;
 }

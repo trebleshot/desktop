@@ -89,6 +89,8 @@ public:
 
     static QString getDefaultSavePath();
 
+    static QString getFlagString(TransferObject::Flag flag);
+
     static Reason getErrorReason(QString errorCode);
 
     static QString getIncomingFilePath(const TransferGroup &transferGroup, const TransferObject &object);
