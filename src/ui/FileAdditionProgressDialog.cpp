@@ -65,16 +65,10 @@ void FileAdditionProgressDialog::task(GThread *thread, const QList<QUrl> &urls)
                     emit thread->statusUpdate(transferMap.size(), position++, transferObject.friendlyName);
                 }
 
-                gDbSignal->commit();
-            } else {
-                QMessageBox error(this);
-                error.setText(tr("Could not add the files right now. Try again."));
-                error.show();
-            }
-
-            if (!transferMap.empty()) {
-                gDbSignal->insert(group);
-                emit filesAdded(group.id);
+                if (!transferMap.empty()) {
+                    gDbSignal->insert(group);
+                    emit filesAdded(group.id);
+                }
             }
         } catch (...) {
             // do nothing
@@ -82,6 +76,9 @@ void FileAdditionProgressDialog::task(GThread *thread, const QList<QUrl> &urls)
     } catch (...) {
         // do nothing
     }
+
+    gDbSignal->commit();
+    qDebug() << thread << "Exited";
 }
 
 void FileAdditionProgressDialog::taskProgress(int max, int progress, const QString &text)

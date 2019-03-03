@@ -44,8 +44,6 @@ public:
 
 public slots:
 
-public:
-
     void about();
 
     void aboutQt();

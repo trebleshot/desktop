@@ -68,8 +68,11 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
                     emit thread->statusUpdate(objectList.size(), ++iterator, object.friendlyName);
                 }
 
-                gDbSignal->commit();
                 passedDevices << device;
+                gDbSignal->commit();
+
+                if (thread->interrupted())
+                    break;
             }
         }
     }
@@ -163,8 +166,9 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
 
     if (successful) {
         emit transferReady(groupId);
-        close();
-    }
+        accept();
+    } else
+        reject();
 }
 
 void TransferRequestProgressDialog::statusUpdate(int total, int progress, QString statusText)
