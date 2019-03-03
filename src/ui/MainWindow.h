@@ -18,6 +18,7 @@
 #include <QPushButton>
 #include <QClipboard>
 #include <src/broadcast/SeamlessServer.h>
+#include <src/model/NetworkDeviceModel.h>
 #include "ui_MainWindow.h"
 
 namespace Ui {
@@ -36,6 +37,7 @@ protected:
     SeamlessServer *m_seamlessServer;
     CommunicationServer *m_commServer;
     TransferGroupModel *m_groupModel;
+    NetworkDeviceModel *m_deviceModel;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -52,6 +54,10 @@ public slots:
 
     void deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devices);
 
+    void deviceContextMenu(const QPoint& point);
+
+    void deviceSelected(const QModelIndex& modelIndex);
+
     void filesAdded(groupid groupId);
 
     void manageDevices();
@@ -60,7 +66,11 @@ public slots:
 
     void refreshStorageLocation();
 
+    void savePathChanged();
+
     void send();
+
+    void selectFilesToSend();
 
     void setStorageLocation();
 
@@ -69,6 +79,8 @@ public slots:
     void showTransferRequest(const QString &deviceId, groupid groupId, int filesTotal);
 
     void transferItemActivated(QModelIndex modelIndex);
+
+    void usernameChanged(QString username);
 
     void updateAvailability();
 };

@@ -23,8 +23,8 @@ void SeamlessServer::connected(CSActiveConnection *connection)
         const auto &mainRequest = connection->receive();
         const auto &mainRequestJSON = mainRequest.asJson();
         const QString &deviceId = mainRequestJSON.contains(KEYWORD_TRANSFER_DEVICE_ID)
-                           ? mainRequestJSON.value(KEYWORD_TRANSFER_DEVICE_ID).toString()
-                           : nullptr;
+                                  ? mainRequestJSON.value(KEYWORD_TRANSFER_DEVICE_ID).toString()
+                                  : nullptr;
         groupid groupId = mainRequestJSON.value(KEYWORD_TRANSFER_GROUP_ID).toVariant().toUInt();
 
         {
@@ -84,7 +84,8 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                                               ? request.value(KEYWORD_SKIPPED_BYTES).toVariant().toUInt()
                                               : 0;
 
-                        qDebug() << this << "File sending about to begin" << serverPort << skippedBytes << transferObject.file;
+                        qDebug() << this << "File sending about to begin" << serverPort << skippedBytes
+                                 << transferObject.file;
                         gDbSignal->update(transferObject);
 
                         QFile file(transferObject.file);
@@ -93,12 +94,13 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                         if (file.exists()) {
                             transferObject.accessPort = serverPort;
                             transferObject.skippedBytes = skippedBytes;
+                            auto fileSize = static_cast<size_t>(file.size());
 
                             reply.insert(KEYWORD_RESULT, true);
 
-                            if (transferObject.fileSize != file.size()) {
+                            if (transferObject.fileSize != fileSize) {
                                 reply.insert(KEYWORD_SIZE_CHANGED, file.size());
-                                transferObject.fileSize = static_cast<size_t>(file.size());
+                                transferObject.fileSize = fileSize;
                             }
 
                             connection->reply(reply);

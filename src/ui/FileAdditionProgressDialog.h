@@ -16,11 +16,11 @@ class FileAdditionProgressDialog : public QDialog {
 Q_OBJECT
 
 public:
-    explicit FileAdditionProgressDialog(QWidget *parent, const QList<QUrl> &urls);
+    explicit FileAdditionProgressDialog(QWidget *parent, const QList<QString> &files);
 
     ~FileAdditionProgressDialog() override;
 
-    void task(GThread *thread, const QList<QUrl> &urls);
+    void task(GThread *thread, const QList<QString> &files);
 
 public slots:
 

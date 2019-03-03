@@ -17,12 +17,12 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
 
     model->select();
 
-    m_ui->treeView->setModel(model);
+    m_ui->transfersTreeView->setModel(model);
 
-    m_ui->treeView->hideColumn(0);
-    m_ui->treeView->hideColumn(1);
-    m_ui->treeView->hideColumn(2);
-    m_ui->treeView->hideColumn(3);
+    m_ui->transfersTreeView->hideColumn(0);
+    m_ui->transfersTreeView->hideColumn(1);
+    m_ui->transfersTreeView->hideColumn(2);
+    m_ui->transfersTreeView->hideColumn(3);
 }
 
 ShowTransferDialog::~ShowTransferDialog()

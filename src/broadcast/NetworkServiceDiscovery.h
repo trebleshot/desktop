@@ -1,0 +1,13 @@
+//
+// Created by veli on 3/3/19.
+//
+
+#ifndef TREBLESHOT_NETWORKSERVICEDISCOVERY_H
+#define TREBLESHOT_NETWORKSERVICEDISCOVERY_H
+
+class NetworkServiceDiscovery {
+
+};
+
+
+#endif //TREBLESHOT_NETWORKSERVICEDISCOVERY_H

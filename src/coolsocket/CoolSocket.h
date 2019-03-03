@@ -135,7 +135,7 @@ class CSResponse {
 public:
     QString response;
     QJsonObject headerIndex;
-    string::size_type length = 0;
+    size_t length = 0;
 
     CSResponse() = default;
 

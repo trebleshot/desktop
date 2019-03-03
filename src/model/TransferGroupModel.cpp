@@ -58,7 +58,7 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
                 else {
                     for (const auto &assigneeInfo : currentGroup.assignees) {
                         if (devicesString.length() > 0)
-                            devicesString.append(",");
+                            devicesString.append(", ");
 
                         devicesString.append(assigneeInfo.device.nickname);
                     }

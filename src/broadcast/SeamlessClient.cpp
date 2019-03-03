@@ -201,14 +201,13 @@ void SeamlessClient::run()
                                                         }
                                                     }
 
-                                                    if (currentFile.size() == transferObject.fileSize) {
+                                                    if (currentFile.size() == fileSize) {
                                                         gDbSignal->doSynchronized(
                                                                 [&group, &transferObject](AccessDatabase *db) {
                                                                     TransferUtils::saveIncomingFile(group, transferObject);
                                                                 });
                                                     } else {
                                                         transferObject.flag = TransferObject::Flag::Interrupted;
-                                                        gDbSignal->publish(transferObject);
                                                     }
                                                 }
                                             } else {
@@ -219,6 +218,8 @@ void SeamlessClient::run()
                                 }
                             }
                         } catch (...) {
+                            if (transferObject.id != 0)
+                                transferObject.flag = TransferObject::Flag::Interrupted;
                             qDebug() << this << "Error occurred. Will retry";
                             retry = true;
                         }

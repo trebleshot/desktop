@@ -301,3 +301,13 @@ QString TransferUtils::sizeExpression(size_t bytes, bool notUseByte)
             .arg(QString(notUseByte ? "kMGTPE" : "KMGTPE").at(expression - 1))
             .arg(notUseByte ? "i" : "");
 }
+
+QList<QString> TransferUtils::getPaths(const QList<QUrl> &urls)
+{
+    QList<QString> paths;
+
+    for (const auto &url : urls)
+        paths << url.toLocalFile();
+
+    return paths;
+}

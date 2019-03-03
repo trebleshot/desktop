@@ -119,7 +119,7 @@ CSResponse CSActiveConnection::receive()
             }
 
             if (headerData.length() > COOLSOCKET_HEADER_HEAP_SIZE) {
-                qDebug() << "Header exceeds heap size: " << headerData.length();
+                qDebug() << this << "Header exceeds heap size:" << headerData.length();
                 throw exception();
             }
         } else {

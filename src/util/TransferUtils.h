@@ -5,13 +5,13 @@
 #ifndef TREBLESHOT_TRANSFERUTILS_H
 #define TREBLESHOT_TRANSFERUTILS_H
 
-
 #include <src/database/AccessDatabase.h>
 #include <src/database/object/TransferObject.h>
 #include <QtCore/QFile>
 #include <src/database/object/TransferGroup.h>
 #include <QtCore/QFileInfo>
 #include <QtCore/QDir>
+#include <QUrl>
 #include <QtCore/QMimeDatabase>
 #include "src/database/object/NetworkDevice.h"
 #include "GThread.h"
@@ -80,6 +80,8 @@ public:
     static void createTransferMap(GThread *thread, QList<TransferObject>* objectList,
                                   const TransferGroup &group, const QMimeDatabase &mimeDatabase,
                                   requestid &requestId, const QString &filePath, const QString &directory = nullptr);
+
+    static QList<QString> getPaths(const QList<QUrl> &urls);
 
     static TransferObject firstAvailableTransfer(groupid groupId, const QString &deviceId);
 

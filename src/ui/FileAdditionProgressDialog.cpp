@@ -16,11 +16,16 @@
 #include "DeviceChooserDialog.h"
 #include "FileAdditionProgressDialog.h"
 
-FileAdditionProgressDialog::FileAdditionProgressDialog(QWidget *parent, const QList<QUrl> &urls)
+FileAdditionProgressDialog::FileAdditionProgressDialog(QWidget *parent, const QList<QString> &files)
         : QDialog(parent), m_ui(new Ui::FileAdditionProgressDialog)
 {
-    m_thread = new GThread([this, urls](GThread *thread) { task(thread, urls); }, true);
+
+
+
+    m_thread = new GThread([this, files](GThread *thread) { task(thread, files); }, true);
     m_ui->setupUi(this);
+
+
 
     connect(m_thread, &GThread::statusUpdate, this, &FileAdditionProgressDialog::taskProgress);
     connect(m_thread, &GThread::finished, this, &FileAdditionProgressDialog::close);
@@ -34,7 +39,7 @@ FileAdditionProgressDialog::~FileAdditionProgressDialog()
     delete m_ui;
 }
 
-void FileAdditionProgressDialog::task(GThread *thread, const QList<QUrl> &urls)
+void FileAdditionProgressDialog::task(GThread *thread, const QList<QString> &files)
 {
     try {
         auto groupId = QRandomGenerator::global()->bounded(static_cast<groupid>(time(nullptr)), sizeof(int));
@@ -45,12 +50,12 @@ void FileAdditionProgressDialog::task(GThread *thread, const QList<QUrl> &urls)
 
         {
             int position = 0;
-            for (const auto &url : urls) {
+            for (const auto &path : files) {
                 if (thread->interrupted())
                     throw std::exception();
 
-                TransferUtils::createTransferMap(thread, &transferMap, group, mimeDb, requestId, url.toLocalFile());
-                emit thread->statusUpdate(urls.size(), position++, url.toLocalFile());
+                TransferUtils::createTransferMap(thread, &transferMap, group, mimeDb, requestId, path);
+                emit thread->statusUpdate(files.size(), position++, path);
             }
         }
 
