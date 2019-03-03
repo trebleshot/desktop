@@ -10,12 +10,10 @@
 #include <src/util/Interrupter.h>
 #include <src/database/object/TransferGroup.h>
 #include <src/util/TransferUtils.h>
+#include <src/util/AppUtils.h>
 
-class SeamlessClient : public QThread, public Interrupter {
+class SeamlessClient : public QThread, public TransferTask {
 Q_OBJECT
-
-    groupid m_groupId = 0;
-    QString m_deviceId;
     int m_attemptsLeft = 2;
 
 public:

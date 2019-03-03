@@ -130,3 +130,9 @@ AccessDatabase *AppUtils::newDatabaseInstance(QObject *parent)
 
     return nullptr;
 }
+
+TransferTaskManager *AppUtils::getTransferTaskManager()
+{
+    static auto* taskManager = new TransferTaskManager;
+    return taskManager;
+}

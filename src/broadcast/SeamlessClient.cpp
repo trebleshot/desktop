@@ -10,7 +10,7 @@
 #include "SeamlessClient.h"
 
 SeamlessClient::SeamlessClient(const QString &deviceId, groupid groupId, bool autoDelete, QObject *parent)
-        : QThread(parent), m_groupId(groupId), m_deviceId(deviceId)
+        : QThread(parent), TransferTask(groupId, deviceId, TransferObject::Type::Incoming)
 {
     if (autoDelete)
         connect(this, &QThread::finished, this, &QObject::deleteLater);
@@ -18,6 +18,7 @@ SeamlessClient::SeamlessClient(const QString &deviceId, groupid groupId, bool au
 
 void SeamlessClient::run()
 {
+    gTaskMgr->attachTask(this);
     qDebug() << this << "== SeamlessClient ==";
 
     bool retry = false;
@@ -259,4 +260,5 @@ void SeamlessClient::run()
     delete client;
 
     qDebug() << this << "-- SeamlessClient --";
+    gTaskMgr->detachTask(this);
 }

@@ -17,7 +17,7 @@ SeamlessServer::SeamlessServer(QObject *parent)
 
 void SeamlessServer::connected(CSActiveConnection *connection)
 {
-    Interrupter interrupter;
+    TransferTask *thisTask = nullptr;
 
     try {
         const auto &mainRequest = connection->receive();
@@ -26,6 +26,9 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                                   ? mainRequestJSON.value(KEYWORD_TRANSFER_DEVICE_ID).toString()
                                   : nullptr;
         groupid groupId = mainRequestJSON.value(KEYWORD_TRANSFER_GROUP_ID).toVariant().toUInt();
+
+        thisTask = new TransferTask(groupId, deviceId, TransferObject::Type::Outgoing);
+        gTaskMgr->attachTask(thisTask);
 
         {
             QJsonObject reply;
@@ -69,8 +72,8 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                         emit taskDone(groupId, deviceId);
                         break;
                     } else
-                        interrupter.interrupt();
-                } else if (!interrupter.interrupted()) {
+                        thisTask->interrupt();
+                } else if (!thisTask->interrupted()) {
                     qDebug() << this << "Entering sending phase";
 
                     transferObject = TransferObject(request.value(KEYWORD_TRANSFER_REQUEST_ID).toVariant().toUInt(),
@@ -114,7 +117,7 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                             socket.open(QIODevice::OpenModeFlag::WriteOnly);
 
                             {
-                                // Establish the connection to the socket that will receive the file
+                                // Establish the connection to the socket that will send the file
                                 socket.connectToHost(connection->socket()->peerAddress(), serverPort);
 
                                 while (QAbstractSocket::SocketState::ConnectingState == socket.state())
@@ -126,17 +129,17 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                                 }
                             }
 
-                            qDebug() << this << "Connected & will receive";
+                            qDebug() << this << "Connected & will send";
 
                             try {
                                 while (!file.atEnd()) {
                                     if (socket.bytesToWrite() == 0) {
                                         socket.write(file.read(BUFFER_LENGTH_DEFAULT));
                                         socket.flush();
-                                    } else if (interrupter.interrupted()
+                                    } else if (thisTask->interrupted()
                                                || (socket.bytesToWrite() > 0
                                                    && !socket.waitForBytesWritten(TIMEOUT_SOCKET_DEFAULT))) {
-                                        qDebug() << this << "Timed out or interrupted:" << interrupter.interrupted();
+                                        qDebug() << this << "Timed out or interrupted:" << thisTask->interrupted();
                                         throw exception();
                                     }
                                 }
@@ -168,7 +171,7 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 
                         transferObject.flag = TransferObject::Flag::Removed;
                     }
-                } else if (interrupter.interrupted()) {
+                } else if (thisTask->interrupted()) {
                     qDebug() << this << "Interrupted";
 
                     connection->reply({
@@ -185,5 +188,10 @@ void SeamlessServer::connected(CSActiveConnection *connection)
         }
     } catch (...) {
         qDebug() << this << "Error occurred";
+    }
+
+    if (thisTask != nullptr) {
+        gTaskMgr->detachTask(thisTask);
+        delete thisTask;
     }
 }

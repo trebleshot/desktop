@@ -1,9 +1,6 @@
 #ifndef ACCESSDATABASE_H
 #define ACCESSDATABASE_H
 
-#define gDatabase AppUtils::getDatabase()
-#define gDbSignal emit AppUtils::getDatabaseSignaller()
-
 #include <QDebug>
 #include <QMimeData>
 #include <QSqlDatabase>
