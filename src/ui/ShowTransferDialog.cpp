@@ -85,6 +85,8 @@ void ShowTransferDialog::checkGroupIntegrity(const SqlSelection &change, ChangeT
             m_groupInfo = TransferUtils::getInfo(m_group);
             m_ui->progressBar->setMaximum(100);
             m_ui->progressBar->setValue((int) (((double) m_groupInfo.completedBytes / m_groupInfo.totalBytes) * 100));
+            m_ui->textFilesLeft->setText(tr("%1 of %2").arg(m_groupInfo.completed).arg(m_groupInfo.total));
+
             updateButtons();
         }
     }

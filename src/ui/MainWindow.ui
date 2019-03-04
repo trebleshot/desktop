@@ -656,16 +656,9 @@
     <addaction name="actionAbout_TrebleShot"/>
     <addaction name="actionAbout_Qt"/>
    </widget>
-   <widget class="QMenu" name="menu_Debug">
-    <property name="title">
-     <string>&amp;Debug</string>
-    </property>
-    <addaction name="actionStart_receiver"/>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuHelp"/>
-   <addaction name="menu_Debug"/>
   </widget>
   <action name="actionChange_device_name">
    <property name="text">
