@@ -196,9 +196,11 @@ void SeamlessClient::run()
                                                             lastDataAvailable = clock();
                                                         }
 
-                                                        if (lastDataAvailable < clock() - TIMEOUT_SOCKET_DEFAULT) {
+                                                        if (lastDataAvailable < clock() - TIMEOUT_SOCKET_DEFAULT)
                                                             throw exception();
-                                                        }
+
+                                                        if (interrupted())
+                                                            break;
                                                     }
 
                                                     if (currentFile.size() == fileSize) {

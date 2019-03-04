@@ -7,6 +7,7 @@
 #include <src/util/AppUtils.h>
 #include <QtWidgets/QFileDialog>
 #include <src/util/TransferUtils.h>
+#include <QtGui/QDesktopServices>
 #include "ShowTransferDialog.h"
 #include "DeviceChooserDialog.h"
 #include "TransferRequestProgressDialog.h"
@@ -24,6 +25,7 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
     connect(gDatabase, &AccessDatabase::databaseChanged, this, &ShowTransferDialog::checkGroupIntegrity);
     connect(m_ui->assigneesComboBox, SIGNAL(activated(int)), this, SLOT(assigneeChanged(int)));
     connect(m_ui->startButton, &QPushButton::pressed, this, &ShowTransferDialog::startTransfer);
+    connect(m_ui->showFilesButton, &QPushButton::pressed, this, &ShowTransferDialog::showFiles);
     connect(m_ui->saveDirectoryButton, &QPushButton::pressed, this, &ShowTransferDialog::saveDirectory);
     connect(m_ui->removeButton, &QPushButton::pressed, this, &ShowTransferDialog::removeTransfer);
     connect(m_ui->chooseDirectoryButton, &QPushButton::pressed, this, &ShowTransferDialog::changeSavePath);
@@ -81,6 +83,8 @@ void ShowTransferDialog::checkGroupIntegrity(const SqlSelection &change, ChangeT
             }
 
             m_groupInfo = TransferUtils::getInfo(m_group);
+            m_ui->progressBar->setMaximum(100);
+            m_ui->progressBar->setValue((int) (((double) m_groupInfo.completedBytes / m_groupInfo.totalBytes) * 100));
             updateButtons();
         }
     }
@@ -101,8 +105,14 @@ void ShowTransferDialog::updateButtons()
     bool hasRunning = gTaskMgr->hasActiveTasksFor(m_group.id);
 
     m_ui->startButton->setEnabled(m_groupInfo.hasIncoming || hasRunning);
-    m_ui->startButton->setEnabled(hasRunning ? "Pause" : "Start");
+    m_ui->startButton->setText(hasRunning ? "Pause" : "Start");
     m_ui->addDevicesButton->setEnabled(m_groupInfo.hasOutgoing);
+    m_ui->saveDirectoryButton->setEnabled(m_groupInfo.hasIncoming);
+    m_ui->storageLineEdit->setEnabled(m_groupInfo.hasIncoming);
+    m_ui->storageText->setEnabled(m_groupInfo.hasIncoming);
+    m_ui->showFilesButton->setEnabled(m_groupInfo.hasIncoming);
+    m_ui->chooseDirectoryButton->setEnabled(m_groupInfo.hasIncoming);
+    m_ui->noIncomingFileText->setVisible(!m_groupInfo.hasIncoming);
 }
 
 void ShowTransferDialog::addDevices()
@@ -133,12 +143,12 @@ void ShowTransferDialog::assigneeChanged(int index)
     m_objectModel->databaseChanged(SqlSelection(), ChangeType::Any);
 }
 
-void ShowTransferDialog::globalTaskStarted(groupid groupId, const QString &deviceId, TransferObject::Type type)
+void ShowTransferDialog::globalTaskStarted(groupid groupId, const QString &deviceId, int type)
 {
     updateButtons();
 }
 
-void ShowTransferDialog::globalTaskFinished(groupid groupId, const QString &deviceId, TransferObject::Type type)
+void ShowTransferDialog::globalTaskFinished(groupid groupId, const QString &deviceId, int type)
 {
     updateButtons();
 }
@@ -149,4 +159,9 @@ void ShowTransferDialog::taskToggle()
         gTaskMgr->pauseTasks(m_group.id);
     else if (m_groupInfo.hasIncoming && !m_assigneeList.empty())
         TransferUtils::startTransfer(m_group.id, m_assigneeList[0].device.id);
+}
+
+void ShowTransferDialog::showFiles()
+{
+    QDesktopServices::openUrl(QUrl(TransferUtils::getSavePath(m_group)));
 }

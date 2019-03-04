@@ -30,9 +30,9 @@ public slots:
 
     void changeSavePath();
 
-    void globalTaskStarted(groupid groupId, const QString &deviceId, TransferObject::Type type);
+    void globalTaskStarted(groupid groupId, const QString &deviceId, int type);
 
-    void globalTaskFinished(groupid groupId, const QString &deviceId, TransferObject::Type type);
+    void globalTaskFinished(groupid groupId, const QString &deviceId, int type);
 
     void removeTransfer();
 
@@ -41,6 +41,8 @@ public slots:
     void saveDirectory();
 
     void sendToDevices(groupid groupId, QList<NetworkDevice> devices);
+
+    void showFiles();
 
     void startTransfer();
 

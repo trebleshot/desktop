@@ -94,10 +94,40 @@
        <string>Options</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout">
+       <item row="5" column="0" colspan="2">
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="errorsText">
+         <property name="text">
+          <string>File needs attention</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QListView" name="errorListView"/>
+       </item>
        <item row="0" column="0">
         <widget class="QLabel" name="storageText">
          <property name="text">
           <string>Files are saved in</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="noIncomingFileText">
+         <property name="text">
+          <string>(No incoming file)</string>
          </property>
         </widget>
        </item>
@@ -116,40 +146,34 @@
         </layout>
        </item>
        <item row="1" column="1">
-        <widget class="QPushButton" name="chooseDirectoryButton">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Choose</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2">
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="3" column="1">
-        <widget class="QListView" name="errorListView"/>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="errorsText">
-         <property name="text">
-          <string>File needs attention</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QPushButton" name="chooseDirectoryButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Choose</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="showFilesButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Show files</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>

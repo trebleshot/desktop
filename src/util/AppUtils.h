@@ -62,7 +62,7 @@ public:
         m_mutex.lock();
 
         for (const auto *task : m_activeTasks)
-            if (task->m_groupId == groupId && (deviceId.isEmpty() || task->m_groupId == deviceId)) {
+            if (task->m_groupId == groupId && (deviceId == nullptr || task->m_deviceId == deviceId)) {
                 m_mutex.unlock();
                 return true;
             }
@@ -91,7 +91,7 @@ public:
 
         m_mutex.lock();
         for (auto *task : m_activeTasks)
-            if (task->m_groupId == groupId && (deviceId.isEmpty() || task->m_groupId == deviceId)) {
+            if (task->m_groupId == groupId && (deviceId == nullptr || deviceId == task->m_deviceId)) {
                 task->interrupt();
                 foundTotal++;
             }
@@ -110,9 +110,9 @@ public:
 
 signals:
 
-    void taskAdded(groupid groupId, const QString &device, TransferObject::Type type);
+    void taskAdded(groupid groupId, const QString &device, int type);
 
-    void taskRemoved(groupid groupId, const QString &device, TransferObject::Type type);
+    void taskRemoved(groupid groupId, const QString &device, int type);
 };
 
 class AppUtils {
