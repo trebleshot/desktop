@@ -49,71 +49,35 @@ MainWindow::MainWindow(QWidget *parent)
         m_ui->transfersTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
         m_ui->transfersTreeView->setModel(m_groupModel);
         m_ui->transfersTreeView->setColumnWidth(0, 160);
+        m_ui->transfersTreeView->setColumnWidth(1, 80);
+        m_ui->transfersTreeView->setColumnWidth(2, 80);
+        m_ui->transfersTreeView->setColumnWidth(3, 80);
         m_ui->devicesTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
         m_ui->devicesTreeView->setModel(m_deviceModel);
         m_ui->devicesTreeView->setColumnWidth(0, 160);
 
+        connect(m_ui->startPauseButton, &QPushButton::pressed, this, &MainWindow::taskToggle);
+        connect(m_ui->showButton, SIGNAL(pressed()), this, SLOT(showTransfer()));
+        connect(m_ui->removeButton, &QPushButton::pressed, this, &MainWindow::removeTransfer);
         connect(m_ui->devicesTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::deviceContextMenu);
         connect(m_ui->devicesTreeView, &QTreeView::activated, this, &MainWindow::deviceSelected);
-
-        connect(m_ui->transfersTreeView, &QTreeView::customContextMenuRequested, [this](const QPoint &point) {
-            QMenu menu(m_ui->transfersTreeView);
-
-            const auto &model = m_ui->transfersTreeView->indexAt(point);
-
-            if (model.isValid()) {
-                updateAvailability();
-
-                menu.addAction(m_ui->actionStart);
-                menu.addAction(m_ui->actionPause);
-                menu.addSeparator();
-                menu.addAction(m_ui->actionAdd_devices);
-                menu.addAction(m_ui->actionRemove);
-
-                menu.exec(m_ui->transfersTreeView->viewport()->mapToGlobal(point));
-            }
-        });
-
+        connect(m_ui->transfersTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::transferContextMenu);
+        connect(m_ui->transfersTreeView, &QTreeView::activated, this, &MainWindow::transferItemActivated);
+        connect(m_ui->transfersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged,
+                this, &MainWindow::transferSelectionChanged);
         connect(m_ui->actionPause, &QAction::triggered, this, &MainWindow::taskPause);
         connect(m_ui->actionStart, &QAction::triggered, this, &MainWindow::taskStart);
         connect(m_ui->sendFilesButton, &QPushButton::clicked, this, &MainWindow::selectFilesToSend);
-        connect(m_ui->menuEdit, &QMenu::aboutToShow, this, &MainWindow::updateAvailability);
-        connect(m_ui->transfersTreeView, &QTreeView::activated, this, &MainWindow::transferItemActivated);
         connect(m_ui->actionAbout_TrebleShot, &QAction::triggered, this, &MainWindow::about);
         connect(m_ui->actionAbout_Qt, &QAction::triggered, this, &MainWindow::aboutQt);
-        connect(m_ui->actionManage_devices, &QAction::triggered, this, &MainWindow::manageDevices);
-        connect(m_ui->actionRemove, &QAction::triggered, this, &MainWindow::remove);
-        connect(m_ui->actionAdd_devices, &QAction::triggered, this, &MainWindow::send);
         connect(m_ui->actionStorage_location, &QAction::triggered, this, &MainWindow::setStorageLocation);
         connect(m_ui->changeStorageFolderButton, &QPushButton::clicked, this, &MainWindow::setStorageLocation);
+        connect(m_ui->actionShow_received_files, &QAction::triggered, this, &MainWindow::showReceivedFiles);
         connect(m_ui->usernameLineEdit, &QLineEdit::textChanged, this, &MainWindow::usernameChanged);
         connect(m_ui->saveStorageButton, &QPushButton::clicked, this, &MainWindow::savePathChanged);
 
-        connect(m_ui->actionStart_receiver, &QAction::triggered, []() {
-            qDebug() << "Debug process";
-
-            SqlSelection sqlSelection;
-            sqlSelection.setTableName(DB_TABLE_TRANSFERASSIGNEE);
-            sqlSelection.setOrderBy(DB_FIELD_TRANSFERASSIGNEE_GROUPID, false);
-
-            const auto &assigneeList = gDatabase->castQuery(sqlSelection, TransferAssignee());
-
-            if (!assigneeList.empty()) {
-                const auto &assignee = assigneeList.first();
-                auto *client = new SeamlessClient(assignee.groupId, assignee.deviceId);
-
-                qDebug() << "Randomly starting a receive process for device"
-                         << assignee.deviceId
-                         << "for group id"
-                         << assignee.groupId;
-
-                client->start();
-            } else {
-                qDebug() << "No assignee found to start as debug receiver process";
-            }
-        });
-
         refreshStorageLocation();
+        transferSelectionChanged(QItemSelection(), QItemSelection());
         m_ui->usernameLineEdit->setText(getUserNickname());
     }
 
@@ -143,15 +107,15 @@ void MainWindow::dropEvent(QDropEvent *event)
         event->acceptProposedAction();
 
         FileAdditionProgressDialog progressDialog(this, TransferUtils::getPaths(event->mimeData()->urls()));
-        connect(&progressDialog, &FileAdditionProgressDialog::filesAdded, this, &MainWindow::showTransfer);
+        connect(&progressDialog, SIGNAL(filesAdded(groupid)), this, SLOT(showTransfer(groupid)));
         progressDialog.exec();
     }
 }
 
-void MainWindow::transferItemActivated(QModelIndex modelIndex)
+void MainWindow::transferItemActivated(const QModelIndex &modelIndex)
 {
     const auto &data = m_groupModel->list().at(modelIndex.row());
-    ShowTransferDialog(this, data.group.id).exec();
+    showTransfer(data.group.id);
 }
 
 void MainWindow::about()
@@ -219,11 +183,11 @@ void MainWindow::showTransferRequest(const QString &deviceId, groupid groupId, i
         messageBox.setText(QString("Receive files from %1, %2 in total?")
                                    .arg(device.nickname)
                                    .arg(filesTotal));
+        auto *okButton = messageBox.addButton(QMessageBox::StandardButton::Ok);
         messageBox.addButton(QMessageBox::StandardButton::Ignore);
-        auto* okButton = messageBox.addButton(QMessageBox::StandardButton::Ok);
 
         connect(okButton, &QPushButton::pressed, [groupId, deviceId]() {
-            auto* client = new SeamlessClient(groupId, deviceId, true);
+            auto *client = new SeamlessClient(groupId, deviceId, true);
             client->start();
         });
 
@@ -234,12 +198,7 @@ void MainWindow::showTransferRequest(const QString &deviceId, groupid groupId, i
     }
 }
 
-void MainWindow::manageDevices()
-{
-    ManageDevicesDialog(this).exec();
-}
-
-void MainWindow::send()
+void MainWindow::showTransfer()
 {
     const auto &selectedIndexes = m_ui->transfersTreeView->selectionModel()->selectedIndexes();
 
@@ -252,38 +211,13 @@ void MainWindow::send()
         showTransfer(m_groupModel->list().at(ids[0]).group.id);
 }
 
-void MainWindow::remove()
+void MainWindow::removeTransfer()
 {
     auto list = m_groupModel->list();
 
     for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
         TransferGroup group = list.at(row).group;
         gDatabase->remove(group);
-    }
-}
-
-void MainWindow::updateAvailability()
-{
-    const auto &selectedIndexes = m_ui->transfersTreeView->selectionModel()->selectedIndexes();
-
-    if (selectedIndexes.empty())
-        return;
-
-    const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
-
-    m_ui->actionRemove->setEnabled(!ids.empty());
-
-    if (ids.size() == 1) {
-        const auto &item = m_groupModel->list().at(ids[0]);
-        const bool running = gTaskMgr->hasActiveTasksFor(item.group.id);
-
-        m_ui->actionStart->setEnabled(item.hasIncoming && !running);
-        m_ui->actionPause->setEnabled(running);
-        m_ui->actionAdd_devices->setEnabled(item.hasOutgoing);
-    } else {
-        m_ui->actionPause->setEnabled(ids.size() > 1);
-        m_ui->actionStart->setEnabled(false);
-        m_ui->actionAdd_devices->setEnabled(false);
     }
 }
 
@@ -294,9 +228,8 @@ void MainWindow::refreshStorageLocation()
 
 void MainWindow::setStorageLocation()
 {
-    AppUtils::getDefaultSettings().setValue(
-            "savePath", QFileDialog::getExistingDirectory(this, "Choose a location where files are put",
-                                                          TransferUtils::getDefaultSavePath()));
+    AppUtils::getDefaultSettings().setValue("savePath", QFileDialog::getExistingDirectory(
+            this, "Choose a location where files are put", TransferUtils::getDefaultSavePath()));
 
     refreshStorageLocation();
 }
@@ -308,7 +241,7 @@ void MainWindow::deviceBlocked(const QString &deviceId, const QHostAddress &addr
     if (gDatabase->reconstructSilently(device)) {
         QMessageBox box(this);
         box.setWindowTitle(device.nickname);
-        box.setText(QString("Restricted %1 trying to communicate with you?").arg(device.nickname));
+        box.setText(QString("Restricted %1 is trying to communicate with you?").arg(device.nickname));
         box.addButton(QMessageBox::StandardButton::Ignore);
         QPushButton *allowButton = box.addButton("Allow", QMessageBox::ButtonRole::AcceptRole);
         QPushButton *blockButton = box.addButton("Deny for this session", QMessageBox::ButtonRole::RejectRole);
@@ -354,21 +287,13 @@ void MainWindow::deviceContextMenu(const QPoint &point)
         NetworkDevice device = m_deviceModel->list()->at(modelIndex.row());
 
         QMenu menu(m_ui->devicesTreeView);
-        auto *actionAccess = new QAction(device.isRestricted ? "Allow to access" : "Restrict", &menu);
-        auto *actionRemove = new QAction("Remove", &menu);
-
-        connect(&menu, &QObject::destroyed, actionAccess, &QObject::deleteLater);
-        connect(&menu, &QObject::destroyed, actionRemove, &QObject::deleteLater);
-        connect(actionAccess, &QAction::triggered, [&device]() {
+        menu.addAction(device.isRestricted ? "Allow to access" : "Restrict", [&device]() {
             device.isRestricted = !device.isRestricted;
             gDatabase->publish(device);
         });
-        connect(actionRemove, &QAction::triggered, [&device]() {
+        menu.addAction("Remove", [&device]() {
             gDatabase->remove(device);
         });
-
-        menu.addAction(actionAccess);
-        menu.addAction(actionRemove);
 
         menu.exec(m_ui->devicesTreeView->mapToGlobal(point));
     }
@@ -391,7 +316,7 @@ void MainWindow::selectFilesToSend()
     fileDialog.exec();
 
     FileAdditionProgressDialog progressDialog(this, fileDialog.selectedFiles());
-    connect(&progressDialog, &FileAdditionProgressDialog::filesAdded, this, &MainWindow::showTransfer);
+    connect(&progressDialog, SIGNAL(filesAdded(groupid)), this, SLOT(showTransfer(groupid)));
     progressDialog.exec();
 }
 
@@ -403,9 +328,8 @@ void MainWindow::taskStart()
         const auto &group = list.at(row).group;
         const auto &assignees = TransferUtils::getAllAssigneeInfo(group);
 
-        if (!assignees.empty()) {
+        if (!assignees.empty())
             TransferUtils::startTransfer(group.id, assignees[0].device.id);
-        }
     }
 }
 
@@ -416,5 +340,94 @@ void MainWindow::taskPause()
     for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
         TransferGroup group = list.at(row).group;
         gTaskMgr->pauseTasks(group.id);
+    }
+}
+
+void MainWindow::transferSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    const auto &selectedIndexes = m_ui->transfersTreeView->selectionModel()->selectedIndexes();
+
+    if (selectedIndexes.empty())
+        return;
+
+    const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
+
+    if (ids.size() == 1) {
+        const auto &item = m_groupModel->list().at(ids[0]);
+        const bool running = gTaskMgr->hasActiveTasksFor(item.group.id);
+
+        if (running)
+            m_ui->startPauseButton->setText("Pause");
+        else {
+            m_ui->startPauseButton->setText("Start");
+            m_ui->startPauseButton->setEnabled(item.hasIncoming);
+        }
+    } else {
+        m_ui->startPauseButton->setText("Pause All");
+        m_ui->startPauseButton->setEnabled(ids.size() > 1);
+    }
+
+    m_ui->showButton->setEnabled(ids.size() == 1);
+    m_ui->removeButton->setEnabled(!ids.empty());
+}
+
+void MainWindow::transferContextMenu(const QPoint &point)
+{
+    const auto &selectedIndexes = m_ui->transfersTreeView->selectionModel()->selectedIndexes();
+
+    if (selectedIndexes.empty())
+        return;
+
+    QMenu menu(m_ui->transfersTreeView);
+    const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
+
+    if (ids.size() == 1) {
+        const auto &item = m_groupModel->list().at(ids[0]);
+        const bool running = gTaskMgr->hasActiveTasksFor(item.group.id);
+
+        if (running)
+            menu.addAction("Pause", this, &MainWindow::taskPause);
+        else
+            menu.addAction("Start", this, &MainWindow::taskStart)->setEnabled(item.hasIncoming);
+    } else
+        menu.addAction("Pause All", this, &MainWindow::taskPause)->setEnabled(ids.size() > 1);
+
+    menu.addSeparator();
+    menu.addAction("Show", this, SLOT(showTransfer()))->setEnabled(ids.size() == 1);
+    menu.addAction("Remove", this, &MainWindow::removeTransfer)->setEnabled(!ids.empty());
+
+    menu.exec(m_ui->transfersTreeView->viewport()->mapToGlobal(point));
+}
+
+void MainWindow::showReceivedFiles()
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile(TransferUtils::getDefaultSavePath()));
+}
+
+void MainWindow::taskToggle()
+{
+    const auto &selectedIndexes = m_ui->transfersTreeView->selectionModel()->selectedIndexes();
+
+    if (selectedIndexes.empty())
+        return;
+
+    QMenu menu(m_ui->transfersTreeView);
+    const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
+
+    if (ids.size() == 1) {
+        const auto &item = m_groupModel->list().at(ids[0]);
+        const bool running = gTaskMgr->hasActiveTasksFor(item.group.id);
+
+        if (running)
+            gTaskMgr->pauseTasks(item.group.id);
+        else if (item.hasIncoming) {
+            for (const auto &assigneeInfo : item.assignees)
+                TransferUtils::startTransfer(item.group.id, assigneeInfo.device.id);
+        }
+    } else {
+        for (int index : ids) {
+            const auto &item = m_groupModel->list().at(index);
+            gTaskMgr->pauseTasks(item.group.id);
+        }
     }
 }

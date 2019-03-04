@@ -31,6 +31,11 @@ if (WIN32)
     set(CMAKE_WIN32_EXECUTABLE ON)
 endif ()
 
+set(PROJECT_NAME "TrebleShot")
+set(PROJECT_DESCRIPTION "Sophisticated and multi-platform file-sharing software")
+set(PROJECT_AUTHOR "Genonbeta")
+set(PROJECT_URL "https://github.com/genonbeta/TrebleShot-Desktop")
+
 set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 1)
 set(PROJECT_VERSION_PATCH 0)
@@ -80,6 +85,8 @@ set(UTIL_LIBRARY
         src/build.h
         src/broadcast/CommunicationServer.h
         src/broadcast/CommunicationServer.cpp
+        src/broadcast/NetworkServiceDiscovery.h
+        src/broadcast/NetworkServiceDiscovery.cpp
         src/broadcast/SeamlessServer.h
         src/broadcast/SeamlessServer.cpp
         src/broadcast/SeamlessClient.h
@@ -107,6 +114,8 @@ set(UTIL_LIBRARY
         src/model/NetworkDeviceModel.cpp
         src/model/TransferGroupModel.h
         src/model/TransferGroupModel.cpp
+        src/model/TransferObjectModel.h
+        src/model/TransferObjectModel.cpp
         src/ui/DeviceChooserDialog.h
         src/ui/DeviceChooserDialog.cpp
         src/ui/FileAdditionProgressDialog.h
@@ -128,10 +137,12 @@ set(UTIL_LIBRARY
         src/util/NetworkDeviceLoader.h
         src/util/NetworkDeviceLoader.cpp
         src/util/TransferUtils.h
-        src/util/TransferUtils.cpp src/util/ViewUtils.cpp src/util/ViewUtils.h src/broadcast/NetworkServiceDiscovery.cpp src/broadcast/NetworkServiceDiscovery.h src/model/TransferObjectModel.cpp src/model/TransferObjectModel.h)
+        src/util/TransferUtils.cpp
+        src/util/ViewUtils.h
+        src/util/ViewUtils.cpp)
 
-add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
-add_executable(TrebleShot src/main.cpp src/ui/MainWindow.cpp)
+add_library(sources OBJECT ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
+add_executable(trebleshot src/main.cpp src/ui/MainWindow.cpp)
 
 # Add the Qt5 Widgets for linking
 if (NOT TARGET Qt5::WinMain)
@@ -139,4 +150,4 @@ if (NOT TARGET Qt5::WinMain)
 endif ()
 
 target_link_libraries(sources PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets)
-target_link_libraries(TrebleShot sources)
+target_link_libraries(trebleshot PUBLIC sources)

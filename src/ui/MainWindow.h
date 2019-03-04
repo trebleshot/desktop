@@ -52,25 +52,25 @@ public slots:
 
     void deviceBlocked(const QString &deviceId, const QHostAddress &address);
 
-    void deviceContextMenu(const QPoint& point);
+    void deviceContextMenu(const QPoint &point);
 
-    void deviceSelected(const QModelIndex& modelIndex);
+    void deviceSelected(const QModelIndex &modelIndex);
+
+    void showTransfer();
 
     void showTransfer(groupid groupId);
 
-    void manageDevices();
-
-    void remove();
+    void removeTransfer();
 
     void refreshStorageLocation();
 
     void savePathChanged();
 
-    void send();
-
     void selectFilesToSend();
 
     void setStorageLocation();
+
+    void showReceivedFiles();
 
     void showReceivedText(const QString &text, const QString &deviceId);
 
@@ -80,11 +80,15 @@ public slots:
 
     void taskPause();
 
-    void transferItemActivated(QModelIndex modelIndex);
+    void taskToggle();
+
+    void transferItemActivated(const QModelIndex &modelIndex);
+
+    void transferSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+
+    void transferContextMenu(const QPoint &point);
 
     void usernameChanged(QString username);
-
-    void updateAvailability();
 };
 
 #endif // MAINWINDOW_H

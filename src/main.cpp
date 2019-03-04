@@ -17,7 +17,9 @@ int main(int argc, char *argv[])
      **/
 
     QApplication::setWindowIcon(QIcon(":/logo/launcher"));
-    QApplication::setApplicationVersion(QString(TREBLESHOT_VERSION_NAME));
+    QApplication::setApplicationName(TREBLESHOT_NAME);
+    QApplication::setApplicationVersion(TREBLESHOT_VERSION_NAME);
+    QApplication::setApplicationDisplayName(TREBLESHOT_NAME);
 
     MainWindow mainWindow;
     mainWindow.show();

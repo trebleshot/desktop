@@ -6,5 +6,5 @@ Icon=trebleshot
 Terminal=false
 X-MultipleArgs=false
 Type=Application
-Categories=Connectivity;Utility;
+Categories=Utility;
 MimeType=application/trebleshot;application/x-trebleshot;

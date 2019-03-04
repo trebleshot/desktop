@@ -100,6 +100,8 @@ void ShowTransferDialog::updateAssignees()
 
     for (const auto &info : copyList)
         m_ui->assigneesComboBox->addItem(info.device.nickname, info.device.id);
+
+    assigneeChanged(0);
 }
 
 void ShowTransferDialog::updateButtons()
@@ -131,6 +133,18 @@ void ShowTransferDialog::sendToDevices(groupid groupId, QList<NetworkDevice> dev
 
 void ShowTransferDialog::removeTransfer()
 {
+    if (m_ui->assigneesComboBox->currentIndex() > 0 && !m_groupInfo.hasOutgoing) {
+        SqlSelection selection;
+        selection.setTableName(DB_TABLE_TRANSFERASSIGNEE);
+        selection.setWhere(QString("%1 = ? AND %2 = ?").arg(DB_FIELD_TRANSFERASSIGNEE_DEVICEID)
+                                   .arg(DB_FIELD_TRANSFERASSIGNEE_GROUPID));
+        selection.whereArgs << m_ui->assigneesComboBox->currentData().toString()
+                            << m_group.id;
+
+        gDatabase->removeAsObject(selection, TransferAssignee());
+        return;
+    }
+
     gDatabase->remove(m_group);
 }
 
@@ -165,5 +179,5 @@ void ShowTransferDialog::taskToggle()
 
 void ShowTransferDialog::showFiles()
 {
-    QDesktopServices::openUrl(QUrl(TransferUtils::getSavePath(m_group)));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(TransferUtils::getSavePath(m_group)));
 }
