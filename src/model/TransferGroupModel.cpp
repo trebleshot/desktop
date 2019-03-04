@@ -99,6 +99,9 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
 
 void TransferGroupModel::databaseChanged(const SqlSelection &change, ChangeType changeType)
 {
+    if (change.valid() && change.tableName != DB_TABLE_TRANSFERGROUP && change.tableName != DB_TABLE_TRANSFER)
+        return;
+
     emit layoutAboutToBeChanged();
 
     m_list.clear();
@@ -109,9 +112,8 @@ void TransferGroupModel::databaseChanged(const SqlSelection &change, ChangeType 
 
     const auto &groupList = gDatabase->castQuery(selection, TransferGroup());
 
-    for (const auto &transferGroup : groupList) {
+    for (const auto &transferGroup : groupList)
         m_list.append(TransferUtils::getInfo(transferGroup));
-    }
 
     emit layoutChanged();
 }

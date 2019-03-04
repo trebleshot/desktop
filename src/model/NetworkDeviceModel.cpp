@@ -25,8 +25,10 @@ int NetworkDeviceModel::rowCount(const QModelIndex &parent) const
 
 void NetworkDeviceModel::databaseChanged(const SqlSelection &change, ChangeType changeType)
 {
-    emit layoutAboutToBeChanged();
+    if (change.valid() && change.tableName != DB_TABLE_DEVICES)
+        return;
 
+    emit layoutAboutToBeChanged();
     m_list.clear();
 
     SqlSelection selection;

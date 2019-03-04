@@ -74,6 +74,8 @@ MainWindow::MainWindow(QWidget *parent)
             }
         });
 
+        connect(m_ui->actionPause, &QAction::triggered, this, &MainWindow::taskPause);
+        connect(m_ui->actionStart, &QAction::triggered, this, &MainWindow::taskStart);
         connect(m_ui->sendFilesButton, &QPushButton::clicked, this, &MainWindow::selectFilesToSend);
         connect(m_ui->menuEdit, &QMenu::aboutToShow, this, &MainWindow::updateAvailability);
         connect(m_ui->transfersTreeView, &QTreeView::activated, this, &MainWindow::transferItemActivated);
@@ -98,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent)
 
             if (!assigneeList.empty()) {
                 const auto &assignee = assigneeList.first();
-                auto *client = new SeamlessClient(assignee.deviceId, assignee.groupId);
+                auto *client = new SeamlessClient(assignee.groupId, assignee.deviceId);
 
                 qDebug() << "Randomly starting a receive process for device"
                          << assignee.deviceId
@@ -141,7 +143,7 @@ void MainWindow::dropEvent(QDropEvent *event)
         event->acceptProposedAction();
 
         FileAdditionProgressDialog progressDialog(this, TransferUtils::getPaths(event->mimeData()->urls()));
-        connect(&progressDialog, &FileAdditionProgressDialog::filesAdded, this, &MainWindow::filesAdded);
+        connect(&progressDialog, &FileAdditionProgressDialog::filesAdded, this, &MainWindow::showTransfer);
         progressDialog.exec();
     }
 }
@@ -173,16 +175,9 @@ void MainWindow::aboutQt()
     QApplication::aboutQt();
 }
 
-void MainWindow::deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devices)
+void MainWindow::showTransfer(groupid groupId)
 {
-    TransferRequestProgressDialog(this, groupId, devices).exec();
-}
-
-void MainWindow::filesAdded(groupid groupId)
-{
-    DeviceChooserDialog dialog(this, groupId);
-    connect(&dialog, &DeviceChooserDialog::devicesSelected, this, &MainWindow::deviceForAddedFiles);
-    dialog.exec();
+    ShowTransferDialog(this, groupId).exec();
 }
 
 void MainWindow::showReceivedText(const QString &text, const QString &deviceId)
@@ -220,13 +215,20 @@ void MainWindow::showTransferRequest(const QString &deviceId, groupid groupId, i
 
         QMessageBox messageBox(this);
 
-        messageBox.setWindowTitle(QString("File receive request from %1").arg(device.nickname));
-        messageBox.setText(QString("%1 wants to you send you files, %2 in total. Do you want to receive now?")
+        messageBox.setWindowTitle(QString("%1").arg(device.nickname));
+        messageBox.setText(QString("Receive files from %1, %2 in total?")
                                    .arg(device.nickname)
                                    .arg(filesTotal));
         messageBox.addButton(QMessageBox::StandardButton::Ignore);
+        auto* okButton = messageBox.addButton(QMessageBox::StandardButton::Ok);
+
+        connect(okButton, &QPushButton::pressed, [groupId, deviceId]() {
+            auto* client = new SeamlessClient(groupId, deviceId, true);
+            client->start();
+        });
 
         messageBox.exec();
+        showTransfer(groupId);
     } catch (...) {
         // do nothing
     }
@@ -247,7 +249,7 @@ void MainWindow::send()
     const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
 
     if (ids.size() == 1)
-        filesAdded(m_groupModel->list().at(ids[0]).group.id);
+        showTransfer(m_groupModel->list().at(ids[0]).group.id);
 }
 
 void MainWindow::remove()
@@ -273,13 +275,14 @@ void MainWindow::updateAvailability()
 
     if (ids.size() == 1) {
         const auto &item = m_groupModel->list().at(ids[0]);
+        const bool running = gTaskMgr->hasActiveTasksFor(item.group.id);
 
-        m_ui->actionStart->setEnabled(item.hasIncoming);
-        m_ui->actionPause->setEnabled(item.hasIncoming);
+        m_ui->actionStart->setEnabled(item.hasIncoming && !running);
+        m_ui->actionPause->setEnabled(running);
         m_ui->actionAdd_devices->setEnabled(item.hasOutgoing);
     } else {
+        m_ui->actionPause->setEnabled(ids.size() > 1);
         m_ui->actionStart->setEnabled(false);
-        m_ui->actionPause->setEnabled(false);
         m_ui->actionAdd_devices->setEnabled(false);
     }
 }
@@ -388,6 +391,30 @@ void MainWindow::selectFilesToSend()
     fileDialog.exec();
 
     FileAdditionProgressDialog progressDialog(this, fileDialog.selectedFiles());
-    connect(&progressDialog, &FileAdditionProgressDialog::filesAdded, this, &MainWindow::filesAdded);
+    connect(&progressDialog, &FileAdditionProgressDialog::filesAdded, this, &MainWindow::showTransfer);
     progressDialog.exec();
+}
+
+void MainWindow::taskStart()
+{
+    auto list = m_groupModel->list();
+
+    for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
+        const auto &group = list.at(row).group;
+        const auto &assignees = TransferUtils::getAllAssigneeInfo(group);
+
+        if (!assignees.empty()) {
+            TransferUtils::startTransfer(group.id, assignees[0].device.id);
+        }
+    }
+}
+
+void MainWindow::taskPause()
+{
+    auto list = m_groupModel->list();
+
+    for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
+        TransferGroup group = list.at(row).group;
+        gTaskMgr->pauseTasks(group.id);
+    }
 }

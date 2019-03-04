@@ -46,6 +46,8 @@ struct TransferGroupInfo {
     size_t totalBytes = 0;
     size_t completedBytes = 0;
 
+    TransferGroupInfo() = default;
+
     TransferGroupInfo(const TransferGroup &group, const QList<AssigneeInfo> &assignees, int total = 0,
                       int completed = 0, bool hasError = false, bool hasIncoming = false, bool hasOutgoing = false,
                       size_t totalBytes = 0, size_t completedBytes = 0)
@@ -104,6 +106,8 @@ public:
     static TransferGroupInfo getInfo(const TransferGroup &group);
 
     static AssigneeInfo getInfo(const TransferAssignee &assignee);
+
+    static void startTransfer(groupid groupId, const QString &deviceId);
 
     static QString saveIncomingFile(const TransferGroup &group, TransferObject &object);
 

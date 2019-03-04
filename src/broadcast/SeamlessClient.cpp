@@ -5,11 +5,10 @@
 #include <src/database/object/NetworkDevice.h>
 #include <src/util/AppUtils.h>
 #include <src/util/CommunicationBridge.h>
-#include <src/database/object/TransferGroup.h>
 #include <src/util/TransferUtils.h>
 #include "SeamlessClient.h"
 
-SeamlessClient::SeamlessClient(const QString &deviceId, groupid groupId, bool autoDelete, QObject *parent)
+SeamlessClient::SeamlessClient(groupid groupId, const QString &deviceId, bool autoDelete, QObject *parent)
         : QThread(parent), TransferTask(groupId, deviceId, TransferObject::Type::Incoming)
 {
     if (autoDelete)

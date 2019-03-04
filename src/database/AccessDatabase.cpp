@@ -1,6 +1,8 @@
 #include <c++/7/bits/unique_ptr.h>
 #include <src/util/AppUtils.h>
 #include "ReconstructionException.h"
+#include "AccessDatabase.h"
+
 
 using DbStructure::generateField;
 using DbStructure::generateTableCreationSql;
@@ -478,6 +480,11 @@ QSqlQuery SqlSelection::toUpdateQuery(const QSqlRecord &record) const
     bindWhereClause(query);
 
     return query;
+}
+
+bool SqlSelection::valid() const
+{
+    return tableName != nullptr;
 }
 
 /***

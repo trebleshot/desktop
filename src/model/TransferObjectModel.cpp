@@ -6,8 +6,8 @@
 #include <src/util/TransferUtils.h>
 #include "TransferObjectModel.h"
 
-TransferObjectModel::TransferObjectModel(groupid groupId, QObject *parent)
-        : QAbstractTableModel(parent)
+TransferObjectModel::TransferObjectModel(groupid groupId, const QString &deviceId, QObject *parent)
+        : QAbstractTableModel(parent), m_deviceId(deviceId)
 {
     m_groupId = groupId;
     connect(gDatabase, &AccessDatabase::databaseChanged, this, &TransferObjectModel::databaseChanged);
@@ -90,34 +90,42 @@ const QList<TransferObject> &TransferObjectModel::list() const
 
 void TransferObjectModel::databaseChanged(const SqlSelection &change, ChangeType type)
 {
+    if (change.valid() && change.tableName != DB_TABLE_TRANSFER && change.tableName != DB_DIVIS_TRANSFER)
+        return;
+
     emit layoutAboutToBeChanged();
 
     m_list.clear();
 
-    {
-        SqlSelection selection;
-        selection.setTableName(DB_TABLE_TRANSFER);
-        selection.setOrderBy(DB_FIELD_TRANSFER_NAME, true);
-        selection.setOrderBy(QString("%1 ASC, %2 ASC")
-                                     .arg(DB_FIELD_TRANSFER_NAME)
-                                     .arg(DB_FIELD_TRANSFER_DIRECTORY));
-        selection.setWhere(QString("%1 = ?").arg(DB_FIELD_TRANSFER_GROUPID));
-        selection.whereArgs << m_groupId;
+    SqlSelection selection;
+    selection.setTableName(DB_TABLE_TRANSFER);
+    selection.setOrderBy(DB_FIELD_TRANSFER_NAME, true);
+    selection.setOrderBy(QString("%1 ASC, %2 ASC")
+                                 .arg(DB_FIELD_TRANSFER_NAME)
+                                 .arg(DB_FIELD_TRANSFER_DIRECTORY));
 
-        m_list = gDatabase->castQuery(selection, TransferObject());
+    if (m_deviceId.isEmpty())
+        selection.setWhere(QString("%1 = ?").arg(DB_FIELD_TRANSFER_GROUPID));
+    else {
+        selection.setWhere(QString("%1 = ? AND %2 = ?")
+                                   .arg(DB_FIELD_TRANSFER_DEVICEID)
+                                   .arg(DB_FIELD_TRANSFER_GROUPID));
+        selection.whereArgs << m_deviceId;
     }
 
-    if (m_list.empty()) {
-        SqlSelection selection;
-        selection.setTableName(DB_DIVIS_TRANSFER);
-        selection.setOrderBy(QString("%1 ASC, %2 ASC")
-                                     .arg(DB_FIELD_TRANSFER_NAME)
-                                     .arg(DB_FIELD_TRANSFER_DIRECTORY));
-        selection.setWhere(QString("%1 = ?").arg(DB_FIELD_TRANSFER_GROUPID));
-        selection.whereArgs << m_groupId;
+    selection.whereArgs << m_groupId;
 
+    m_list = gDatabase->castQuery(selection, TransferObject());
+
+    if (m_list.empty()) {
+        selection.setTableName(DB_DIVIS_TRANSFER);
         m_list = gDatabase->castQuery(selection, TransferObject());
     }
 
     emit layoutChanged();
+}
+
+void TransferObjectModel::setDeviceId(const QString &deviceId)
+{
+    m_deviceId = deviceId;
 }

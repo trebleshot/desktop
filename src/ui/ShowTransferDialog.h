@@ -22,10 +22,40 @@ public:
 
     ~ShowTransferDialog() override;
 
+public slots:
+
+    void addDevices();
+
+    void assigneeChanged(int index);
+
+    void changeSavePath();
+
+    void globalTaskStarted(groupid groupId, const QString &deviceId, TransferObject::Type type);
+
+    void globalTaskFinished(groupid groupId, const QString &deviceId, TransferObject::Type type);
+
+    void removeTransfer();
+
+    void checkGroupIntegrity(const SqlSelection &change, ChangeType type);
+
+    void saveDirectory();
+
+    void sendToDevices(groupid groupId, QList<NetworkDevice> devices);
+
+    void startTransfer();
+
+    void taskToggle();
+
+    void updateAssignees();
+
+    void updateButtons();
+
 protected:
     Ui::ShowTransferDialog *m_ui;
     TransferObjectModel *m_objectModel;
-    groupid m_groupId;
+    TransferGroup m_group;
+    TransferGroupInfo m_groupInfo;
+    QList<AssigneeInfo> m_assigneeList;
 };
 
 

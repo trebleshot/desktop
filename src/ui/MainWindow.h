@@ -52,13 +52,11 @@ public slots:
 
     void deviceBlocked(const QString &deviceId, const QHostAddress &address);
 
-    void deviceForAddedFiles(groupid groupId, QList<NetworkDevice> devices);
-
     void deviceContextMenu(const QPoint& point);
 
     void deviceSelected(const QModelIndex& modelIndex);
 
-    void filesAdded(groupid groupId);
+    void showTransfer(groupid groupId);
 
     void manageDevices();
 
@@ -77,6 +75,10 @@ public slots:
     void showReceivedText(const QString &text, const QString &deviceId);
 
     void showTransferRequest(const QString &deviceId, groupid groupId, int filesTotal);
+
+    void taskStart();
+
+    void taskPause();
 
     void transferItemActivated(QModelIndex modelIndex);
 

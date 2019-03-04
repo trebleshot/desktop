@@ -57,12 +57,12 @@ public:
         m_mutex.unlock();
     }
 
-    bool hasActiveTasksFor(groupid groupId, const QString &deviceId)
+    bool hasActiveTasksFor(groupid groupId, const QString &deviceId = QString())
     {
         m_mutex.lock();
 
         for (const auto *task : m_activeTasks)
-            if (task->m_groupId == groupId && task->m_groupId == deviceId) {
+            if (task->m_groupId == groupId && (deviceId.isEmpty() || task->m_groupId == deviceId)) {
                 m_mutex.unlock();
                 return true;
             }
@@ -83,6 +83,21 @@ public:
         m_mutex.unlock();
 
         return tasks;
+    }
+
+    int pauseTasks(groupid groupId, const QString &deviceId = QString())
+    {
+        int foundTotal = 0;
+
+        m_mutex.lock();
+        for (auto *task : m_activeTasks)
+            if (task->m_groupId == groupId && (deviceId.isEmpty() || task->m_groupId == deviceId)) {
+                task->interrupt();
+                foundTotal++;
+            }
+        m_mutex.unlock();
+
+        return foundTotal;
     }
 
     void detachTask(TransferTask *task)

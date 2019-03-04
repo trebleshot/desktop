@@ -137,6 +137,8 @@ public:
     QString toSelectionColumns() const;
 
     QSqlQuery toUpdateQuery(const QSqlRecord &query) const;
+
+    bool valid() const;
 };
 
 class DatabaseObject {

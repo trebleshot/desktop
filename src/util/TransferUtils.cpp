@@ -6,8 +6,7 @@
 #include <QtCore/QDir>
 #include <QSqlError>
 #include <cmath>
-#include "AppUtils.h"
-#include "TransferUtils.h"
+#include <src/broadcast/SeamlessClient.h>
 
 SqlSelection TransferUtils::createSqlSelection(groupid groupId, const QString &deviceId,
                                                TransferObject::Flag flag, bool equals)
@@ -170,9 +169,7 @@ QString TransferUtils::getFlagString(TransferObject::Flag flag)
 
 QString TransferUtils::getSavePath(const TransferGroup &group)
 {
-    return (group.savePath != nullptr && group.savePath.length() > 0 && QDir().mkdir(group.savePath))
-           ? group.savePath
-           : getDefaultSavePath();
+    return (!group.savePath.isEmpty() && QDir(group.savePath).mkpath(".")) ? group.savePath : getDefaultSavePath();
 }
 
 QString TransferUtils::getIncomingFilePath(const TransferGroup &transferGroup, const TransferObject &object)
@@ -328,4 +325,10 @@ QList<QString> TransferUtils::getPaths(const QList<QUrl> &urls)
         paths << url.toLocalFile();
 
     return paths;
+}
+
+void TransferUtils::startTransfer(groupid groupId, const QString &deviceId)
+{
+    auto *client = new SeamlessClient(groupId, deviceId);
+    client->start();
 }
