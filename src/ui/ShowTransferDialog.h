@@ -48,9 +48,17 @@ public slots:
 
     void taskToggle();
 
+    void transferItemActivated(const QModelIndex& modelIndex);
+
+    void transferBitChange(groupid groupId, const QString &deviceId, int type, qint64 bit, qint64 fileSessionSize);
+
+    void transferFileChange(groupid groupId, const QString &deviceId, int type);
+
     void updateAssignees();
 
     void updateButtons();
+
+    void updateStats();
 
 protected:
     Ui::ShowTransferDialog *m_ui;
@@ -58,6 +66,7 @@ protected:
     TransferGroup m_group;
     TransferGroupInfo m_groupInfo;
     QList<AssigneeInfo> m_assigneeList;
+    qint64 m_fileSessionSize = 0;
 };
 
 

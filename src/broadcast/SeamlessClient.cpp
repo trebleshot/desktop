@@ -187,6 +187,8 @@ void SeamlessClient::run()
                                                     auto *socket = tcpServer.nextPendingConnection();
                                                     auto lastDataAvailable = clock();
                                                     auto fileSize = static_cast<qint64>(transferObject.fileSize);
+                                                    auto lastUpdate = (clock_t) 0;
+                                                    auto lastKnownSize = (qint64) 0;
 
                                                     while (socket->isReadable() && currentFile.size() < fileSize) {
                                                         if (socket->waitForReadyRead(2000)) {
@@ -194,6 +196,18 @@ void SeamlessClient::run()
                                                             currentFile.flush();
 
                                                             lastDataAvailable = clock();
+                                                        }
+
+                                                        // make sure when about to complete notify the last bits
+                                                        if (clock() - lastUpdate >
+                                                            2000 || currentFile.size() < fileSize) {
+                                                            auto size = currentFile.size();
+                                                            emit gTaskMgr->taskByteTransferred(m_groupId, m_deviceId,
+                                                                                               TransferObject::Incoming,
+                                                                                               size - lastKnownSize,
+                                                                                               size);
+                                                            lastKnownSize = size;
+                                                            lastUpdate = clock();
                                                         }
 
                                                         if (lastDataAvailable < clock() - TIMEOUT_SOCKET_DEFAULT)
@@ -208,6 +222,9 @@ void SeamlessClient::run()
                                                                 [&group, &transferObject](AccessDatabase *db) {
                                                                     TransferUtils::saveIncomingFile(group, transferObject);
                                                                 });
+
+                                                        emit gTaskMgr->taskItemTransferred(m_groupId, m_deviceId,
+                                                                                           TransferObject::Incoming);
                                                     } else {
                                                         transferObject.flag = TransferObject::Flag::Interrupted;
                                                     }

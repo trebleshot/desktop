@@ -162,6 +162,8 @@ QString TransferUtils::getFlagString(TransferObject::Flag flag)
             return QObject::tr("Pending");
         case TransferObject::Flag::Removed:
             return QObject::tr("Removed");
+        case TransferObject::Flag::Running:
+            return QObject::tr("Running");
     }
 
     return QString();

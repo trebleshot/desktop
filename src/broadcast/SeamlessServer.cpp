@@ -7,7 +7,6 @@
 #include <src/database/object/TransferObject.h>
 #include <QtCore/QFile>
 #include <src/util/AppUtils.h>
-#include "SeamlessServer.h"
 
 SeamlessServer::SeamlessServer(QObject *parent)
         : CSServer(QHostAddress::Any, PORT_SEAMLESS, TIMEOUT_SOCKET_DEFAULT, parent)
@@ -89,12 +88,10 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 
                         qDebug() << this << "File sending about to begin" << serverPort << skippedBytes
                                  << transferObject.file;
-                        gDbSignal->update(transferObject);
 
                         QFile file(transferObject.file);
-                        file.open(QFile::OpenModeFlag::ReadOnly);
 
-                        if (file.exists()) {
+                        if (file.exists() && file.open(QFile::OpenModeFlag::ReadOnly)) {
                             transferObject.accessPort = serverPort;
                             transferObject.skippedBytes = skippedBytes;
                             auto fileSize = static_cast<size_t>(file.size());
@@ -113,8 +110,14 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                                     qDebug() << this << "File seek failed for byte" << skippedBytes;
 
                             qDebug() << this << "About to connect";
+
+                            if (transferObject.flag != TransferObject::Flag::Running) {
+                                transferObject.flag = TransferObject::Flag::Running;
+                                gDatabase->update(transferObject);
+                            }
+
                             QTcpSocket socket;
-                            socket.open(QIODevice::OpenModeFlag::WriteOnly);
+                            socket.open(QTcpSocket::OpenModeFlag::WriteOnly);
 
                             {
                                 // Establish the connection to the socket that will send the file
@@ -132,6 +135,9 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                             qDebug() << this << "Connected & will send";
 
                             try {
+                                qint64 lastSize = 0;
+                                clock_t lastUpdated = 0;
+
                                 while (!file.atEnd()) {
                                     if (socket.bytesToWrite() == 0) {
                                         socket.write(file.read(BUFFER_LENGTH_DEFAULT));
@@ -142,7 +148,21 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                                         qDebug() << this << "Timed out or interrupted:" << thisTask->interrupted();
                                         throw exception();
                                     }
+
+                                    // make sure when about to complete notify the last bits
+                                    if (clock() - lastUpdated > 2000 || file.atEnd()) {
+                                        auto size = file.pos();
+                                        emit gTaskMgr->taskByteTransferred(thisTask->m_groupId, thisTask->m_deviceId,
+                                                                           TransferObject::Outgoing,
+                                                                           size - lastSize,
+                                                                           size);
+                                        lastSize = size;
+                                        lastUpdated = clock();
+                                    }
                                 }
+
+                                emit gTaskMgr->taskItemTransferred(thisTask->m_groupId, thisTask->m_deviceId,
+                                                                   TransferObject::Outgoing);
 
                                 qDebug() << this << "I/O Completed";
                                 transferObject.flag = TransferObject::Flag::Done;
@@ -161,6 +181,8 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                                               });
 
                             transferObject.flag = TransferObject::Flag::Interrupted;
+
+                            qDebug() << this << "File does not exist or did not open";
                         }
                     } else {
                         connection->reply({

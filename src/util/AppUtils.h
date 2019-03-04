@@ -14,6 +14,7 @@
 #include <QtCore/QSettings>
 #include <src/database/object/NetworkDevice.h>
 #include <src/database/object/TransferObject.h>
+#include <src/broadcast/SeamlessServer.h>
 
 #define gTaskMgr AppUtils::getTransferTaskManager()
 #define gDatabase AppUtils::getDatabase()
@@ -25,6 +26,7 @@ class TransferTask : public Interrupter {
 
 public:
     friend TransferTaskManager;
+    friend SeamlessServer;
 
     explicit TransferTask(groupid groupId, const QString &deviceId, TransferObject::Type type)
     {
@@ -113,6 +115,10 @@ signals:
     void taskAdded(groupid groupId, const QString &device, int type);
 
     void taskRemoved(groupid groupId, const QString &device, int type);
+
+    void taskByteTransferred(groupid groupId, const QString &device, int type, qint64 change, qint64 fileSessionSize);
+
+    void taskItemTransferred(groupid groupId, const QString &device, int type);
 };
 
 class AppUtils {

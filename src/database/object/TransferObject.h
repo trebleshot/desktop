@@ -18,7 +18,8 @@ public:
         Interrupted,
         Pending,
         Removed,
-        Done
+        Done,
+        Running
     };
 
     QString friendlyName;

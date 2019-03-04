@@ -22,7 +22,10 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
 
     connect(gTaskMgr, &TransferTaskManager::taskAdded, this, &ShowTransferDialog::globalTaskStarted);
     connect(gTaskMgr, &TransferTaskManager::taskRemoved, this, &ShowTransferDialog::globalTaskFinished);
+    connect(gTaskMgr, &TransferTaskManager::taskItemTransferred, this, &ShowTransferDialog::transferFileChange);
+    connect(gTaskMgr, &TransferTaskManager::taskByteTransferred, this, &ShowTransferDialog::transferBitChange);
     connect(gDatabase, &AccessDatabase::databaseChanged, this, &ShowTransferDialog::checkGroupIntegrity);
+    connect(m_ui->transfersTreeView, &QTreeView::activated, this, &ShowTransferDialog::transferItemActivated);
     connect(m_ui->assigneesComboBox, SIGNAL(activated(int)), this, SLOT(assigneeChanged(int)));
     connect(m_ui->startButton, &QPushButton::pressed, this, &ShowTransferDialog::startTransfer);
     connect(m_ui->showFilesButton, &QPushButton::pressed, this, &ShowTransferDialog::showFiles);
@@ -83,10 +86,8 @@ void ShowTransferDialog::checkGroupIntegrity(const SqlSelection &change, ChangeT
             }
 
             m_groupInfo = TransferUtils::getInfo(m_group);
-            m_ui->progressBar->setMaximum(100);
-            m_ui->progressBar->setValue((int) (((double) m_groupInfo.completedBytes / m_groupInfo.totalBytes) * 100));
-            m_ui->textFilesLeft->setText(tr("%1 of %2").arg(m_groupInfo.completed).arg(m_groupInfo.total));
 
+            updateStats();
             updateButtons();
         }
     }
@@ -133,10 +134,11 @@ void ShowTransferDialog::sendToDevices(groupid groupId, QList<NetworkDevice> dev
 
 void ShowTransferDialog::removeTransfer()
 {
-    if (m_ui->assigneesComboBox->currentIndex() > 0 && !m_groupInfo.hasOutgoing) {
+    if (m_ui->assigneesComboBox->currentIndex() > 0 && !m_groupInfo.hasIncoming) {
         SqlSelection selection;
         selection.setTableName(DB_TABLE_TRANSFERASSIGNEE);
-        selection.setWhere(QString("%1 = ? AND %2 = ?").arg(DB_FIELD_TRANSFERASSIGNEE_DEVICEID)
+        selection.setWhere(QString("%1 = ? AND %2 = ?")
+                                   .arg(DB_FIELD_TRANSFERASSIGNEE_DEVICEID)
                                    .arg(DB_FIELD_TRANSFERASSIGNEE_GROUPID));
         selection.whereArgs << m_ui->assigneesComboBox->currentData().toString()
                             << m_group.id;
@@ -180,4 +182,50 @@ void ShowTransferDialog::taskToggle()
 void ShowTransferDialog::showFiles()
 {
     QDesktopServices::openUrl(QUrl::fromLocalFile(TransferUtils::getSavePath(m_group)));
+}
+
+void ShowTransferDialog::updateStats()
+{
+    m_ui->progressBar->setMaximum(100);
+    m_ui->progressBar->setValue((int) (((double) m_groupInfo.completedBytes / m_groupInfo.totalBytes) * 100));
+    m_ui->textFilesLeft->setText(tr("%1 of %2").arg(m_groupInfo.completed).arg(m_groupInfo.total));
+}
+
+void ShowTransferDialog::transferBitChange(groupid groupId, const QString &deviceId, int type, qint64 bit, qint64 file)
+{
+    if (groupId == m_group.id) {
+        if (m_fileSessionSize == 0) {
+            m_groupInfo.completedBytes += file;
+            m_fileSessionSize = file;
+        } else
+            m_groupInfo.completedBytes += bit;
+    }
+
+    updateStats();
+}
+
+void ShowTransferDialog::transferFileChange(groupid groupId, const QString &deviceId, int type)
+{
+    if (groupId == m_group.id) {
+        m_groupInfo.completed++;
+        m_fileSessionSize = 0;
+    }
+
+    updateStats();
+}
+
+void ShowTransferDialog::transferItemActivated(const QModelIndex &modelIndex)
+{
+    if (!modelIndex.isValid())
+        return;
+
+    auto item = m_objectModel->list().at(modelIndex.row());
+
+    if (modelIndex.column() == TransferObjectModel::Status && item.flag == TransferObject::Interrupted) {
+        item.flag = TransferObject::Pending;
+        gDatabase->update(item);
+    } else if (item.flag == TransferObject::Flag::Done && item.type == TransferObject::Type::Incoming)
+        QDesktopServices::openUrl(QUrl::fromLocalFile(TransferUtils::getIncomingFilePath(m_group, item)));
+    else if (item.type == TransferObject::Type::Outgoing && QFile::exists(item.file))
+        QDesktopServices::openUrl(QUrl::fromLocalFile(item.file));
 }
