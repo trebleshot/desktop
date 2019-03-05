@@ -113,7 +113,7 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 
                                 if (transferObject.flag != TransferObject::Flag::Running) {
                                     transferObject.flag = TransferObject::Flag::Running;
-                                    gDatabase->update(transferObject);
+                                    gDbSignal->update(transferObject);
                                 }
 
                                 QTcpSocket socket;

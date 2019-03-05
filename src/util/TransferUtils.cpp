@@ -331,6 +331,6 @@ QList<QString> TransferUtils::getPaths(const QList<QUrl> &urls)
 
 void TransferUtils::startTransfer(groupid groupId, const QString &deviceId)
 {
-    auto *client = new SeamlessClient(groupId, deviceId);
+    auto *client = new SeamlessClient(groupId, deviceId, true);
     client->start();
 }

@@ -133,7 +133,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Choose</string>
+            <string>Change</string>
            </property>
           </widget>
          </item>

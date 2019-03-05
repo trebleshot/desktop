@@ -21,6 +21,8 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
     m_ui->transfersTreeView->setModel(m_objectModel);
     m_ui->errorTreeView->setColumnWidth(0, 250);
     m_ui->transfersTreeView->setColumnWidth(0, 250);
+    m_ui->transfersTreeView->setColumnWidth(1, 80);
+    m_ui->transfersTreeView->setColumnWidth(2, 80);
 
     connect(gTaskMgr, &TransferTaskManager::taskAdded, this, &ShowTransferDialog::globalTaskStarted);
     connect(gTaskMgr, &TransferTaskManager::taskRemoved, this, &ShowTransferDialog::globalTaskFinished);
@@ -226,7 +228,8 @@ void ShowTransferDialog::transferItemActivated(const QModelIndex &modelIndex)
 
     auto item = m_objectModel->list().at(modelIndex.row());
 
-    if (modelIndex.column() == TransferObjectModel::Status && item.flag == TransferObject::Interrupted) {
+    if (modelIndex.column() == TransferObjectModel::Status && item.flag != TransferObject::Done
+        && item.flag != TransferObject::Removed) {
         item.flag = TransferObject::Pending;
         gDatabase->update(item);
     } else if (item.flag == TransferObject::Flag::Done && item.type == TransferObject::Type::Incoming)

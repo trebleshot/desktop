@@ -183,16 +183,56 @@ void MainWindow::showTransferRequest(const QString &deviceId, groupid groupId, i
         messageBox.setText(QString("Receive files from %1, %2 in total?")
                                    .arg(device.nickname)
                                    .arg(filesTotal));
-        auto *okButton = messageBox.addButton(QMessageBox::StandardButton::Ok);
+        auto *okButton = messageBox.addButton(QMessageBox::StandardButton::Yes);
+        auto *noButton = messageBox.addButton(QMessageBox::StandardButton::No);
         messageBox.addButton(QMessageBox::StandardButton::Ignore);
 
         connect(okButton, &QPushButton::pressed, [groupId, deviceId]() {
-            auto *client = new SeamlessClient(groupId, deviceId, true);
-            client->start();
+            TransferUtils::startTransfer(groupId, deviceId);
         });
 
         messageBox.exec();
-        showTransfer(groupId);
+
+        auto *clickedButton = messageBox.clickedButton();
+        auto accepted = clickedButton != noButton;
+
+        auto *thread = new GThread([groupId, deviceId, accepted](GThread *thread) {
+            TransferGroup group(groupId);
+            NetworkDevice copyDevice(deviceId);
+            TransferAssignee assignee(groupId, deviceId);
+
+            if (gDbSignal->reconstruct(group) && gDbSignal->reconstruct(copyDevice) &&
+                gDbSignal->reconstruct(assignee)) {
+                if (!accepted)
+                    gDbSignal->remove(group);
+
+                DeviceConnection connection(deviceId, assignee.connectionAdapter);
+
+                if (gDbSignal->reconstruct(connection)) {
+                    CommunicationBridge bridge;
+
+                    try {
+                        auto *activeConnection = bridge.communicate(copyDevice, connection);
+
+                        activeConnection->reply({
+                                                        {KEYWORD_REQUEST, KEYWORD_REQUEST_RESPONSE},
+                                                        {KEYWORD_TRANSFER_GROUP_ID,    QVariant(groupId).toLongLong()},
+                                                        {KEYWORD_TRANSFER_IS_ACCEPTED, accepted}
+                                                });
+
+                        activeConnection->receive();
+                    } catch (...) {
+                        qDebug() << thread << "Response failed";
+                    }
+                }
+            } else
+                qDebug() << thread << "Reconstruction failed";
+        }, true);
+
+        thread->start();
+
+        if (okButton == clickedButton)
+            showTransfer(groupId);
     } catch (...) {
         // do nothing
     }

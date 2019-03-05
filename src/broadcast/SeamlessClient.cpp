@@ -184,6 +184,11 @@ void SeamlessClient::run()
                                             // We do receive the file here ...
                                             if (tcpServer.waitForNewConnection(TIMEOUT_SOCKET_DEFAULT)) {
                                                 if (tcpServer.hasPendingConnections()) {
+                                                    if (transferObject.flag != TransferObject::Flag::Running) {
+                                                        transferObject.flag = TransferObject::Flag::Running;
+                                                        gDbSignal->update(transferObject);
+                                                    }
+
                                                     auto *socket = tcpServer.nextPendingConnection();
                                                     auto lastDataAvailable = clock();
                                                     auto fileSize = static_cast<qint64>(transferObject.fileSize);
@@ -200,7 +205,7 @@ void SeamlessClient::run()
 
                                                         // make sure when about to complete notify the last bits
                                                         if (clock() - lastUpdate >
-                                                            2000 || currentFile.size() < fileSize) {
+                                                            2000 || currentFile.size() == fileSize) {
                                                             auto size = currentFile.size();
                                                             emit gTaskMgr->taskByteTransferred(m_groupId, m_deviceId,
                                                                                                TransferObject::Incoming,
