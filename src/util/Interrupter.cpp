@@ -13,3 +13,8 @@ void Interrupter::interrupt()
 {
     m_interrupted = true;
 }
+
+void Interrupter::reset()
+{
+    m_interrupted = false;
+}

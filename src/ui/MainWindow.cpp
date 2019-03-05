@@ -207,7 +207,7 @@ void MainWindow::showTransfer()
 
     const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
 
-    if (ids.size() == 1)
+    if (ids.size() == 1 && !m_groupModel->list().empty())
         showTransfer(m_groupModel->list().at(ids[0]).group.id);
 }
 

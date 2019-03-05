@@ -136,7 +136,7 @@ public:
 
     QString toSelectionColumns() const;
 
-    QSqlQuery toUpdateQuery(const QSqlRecord &query) const;
+    QSqlQuery toUpdateQuery(const DbObjectMap &map) const;
 
     bool valid() const;
 };
@@ -236,9 +236,9 @@ public slots:
 
     QSqlRecord record(const DatabaseObject &object);
 
-    QSqlRecord record(const DatabaseObject &object, const QSqlTableModel &tableModel);
+    QSqlRecord record(const DatabaseObject &object, QSqlTableModel *tableModel);
 
-    QSqlRecord record(const DbObjectMap &objectMap, const QSqlTableModel &tableModel);
+    QSqlRecord record(const DbObjectMap &objectMap, QSqlTableModel *tableModel);
 
     bool remove(const SqlSelection &selection);
 

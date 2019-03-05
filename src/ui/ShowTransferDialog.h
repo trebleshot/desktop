@@ -9,6 +9,7 @@
 #include <ui_ShowTransferDialog.h>
 #include <src/database/object/TransferGroup.h>
 #include <src/model/TransferObjectModel.h>
+#include <src/model/FlawedTransferModel.h>
 
 namespace Ui {
     class ShowTransferDialog;
@@ -38,6 +39,8 @@ public slots:
 
     void checkGroupIntegrity(const SqlSelection &change, ChangeType type);
 
+    void retryReceiving();
+
     void saveDirectory();
 
     void sendToDevices(groupid groupId, QList<NetworkDevice> devices);
@@ -63,6 +66,7 @@ public slots:
 protected:
     Ui::ShowTransferDialog *m_ui;
     TransferObjectModel *m_objectModel;
+    FlawedTransferModel *m_errorsModel;
     TransferGroup m_group;
     TransferGroupInfo m_groupInfo;
     QList<AssigneeInfo> m_assigneeList;

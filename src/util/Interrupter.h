@@ -15,6 +15,8 @@ public:
     bool interrupted();
 
     void interrupt();
+
+    void reset();
 };
 
 

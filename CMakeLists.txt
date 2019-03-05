@@ -120,18 +120,18 @@ set(UTIL_LIBRARY
         src/ui/DeviceChooserDialog.cpp
         src/ui/FileAdditionProgressDialog.h
         src/ui/FileAdditionProgressDialog.cpp
-        src/ui/ShowTransferDialog.h
-        src/ui/ShowTransferDialog.cpp
         src/ui/ManageDevicesDialog.h
         src/ui/ManageDevicesDialog.cpp
+        src/ui/ShowTransferDialog.h
+        src/ui/ShowTransferDialog.cpp
         src/ui/TransferRequestProgressDialog.h
         src/ui/TransferRequestProgressDialog.cpp
         src/util/AppUtils.h
         src/util/AppUtils.cpp
-        src/util/GThread.h
-        src/util/GThread.cpp
         src/util/CommunicationBridge.h
         src/util/CommunicationBridge.cpp
+        src/util/GThread.h
+        src/util/GThread.cpp
         src/util/Interrupter.h
         src/util/Interrupter.cpp
         src/util/NetworkDeviceLoader.h
@@ -139,7 +139,7 @@ set(UTIL_LIBRARY
         src/util/TransferUtils.h
         src/util/TransferUtils.cpp
         src/util/ViewUtils.h
-        src/util/ViewUtils.cpp)
+        src/util/ViewUtils.cpp src/model/FlawedTransferModel.cpp src/model/FlawedTransferModel.h)
 
 add_library(sources OBJECT ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(trebleshot src/main.cpp src/ui/MainWindow.cpp)

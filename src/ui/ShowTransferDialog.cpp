@@ -14,10 +14,12 @@
 
 ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
         : QDialog(parent), m_ui(new Ui::ShowTransferDialog), m_objectModel(new TransferObjectModel(groupId)),
-          m_group(groupId), m_groupInfo()
+          m_errorsModel(new FlawedTransferModel(groupId)), m_group(groupId), m_groupInfo()
 {
     m_ui->setupUi(this);
+    m_ui->errorTreeView->setModel(m_errorsModel);
     m_ui->transfersTreeView->setModel(m_objectModel);
+    m_ui->errorTreeView->setColumnWidth(0, 250);
     m_ui->transfersTreeView->setColumnWidth(0, 250);
 
     connect(gTaskMgr, &TransferTaskManager::taskAdded, this, &ShowTransferDialog::globalTaskStarted);
@@ -25,6 +27,7 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
     connect(gTaskMgr, &TransferTaskManager::taskItemTransferred, this, &ShowTransferDialog::transferFileChange);
     connect(gTaskMgr, &TransferTaskManager::taskByteTransferred, this, &ShowTransferDialog::transferBitChange);
     connect(gDatabase, &AccessDatabase::databaseChanged, this, &ShowTransferDialog::checkGroupIntegrity);
+    connect(m_ui->retryReceivingButton, &QPushButton::pressed, this, &ShowTransferDialog::retryReceiving);
     connect(m_ui->transfersTreeView, &QTreeView::activated, this, &ShowTransferDialog::transferItemActivated);
     connect(m_ui->assigneesComboBox, SIGNAL(activated(int)), this, SLOT(assigneeChanged(int)));
     connect(m_ui->startButton, &QPushButton::pressed, this, &ShowTransferDialog::startTransfer);
@@ -40,6 +43,7 @@ ShowTransferDialog::~ShowTransferDialog()
 {
     delete m_ui;
     delete m_objectModel;
+    delete m_errorsModel;
 }
 
 void ShowTransferDialog::changeSavePath()
@@ -118,6 +122,7 @@ void ShowTransferDialog::updateButtons()
     m_ui->showFilesButton->setEnabled(m_groupInfo.hasIncoming);
     m_ui->chooseDirectoryButton->setEnabled(m_groupInfo.hasIncoming);
     m_ui->noIncomingFileText->setVisible(!m_groupInfo.hasIncoming);
+    m_ui->retryReceivingButton->setEnabled(m_groupInfo.hasIncoming);
 }
 
 void ShowTransferDialog::addDevices()
@@ -228,4 +233,17 @@ void ShowTransferDialog::transferItemActivated(const QModelIndex &modelIndex)
         QDesktopServices::openUrl(QUrl::fromLocalFile(TransferUtils::getIncomingFilePath(m_group, item)));
     else if (item.type == TransferObject::Type::Outgoing && QFile::exists(item.file))
         QDesktopServices::openUrl(QUrl::fromLocalFile(item.file));
+}
+
+void ShowTransferDialog::retryReceiving()
+{
+    SqlSelection selection;
+    selection.setTableName(DB_TABLE_TRANSFER);
+    selection.setWhere(QString("%1 = ? AND %2 = ?").arg(DB_FIELD_TRANSFER_GROUPID).arg(DB_FIELD_TRANSFER_FLAG));
+    selection.whereArgs << m_group.id
+                        << TransferObject::Flag::Interrupted;
+
+    gDatabase->update(selection, DbObjectMap{
+            {DB_FIELD_TRANSFER_FLAG, TransferObject::Flag::Pending}
+    });
 }

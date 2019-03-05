@@ -127,7 +127,7 @@ bool AccessDatabase::insert(DatabaseObject &dbObject)
 
     const auto &selection = dbObject.getWhere();
     QSqlTableModel *model = DbStructure::gatherTableModel(selection.tableName);
-    bool state = model->insertRecord(-1, record(dbObject, *model));
+    bool state = model->insertRecord(-1, record(dbObject, model));
 
     emit databaseChanged(selection, ChangeType::Insert);
 
@@ -196,24 +196,19 @@ bool AccessDatabase::update(DatabaseObject &dbObject)
 
 bool AccessDatabase::update(const SqlSelection &selection, const DbObjectMap &map)
 {
-    auto *tableModel = DbStructure::gatherTableModel(selection.tableName);
-    QSqlQuery updateQuery = selection.toUpdateQuery(record(map, *tableModel));
-    bool result = updateQuery.exec();
-
-    delete tableModel;
+    bool result = selection.toUpdateQuery(map).exec();
     emit databaseChanged(selection, ChangeType::Update);
-
     return result;
 }
 
-QSqlRecord AccessDatabase::record(const DatabaseObject &object, const QSqlTableModel &tableModel)
+QSqlRecord AccessDatabase::record(const DatabaseObject &object, QSqlTableModel *tableModel)
 {
     return record(object.getValues(), tableModel);
 }
 
-QSqlRecord AccessDatabase::record(const DbObjectMap &objectMap, const QSqlTableModel &tableModel)
+QSqlRecord AccessDatabase::record(const DbObjectMap &objectMap, QSqlTableModel *tableModel)
 {
-    QSqlRecord record = tableModel.record();
+    QSqlRecord record = tableModel->record();
 
     for (const auto &key : objectMap.keys())
         record.setValue(key, objectMap.value(key));
@@ -448,25 +443,21 @@ QString SqlSelection::toSelectionColumns() const
     return output;
 }
 
-QSqlQuery SqlSelection::toUpdateQuery(const QSqlRecord &record) const
+QSqlQuery SqlSelection::toUpdateQuery(const DbObjectMap &map) const
 {
     QSqlQuery query;
     QString queryString = "update `";
     queryString.append(this->tableName);
     queryString.append("` set ");
-    QString updateIndex = QString();
+    QString updateIndex;
 
-    for (int iterator = 0; iterator < record.count(); iterator++) {
-        QSqlField currentField = record.field(iterator);
-
+    for (const auto& key : map.keys()) {
         if (updateIndex.length() > 0)
             updateIndex.append(", ");
 
         updateIndex.append("`");
-        updateIndex.append(currentField.name());
+        updateIndex.append(key);
         updateIndex.append("` = ?");
-
-        query.addBindValue(currentField.value());
     }
 
     queryString.append(updateIndex);
@@ -474,8 +465,8 @@ QSqlQuery SqlSelection::toUpdateQuery(const QSqlRecord &record) const
 
     query.prepare(queryString);
 
-    for (int iterator = 0; iterator < record.count(); iterator++)
-        query.addBindValue(record.value(iterator));
+    for (const auto& key : map.keys())
+        query.addBindValue(map.value(key));
 
     bindWhereClause(query);
 

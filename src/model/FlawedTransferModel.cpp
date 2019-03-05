@@ -1,42 +1,38 @@
 //
-// Created by veli on 3/4/19.
+// Created by veli on 3/5/19.
 //
 
 #include <src/util/AppUtils.h>
 #include <src/util/TransferUtils.h>
-#include "TransferObjectModel.h"
+#include "FlawedTransferModel.h"
 
-TransferObjectModel::TransferObjectModel(groupid groupId, const QString &deviceId, QObject *parent)
-        : QAbstractTableModel(parent), m_deviceId(deviceId)
+FlawedTransferModel::FlawedTransferModel(groupid groupId, QObject *parent)
+        : QAbstractTableModel(parent)
 {
     m_groupId = groupId;
-    connect(gDatabase, &AccessDatabase::databaseChanged, this, &TransferObjectModel::databaseChanged);
+    connect(gDatabase, &AccessDatabase::databaseChanged, this, &FlawedTransferModel::databaseChanged);
     databaseChanged(SqlSelection(), ChangeType::Any);
 }
 
-int TransferObjectModel::columnCount(const QModelIndex &parent) const
+int FlawedTransferModel::columnCount(const QModelIndex &parent) const
 {
     return ColumnNames::__itemCount;
 }
 
-int TransferObjectModel::rowCount(const QModelIndex &parent) const
+int FlawedTransferModel::rowCount(const QModelIndex &parent) const
 {
     return m_list.size();
 }
 
-QVariant TransferObjectModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant FlawedTransferModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole) {
         if (orientation == Qt::Horizontal) {
             switch (section) {
                 case ColumnNames::Status:
-                    return tr("Status");
+                    return tr("Error");
                 case ColumnNames::FileName:
                     return tr("File name");
-                case ColumnNames::Size:
-                    return tr("Size");
-                case ColumnNames::Directory:
-                    return tr("Directory");
                 default:
                     return QString("?");
             }
@@ -47,7 +43,7 @@ QVariant TransferObjectModel::headerData(int section, Qt::Orientation orientatio
     return QVariant();
 }
 
-QVariant TransferObjectModel::data(const QModelIndex &index, int role) const
+QVariant FlawedTransferModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole) {
         const auto &currentObject = m_list.at(index.row());
@@ -57,10 +53,6 @@ QVariant TransferObjectModel::data(const QModelIndex &index, int role) const
                 return currentObject.friendlyName;
             case ColumnNames::Status:
                 return TransferUtils::getFlagString(currentObject.flag);
-            case ColumnNames::Size:
-                return TransferUtils::sizeExpression(currentObject.fileSize, false);
-            case ColumnNames::Directory:
-                return currentObject.directory;
             default:
                 return QString("Data id %1x%2")
                         .arg(index.row())
@@ -83,12 +75,12 @@ QVariant TransferObjectModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-const QList<TransferObject> &TransferObjectModel::list() const
+const QList<TransferObject> &FlawedTransferModel::list() const
 {
     return m_list;
 }
 
-void TransferObjectModel::databaseChanged(const SqlSelection &change, ChangeType type)
+void FlawedTransferModel::databaseChanged(const SqlSelection &change, ChangeType type)
 {
     if (change.valid() && change.tableName != DB_TABLE_TRANSFER && change.tableName != DB_DIVIS_TRANSFER)
         return;
@@ -102,17 +94,13 @@ void TransferObjectModel::databaseChanged(const SqlSelection &change, ChangeType
     selection.setOrderBy(QString("%1 ASC, %2 ASC")
                                  .arg(DB_FIELD_TRANSFER_NAME)
                                  .arg(DB_FIELD_TRANSFER_DIRECTORY));
-
-    if (m_deviceId.isEmpty())
-        selection.setWhere(QString("%1 = ?").arg(DB_FIELD_TRANSFER_GROUPID));
-    else {
-        selection.setWhere(QString("%1 = ? AND %2 = ?")
-                                   .arg(DB_FIELD_TRANSFER_DEVICEID)
-                                   .arg(DB_FIELD_TRANSFER_GROUPID));
-        selection.whereArgs << m_deviceId;
-    }
-
-    selection.whereArgs << m_groupId;
+    selection.setWhere(QString("%1 = ? AND (%2 = ? OR %3 = ?)")
+                               .arg(DB_FIELD_TRANSFER_GROUPID)
+                               .arg(DB_FIELD_TRANSFER_FLAG)
+                               .arg(DB_FIELD_TRANSFER_FLAG));
+    selection.whereArgs << m_groupId
+                        << TransferObject::Flag::Removed
+                        << TransferObject::Flag::Interrupted;
 
     m_list = gDatabase->castQuery(selection, TransferObject());
 
@@ -122,9 +110,4 @@ void TransferObjectModel::databaseChanged(const SqlSelection &change, ChangeType
     }
 
     emit layoutChanged();
-}
-
-void TransferObjectModel::setDeviceId(const QString &deviceId)
-{
-    m_deviceId = deviceId;
 }

@@ -59,7 +59,6 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 
             const QJsonObject &request = response.asJson();
             QJsonObject reply;
-            TransferObject transferObject;
 
             qDebug() << this << request;
 
@@ -75,123 +74,128 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                 } else if (!thisTask->interrupted()) {
                     qDebug() << this << "Entering sending phase";
 
-                    transferObject = TransferObject(request.value(KEYWORD_TRANSFER_REQUEST_ID).toVariant().toUInt(),
-                                                    deviceId, TransferObject::Type::Outgoing);
+                    TransferObject transferObject(request.value(KEYWORD_TRANSFER_REQUEST_ID).toVariant().toUInt(),
+                                                  deviceId, TransferObject::Type::Outgoing);
 
                     if (gDbSignal->reconstruct(transferObject)) {
-                        quint16 serverPort = static_cast<quint16>(request.value(KEYWORD_TRANSFER_SOCKET_PORT)
-                                .toVariant()
-                                .toUInt());
-                        size_t skippedBytes = request.contains(KEYWORD_SKIPPED_BYTES)
-                                              ? request.value(KEYWORD_SKIPPED_BYTES).toVariant().toUInt()
-                                              : 0;
+                        try {
+                            quint16 serverPort = static_cast<quint16>(request.value(KEYWORD_TRANSFER_SOCKET_PORT)
+                                    .toVariant()
+                                    .toUInt());
+                            size_t skippedBytes = request.contains(KEYWORD_SKIPPED_BYTES)
+                                                  ? request.value(KEYWORD_SKIPPED_BYTES).toVariant().toUInt()
+                                                  : 0;
 
-                        qDebug() << this << "File sending about to begin" << serverPort << skippedBytes
-                                 << transferObject.file;
+                            qDebug() << this << "File sending about to begin" << serverPort << skippedBytes
+                                     << transferObject.file;
 
-                        QFile file(transferObject.file);
+                            QFile file(transferObject.file);
 
-                        if (file.exists() && file.open(QFile::OpenModeFlag::ReadOnly)) {
-                            transferObject.accessPort = serverPort;
-                            transferObject.skippedBytes = skippedBytes;
-                            auto fileSize = static_cast<size_t>(file.size());
+                            if (file.exists() && file.open(QFile::OpenModeFlag::ReadOnly)) {
+                                transferObject.accessPort = serverPort;
+                                transferObject.skippedBytes = skippedBytes;
+                                auto fileSize = static_cast<size_t>(file.size());
 
-                            reply.insert(KEYWORD_RESULT, true);
+                                reply.insert(KEYWORD_RESULT, true);
 
-                            if (transferObject.fileSize != fileSize) {
-                                reply.insert(KEYWORD_SIZE_CHANGED, file.size());
-                                transferObject.fileSize = fileSize;
-                            }
-
-                            connection->reply(reply);
-
-                            if (skippedBytes > 0)
-                                if (!file.seek(static_cast<qint64>(skippedBytes)))
-                                    qDebug() << this << "File seek failed for byte" << skippedBytes;
-
-                            qDebug() << this << "About to connect";
-
-                            if (transferObject.flag != TransferObject::Flag::Running) {
-                                transferObject.flag = TransferObject::Flag::Running;
-                                gDatabase->update(transferObject);
-                            }
-
-                            QTcpSocket socket;
-                            socket.open(QTcpSocket::OpenModeFlag::WriteOnly);
-
-                            {
-                                // Establish the connection to the socket that will send the file
-                                socket.connectToHost(connection->socket()->peerAddress(), serverPort);
-
-                                while (QAbstractSocket::SocketState::ConnectingState == socket.state())
-                                    socket.waitForConnected(TIMEOUT_SOCKET_DEFAULT_LARGE);
-
-                                if (QAbstractSocket::SocketState::ConnectedState != socket.state()) {
-                                    qDebug() << this << "Did not connect";
-                                    throw exception();
+                                if (transferObject.fileSize != fileSize) {
+                                    reply.insert(KEYWORD_SIZE_CHANGED, file.size());
+                                    transferObject.fileSize = fileSize;
                                 }
-                            }
 
-                            qDebug() << this << "Connected & will send";
+                                connection->reply(reply);
 
-                            try {
-                                qint64 lastSize = 0;
-                                clock_t lastUpdated = 0;
+                                if (skippedBytes > 0)
+                                    if (!file.seek(static_cast<qint64>(skippedBytes)))
+                                        qDebug() << this << "File seek failed for byte" << skippedBytes;
 
-                                while (!file.atEnd()) {
-                                    if (socket.bytesToWrite() == 0) {
-                                        socket.write(file.read(BUFFER_LENGTH_DEFAULT));
-                                        socket.flush();
-                                    } else if (thisTask->interrupted()
-                                               || (socket.bytesToWrite() > 0
-                                                   && !socket.waitForBytesWritten(TIMEOUT_SOCKET_DEFAULT))) {
-                                        qDebug() << this << "Timed out or interrupted:" << thisTask->interrupted();
+                                qDebug() << this << "About to connect";
+
+                                if (transferObject.flag != TransferObject::Flag::Running) {
+                                    transferObject.flag = TransferObject::Flag::Running;
+                                    gDatabase->update(transferObject);
+                                }
+
+                                QTcpSocket socket;
+                                socket.open(QTcpSocket::OpenModeFlag::WriteOnly);
+
+                                {
+                                    // Establish the connection to the socket that will send the file
+                                    socket.connectToHost(connection->socket()->peerAddress(), serverPort);
+
+                                    while (QAbstractSocket::SocketState::ConnectingState == socket.state())
+                                        socket.waitForConnected(TIMEOUT_SOCKET_DEFAULT_LARGE);
+
+                                    if (QAbstractSocket::SocketState::ConnectedState != socket.state()) {
+                                        qDebug() << this << "Did not connect";
                                         throw exception();
                                     }
-
-                                    // make sure when about to complete notify the last bits
-                                    if (clock() - lastUpdated > 2000 || file.atEnd()) {
-                                        auto size = file.pos();
-                                        emit gTaskMgr->taskByteTransferred(thisTask->m_groupId, thisTask->m_deviceId,
-                                                                           TransferObject::Outgoing,
-                                                                           size - lastSize,
-                                                                           size);
-                                        lastSize = size;
-                                        lastUpdated = clock();
-                                    }
                                 }
 
-                                emit gTaskMgr->taskItemTransferred(thisTask->m_groupId, thisTask->m_deviceId,
-                                                                   TransferObject::Outgoing);
+                                qDebug() << this << "Connected & will send";
 
-                                qDebug() << this << "I/O Completed";
-                                transferObject.flag = TransferObject::Flag::Done;
-                            } catch (...) {
-                                qDebug() << this << "I/O Error occurred";
+                                try {
+                                    qint64 lastSize = 0;
+                                    clock_t lastUpdated = 0;
+
+                                    while (!file.atEnd()) {
+                                        if (socket.bytesToWrite() == 0) {
+                                            socket.write(file.read(BUFFER_LENGTH_DEFAULT));
+                                            socket.flush();
+                                        } else if (thisTask->interrupted()
+                                                   || (socket.bytesToWrite() > 0
+                                                       && !socket.waitForBytesWritten(TIMEOUT_SOCKET_DEFAULT))) {
+                                            qDebug() << this << "Timed out or interrupted:" << thisTask->interrupted();
+                                            throw exception();
+                                        }
+
+                                        // make sure when about to complete notify the last bits
+                                        if (clock() - lastUpdated > 2000 || file.atEnd()) {
+                                            auto size = file.pos();
+                                            emit gTaskMgr->taskByteTransferred(thisTask->m_groupId, thisTask->m_deviceId,
+                                                                               TransferObject::Outgoing,
+                                                                               size - lastSize,
+                                                                               size);
+                                            lastSize = size;
+                                            lastUpdated = clock();
+                                        }
+                                    }
+
+                                    emit gTaskMgr->taskItemTransferred(thisTask->m_groupId, thisTask->m_deviceId,
+                                                                       TransferObject::Outgoing);
+
+                                    qDebug() << this << "I/O Completed";
+                                    transferObject.flag = TransferObject::Flag::Done;
+                                } catch (...) {
+                                    qDebug() << this << "I/O Error occurred";
+                                    transferObject.flag = TransferObject::Flag::Interrupted;
+                                }
+
+                                socket.close();
+                                file.close();
+                            } else {
+                                connection->reply({
+                                                          {KEYWORD_RESULT,            false},
+                                                          {KEYWORD_ERROR, KEYWORD_ERROR_NOT_ACCESSIBLE},
+                                                          {KEYWORD_FLAG_GROUP_EXISTS, true}
+                                                  });
+
                                 transferObject.flag = TransferObject::Flag::Interrupted;
+
+                                qDebug() << this << "File does not exist or did not open";
                             }
-
-                            socket.close();
-                            file.close();
-                        } else {
-                            connection->reply({
-                                                      {KEYWORD_RESULT,            false},
-                                                      {KEYWORD_ERROR, KEYWORD_ERROR_NOT_ACCESSIBLE},
-                                                      {KEYWORD_FLAG_GROUP_EXISTS, true}
-                                              });
-
-                            transferObject.flag = TransferObject::Flag::Interrupted;
-
-                            qDebug() << this << "File does not exist or did not open";
+                        } catch (...) {
+                            qDebug() << this << "Some error occurred";
                         }
+
+                        gDbSignal->update(transferObject);
                     } else {
+                        qDebug() << this << "Object does not exist, but the group does";
                         connection->reply({
                                                   {KEYWORD_RESULT,            false},
                                                   {KEYWORD_ERROR, KEYWORD_ERROR_NOT_FOUND},
                                                   {KEYWORD_FLAG_GROUP_EXISTS, true}
                                           });
-
-                        transferObject.flag = TransferObject::Flag::Removed;
                     }
                 } else if (thisTask->interrupted()) {
                     qDebug() << this << "Interrupted";
@@ -200,12 +204,7 @@ void SeamlessServer::connected(CSActiveConnection *connection)
                                               {KEYWORD_RESULT,            false},
                                               {KEYWORD_TRANSFER_JOB_DONE, false}
                                       });
-
-                    transferObject.flag = TransferObject::Flag::Interrupted;
                 }
-
-                if (transferObject.id != 0)
-                    gDbSignal->update(transferObject);
             }
         }
     } catch (...) {
