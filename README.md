@@ -1,11 +1,15 @@
 # TrebleShot for Desktop
 The reason why this project exist is to fill the gap on desktop 
 environment. 
-[TrebleShot](https://github.com/genonbeta/TrebleShot-Desktop/projects/1)
+[TrebleShot](https://github.com/genonbeta/TrebleShot/)
 is an Android file transferring tool. You can send big files with it
 without feeling anxiety while doing it, because, with TrebleShot, you 
 can resume when something goes wrong.
 
+## Wednesday, March 6, 2019
+```
+First alpha release is here. You can find it in releases page.  
+```
  
 ## Wednesday, Feb 29, 2019
 ```
