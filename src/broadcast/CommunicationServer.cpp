@@ -17,6 +17,7 @@ void CommunicationServer::connected(CSActiveConnection *connection)
 {
     if (m_blockedAddresses.contains(connection->socket()->peerAddress()))
     {
+
         qDebug() << this << connection->socket()->peerAddress() << "is denied";
         connection->socket()->close();
         return;

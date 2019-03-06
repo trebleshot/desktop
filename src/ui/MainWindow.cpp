@@ -2,6 +2,7 @@
 #include <src/broadcast/SeamlessClient.h>
 #include <QtWidgets/QFileDialog>
 #include <src/util/ViewUtils.h>
+#include <src/broadcast/DNSSDService.h>
 #include "MainWindow.h"
 #include "ManageDevicesDialog.h"
 #include "ShowTransferDialog.h"
@@ -12,7 +13,8 @@
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_ui(new Ui::MainWindow),
           m_seamlessServer(new SeamlessServer), m_commServer(new CommunicationServer),
-          m_groupModel(new TransferGroupModel()), m_deviceModel(new NetworkDeviceModel)
+          m_groupModel(new TransferGroupModel()), m_deviceModel(new NetworkDeviceModel),
+          m_discoveryService(new DNSSDService)
 {
     m_ui->setupUi(this);
 
@@ -92,6 +94,7 @@ MainWindow::~MainWindow()
     delete m_groupModel;
     delete m_deviceModel;
     delete m_commServer;
+    delete m_discoveryService;
 }
 
 

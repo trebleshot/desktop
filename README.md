@@ -33,8 +33,9 @@ changes by visiting
 # Build
 * CMake 3.8.2+
 * Qt Framework 5.9.6+
+* KDE DNS-SD Development Package libkf5dnssd-dev (a.k.a. kdnssd-kf5)
 * Run shell command ./build_trebleshot.txt
 
 ```
-Have a question? Reach me out *velitasali@protonmail.com*
+Have a question? Reach me out velitasali@protonmail.com
 ``` 

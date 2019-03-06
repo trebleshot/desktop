@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define TS_SERVICE_NAME "TSComm"
+#define TS_SERVICE_TYPE "_tscomm._tcp."
 #define PORT_COMMUNICATION_DEFAULT 1128
 #define PORT_SEAMLESS 58762
 #define TIMEOUT_SOCKET_DEFAULT 5000

@@ -66,7 +66,10 @@ void NetworkDeviceLoader::loadAsynchronously(QObject *sender,
                                              const std::function<void(const NetworkDevice &)> &listener)
 {
     GThread::startIndependent([sender, hostAddress, listener](GThread *thisThread) {
-        listener(load(sender, hostAddress));
+        const NetworkDevice &device = load(sender, hostAddress);
+
+        if (listener != nullptr)
+            listener(device);
     });
 }
 

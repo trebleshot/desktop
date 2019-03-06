@@ -48,6 +48,7 @@ find_package(Qt5Gui REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Sql REQUIRED)
 find_package(Qt5Widgets REQUIRED)
+find_package(KF5DNSSD NO_MODULE)
 
 IF (Qt5Core_FOUND)
     MESSAGE(STATUS "Found Qt ${Qt5Core_VERSION_STRING}")
@@ -139,7 +140,7 @@ set(UTIL_LIBRARY
         src/util/TransferUtils.h
         src/util/TransferUtils.cpp
         src/util/ViewUtils.h
-        src/util/ViewUtils.cpp src/model/FlawedTransferModel.cpp src/model/FlawedTransferModel.h)
+        src/util/ViewUtils.cpp src/model/FlawedTransferModel.cpp src/model/FlawedTransferModel.h src/broadcast/DNSSDService.cpp src/broadcast/DNSSDService.h)
 
 add_library(sources OBJECT ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(trebleshot src/main.cpp src/ui/MainWindow.cpp)
@@ -149,5 +150,5 @@ if (NOT TARGET Qt5::WinMain)
     add_library(Qt5::WinMain STATIC IMPORTED)
 endif ()
 
-target_link_libraries(sources PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets)
+target_link_libraries(sources PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets KF5::DNSSD)
 target_link_libraries(trebleshot PUBLIC sources)
