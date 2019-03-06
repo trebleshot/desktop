@@ -2,7 +2,6 @@
 #include <src/broadcast/SeamlessClient.h>
 #include <QtWidgets/QFileDialog>
 #include <src/util/ViewUtils.h>
-#include <src/broadcast/DNSSDService.h>
 #include "MainWindow.h"
 #include "ManageDevicesDialog.h"
 #include "ShowTransferDialog.h"

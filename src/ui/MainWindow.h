@@ -19,6 +19,7 @@
 #include <QClipboard>
 #include <src/broadcast/SeamlessServer.h>
 #include <src/model/NetworkDeviceModel.h>
+#include <src/broadcast/DNSSDService.h>
 #include "ui_MainWindow.h"
 
 namespace Ui {

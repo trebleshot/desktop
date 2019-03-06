@@ -13,6 +13,7 @@ DeviceChooserDialog::DeviceChooserDialog(QWidget *parent, groupid groupId)
     m_ui->setupUi(this);
     m_ui->treeView->setModel(m_deviceModel);
     m_ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(false);
+    m_ui->treeView->setColumnWidth(0, 120);
 
     connect(m_ui->treeView, &QTreeView::activated, this, &DeviceChooserDialog::modelActivated);
     connect(m_ui->treeView, &QTreeView::pressed, this, &DeviceChooserDialog::modelPressed);
