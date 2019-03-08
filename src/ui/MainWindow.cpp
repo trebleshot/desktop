@@ -47,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
             error->show();
         }
 
+        m_discoveryService->start();
         m_ui->transfersTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
         m_ui->transfersTreeView->setModel(m_groupModel);
         m_ui->transfersTreeView->setColumnWidth(0, 160);
@@ -187,7 +188,7 @@ void MainWindow::showTransferRequest(const QString &deviceId, groupid groupId, i
                                    .arg(filesTotal));
         auto *okButton = messageBox.addButton(QMessageBox::StandardButton::Yes);
         auto *noButton = messageBox.addButton(QMessageBox::StandardButton::No);
-        messageBox.addButton(QMessageBox::StandardButton::Ignore);
+        messageBox.addButton(QMessageBox::StandardButton::Close);
 
         connect(okButton, &QPushButton::pressed, [groupId, deviceId]() {
             TransferUtils::startTransfer(groupId, deviceId);

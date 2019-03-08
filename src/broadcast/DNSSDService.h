@@ -16,7 +16,9 @@ public:
     explicit DNSSDService(QObject* parent = nullptr);
 
     ~DNSSDService() override;
-    
+
+    void start();
+
 public slots:
     
     void serviceFound(KDNSSD::RemoteService::Ptr service);

@@ -71,8 +71,6 @@ class DatabaseObject;
 
 class SqlSelection;
 
-class DbChangeSubscriber;
-
 enum ChangeType {
     Any = -1,
     Delete,

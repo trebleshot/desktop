@@ -204,8 +204,8 @@ void SeamlessClient::run()
                                                         }
 
                                                         // make sure when about to complete notify the last bits
-                                                        if (clock() - lastUpdate >
-                                                            2000 || currentFile.size() == fileSize) {
+                                                        if (clock() - lastUpdate > 2000
+                                                            || currentFile.size() == fileSize) {
                                                             auto size = currentFile.size();
                                                             emit gTaskMgr->taskByteTransferred(m_groupId, m_deviceId,
                                                                                                TransferObject::Incoming,
@@ -231,6 +231,7 @@ void SeamlessClient::run()
                                                         emit gTaskMgr->taskItemTransferred(m_groupId, m_deviceId,
                                                                                            TransferObject::Incoming);
                                                     } else {
+                                                        qDebug() << this << "The size did not match";
                                                         transferObject.flag = TransferObject::Flag::Interrupted;
                                                     }
                                                 }

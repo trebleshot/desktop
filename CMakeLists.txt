@@ -86,6 +86,8 @@ set(UTIL_LIBRARY
         src/build.h
         src/broadcast/CommunicationServer.h
         src/broadcast/CommunicationServer.cpp
+        src/broadcast/DNSSDService.h
+        src/broadcast/DNSSDService.cpp
         src/broadcast/NetworkServiceDiscovery.h
         src/broadcast/NetworkServiceDiscovery.cpp
         src/broadcast/SeamlessServer.h
@@ -111,6 +113,8 @@ set(UTIL_LIBRARY
         src/database/object/TransferGroup.cpp
         src/dialog/WelcomeDialog.h
         src/dialog/WelcomeDialog.cpp
+        src/model/FlawedTransferModel.h
+        src/model/FlawedTransferModel.cpp
         src/model/NetworkDeviceModel.h
         src/model/NetworkDeviceModel.cpp
         src/model/TransferGroupModel.h
@@ -140,9 +144,9 @@ set(UTIL_LIBRARY
         src/util/TransferUtils.h
         src/util/TransferUtils.cpp
         src/util/ViewUtils.h
-        src/util/ViewUtils.cpp src/model/FlawedTransferModel.cpp src/model/FlawedTransferModel.h src/broadcast/DNSSDService.cpp src/broadcast/DNSSDService.h)
+        src/util/ViewUtils.cpp)
 
-add_library(sources OBJECT ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
+add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 add_executable(trebleshot src/main.cpp src/ui/MainWindow.cpp)
 
 # Add the Qt5 Widgets for linking

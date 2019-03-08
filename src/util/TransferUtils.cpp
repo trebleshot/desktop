@@ -308,7 +308,7 @@ QString TransferUtils::sizeExpression(size_t bytes, bool notUseByte)
 {
     size_t unit = notUseByte ? 1000 : 1024;
 
-    if (bytes < unit)
+    if (bytes < unit )
         return QString("%1 B").arg(bytes);
 
     int expression = (int) (log(bytes) / log(unit));
