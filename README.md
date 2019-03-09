@@ -36,6 +36,9 @@ changes by visiting
 * KDE DNS-SD Development Package libkf5dnssd-dev (a.k.a. kdnssd-kf5)
 * Run shell command ./build_trebleshot.txt
 
+# Status
+[![Build Status](https://travis-ci.org/genonbeta/TrebleShot-Desktop.svg)](https://travis-ci.org/genonbeta/TrebleShot-Desktop)
+
 ```
 Have a question? Reach me out velitasali@protonmail.com
 ``` 

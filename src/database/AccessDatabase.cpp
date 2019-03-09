@@ -1,4 +1,3 @@
-#include <c++/7/bits/unique_ptr.h>
 #include <src/util/AppUtils.h>
 #include "ReconstructionException.h"
 #include "AccessDatabase.h"

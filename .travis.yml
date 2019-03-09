@@ -1,31 +1,37 @@
 language: cpp
 compiler: gcc
 sudo: require
-dist: trusty
+dist: xenial
 
 before_install:
-  - sudo add-apt-repository ppa:beineri/opt-qt593-trusty -y
+  - sudo add-apt-repository ppa:beineri/opt-qt-5.11.1-xenial -y
+  - sudo add-apt-repository ppa:kubuntu-ppa/backports -y
   - sudo apt-get update -qq
 
 install:
-  - sudo apt-get -y install qt59base
+  - sudo apt-get -y install libkf5dnssd-dev qt511base cmake
   - source /opt/qt*/bin/qt*-env.sh
 
 script:
-  - qmake CONFIG+=release PREFIX=/usr
-  - make -j$(nproc)
-  - make INSTALL_ROOT=appdir -j$(nproc) install ; find appdir/
-  - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+  - mkdir "cmake-build-release"
+  - cd "cmake-build-release"
+  - cmake -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" ..
+  - cmake --build . --target trebleshot -- -j 2
+  # wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+  - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage"
+  # chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+  - chmod a+x linuxdeployqt-6-x86_64.AppImage
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
   # export VERSION=... # linuxdeployqt uses this for naming the file
-  - ./linuxdeployqt-continuous-x86_64.AppImage dist/trebleshot.desktop -appimage
+  - cp ../assets/drawable/ic_launcher.png trebleshot.png
+  # ./linuxdeployqt-continuous-x86_64.AppImage ../dist/trebleshot.desktop -appimage
+  - ./linuxdeployqt-6-x86_64.AppImage ../dist/trebleshot.desktop -appimage
 
 after_success:
   # find appdir -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging
   # curl --upload-file APPNAME*.AppImage https://transfer.sh/APPNAME-git.$(git rev-parse --short HEAD)-x86_64.AppImage
-  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
-  - bash upload.sh APPNAME*.AppImage*
+  - wget -c https://gist.githubusercontent.com/velitasali/36a8a2fd1b32231c41804676fe626e90/raw/2c1daafc796591fffa494868c93515646188ceef/upload.sh
+  - bash upload.sh trebleshot*.AppImage*
 
 branches:
   except:
