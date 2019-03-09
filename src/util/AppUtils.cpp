@@ -8,8 +8,10 @@
 #include <QtWidgets/QMessageBox>
 #include <QtNetwork/QNetworkSession>
 #include <QtCore/QJsonObject>
+#include <QtCore/QStandardPaths>
+#include <QtGui/QDesktopServices>
+#include <QtCore/QDir>
 #include "AppUtils.h"
-#include "NetworkDeviceLoader.h"
 
 bool AppUtils::applyAdapterName(DeviceConnection &connection)
 {
@@ -119,7 +121,13 @@ QString AppUtils::getDeviceId()
 AccessDatabase *AppUtils::newDatabaseInstance(QObject *parent)
 {
     QSqlDatabase *db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
-    db->setDatabaseName("local.db");
+    const auto &location = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation);
+    QDir saveDir(location);
+
+    if (!saveDir.exists() && !saveDir.mkdir(location))
+        return nullptr;
+
+    db->setDatabaseName(saveDir.filePath("default.db"));
 
     if (db->open()) {
         cout << "Database has opened" << endl;

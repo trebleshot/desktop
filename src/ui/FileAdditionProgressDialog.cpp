@@ -9,7 +9,6 @@
 #include <QtCore/QRandomGenerator>
 #include <QtCore/QMimeDatabase>
 #include <src/database/object/TransferObject.h>
-#include <src/database/object/TransferGroup.h>
 #include <src/util/AppUtils.h>
 #include <src/util/GThread.h>
 #include <src/util/TransferUtils.h>
@@ -21,10 +20,8 @@ FileAdditionProgressDialog::FileAdditionProgressDialog(QWidget *parent, const QL
 {
 
 
-
     m_thread = new GThread([this, files](GThread *thread) { task(thread, files); }, true);
     m_ui->setupUi(this);
-
 
 
     connect(m_thread, &GThread::statusUpdate, this, &FileAdditionProgressDialog::taskProgress);
@@ -41,12 +38,13 @@ FileAdditionProgressDialog::~FileAdditionProgressDialog()
 
 void FileAdditionProgressDialog::task(GThread *thread, const QList<QString> &files)
 {
+    QList<TransferObject *> transferMap;
+
     try {
         auto groupId = QRandomGenerator::global()->bounded(static_cast<groupid>(time(nullptr)), sizeof(int));
         requestid requestId = groupId + 1;
         TransferGroup group(groupId);
         QMimeDatabase mimeDb;
-        QList<TransferObject> transferMap;
 
         {
             int position = 0;
@@ -62,12 +60,12 @@ void FileAdditionProgressDialog::task(GThread *thread, const QList<QString> &fil
         try {
             if (gDbSignal->transaction()) {
                 int position = 0;
-                for (auto &transferObject : transferMap) {
+                for (auto transferObject : transferMap) {
                     if (thread->interrupted())
                         throw std::exception();
 
-                    gDbSignal->insert(transferObject);
-                    emit thread->statusUpdate(transferMap.size(), position++, transferObject.friendlyName);
+                    gDbSignal->insert(*transferObject);
+                    emit thread->statusUpdate(transferMap.size(), position++, transferObject->friendlyName);
                 }
 
                 if (!transferMap.empty()) {
@@ -82,6 +80,7 @@ void FileAdditionProgressDialog::task(GThread *thread, const QList<QString> &fil
         // do nothing
     }
 
+    qDeleteAll(transferMap);
     gDbSignal->commit();
     qDebug() << thread << "Exited";
 }

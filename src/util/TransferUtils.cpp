@@ -35,7 +35,7 @@ SqlSelection TransferUtils::createSqlSelection(groupid groupId, const QString &d
 }
 
 
-void TransferUtils::createTransferMap(GThread *thread, QList<TransferObject> *objectList, const TransferGroup &group,
+void TransferUtils::createTransferMap(GThread *thread, QList<TransferObject *> *objectList, const TransferGroup &group,
                                       const QMimeDatabase &mimeDatabase, requestid &requestId, const QString &filePath,
                                       const QString &directory)
 {
@@ -43,21 +43,21 @@ void TransferUtils::createTransferMap(GThread *thread, QList<TransferObject> *ob
         return;
 
     emit thread->statusUpdate(-1, -1, directory);
-    QFileInfo fileInfo = filePath;
+    QFileInfo fileInfo(filePath);
 
     if (fileInfo.isFile()) {
         QFile file(filePath);
-        TransferObject object(requestId++, nullptr, TransferObject::Type::Outgoing);
+        auto object = new TransferObject(requestId++, nullptr, TransferObject::Type::Outgoing);
 
-        object.groupId = group.id;
-        object.friendlyName = fileInfo.fileName();
-        object.file = filePath;
-        object.fileSize = static_cast<size_t>(file.size());
-        object.fileMimeType = mimeDatabase.mimeTypeForFile(fileInfo).name();
-        object.flag = TransferObject::Flag::Pending;
+        object->groupId = group.id;
+        object->friendlyName = fileInfo.fileName();
+        object->file = filePath;
+        object->fileSize = static_cast<size_t>(file.size());
+        object->fileMimeType = mimeDatabase.mimeTypeForFile(fileInfo).name();
+        object->flag = TransferObject::Flag::Pending;
 
         if (!directory.isEmpty())
-            object.directory = directory;
+            object->directory = directory;
 
         file.close();
 

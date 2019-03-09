@@ -148,6 +148,8 @@ void CommunicationServer::connected(CSActiveConnection *connection)
                                 gDbSignal->commit();
                             }
 
+                            qDeleteAll(objectList);
+
                             if (filesTotal > 0)
                                     emit transferRequest(device.id, transferGroup.id, filesTotal);
                         }, this);

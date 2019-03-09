@@ -79,7 +79,7 @@ public:
                                            TransferObject::Flag flag = TransferObject::Flag::Any,
                                            bool equals = true);
 
-    static void createTransferMap(GThread *thread, QList<TransferObject>* objectList,
+    static void createTransferMap(GThread *thread, QList<TransferObject *> *objectList,
                                   const TransferGroup &group, const QMimeDatabase &mimeDatabase,
                                   requestid &requestId, const QString &filePath, const QString &directory = nullptr);
 

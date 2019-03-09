@@ -203,7 +203,7 @@ void SeamlessClient::run()
                                                             lastDataAvailable = clock();
                                                         }
 
-                                                        // make sure when about to complete notify the last bits
+                                                        // make sure, when about to complete, notify the last bits
                                                         if (clock() - lastUpdate > 2000
                                                             || currentFile.size() == fileSize) {
                                                             auto size = currentFile.size();
