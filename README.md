@@ -8,7 +8,7 @@ can resume when something goes wrong.
 
 ## Saturday, March 9, 2019
 ```
-Travis-CI has been integrated. Basic features has been implemented. 
+Travis CI has been integrated. Basic features has been implemented. 
 The project is in bug hunting phase.
 ```
 
@@ -42,7 +42,7 @@ changes by visiting
 * KDE DNS-SD Development Package libkf5dnssd-dev (a.k.a. kdnssd-kf5)
 * Run shell command ./build_trebleshot.txt
 
-Continuous deployment with travis-ci https://github.com/genonbeta/TrebleShot-Desktop/releases/tag/continuous
+Latest CI Build https://github.com/genonbeta/TrebleShot-Desktop/releases/tag/continuous
 
 # Status
 [![Build Status](https://travis-ci.org/genonbeta/TrebleShot-Desktop.svg)](https://travis-ci.org/genonbeta/TrebleShot-Desktop)

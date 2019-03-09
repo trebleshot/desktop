@@ -125,6 +125,8 @@ set(UTIL_LIBRARY
         src/ui/DeviceChooserDialog.cpp
         src/ui/FileAdditionProgressDialog.h
         src/ui/FileAdditionProgressDialog.cpp
+        src/ui/MainWindow.h
+        src/ui/MainWindow.cpp
         src/ui/ManageDevicesDialog.h
         src/ui/ManageDevicesDialog.cpp
         src/ui/ShowTransferDialog.h
@@ -146,13 +148,11 @@ set(UTIL_LIBRARY
         src/util/ViewUtils.h
         src/util/ViewUtils.cpp)
 
-add_library(sources SHARED ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
-add_executable(trebleshot src/main.cpp src/ui/MainWindow.cpp)
+add_executable(trebleshot src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 
 # Add the Qt5 Widgets for linking
 if (NOT TARGET Qt5::WinMain)
     add_library(Qt5::WinMain STATIC IMPORTED)
 endif ()
 
-target_link_libraries(sources PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets KF5::DNSSD)
-target_link_libraries(trebleshot PUBLIC sources)
+target_link_libraries(trebleshot PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets KF5::DNSSD)
