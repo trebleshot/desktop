@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/logo">
-        <file alias="launcher">drawable/ic_launcher.png</file>
+        <file alias="trebleshot">drawable/trebleshot.png</file>
+        <file alias="trebleshot_small">drawable/trebleshot_small.png</file>
     </qresource>
     <qresource prefix="/icon">
         <file alias="arrow_down">drawable/arrow_down.svg</file>

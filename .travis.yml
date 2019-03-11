@@ -23,7 +23,7 @@ script:
   - chmod a+x linuxdeployqt-6-x86_64.AppImage
   - unset QTDIR; unset QT_PLUGIN_PATH ; unset LD_LIBRARY_PATH
   # export VERSION=... # linuxdeployqt uses this for naming the file
-  - cp ../assets/drawable/ic_launcher.png trebleshot.png
+  - cp ../assets/drawable/trebleshot.png trebleshot.png
   # ./linuxdeployqt-continuous-x86_64.AppImage ../dist/trebleshot.desktop -appimage
   - ./linuxdeployqt-6-x86_64.AppImage ../dist/trebleshot.desktop -appimage
 

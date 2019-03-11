@@ -156,3 +156,20 @@ if (NOT TARGET Qt5::WinMain)
 endif ()
 
 target_link_libraries(trebleshot PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets KF5::DNSSD)
+
+if(NOT WIN32)
+    install(TARGETS trebleshot
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib)
+endif()
+
+if(UNIX AND NOT APPLE)
+    install(FILES assets/drawable/trebleshot.png
+            DESTINATION share/icons/hicolor/256x256/apps/)
+
+    install(FILES dist/trebleshot.desktop
+            DESTINATION share/applications/)
+
+    install(FILES dist/trebleshot.desktop.appdata.xml
+            DESTINATION share/appdata/)
+endif(UNIX AND NOT APPLE)

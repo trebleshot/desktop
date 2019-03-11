@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+    <id>trebleshot.desktop</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>GPL-2.0+</project_license>
+    <name>TrebleShot</name>
+    <summary>TrebleShot is a cross-platform file transferring tool</summary>
+    <description>
+        <p>With TrebleShot, you send and receive files over a local network.</p>
+        <p>It supports resuming and pausing tasks so that you don't have to worry for bad circumstances.</p>
+        <p>Some of the useful features:</p>
+        <ul>
+            <li>Pause and resume transfers even after something went wrong</li>
+            <li>Share large files</li>
+            <li>Share multiple content from your video, photo, music and application libraries</li>
+            <li>No internet connection is required: setup a hotspot and connect to it using QR code</li>
+            <li>Share with multiple devices at the same time</li>
+            <li>Exchange texts of any kind and save them to TrebleShot</li>
+            <li>Share folders as they are for backup and other purposes</li>
+            <li>Light UI: Works faster than its rivals on low-end devices</li>
+            <li>Speed-oriented: Minimal UI optimized for speed</li>
+            <li>Advanced features: network change handling, choosing network after speed measurement</li>
+        </ul>
+    </description>
+    <url type="homepage">https://github.com/genonbeta/TrebleShot-Desktop/</url>
+    <url type="bugtracker">https://github.com/genonbeta/TrebleShot-Desktop/issues</url>
+</component>
