@@ -40,7 +40,7 @@ changes by visiting
 * CMake 3.8.2+
 * Qt Framework 5.10+
 * KDE DNS-SD Development Package libkf5dnssd-dev (a.k.a. kdnssd-kf5)
-* Run shell command ./build_trebleshot.txt
+* Run shell command ./build_trebleshot.sh
 
 Latest CI Build https://github.com/genonbeta/TrebleShot-Desktop/releases/tag/continuous
 
