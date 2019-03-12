@@ -271,10 +271,20 @@ void MainWindow::refreshStorageLocation()
 
 void MainWindow::setStorageLocation()
 {
-    AppUtils::getDefaultSettings().setValue("savePath", QFileDialog::getExistingDirectory(
-            this, "Choose a location where files are put", TransferUtils::getDefaultSavePath()));
+    auto *fileDialog = new QFileDialog();
 
-    refreshStorageLocation();
+    fileDialog->setWindowTitle("Choose a folder where files will be put");
+    fileDialog->setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
+    fileDialog->setDirectory(TransferUtils::getDefaultSavePath());
+    fileDialog->setFileMode(QFileDialog::FileMode::DirectoryOnly);
+    fileDialog->show();
+
+    connect(fileDialog, &QDialog::accepted, [fileDialog]() {
+        AppUtils::getDefaultSettings().setValue("savePath", fileDialog->directory().path());
+    });
+
+    connect(fileDialog, &QDialog::accepted, this, &MainWindow::refreshStorageLocation);
+    connect(fileDialog, &QDialog::finished, fileDialog, &QObject::deleteLater);
 }
 
 void MainWindow::deviceBlocked(const QString &deviceId, const QHostAddress &address)
@@ -353,14 +363,22 @@ void MainWindow::deviceSelected(const QModelIndex &modelIndex)
 
 void MainWindow::selectFilesToSend()
 {
-    QFileDialog fileDialog;
-    fileDialog.setFileMode(QFileDialog::FileMode::ExistingFiles);
+    auto *fileDialog = new QFileDialog();
 
-    fileDialog.exec();
+    fileDialog->setWindowTitle("Choose files to send");
+    fileDialog->setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
+    fileDialog->setFileMode(QFileDialog::FileMode::ExistingFiles);
+    fileDialog->show();
 
-    FileAdditionProgressDialog progressDialog(this, fileDialog.selectedFiles());
-    connect(&progressDialog, SIGNAL(filesAdded(groupid)), this, SLOT(showTransfer(groupid)));
-    progressDialog.exec();
+    connect(fileDialog, &QDialog::accepted, [this, fileDialog]() {
+        auto *progressDialog = new FileAdditionProgressDialog(this, fileDialog->selectedFiles());
+        progressDialog->show();
+
+        connect(progressDialog, SIGNAL(filesAdded(groupid)), this, SLOT(showTransfer(groupid)));
+        connect(progressDialog, &QDialog::finished, progressDialog, &QObject::deleteLater);
+    });
+
+    connect(fileDialog, &QDialog::finished, fileDialog, &QObject::deleteLater);
 }
 
 void MainWindow::taskStart()

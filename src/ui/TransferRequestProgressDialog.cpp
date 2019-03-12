@@ -25,7 +25,7 @@ TransferRequestProgressDialog::TransferRequestProgressDialog(QWidget *parent, co
 void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId, const QList<NetworkDevice> &devices)
 {
     QList<TransferObject> objectList;
-    bool successful = false;
+    bool addedAny = false;
 
     {
         SqlSelection selection;
@@ -43,46 +43,10 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
         return;
     }
 
-    QList<QString> failedDevices;
+    QList<NetworkDevice> failedDevices;
     QList<NetworkDevice> passedDevices;
 
-    for (const NetworkDevice &device : devices) {
-        if (thread->interrupted())
-            break;
-
-        SqlSelection deviceSelection;
-        deviceSelection.setTableName(DB_TABLE_TRANSFER);
-        deviceSelection.setWhere(QString("%1 = ? AND %2 = ? AND %3 = ?")
-                                         .arg(DB_FIELD_TRANSFER_GROUPID)
-                                         .arg(DB_FIELD_TRANSFER_DEVICEID)
-                                         .arg(DB_FIELD_TRANSFER_TYPE));
-        deviceSelection.whereArgs << groupId << device.id << TransferObject::Type::Outgoing;
-        deviceSelection.setLimit(1);
-
-        if (gDbSignal->contains(deviceSelection)) {
-            qDebug() << "deviceForAddedFiles << Already contains for" << device.nickname;
-            passedDevices << device;
-        } else {
-            if (gDbSignal->transaction()) {
-                int iterator = 0;
-
-                for (auto &object : objectList) {
-                    object.deviceId = device.id;
-
-                    gDbSignal->insert(object);
-                    emit thread->statusUpdate(objectList.size(), ++iterator, object.friendlyName);
-                }
-
-                passedDevices << device;
-                gDbSignal->commit();
-
-                if (thread->interrupted())
-                    break;
-            }
-        }
-    }
-
-    for (auto &thisDevice : passedDevices) {
+    for (auto &thisDevice : QList<NetworkDevice>(devices)) {
         if (thread->interrupted())
             break;
 
@@ -102,6 +66,7 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
             qDebug() << "deviceForAddedFiles << No connection for" << thisDevice.nickname;
         } else {
             bool shouldTryNext = true;
+            bool successful = false;
 
             for (const auto &thisConnection : connections) {
                 if (thread->interrupted())
@@ -148,7 +113,9 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
                         const QJsonObject &thisReply = connection->receive().asJson();
 
                         if (thisReply.value(KEYWORD_RESULT).toBool(false)) {
+                            addedAny = true;
                             successful = true;
+                            passedDevices << thisDevice;
 
                             qDebug() << "deviceForAddedFiles << Successful for" << thisDevice.nickname;
                             gDbSignal->publish(assignee);
@@ -159,7 +126,6 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
                     // do nothing
                     qDebug() << "deviceForAddedFiles << Error" << thisDevice.nickname << thisConnection.adapterName;
                     qDebug() << "deviceForAddedFiles << Continue ??" << shouldTryNext;
-                    failedDevices << thisDevice.id;
                 }
 
                 delete connection;
@@ -167,13 +133,51 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
                 if (!shouldTryNext)
                     break;
             }
+
+            if (!successful)
+                failedDevices << thisDevice;
         }
     }
 
     if (!failedDevices.isEmpty())
             emit errorOccurred(groupId, failedDevices);
 
-    if (successful) {
+    if (addedAny) {
+        for (const NetworkDevice &device : passedDevices) {
+            if (thread->interrupted())
+                break;
+
+            SqlSelection deviceSelection;
+            deviceSelection.setTableName(DB_TABLE_TRANSFER);
+            deviceSelection.setWhere(QString("%1 = ? AND %2 = ? AND %3 = ?")
+                                             .arg(DB_FIELD_TRANSFER_GROUPID)
+                                             .arg(DB_FIELD_TRANSFER_DEVICEID)
+                                             .arg(DB_FIELD_TRANSFER_TYPE));
+            deviceSelection.whereArgs << groupId << device.id << TransferObject::Type::Outgoing;
+            deviceSelection.setLimit(1);
+
+            if (gDbSignal->contains(deviceSelection)) {
+                qDebug() << "deviceForAddedFiles << Already contains for" << device.nickname;
+            } else {
+                if (gDbSignal->transaction()) {
+                    int iterator = 0;
+
+                    for (auto &object : objectList) {
+                        object.deviceId = device.id;
+
+                        gDbSignal->insert(object);
+                        emit thread->statusUpdate(objectList.size(), ++iterator, object.friendlyName);
+                    }
+
+                    passedDevices << device;
+                    gDbSignal->commit();
+
+                    if (thread->interrupted())
+                        break;
+                }
+            }
+        }
+
         if (m_signalOnSuccess)
                 emit transferReady(groupId);
 
@@ -189,22 +193,30 @@ void TransferRequestProgressDialog::statusUpdate(int total, int progress, QStrin
     m_ui->label->setText(statusText);
 }
 
-void TransferRequestProgressDialog::showError(const groupid &groupId, const QList<QString> &devices)
+void TransferRequestProgressDialog::showError(const groupid &groupId, const QList<NetworkDevice> &devices)
 {
-    auto *dialog = new QMessageBox(this);
+    auto *dialog = new QMessageBox;
     QString devicesString;
 
-    for (const auto &deviceId : devices) {
-        NetworkDevice device(deviceId);
-
+    for (const auto &device : devices) {
         if (devicesString.size() > 0)
             devicesString.append("\n");
 
-        devicesString.append(gDatabase->reconstructSilently(device) ? device.nickname : deviceId);
+        devicesString.append(device.nickname);
     }
 
     connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
     dialog->setWindowTitle("Connection Error");
-    dialog->setText(QString("Failed to connect to the following devices;\n\n%1").arg(devicesString));
+    dialog->setText(QString("Failed to connect to the devices below:\n\n%1").arg(devicesString));
+    dialog->addButton(QMessageBox::StandardButton::Close);
+    QPushButton* pushButton = dialog->addButton(QMessageBox::StandardButton::Retry);
     dialog->show();
+
+    connect(pushButton, &QPushButton::pressed, [groupId, devices, dialog](){
+        dialog->close();
+
+        auto* progressDialog = new TransferRequestProgressDialog(nullptr, groupId, devices, false);
+        connect(progressDialog, &QDialog::finished, progressDialog, &QObject::deleteLater);
+        progressDialog->show();
+    });
 }

@@ -11,6 +11,7 @@
 #include <src/database/object/NetworkDevice.h>
 #include <src/util/AppUtils.h>
 #include <src/util/GThread.h>
+#include <QPushButton>
 
 namespace Ui {
     class TransferRequestProgressDialog;
@@ -26,14 +27,14 @@ public:
 public slots:
 
     void showError(const groupid &groupId,
-                   const QList<QString> &devices);
+                   const QList<NetworkDevice> &devices);
 
     void statusUpdate(int total, int progress, QString statusText);
 
 
 signals:
 
-    void errorOccurred(groupid groupId, const QList<QString> &devices);
+    void errorOccurred(groupid groupId, const QList<NetworkDevice> &devices);
 
     void transferReady(groupid groupId);
 

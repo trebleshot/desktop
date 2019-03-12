@@ -51,13 +51,21 @@ ShowTransferDialog::~ShowTransferDialog()
 
 void ShowTransferDialog::changeSavePath()
 {
-    QString string = QFileDialog::getExistingDirectory(this, "Choose where this transfer will be saved to",
-                                                       TransferUtils::getSavePath(m_group));
+    auto *fileDialog = new QFileDialog();
 
-    if (string != nullptr) {
-        m_group.savePath = string;
+    fileDialog->setWindowTitle("Choose a folder where the files will be put");
+    fileDialog->setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
+    fileDialog->setDirectory(TransferUtils::getSavePath(m_group));
+    fileDialog->setFileMode(QFileDialog::FileMode::DirectoryOnly);
+    fileDialog->show();
+
+    connect(fileDialog, &QDialog::accepted, [this, fileDialog]() {
+        m_group.savePath = fileDialog->directory().path();
+        m_ui->storageLineEdit->setText(m_group.savePath);
         gDatabase->update(m_group);
-    }
+    });
+
+    connect(fileDialog, &QDialog::finished, fileDialog, &QObject::deleteLater);
 }
 
 void ShowTransferDialog::saveDirectory()
