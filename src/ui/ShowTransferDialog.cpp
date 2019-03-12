@@ -38,6 +38,7 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
     connect(m_ui->removeButton, &QPushButton::pressed, this, &ShowTransferDialog::removeTransfer);
     connect(m_ui->chooseDirectoryButton, &QPushButton::pressed, this, &ShowTransferDialog::changeSavePath);
     connect(m_ui->addDevicesButton, &QPushButton::pressed, this, &ShowTransferDialog::addDevices);
+
     checkGroupIntegrity(SqlSelection(), ChangeType::Any);
 }
 
@@ -129,14 +130,17 @@ void ShowTransferDialog::updateButtons()
 
 void ShowTransferDialog::addDevices()
 {
-    DeviceChooserDialog dialog(this, m_group.id);
-    connect(&dialog, &DeviceChooserDialog::devicesSelected, this, &ShowTransferDialog::sendToDevices);
-    dialog.exec();
+    auto *dialog = new DeviceChooserDialog(this, m_group.id);
+    connect(dialog, &DeviceChooserDialog::devicesSelected, this, &ShowTransferDialog::sendToDevices);
+    connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
+    dialog->show();
 }
 
 void ShowTransferDialog::sendToDevices(groupid groupId, QList<NetworkDevice> devices)
 {
-    TransferRequestProgressDialog(this, groupId, devices).exec();
+    auto* dialog = new TransferRequestProgressDialog(this, groupId, devices);
+    connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
+    dialog->show();
 }
 
 void ShowTransferDialog::removeTransfer()

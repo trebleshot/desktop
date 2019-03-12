@@ -4,18 +4,22 @@
 
 #include <src/database/object/TransferObject.h>
 #include <src/util/CommunicationBridge.h>
+#include <QtWidgets/QMessageBox>
 #include "TransferRequestProgressDialog.h"
 
 TransferRequestProgressDialog::TransferRequestProgressDialog(QWidget *parent, const groupid &groupId,
-                                                             const QList<NetworkDevice> &devices)
+                                                             const QList<NetworkDevice> &devices,
+                                                             bool signalOnSuccess)
         : QDialog(parent), m_ui(new Ui::TransferRequestProgressDialog)
 {
     m_ui->setupUi(this);
+    m_signalOnSuccess = signalOnSuccess;
     m_thread = new GThread([this, groupId, devices](GThread *thread) { task(thread, groupId, devices); }, true);
     m_thread->start();
 
     connect(m_thread, &GThread::statusUpdate, this, &TransferRequestProgressDialog::statusUpdate);
     connect(this, &QDialog::finished, m_thread, &GThread::notifyInterrupt);
+    connect(this, &TransferRequestProgressDialog::errorOccurred, this, &TransferRequestProgressDialog::showError);
 }
 
 void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId, const QList<NetworkDevice> &devices)
@@ -39,6 +43,7 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
         return;
     }
 
+    QList<QString> failedDevices;
     QList<NetworkDevice> passedDevices;
 
     for (const NetworkDevice &device : devices) {
@@ -154,6 +159,7 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
                     // do nothing
                     qDebug() << "deviceForAddedFiles << Error" << thisDevice.nickname << thisConnection.adapterName;
                     qDebug() << "deviceForAddedFiles << Continue ??" << shouldTryNext;
+                    failedDevices << thisDevice.id;
                 }
 
                 delete connection;
@@ -164,8 +170,13 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
         }
     }
 
+    if (!failedDevices.isEmpty())
+            emit errorOccurred(groupId, failedDevices);
+
     if (successful) {
-        emit transferReady(groupId);
+        if (m_signalOnSuccess)
+                emit transferReady(groupId);
+
         accept();
     } else
         reject();
@@ -176,4 +187,24 @@ void TransferRequestProgressDialog::statusUpdate(int total, int progress, QStrin
     m_ui->progressBar->setMaximum(total);
     m_ui->progressBar->setValue(progress);
     m_ui->label->setText(statusText);
+}
+
+void TransferRequestProgressDialog::showError(const groupid &groupId, const QList<QString> &devices)
+{
+    auto *dialog = new QMessageBox(this);
+    QString devicesString;
+
+    for (const auto &deviceId : devices) {
+        NetworkDevice device(deviceId);
+
+        if (devicesString.size() > 0)
+            devicesString.append("\n");
+
+        devicesString.append(gDatabase->reconstructSilently(device) ? device.nickname : deviceId);
+    }
+
+    connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
+    dialog->setWindowTitle("Connection Error");
+    dialog->setText(QString("Failed to connect to the following devices;\n\n%1").arg(devicesString));
+    dialog->show();
 }
