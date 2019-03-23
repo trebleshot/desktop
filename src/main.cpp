@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     QApplication::setWindowIcon(QIcon(":/logo/trebleshot_small"));
     QApplication::setApplicationName(TREBLESHOT_NAME);
     QApplication::setApplicationVersion(TREBLESHOT_VERSION_NAME);
-    QApplication::setApplicationDisplayName(TREBLESHOT_NAME);
+    QApplication::setApplicationDisplayName(QString("%1 %2").arg(TREBLESHOT_NAME).arg(TREBLESHOT_VERSION_NAME));
 
     MainWindow mainWindow;
     mainWindow.show();

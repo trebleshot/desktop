@@ -18,11 +18,8 @@
 FileAdditionProgressDialog::FileAdditionProgressDialog(QWidget *parent, const QList<QString> &files)
         : QDialog(parent), m_ui(new Ui::FileAdditionProgressDialog)
 {
-
-
     m_thread = new GThread([this, files](GThread *thread) { task(thread, files); }, true);
     m_ui->setupUi(this);
-
 
     connect(m_thread, &GThread::statusUpdate, this, &FileAdditionProgressDialog::taskProgress);
     connect(m_thread, &GThread::finished, this, &FileAdditionProgressDialog::close);
@@ -33,6 +30,11 @@ FileAdditionProgressDialog::FileAdditionProgressDialog(QWidget *parent, const QL
 
 FileAdditionProgressDialog::~FileAdditionProgressDialog()
 {
+    delete m_ui->progressBar;
+    delete m_ui->label;
+    delete m_ui->buttonBox;
+    delete m_ui->verticalLayout;
+    delete m_ui->horizontalLayout;
     delete m_ui;
 }
 

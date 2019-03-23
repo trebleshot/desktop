@@ -74,6 +74,7 @@ qt5_add_resources(QRCS
         assets/resources.qrc)
 
 qt5_wrap_ui(UI_HEADERS
+        src/ui/AboutDialog.ui
         src/ui/DeviceChooserDialog.ui
         src/ui/FileAdditionProgressDialog.ui
         src/ui/MainWindow.ui
@@ -121,6 +122,8 @@ set(UTIL_LIBRARY
         src/model/TransferGroupModel.cpp
         src/model/TransferObjectModel.h
         src/model/TransferObjectModel.cpp
+        src/ui/AboutDialog.h
+        src/ui/AboutDialog.cpp
         src/ui/DeviceChooserDialog.h
         src/ui/DeviceChooserDialog.cpp
         src/ui/FileAdditionProgressDialog.h
@@ -157,13 +160,13 @@ endif ()
 
 target_link_libraries(trebleshot PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets KF5::DNSSD)
 
-if(NOT WIN32)
+if (NOT WIN32)
     install(TARGETS trebleshot
             RUNTIME DESTINATION bin
             LIBRARY DESTINATION lib)
-endif()
+endif ()
 
-if(UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE)
     install(FILES assets/drawable/trebleshot.png
             DESTINATION share/icons/hicolor/256x256/apps/)
 
@@ -172,4 +175,4 @@ if(UNIX AND NOT APPLE)
 
     install(FILES dist/trebleshot.desktop.appdata.xml
             DESTINATION share/appdata/)
-endif(UNIX AND NOT APPLE)
+endif (UNIX AND NOT APPLE)

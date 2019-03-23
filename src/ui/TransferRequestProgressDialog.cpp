@@ -209,10 +209,10 @@ void TransferRequestProgressDialog::showError(const groupid &groupId, const QLis
     dialog->setWindowTitle("Connection Error");
     dialog->setText(QString("Failed to connect to the devices below:\n\n%1").arg(devicesString));
     dialog->addButton(QMessageBox::StandardButton::Close);
-    QPushButton* pushButton = dialog->addButton(QMessageBox::StandardButton::Retry);
+    QPushButton* retryButton = dialog->addButton(QMessageBox::StandardButton::Retry);
     dialog->show();
 
-    connect(pushButton, &QPushButton::pressed, [groupId, devices, dialog](){
+    connect(retryButton, &QPushButton::pressed, [groupId, devices, dialog](){
         dialog->close();
 
         auto* progressDialog = new TransferRequestProgressDialog(nullptr, groupId, devices, false);

@@ -8,6 +8,7 @@
 #include "DeviceChooserDialog.h"
 #include "FileAdditionProgressDialog.h"
 #include "TransferRequestProgressDialog.h"
+#include "AboutDialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_ui(new Ui::MainWindow),
@@ -18,9 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_ui->setupUi(this);
 
     setAcceptDrops(true);
-    setWindowTitle(QString("%1 - %2")
-                           .arg(QApplication::applicationName())
-                           .arg(QApplication::applicationVersion()));
+    setWindowTitle("Home");
 
     if (AppUtils::getDatabase() == nullptr) {
         auto *error = new QMessageBox(this);
@@ -123,18 +122,9 @@ void MainWindow::transferItemActivated(const QModelIndex &modelIndex)
 
 void MainWindow::about()
 {
-    QMessageBox about(this);
-
-    about.setWindowTitle(QString("About TrebleShot"));
-    about.setText(QString("TrebleShot is a cross platform file transferring tool."));
-    about.addButton(QMessageBox::StandardButton::Close);
-    QPushButton *buttonMoreInfo = about.addButton(QString("More info"), QMessageBox::ButtonRole::ActionRole);
-
-    connect(buttonMoreInfo, &QPushButton::pressed, []() {
-        QDesktopServices::openUrl(QUrl(URI_APP_HOME));
-    });
-
-    about.exec();
+    auto* about = new AboutDialog(this);
+    connect(about, &QDialog::finished, about, &QObject::deleteLater);
+    about->show();
 }
 
 void MainWindow::aboutQt()

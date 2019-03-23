@@ -7,7 +7,8 @@
 GThread::GThread(const std::function<void(GThread *)> &function, bool deleteOnFinish, QObject *parent)
         : QThread(parent), m_callback(function)
 {
-    connect(this, &GThread::finished, this, &GThread::deleteLater);
+    if (deleteOnFinish)
+        connect(this, &GThread::finished, this, &GThread::deleteLater);
 }
 
 void GThread::run()
