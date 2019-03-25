@@ -2,6 +2,7 @@
 // Created by veli on 3/6/19.
 //
 
+#ifdef USE_DNSSD_FEATURE
 #include "DNSSDService.h"
 
 DNSSDService::DNSSDService(QObject *parent)
@@ -31,3 +32,4 @@ void DNSSDService::start()
     m_serviceBrowser->startBrowse();
     m_serviceBroadcast->publish();
 }
+#endif // USE_DNSSD_FEATURE

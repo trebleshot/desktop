@@ -1,32 +1,32 @@
 //
 // Created by veli on 3/6/19.
 //
-
 #ifndef TREBLESHOT_BONJOURSERVICE_H
 #define TREBLESHOT_BONJOURSERVICE_H
 
+#ifdef USE_DNSSD_FEATURE
 #include <KDNSSD/DNSSD/PublicService>
 #include <KDNSSD/DNSSD/ServiceBrowser>
 #include <src/util/NetworkDeviceLoader.h>
 
 class DNSSDService : public QObject {
-Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit DNSSDService(QObject* parent = nullptr);
+	explicit DNSSDService(QObject* parent = nullptr);
 
-    ~DNSSDService() override;
+	~DNSSDService() override;
 
-    void start();
+	void start();
 
 public slots:
-    
-    void serviceFound(KDNSSD::RemoteService::Ptr service);
+
+	void serviceFound(KDNSSD::RemoteService::Ptr service);
 
 protected:
-    KDNSSD::PublicService *m_serviceBroadcast;
-    KDNSSD::ServiceBrowser *m_serviceBrowser;
+	KDNSSD::PublicService *m_serviceBroadcast;
+	KDNSSD::ServiceBrowser *m_serviceBrowser;
 };
 
-
+#endif // USE_DNSSD_FEATURE
 #endif //TREBLESHOT_BONJOURSERVICE_H

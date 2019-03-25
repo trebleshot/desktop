@@ -20,9 +20,6 @@ include(QtCommon)
 # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
 fix_project_version()
 
-#For Build on Mac: uncomment following srting and provice proper way to QT
-set(CMAKE_PREFIX_PATH ~/DevToolsMac/QT/5.9.6/clang_64)
-
 # Add a compiler flag
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
@@ -87,10 +84,6 @@ set(UTIL_LIBRARY
         src/build.h
         src/broadcast/CommunicationServer.h
         src/broadcast/CommunicationServer.cpp
-        src/broadcast/DNSSDService.h
-        src/broadcast/DNSSDService.cpp
-        src/broadcast/NetworkServiceDiscovery.h
-        src/broadcast/NetworkServiceDiscovery.cpp
         src/broadcast/SeamlessServer.h
         src/broadcast/SeamlessServer.cpp
         src/broadcast/SeamlessClient.h
@@ -151,6 +144,13 @@ set(UTIL_LIBRARY
         src/util/ViewUtils.h
         src/util/ViewUtils.cpp)
 
+message(STATUS "KF5DNSSD found: ${KF5DNSSD_FOUND}")
+
+if (KF5DNSSD_FOUND)
+	add_definitions(-DUSE_DNSSD_FEATURE=1)
+	list(APPEND ${UTIL_LIBRARY} src/broadcast/DNSSDService.h src/broadcast/DNSSDService.cpp)
+endif ()
+
 add_executable(trebleshot src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 
 # Add the Qt5 Widgets for linking
@@ -158,7 +158,13 @@ if (NOT TARGET Qt5::WinMain)
     add_library(Qt5::WinMain STATIC IMPORTED)
 endif ()
 
-target_link_libraries(trebleshot PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets KF5::DNSSD)
+target_link_libraries(trebleshot PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets)
+
+if (KF5DNSSD_FOUND)
+	target_link_libraries(trebleshot PUBLIC KF5::DNSSD)
+endif ()
+
+fix_win_compiler()
 
 if (NOT WIN32)
     install(TARGETS trebleshot

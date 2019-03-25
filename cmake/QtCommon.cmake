@@ -63,7 +63,7 @@ endmacro()
 
 macro(fix_win_compiler)
     if (MSVC)
-        set_target_properties(${PROJECT_NAME} PROPERTIES
+        set_target_properties(trebleshot PROPERTIES
                 WIN32_EXECUTABLE YES
                 LINK_FLAGS "/ENTRY:mainCRTStartup"
                 )
@@ -79,4 +79,3 @@ endmacro()
 
 init_os_bundle()
 init_qt()
-fix_win_compiler()
