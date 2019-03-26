@@ -56,12 +56,19 @@ IF (Qt5Core_FOUND)
     endif ()
 
     # guess plugins and libraries directory
-	set(QT_BINARY_DIR "${Qt5Core_DIR}/../../../bin")
-    set(QT_PLUGINS_DIR "${Qt5Core_DIR}/../../../plugins")
+	set(QT_DIR "${Qt5Core_DIR}/../../..")
+	set(QT_BINARY_DIR "${QT_DIR}/bin")
+    set(QT_PLUGINS_DIR "${QT_DIR}/plugins")
     get_target_property(QT_LIBRARY_DIR Qt5::Core LOCATION)
     get_filename_component(QT_LIBRARY_DIR ${QT_LIBRARY_DIR} PATH)
 ELSE ()
     MESSAGE(FATAL_ERROR "No Qt5 found!")
+ENDIF ()
+
+IF (${CMAKE_BUILD_TYPE} EQUAL Debug)
+	set(QT_LIBRARY_SUFFIX ".dll")
+ELSE ()
+	set(QT_LIBRARY_SUFFIX "d.dll")
 ENDIF ()
 
 configure_file(src/build.h.in src/build.h)
@@ -158,7 +165,7 @@ if (KF5DNSSD_FOUND)
 	list(APPEND ${UTIL_LIBRARY} src/broadcast/DNSSDService.h src/broadcast/DNSSDService.cpp)
 endif ()
 
-add_executable(trebleshot src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
+add_executable(trebleshot src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS} ${META_FILES_TO_INCLUDE})
 
 # Add the Qt5 Widgets for linking
 if (NOT TARGET Qt5::WinMain)

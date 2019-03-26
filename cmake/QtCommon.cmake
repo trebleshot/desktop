@@ -9,24 +9,20 @@ macro(fix_project_version)
 endmacro()
 
 macro(add_project_meta FILES_TO_INCLUDE)
-    if (NOT RESOURCE_FOLDER)
-        set(RESOURCE_FOLDER res)
-    endif ()
-
     if (NOT ICON_NAME)
-        set(ICON_NAME AppIcon)
+        set(ICON_NAME trebleshot)
     endif ()
 
     if (APPLE)
-        set(ICON_FILE ${RESOURCE_FOLDER}/${ICON_NAME}.icns)
+		set(ICON_NAME ${ICON_NAME}.icns)
+        set(ICON_FILE assets/drawable/${ICON_NAME})
     elseif (WIN32)
-        set(ICON_FILE ${RESOURCE_FOLDER}/${ICON_NAME}.ico)
+		set(ICON_NAME ${ICON_NAME}.ico)
+        set(ICON_FILE assets/drawable/${ICON_NAME})
     endif ()
 
     if (WIN32)
-        configure_file("${PROJECT_SOURCE_DIR}/cmake/windows_metafile.rc.in"
-                "windows_metafile.rc"
-                )
+        configure_file("${PROJECT_SOURCE_DIR}/cmake/windows_metafile.rc.in" "windows_metafile.rc")
         set(RES_FILES "windows_metafile.rc")
         set(CMAKE_RC_COMPILER_INIT windres)
         ENABLE_LANGUAGE(RC)
