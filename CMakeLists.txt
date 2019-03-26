@@ -56,12 +56,19 @@ IF (Qt5Core_FOUND)
     endif ()
 
     # guess plugins and libraries directory
+	set(QT_BINARY_DIR "${Qt5Core_DIR}/../../../bin")
     set(QT_PLUGINS_DIR "${Qt5Core_DIR}/../../../plugins")
     get_target_property(QT_LIBRARY_DIR Qt5::Core LOCATION)
     get_filename_component(QT_LIBRARY_DIR ${QT_LIBRARY_DIR} PATH)
 ELSE ()
     MESSAGE(FATAL_ERROR "No Qt5 found!")
 ENDIF ()
+
+configure_file(src/build.h.in src/build.h)
+
+IF(WIN32)
+	configure_file(dist/Windows/package.nsi.in package.nsi)	
+ENDIF()
 
 configure_file(src/build.h.in src/build.h)
 

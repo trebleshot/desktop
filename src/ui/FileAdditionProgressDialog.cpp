@@ -30,11 +30,6 @@ FileAdditionProgressDialog::FileAdditionProgressDialog(QWidget *parent, const QL
 
 FileAdditionProgressDialog::~FileAdditionProgressDialog()
 {
-    delete m_ui->progressBar;
-    delete m_ui->label;
-    delete m_ui->buttonBox;
-    delete m_ui->verticalLayout;
-    delete m_ui->horizontalLayout;
     delete m_ui;
 }
 
