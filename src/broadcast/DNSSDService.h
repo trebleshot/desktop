@@ -4,8 +4,6 @@
 #ifndef TREBLESHOT_BONJOURSERVICE_H
 #define TREBLESHOT_BONJOURSERVICE_H
 
-#include <KDNSSD/DNSSD/PublicService>
-#include <KDNSSD/DNSSD/ServiceBrowser>
 #include <src/util/NetworkDeviceLoader.h>
 
 class DNSSDService : public QObject {

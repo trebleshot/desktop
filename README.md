@@ -6,6 +6,14 @@ is an Android file transferring tool. You can send big files with it
 without feeling anxiety while doing it, because, with TrebleShot, you 
 can resume when something goes wrong.
 
+
+## Wednesday, March 27, 2019
+```
+Windows version is functional. Service discovery has not been implemented. 
+File-sharing on Linux side slow while sending, on Windows side while receiving 
+or rather broken.
+```
+
 ## Saturday, March 9, 2019
 ```
 Travis CI has been integrated. Basic features has been implemented. 
