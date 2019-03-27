@@ -56,8 +56,8 @@ IF (Qt5Core_FOUND)
     endif ()
 
     # guess plugins and libraries directory
-	set(QT_DIR "${Qt5Core_DIR}/../../..")
-	set(QT_BINARY_DIR "${QT_DIR}/bin")
+    set(QT_DIR "${Qt5Core_DIR}/../../..")
+    set(QT_BINARY_DIR "${QT_DIR}/bin")
     set(QT_PLUGINS_DIR "${QT_DIR}/plugins")
     get_target_property(QT_LIBRARY_DIR Qt5::Core LOCATION)
     get_filename_component(QT_LIBRARY_DIR ${QT_LIBRARY_DIR} PATH)
@@ -66,16 +66,16 @@ ELSE ()
 ENDIF ()
 
 IF (${CMAKE_BUILD_TYPE} EQUAL Debug)
-	set(QT_LIBRARY_SUFFIX ".dll")
+    set(QT_LIBRARY_SUFFIX ".dll")
 ELSE ()
-	set(QT_LIBRARY_SUFFIX "d.dll")
+    set(QT_LIBRARY_SUFFIX "d.dll")
 ENDIF ()
 
 configure_file(src/build.h.in src/build.h)
 
-IF(WIN32)
-	configure_file(dist/Windows/package.nsi.in package.nsi)	
-ENDIF()
+IF (WIN32)
+    configure_file(dist/Windows/package.nsi.in package.nsi)
+ENDIF ()
 
 configure_file(src/build.h.in src/build.h)
 
@@ -98,6 +98,8 @@ set(UTIL_LIBRARY
         src/build.h
         src/broadcast/CommunicationServer.h
         src/broadcast/CommunicationServer.cpp
+        src/broadcast/DNSSDService.h
+        src/broadcast/DNSSDService.cpp
         src/broadcast/SeamlessServer.h
         src/broadcast/SeamlessServer.cpp
         src/broadcast/SeamlessClient.h
@@ -158,11 +160,8 @@ set(UTIL_LIBRARY
         src/util/ViewUtils.h
         src/util/ViewUtils.cpp)
 
-message(STATUS "KF5DNSSD found: ${KF5DNSSD_FOUND}")
-
 if (KF5DNSSD_FOUND)
-	add_definitions(-DUSE_DNSSD_FEATURE=1)
-	list(APPEND ${UTIL_LIBRARY} src/broadcast/DNSSDService.h src/broadcast/DNSSDService.cpp)
+    add_definitions(-DUSE_DNSSD_FEATURE=1)
 endif ()
 
 add_executable(trebleshot src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
@@ -175,7 +174,7 @@ endif ()
 target_link_libraries(trebleshot PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets)
 
 if (KF5DNSSD_FOUND)
-	target_link_libraries(trebleshot PUBLIC KF5::DNSSD)
+    target_link_libraries(trebleshot PUBLIC KF5::DNSSD)
 endif ()
 
 fix_win_compiler()

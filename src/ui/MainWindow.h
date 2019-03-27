@@ -35,9 +35,7 @@ protected:
     CommunicationServer *m_commServer;
     TransferGroupModel *m_groupModel;
     NetworkDeviceModel *m_deviceModel;
-#ifdef USE_DNSSD_FEATURE
 	DNSSDService *m_discoveryService;
-#endif // USE_DNSSD_FEATURE
 
     void dragEnterEvent(QDragEnterEvent *event) override;
 

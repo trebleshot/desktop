@@ -2,9 +2,9 @@
 // Created by veli on 3/6/19.
 //
 
-#ifdef USE_DNSSD_FEATURE
 #include "DNSSDService.h"
 
+#ifdef USE_DNSSD_FEATURE
 DNSSDService::DNSSDService(QObject *parent)
         : QObject(parent),
           m_serviceBroadcast(new KDNSSD::PublicService(TS_SERVICE_NAME, TS_SERVICE_TYPE, PORT_COMMUNICATION_DEFAULT)),
@@ -32,4 +32,10 @@ void DNSSDService::start()
     m_serviceBrowser->startBrowse();
     m_serviceBroadcast->publish();
 }
+#else
+DNSSDService::DNSSDService(QObject *parent) : QObject(parent)
+{}
+
+void DNSSDService::start()
+{}
 #endif // USE_DNSSD_FEATURE

@@ -13,10 +13,8 @@
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), m_ui(new Ui::MainWindow),
           m_seamlessServer(new SeamlessServer), m_commServer(new CommunicationServer),
-          m_groupModel(new TransferGroupModel()), m_deviceModel(new NetworkDeviceModel)
-#ifdef USE_DNSSD_FEATURE
-	, m_discoveryService(new DNSSDService)
-#endif // USE_DNSSD_FEATURE
+          m_groupModel(new TransferGroupModel()), m_deviceModel(new NetworkDeviceModel),
+          m_discoveryService(new DNSSDService)
 {
     m_ui->setupUi(this);
 
@@ -48,9 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
             error->show();
         }
 
-#ifdef USE_DNSSD_FEATURE
-		m_discoveryService->start();
-#endif // USE_DNSSD_FEATURE
+        m_discoveryService->start();
         m_ui->transfersTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
         m_ui->transfersTreeView->setModel(m_groupModel);
         m_ui->transfersTreeView->setColumnWidth(0, 160);
@@ -97,9 +93,7 @@ MainWindow::~MainWindow()
     delete m_groupModel;
     delete m_deviceModel;
     delete m_commServer;
-#ifdef USE_DNSSD_FEATURE
-	delete m_discoveryService;
-#endif // USE_DNSSD_FEATURE
+    delete m_discoveryService;
 }
 
 
@@ -128,7 +122,7 @@ void MainWindow::transferItemActivated(const QModelIndex &modelIndex)
 
 void MainWindow::about()
 {
-    auto* about = new AboutDialog(this);
+    auto *about = new AboutDialog(this);
     connect(about, &QDialog::finished, about, &QObject::deleteLater);
     about->show();
 }
