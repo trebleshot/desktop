@@ -5,9 +5,6 @@
 #include "DNSSDService.h"
 
 #ifdef USE_DNSSD_FEATURE
-#include <KDNSSD/DNSSD/PublicService>
-#include <KDNSSD/DNSSD/ServiceBrowser>
-
 DNSSDService::DNSSDService(QObject *parent)
         : QObject(parent),
           m_serviceBroadcast(new KDNSSD::PublicService(TS_SERVICE_NAME, TS_SERVICE_TYPE, PORT_COMMUNICATION_DEFAULT)),
