@@ -21,6 +21,8 @@ macro(add_project_meta FILES_TO_INCLUDE)
         set(ICON_FILE assets/drawable/${ICON_NAME})
     endif ()
 
+	configure_file(${ICON_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${ICON_NAME} COPYONLY)
+
     if (WIN32)
         configure_file("${PROJECT_SOURCE_DIR}/cmake/windows_metafile.rc.in" "windows_metafile.rc")
         set(RES_FILES "windows_metafile.rc")
@@ -30,7 +32,7 @@ macro(add_project_meta FILES_TO_INCLUDE)
     endif ()
 
     if (APPLE)
-        set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+        set_source_files_properties(${ICON_NAME} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
         # Identify MacOS bundle
         set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
@@ -43,7 +45,7 @@ macro(add_project_meta FILES_TO_INCLUDE)
     endif ()
 
     if (APPLE)
-        set(${FILES_TO_INCLUDE} ${ICON_FILE})
+        set(${FILES_TO_INCLUDE} ${ICON_NAME})
     elseif (WIN32)
         set(${FILES_TO_INCLUDE} ${RES_FILES})
     endif ()

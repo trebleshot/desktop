@@ -165,7 +165,7 @@ if (KF5DNSSD_FOUND)
 	list(APPEND ${UTIL_LIBRARY} src/broadcast/DNSSDService.h src/broadcast/DNSSDService.cpp)
 endif ()
 
-add_executable(trebleshot src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS} ${META_FILES_TO_INCLUDE})
+add_executable(trebleshot src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 
 # Add the Qt5 Widgets for linking
 if (NOT TARGET Qt5::WinMain)
