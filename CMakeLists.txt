@@ -65,11 +65,15 @@ ELSE ()
     MESSAGE(FATAL_ERROR "No Qt5 found!")
 ENDIF ()
 
-IF (${CMAKE_BUILD_TYPE} EQUAL Debug)
-    set(QT_LIBRARY_SUFFIX ".dll")
-ELSE ()
-    set(QT_LIBRARY_SUFFIX "d.dll")
-ENDIF ()
+# For Windows installation Qt libraries will be determined by this suffix.
+IF(CMAKE_BUILD_TYPE MATCHES Debug)
+  set(QT_LIBRARY_SUFFIX "d.dll")
+ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
+  set(QT_LIBRARY_SUFFIX ".dll")
+ELSE()
+  set(QT_LIBRARY_SUFFIX ".dll")
+ENDIF()
+
 
 configure_file(src/build.h.in src/build.h)
 

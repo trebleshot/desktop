@@ -7,11 +7,16 @@
 #include "TransferObjectModel.h"
 
 TransferObjectModel::TransferObjectModel(groupid groupId, const QString &deviceId, QObject *parent)
-	: QAbstractTableModel(parent), m_deviceId(deviceId)
+	: QAbstractTableModel(parent), m_list(new QList<TransferObject>), m_deviceId(deviceId)
 {
 	m_groupId = groupId;
 	connect(gDatabase, &AccessDatabase::databaseChanged, this, &TransferObjectModel::databaseChanged);
 	databaseChanged(SqlSelection(), ChangeType::Any);
+}
+
+TransferObjectModel::~TransferObjectModel()
+{
+	delete m_list;
 }
 
 int TransferObjectModel::columnCount(const QModelIndex &parent) const
@@ -21,7 +26,7 @@ int TransferObjectModel::columnCount(const QModelIndex &parent) const
 
 int TransferObjectModel::rowCount(const QModelIndex &parent) const
 {
-	return m_list.size();
+	return m_list->size();
 }
 
 QVariant TransferObjectModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -51,7 +56,7 @@ QVariant TransferObjectModel::headerData(int section, Qt::Orientation orientatio
 QVariant TransferObjectModel::data(const QModelIndex &index, int role) const
 {
 	if (role == Qt::DisplayRole) {
-		const auto &currentObject = m_list.at(index.row());
+		const auto &currentObject = m_list->at(index.row());
 
 		switch (index.column()) {
 		case ColumnNames::FileName:
@@ -71,7 +76,7 @@ QVariant TransferObjectModel::data(const QModelIndex &index, int role) const
 	else if (role == Qt::DecorationRole) {
 		switch (index.column()) {
 		case ColumnNames::FileName: {
-			const auto &currentGroup = m_list.at(index.row());
+			const auto &currentGroup = m_list->at(index.row());
 			return QIcon(currentGroup.type == TransferObject::Type::Incoming
 				? ":/icon/arrow_down"
 				: ":/icon/arrow_up");
@@ -85,7 +90,7 @@ QVariant TransferObjectModel::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-const QList<TransferObject> &TransferObjectModel::list() const
+const QList<TransferObject> *TransferObjectModel::list() const
 {
 	return m_list;
 }
@@ -96,8 +101,8 @@ void TransferObjectModel::databaseChanged(const SqlSelection &change, ChangeType
 		return;
 
 	emit layoutAboutToBeChanged();
-
-	m_list.clear();
+	delete m_list;
+	m_list = new QList<TransferObject>;
 
 	SqlSelection selection;
 	selection.setTableName(DB_TABLE_TRANSFER);
@@ -116,11 +121,11 @@ void TransferObjectModel::databaseChanged(const SqlSelection &change, ChangeType
 
 	selection.whereArgs << m_groupId;
 
-	gDatabase->castQuery(selection, m_list);
+	gDatabase->castQuery(selection, *m_list);
 
-	if (m_list.empty()) {
+	if (m_list->empty()) {
 		selection.setTableName(DB_DIVIS_TRANSFER);
-		gDatabase->castQuery(selection, m_list);
+		gDatabase->castQuery(selection, *m_list);
 	}
 
 	emit layoutChanged();

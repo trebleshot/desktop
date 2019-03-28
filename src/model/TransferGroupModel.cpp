@@ -11,6 +11,11 @@ TransferGroupModel::TransferGroupModel(QObject *parent)
     databaseChanged(SqlSelection(), ChangeType::Any);
 }
 
+TransferGroupModel::~TransferGroupModel()
+{
+	delete m_list;
+}
+
 int TransferGroupModel::columnCount(const QModelIndex &parent) const
 {
     return ColumnNames::__itemCount;

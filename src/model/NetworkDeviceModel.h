@@ -21,6 +21,8 @@ public:
 
     explicit NetworkDeviceModel(QObject *parent = nullptr);
 
+	~NetworkDeviceModel();
+
     int columnCount(const QModelIndex &parent) const override;
 
     int rowCount(const QModelIndex &parent) const override;

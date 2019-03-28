@@ -14,6 +14,11 @@ FlawedTransferModel::FlawedTransferModel(groupid groupId, QObject *parent)
     databaseChanged(SqlSelection(), ChangeType::Any);
 }
 
+FlawedTransferModel::~FlawedTransferModel()
+{
+	delete m_list;
+}
+
 int FlawedTransferModel::columnCount(const QModelIndex &parent) const
 {
     return ColumnNames::__itemCount;

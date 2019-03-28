@@ -24,6 +24,8 @@ public:
 
     explicit TransferObjectModel(groupid groupId, const QString &deviceId = QString(), QObject *parent = nullptr);
 
+	~TransferObjectModel();
+
     int columnCount(const QModelIndex &parent) const override;
 
     int rowCount(const QModelIndex &parent) const override;
@@ -32,7 +34,7 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
 
-    const QList<TransferObject> &list() const;
+    const QList<TransferObject> *list() const;
 
     void setDeviceId(const QString &deviceId);
 
@@ -41,7 +43,7 @@ public slots:
     void databaseChanged(const SqlSelection &change, ChangeType type);
 
 protected:
-    QList<TransferObject> m_list;
+    QList<TransferObject> *m_list;
     QString m_deviceId;
     groupid m_groupId;
 };

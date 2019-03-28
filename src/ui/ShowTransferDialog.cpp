@@ -14,7 +14,8 @@
 
 ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
 	: QDialog(parent), m_ui(new Ui::ShowTransferDialog), m_objectModel(new TransferObjectModel(groupId)),
-	m_errorsModel(new FlawedTransferModel(groupId)), m_group(groupId), m_groupInfo()
+	m_errorsModel(new FlawedTransferModel(groupId)), m_group(groupId), 
+	m_assigneeList(new QList<AssigneeInfo>), m_groupInfo()
 {
 	m_ui->setupUi(this);
 	m_ui->errorTreeView->setModel(m_errorsModel);
@@ -47,6 +48,7 @@ ShowTransferDialog::~ShowTransferDialog()
 	delete m_ui;
 	delete m_objectModel;
 	delete m_errorsModel;
+	delete m_assigneeList;
 }
 
 void ShowTransferDialog::changeSavePath()
@@ -86,8 +88,10 @@ void ShowTransferDialog::saveDirectory()
 void ShowTransferDialog::checkGroupIntegrity(const SqlSelection &change, ChangeType type)
 {
 	if (!change.valid() || change.tableName == DB_TABLE_TRANSFERASSIGNEE) {
-		m_assigneeList.clear();
-		TransferUtils::getAllAssigneeInfo(m_group, m_assigneeList);
+		delete m_assigneeList;
+		m_assigneeList = new QList<AssigneeInfo>;
+
+		TransferUtils::getAllAssigneeInfo(m_group, *m_assigneeList);
 		updateAssignees();
 	}
 
@@ -111,11 +115,10 @@ void ShowTransferDialog::checkGroupIntegrity(const SqlSelection &change, ChangeT
 
 void ShowTransferDialog::updateAssignees()
 {
-	const QList<AssigneeInfo> &copyList = m_assigneeList;
 	m_ui->assigneesComboBox->clear();
 	m_ui->assigneesComboBox->addItem(tr("Any"), QString());
 
-	for (const auto &info : copyList)
+	for (const auto &info : *m_assigneeList)
 		m_ui->assigneesComboBox->addItem(info.device.nickname, info.device.id);
 
 	assigneeChanged(0);
@@ -195,8 +198,8 @@ void ShowTransferDialog::taskToggle()
 {
 	if (gTaskMgr->hasActiveTasksFor(m_group.id))
 		gTaskMgr->pauseTasks(m_group.id);
-	else if (m_groupInfo.hasIncoming && !m_assigneeList.empty())
-		TransferUtils::startTransfer(m_group.id, m_assigneeList[0].device.id);
+	else if (m_groupInfo.hasIncoming && !m_assigneeList->empty())
+		TransferUtils::startTransfer(m_group.id, (*m_assigneeList)[0].device.id);
 }
 
 void ShowTransferDialog::showFiles()
@@ -240,7 +243,7 @@ void ShowTransferDialog::transferItemActivated(const QModelIndex &modelIndex)
 	if (!modelIndex.isValid())
 		return;
 
-	auto item = m_objectModel->list().at(modelIndex.row());
+	auto item = m_objectModel->list()->at(modelIndex.row());
 
 	if (modelIndex.column() == TransferObjectModel::Status && item.flag != TransferObject::Done
 		&& item.flag != TransferObject::Removed) {

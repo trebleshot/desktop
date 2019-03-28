@@ -67,9 +67,9 @@ protected:
 	Ui::ShowTransferDialog *m_ui;
 	TransferObjectModel *m_objectModel;
 	FlawedTransferModel *m_errorsModel;
+	QList<AssigneeInfo> *m_assigneeList;
 	TransferGroup m_group;
 	TransferGroupInfo m_groupInfo;
-	QList<AssigneeInfo> m_assigneeList;
 	qint64 m_fileSessionSize = 0;
 };
 

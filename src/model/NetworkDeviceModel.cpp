@@ -13,6 +13,11 @@ NetworkDeviceModel::NetworkDeviceModel(QObject *parent)
     databaseChanged(SqlSelection(), ChangeType::Any);
 }
 
+NetworkDeviceModel::~NetworkDeviceModel()
+{
+	delete m_list;
+}
+
 int NetworkDeviceModel::columnCount(const QModelIndex &parent) const
 {
     return ColumnNames::__itemCount;
