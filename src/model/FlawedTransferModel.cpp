@@ -7,7 +7,7 @@
 #include "FlawedTransferModel.h"
 
 FlawedTransferModel::FlawedTransferModel(groupid groupId, QObject *parent)
-        : QAbstractTableModel(parent)
+        : QAbstractTableModel(parent), m_list(new QList<TransferObject>)
 {
     m_groupId = groupId;
     connect(gDatabase, &AccessDatabase::databaseChanged, this, &FlawedTransferModel::databaseChanged);
@@ -21,7 +21,7 @@ int FlawedTransferModel::columnCount(const QModelIndex &parent) const
 
 int FlawedTransferModel::rowCount(const QModelIndex &parent) const
 {
-    return m_list.size();
+    return m_list->size();
 }
 
 QVariant FlawedTransferModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -46,7 +46,7 @@ QVariant FlawedTransferModel::headerData(int section, Qt::Orientation orientatio
 QVariant FlawedTransferModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole) {
-        const auto &currentObject = m_list.at(index.row());
+        const auto &currentObject = m_list->at(index.row());
 
         switch (index.column()) {
             case ColumnNames::FileName:
@@ -61,7 +61,7 @@ QVariant FlawedTransferModel::data(const QModelIndex &index, int role) const
     } else if (role == Qt::DecorationRole) {
         switch (index.column()) {
             case ColumnNames::FileName: {
-                const auto &currentGroup = m_list.at(index.row());
+                const auto &currentGroup = m_list->at(index.row());
                 return QIcon(currentGroup.type == TransferObject::Type::Incoming
                              ? ":/icon/arrow_down"
                              : ":/icon/arrow_up");
@@ -75,7 +75,7 @@ QVariant FlawedTransferModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-const QList<TransferObject> &FlawedTransferModel::list() const
+const QList<TransferObject> *FlawedTransferModel::list() const
 {
     return m_list;
 }
@@ -86,8 +86,9 @@ void FlawedTransferModel::databaseChanged(const SqlSelection &change, ChangeType
         return;
 
     emit layoutAboutToBeChanged();
-
-    m_list.clear();
+	delete m_list;
+	
+	m_list = new QList<TransferObject>;
 
     SqlSelection selection;
     selection.setTableName(DB_TABLE_TRANSFER);
@@ -102,11 +103,11 @@ void FlawedTransferModel::databaseChanged(const SqlSelection &change, ChangeType
                         << TransferObject::Flag::Removed
                         << TransferObject::Flag::Interrupted;
 
-    m_list = gDatabase->castQuery(selection, TransferObject());
+    gDatabase->castQuery(selection, *m_list);
 
-    if (m_list.empty()) {
+    if (m_list->empty()) {
         selection.setTableName(DB_DIVIS_TRANSFER);
-        m_list = gDatabase->castQuery(selection, TransferObject());
+        gDatabase->castQuery(selection, *m_list);
     }
 
     emit layoutChanged();

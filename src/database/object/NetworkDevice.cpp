@@ -71,7 +71,9 @@ void NetworkDevice::onRemovingObject(AccessDatabase *db, DatabaseObject *parent)
     assignee.setWhere(QString("%1 = ?").arg(DB_FIELD_TRANSFERASSIGNEE_DEVICEID));
     assignee.whereArgs << id;
 
-    const QList<TransferAssignee> &assigneeList = db->castQuery(assignee, TransferAssignee());
+	QList<TransferAssignee> assigneeList;
+		
+	db->castQuery(assignee, assigneeList);
 
     for (auto thisAssignee : assigneeList) {
         db->remove(thisAssignee);

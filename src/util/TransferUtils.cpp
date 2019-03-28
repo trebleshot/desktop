@@ -238,15 +238,16 @@ QString TransferUtils::saveIncomingFile(const TransferGroup &group, TransferObje
 
 TransferGroupInfo TransferUtils::getInfo(const TransferGroup &group)
 {
-    const auto &assignees = getAllAssigneeInfo(group);
+	QList<AssigneeInfo> assignees;	
+	getAllAssigneeInfo(group, assignees);
 
     SqlSelection selection;
-
     selection.setTableName(assignees.empty() ? DB_DIVIS_TRANSFER : DB_TABLE_TRANSFER);
     selection.setWhere(QString("`%1` = ?").arg(DB_FIELD_TRANSFER_GROUPID));
     selection.whereArgs << group.id;
 
-    const auto &list = gDatabase->castQuery(selection, TransferObject());
+	QList<TransferObject> list;
+	gDatabase->castQuery(selection, list);
 
     TransferGroupInfo groupInfo(group, assignees, list.size());
 
@@ -287,7 +288,7 @@ AssigneeInfo TransferUtils::getInfo(const TransferAssignee &assignee)
     return AssigneeInfo();
 }
 
-QList<AssigneeInfo> TransferUtils::getAllAssigneeInfo(const TransferGroup &group)
+void TransferUtils::getAllAssigneeInfo(const TransferGroup &group, QList<AssigneeInfo> &list)
 {
     SqlSelection selection;
 
@@ -296,12 +297,12 @@ QList<AssigneeInfo> TransferUtils::getAllAssigneeInfo(const TransferGroup &group
     selection.whereArgs << group.id;
 
     QList<AssigneeInfo> returnedList;
-    const auto &assigneeList = gDatabase->castQuery(selection, TransferAssignee());
+	QList<TransferAssignee> assigneeList;
+	
+	gDatabase->castQuery(selection, assigneeList);
 
     for (const auto &assignee : assigneeList)
-        returnedList << getInfo(assignee);
-
-    return returnedList;
+		list << getInfo(assignee);
 }
 
 QString TransferUtils::sizeExpression(size_t bytes, bool notUseByte)
@@ -319,14 +320,10 @@ QString TransferUtils::sizeExpression(size_t bytes, bool notUseByte)
             .arg(notUseByte ? "i" : "");
 }
 
-QList<QString> TransferUtils::getPaths(const QList<QUrl> &urls)
+void TransferUtils::getPaths(const QList<QUrl> &urls, QList<QString> &list)
 {
-    QList<QString> paths;
-
     for (const auto &url : urls)
-        paths << url.toLocalFile();
-
-    return paths;
+        list << url.toLocalFile();
 }
 
 void TransferUtils::startTransfer(groupid groupId, const QString &deviceId)

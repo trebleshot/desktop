@@ -108,7 +108,10 @@ void MainWindow::dropEvent(QDropEvent *event)
     if (event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
 
-        FileAdditionProgressDialog progressDialog(this, TransferUtils::getPaths(event->mimeData()->urls()));
+		QList<QString> paths;
+		TransferUtils::getPaths(event->mimeData()->urls(), paths);
+
+        FileAdditionProgressDialog progressDialog(this, paths);
         connect(&progressDialog, SIGNAL(filesAdded(groupid)), this, SLOT(showTransfer(groupid)));
         progressDialog.exec();
     }
@@ -116,7 +119,7 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::transferItemActivated(const QModelIndex &modelIndex)
 {
-    const auto &data = m_groupModel->list().at(modelIndex.row());
+    const auto &data = m_groupModel->list()->at(modelIndex.row());
     showTransfer(data.group.id);
 }
 
@@ -240,16 +243,16 @@ void MainWindow::showTransfer()
 
     const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
 
-    if (ids.size() == 1 && !m_groupModel->list().empty())
-        showTransfer(m_groupModel->list().at(ids[0]).group.id);
+    if (ids.size() == 1 && !m_groupModel->list()->empty())
+        showTransfer(m_groupModel->list()->at(ids[0]).group.id);
 }
 
 void MainWindow::removeTransfer()
 {
-    auto list = m_groupModel->list();
+    auto *list = m_groupModel->list();
 
     for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
-        TransferGroup group = list.at(row).group;
+        TransferGroup group = list->at(row).group;
         gDatabase->remove(group);
     }
 }
@@ -373,11 +376,13 @@ void MainWindow::selectFilesToSend()
 
 void MainWindow::taskStart()
 {
-    auto list = m_groupModel->list();
+    auto *list = m_groupModel->list();
 
     for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
-        const auto &group = list.at(row).group;
-        const auto &assignees = TransferUtils::getAllAssigneeInfo(group);
+        const auto &group = list->at(row).group;
+		QList<AssigneeInfo> assignees;
+			
+		TransferUtils::getAllAssigneeInfo(group, assignees);
 
         if (!assignees.empty())
             TransferUtils::startTransfer(group.id, assignees[0].device.id);
@@ -386,10 +391,10 @@ void MainWindow::taskStart()
 
 void MainWindow::taskPause()
 {
-    auto list = m_groupModel->list();
+    auto *list = m_groupModel->list();
 
     for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
-        TransferGroup group = list.at(row).group;
+        TransferGroup group = list->at(row).group;
         gTaskMgr->pauseTasks(group.id);
     }
 }
@@ -404,7 +409,7 @@ void MainWindow::transferSelectionChanged(const QItemSelection &selected, const 
     const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
 
     if (ids.size() == 1) {
-        const auto &item = m_groupModel->list().at(ids[0]);
+        const auto &item = m_groupModel->list()->at(ids[0]);
         const bool running = gTaskMgr->hasActiveTasksFor(item.group.id);
 
         if (running)
@@ -433,7 +438,7 @@ void MainWindow::transferContextMenu(const QPoint &point)
     const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
 
     if (ids.size() == 1) {
-        const auto &item = m_groupModel->list().at(ids[0]);
+        const auto &item = m_groupModel->list()->at(ids[0]);
         const bool running = gTaskMgr->hasActiveTasksFor(item.group.id);
 
         if (running)
@@ -466,7 +471,7 @@ void MainWindow::taskToggle()
     const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
 
     if (ids.size() == 1) {
-        const auto &item = m_groupModel->list().at(ids[0]);
+        const auto &item = m_groupModel->list()->at(ids[0]);
         const bool running = gTaskMgr->hasActiveTasksFor(item.group.id);
 
         if (running)
@@ -477,7 +482,7 @@ void MainWindow::taskToggle()
         }
     } else {
         for (int index : ids) {
-            const auto &item = m_groupModel->list().at(index);
+            const auto &item = m_groupModel->list()->at(index);
             gTaskMgr->pauseTasks(item.group.id);
         }
     }

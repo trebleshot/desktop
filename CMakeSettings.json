@@ -12,6 +12,19 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": ""
+    },
+    {
+      "buildCommandArgs": "-v",
+      "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+      "cmakeCommandArgs": "",
+      "configurationType": "Release",
+      "ctestCommandArgs": "",
+      "generator": "Ninja",
+      "inheritEnvironments": [
+        "msvc_x64_x64"
+      ],
+      "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+      "name": "x64-Release"
     }
   ]
 }

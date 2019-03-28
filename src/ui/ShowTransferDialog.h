@@ -12,65 +12,65 @@
 #include <src/model/FlawedTransferModel.h>
 
 namespace Ui {
-    class ShowTransferDialog;
+	class ShowTransferDialog;
 }
 
 class ShowTransferDialog : public QDialog {
-Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit ShowTransferDialog(QWidget *parentWindow, groupid groupId);
+	explicit ShowTransferDialog(QWidget *parentWindow, groupid groupId);
 
-    ~ShowTransferDialog() override;
+	~ShowTransferDialog() override;
 
 public slots:
 
-    void addDevices();
+	void addDevices();
 
-    void assigneeChanged(int index);
+	void assigneeChanged(int index);
 
-    void changeSavePath();
+	void changeSavePath();
 
-    void globalTaskStarted(groupid groupId, const QString &deviceId, int type);
+	void globalTaskStarted(groupid groupId, const QString &deviceId, int type);
 
-    void globalTaskFinished(groupid groupId, const QString &deviceId, int type);
+	void globalTaskFinished(groupid groupId, const QString &deviceId, int type);
 
-    void removeTransfer();
+	void removeTransfer();
 
-    void checkGroupIntegrity(const SqlSelection &change, ChangeType type);
+	void checkGroupIntegrity(const SqlSelection &change, ChangeType type);
 
-    void retryReceiving();
+	void retryReceiving();
 
-    void saveDirectory();
+	void saveDirectory();
 
-    void sendToDevices(groupid groupId, QList<NetworkDevice> devices);
+	void sendToDevices(groupid groupId, QList<NetworkDevice> devices);
 
-    void showFiles();
+	void showFiles();
 
-    void startTransfer();
+	void startTransfer();
 
-    void taskToggle();
+	void taskToggle();
 
-    void transferItemActivated(const QModelIndex& modelIndex);
+	void transferItemActivated(const QModelIndex& modelIndex);
 
-    void transferBitChange(groupid groupId, const QString &deviceId, int type, qint64 bit, qint64 fileSessionSize);
+	void transferBitChange(groupid groupId, const QString &deviceId, int type, qint64 bit, qint64 fileSessionSize);
 
-    void transferFileChange(groupid groupId, const QString &deviceId, int type);
+	void transferFileChange(groupid groupId, const QString &deviceId, int type);
 
-    void updateAssignees();
+	void updateAssignees();
 
-    void updateButtons();
+	void updateButtons();
 
-    void updateStats();
+	void updateStats();
 
 protected:
-    Ui::ShowTransferDialog *m_ui;
-    TransferObjectModel *m_objectModel;
-    FlawedTransferModel *m_errorsModel;
-    TransferGroup m_group;
-    TransferGroupInfo m_groupInfo;
-    QList<AssigneeInfo> m_assigneeList;
-    qint64 m_fileSessionSize = 0;
+	Ui::ShowTransferDialog *m_ui;
+	TransferObjectModel *m_objectModel;
+	FlawedTransferModel *m_errorsModel;
+	TransferGroup m_group;
+	TransferGroupInfo m_groupInfo;
+	QList<AssigneeInfo> m_assigneeList;
+	qint64 m_fileSessionSize = 0;
 };
 
 

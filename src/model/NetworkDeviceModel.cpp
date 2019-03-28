@@ -7,7 +7,7 @@
 #include "NetworkDeviceModel.h"
 
 NetworkDeviceModel::NetworkDeviceModel(QObject *parent)
-        : QAbstractTableModel(parent)
+        : QAbstractTableModel(parent), m_list(new QList<NetworkDevice>)
 {
     connect(gDatabase, &AccessDatabase::databaseChanged, this, &NetworkDeviceModel::databaseChanged);
     databaseChanged(SqlSelection(), ChangeType::Any);
@@ -20,7 +20,7 @@ int NetworkDeviceModel::columnCount(const QModelIndex &parent) const
 
 int NetworkDeviceModel::rowCount(const QModelIndex &parent) const
 {
-    return m_list.size();
+    return m_list->size();
 }
 
 void NetworkDeviceModel::databaseChanged(const SqlSelection &change, ChangeType changeType)
@@ -29,13 +29,14 @@ void NetworkDeviceModel::databaseChanged(const SqlSelection &change, ChangeType 
         return;
 
     emit layoutAboutToBeChanged();
-    m_list.clear();
+	delete m_list;
+	m_list = new QList<NetworkDevice>;
 
     SqlSelection selection;
     selection.setTableName(DB_TABLE_DEVICES);
     selection.setOrderBy(DB_FIELD_DEVICES_LASTUSAGETIME, false);
 
-    m_list = gDatabase->castQuery(selection, NetworkDevice());
+    gDatabase->castQuery(selection, *m_list);
 
     emit layoutChanged();
 }
@@ -64,7 +65,7 @@ QVariant NetworkDeviceModel::headerData(int section, Qt::Orientation orientation
 QVariant NetworkDeviceModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole) {
-        const auto &thisDevice = m_list.at(index.row());
+        const auto &thisDevice = m_list->at(index.row());
 
         switch (index.column()) {
             case ColumnNames::Name:
@@ -88,5 +89,5 @@ QVariant NetworkDeviceModel::data(const QModelIndex &index, int role) const
 
 const QList<NetworkDevice> *NetworkDeviceModel::list()
 {
-    return &m_list;
+    return m_list;
 }

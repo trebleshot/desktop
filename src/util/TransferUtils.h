@@ -83,7 +83,7 @@ public:
                                   const TransferGroup &group, const QMimeDatabase &mimeDatabase,
                                   requestid &requestId, const QString &filePath, const QString &directory = nullptr);
 
-    static QList<QString> getPaths(const QList<QUrl> &urls);
+    static void getPaths(const QList<QUrl> &urls, QList<QString> &list);
 
     static TransferObject firstAvailableTransfer(groupid groupId, const QString &deviceId);
 
@@ -101,7 +101,7 @@ public:
 
     static QString getUniqueFileName(const QString &filePath, bool tryActualFile);
 
-    static QList<AssigneeInfo> getAllAssigneeInfo(const TransferGroup &group);
+    static void getAllAssigneeInfo(const TransferGroup &group, QList<AssigneeInfo> &list);
 
     static TransferGroupInfo getInfo(const TransferGroup &group);
 

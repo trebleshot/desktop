@@ -29,14 +29,14 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
 
-    const QList<TransferObject> &list() const;
+    const QList<TransferObject> *list() const;
 
 public slots:
 
     void databaseChanged(const SqlSelection &change, ChangeType type);
 
 protected:
-    QList<TransferObject> m_list;
+    QList<TransferObject>* m_list;
     groupid m_groupId;
 };
 

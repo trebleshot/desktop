@@ -40,14 +40,14 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
 
-    const QList<TransferGroupInfo> &list() const;
+    const QList<TransferGroupInfo> *list() const;
 
 public slots:
 
     void databaseChanged(const SqlSelection &change, ChangeType changeType);
 
 protected:
-    QList<TransferGroupInfo> m_list;
+    QList<TransferGroupInfo> *m_list;
     QMutex m_mutex;
 };
 

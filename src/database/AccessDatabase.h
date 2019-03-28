@@ -181,9 +181,8 @@ public:
     QSqlDatabase *getDatabase();
 
     template<typename T = DatabaseObject>
-    QList<T> castQuery(const SqlSelection &sqlSelection, const T &classInstance)
+    void castQuery(const SqlSelection &sqlSelection, QList<T> &resultList)
     {
-        QList<T> resultList;
         QSqlQuery query = sqlSelection.toSelectionQuery();
 
         query.exec();
@@ -194,8 +193,6 @@ public:
                 dbObject.generateValues(query.record());
                 resultList.append(dbObject);
             } while (query.next());
-
-        return resultList;
     }
 
     void initialize();
@@ -203,7 +200,8 @@ public:
     template<typename T = DatabaseObject>
     bool removeAsObject(const SqlSelection &selection, const T &type, DatabaseObject *parent = nullptr)
     {
-        const QList<T> &objects = castQuery(selection, type);
+		QList<T> objects;
+		castQuery(selection, objects);
 
         for (auto resultingObject : objects)
             resultingObject.onRemovingObject(this, parent);

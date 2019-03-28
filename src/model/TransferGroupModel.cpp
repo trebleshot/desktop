@@ -5,7 +5,7 @@
 #include "TransferGroupModel.h"
 
 TransferGroupModel::TransferGroupModel(QObject *parent)
-        : QAbstractTableModel(parent)
+        : QAbstractTableModel(parent), m_list(new QList<TransferGroupInfo>)
 {
     connect(gDatabase, &AccessDatabase::databaseChanged, this, &TransferGroupModel::databaseChanged);
     databaseChanged(SqlSelection(), ChangeType::Any);
@@ -18,7 +18,7 @@ int TransferGroupModel::columnCount(const QModelIndex &parent) const
 
 int TransferGroupModel::rowCount(const QModelIndex &parent) const
 {
-    return m_list.size();
+    return m_list->size();
 }
 
 QVariant TransferGroupModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -47,7 +47,7 @@ QVariant TransferGroupModel::headerData(int section, Qt::Orientation orientation
 QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole) {
-        const auto &currentGroup = m_list.at(index.row());
+        const auto &currentGroup = m_list->at(index.row());
 
         switch (index.column()) {
             case ColumnNames::Devices: {
@@ -83,7 +83,7 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
     } else if (role == Qt::DecorationRole) {
         switch (index.column()) {
             case ColumnNames::Devices: {
-                const auto &currentGroup = m_list.at(index.row());
+                const auto &currentGroup = m_list->at(index.row());
                 return QIcon(currentGroup.hasIncoming
                              ? ":/icon/arrow_down"
                              : ":/icon/arrow_up");
@@ -103,22 +103,23 @@ void TransferGroupModel::databaseChanged(const SqlSelection &change, ChangeType 
         return;
 
     emit layoutAboutToBeChanged();
+	delete m_list;
+	m_list = new QList<TransferGroupInfo>;
 
-    m_list.clear();
-
+	QList<TransferGroup> groupList;
     SqlSelection selection;
     selection.setTableName(DB_TABLE_TRANSFERGROUP);
     selection.setOrderBy(DB_FIELD_TRANSFERGROUP_DATECREATED, false);
-
-    const auto &groupList = gDatabase->castQuery(selection, TransferGroup());
+	
+	gDatabase->castQuery(selection, groupList);
 
     for (const auto &transferGroup : groupList)
-        m_list.append(TransferUtils::getInfo(transferGroup));
+        m_list->append(TransferUtils::getInfo(transferGroup));
 
     emit layoutChanged();
 }
 
-const QList<TransferGroupInfo> &TransferGroupModel::list() const
+const QList<TransferGroupInfo> *TransferGroupModel::list() const
 {
     return m_list;
 }
