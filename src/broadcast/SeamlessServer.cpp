@@ -216,3 +216,32 @@ void SeamlessServer::connected(CSActiveConnection *connection)
         delete thisTask;
     }
 }
+
+
+Thread_SeamlessServer::Thread_SeamlessServer(QObject *parent)
+	: QThread(parent), m_server(new SeamlessServer)
+{
+
+}
+
+Thread_SeamlessServer::~Thread_SeamlessServer()
+{
+	delete m_server;
+}
+
+SeamlessServer * Thread_SeamlessServer::server()
+{
+	return m_server;
+}
+
+void Thread_SeamlessServer::run()
+{
+	m_server->moveToThread(thread());
+	m_server->start();
+
+	while (m_server->isListening()) {
+
+	}
+
+	qDebug() << this << "Server exited";
+}

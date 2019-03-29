@@ -30,8 +30,8 @@ Q_OBJECT
 
 protected:
     Ui::MainWindow *m_ui;
-    SeamlessServer *m_seamlessServer;
-    CommunicationServer *m_commServer;
+    Thread_SeamlessServer *m_seamlessServer;
+    Thread_CommunicationServer *m_commServer;
     TransferGroupModel *m_groupModel;
     NetworkDeviceModel *m_deviceModel;
 	DNSSDService *m_discoveryService;

@@ -23,3 +23,22 @@ signals:
 
     void taskDone(groupid groupId, QString deviceId);
 };
+
+class Thread_SeamlessServer : public QThread {
+	Q_OBJECT
+
+public:
+	explicit Thread_SeamlessServer(QObject *parent = nullptr);
+
+	~Thread_SeamlessServer();
+
+	SeamlessServer* server();
+
+	SeamlessServer* operator->() {
+		return m_server;
+	}
+protected:
+	SeamlessServer* m_server;
+
+	void run() override;
+};

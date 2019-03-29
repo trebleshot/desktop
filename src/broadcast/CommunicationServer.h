@@ -10,9 +10,9 @@
 #include <QApplication>
 
 class CommunicationServer : public CSServer {
-Q_OBJECT
+	Q_OBJECT
 
-	void pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result);
+		void pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result);
 
 public:
 	explicit CommunicationServer(QObject *parent = nullptr);
@@ -36,8 +36,20 @@ protected:
 };
 
 class Thread_CommunicationServer : public QThread {
-Q_OBJECT
+	Q_OBJECT
 
 public:
 	explicit Thread_CommunicationServer(QObject *parent = nullptr);
+
+	~Thread_CommunicationServer();
+
+	CommunicationServer* server();
+
+	CommunicationServer* operator->() {
+		return m_server;
+	}
+protected:
+	CommunicationServer* m_server;
+
+	void run() override;
 };

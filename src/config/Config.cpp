@@ -59,4 +59,5 @@ void initAppEnvironment()
     qRegisterMetaType<groupid>("groupid");
     qRegisterMetaType<requestid>("requestid");
     qRegisterMetaType<QList<NetworkDevice>>("QList<NetworkDevice>");
+	qRegisterMetaType<QHostAddress>("QHostAddress");
 }

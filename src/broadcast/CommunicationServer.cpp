@@ -10,7 +10,7 @@
 CommunicationServer::CommunicationServer(QObject *parent)
         : CSServer(QHostAddress::Any, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT, parent)
 {
-    qRegisterMetaType<QHostAddress>("QHostAddress");
+    
 }
 
 void CommunicationServer::connected(CSActiveConnection *connection)
@@ -214,7 +214,30 @@ void CommunicationServer::blockAddress(const QHostAddress &address)
     m_blockedAddresses << address;
 }
 
-Thread_CommunicationServer::Thread_CommunicationServer(QObject *parent) : QThread(parent)
+Thread_CommunicationServer::Thread_CommunicationServer(QObject *parent) 
+	: QThread(parent), m_server(new CommunicationServer)
 {
 
+}
+
+Thread_CommunicationServer::~Thread_CommunicationServer()
+{
+	delete m_server;
+}
+
+CommunicationServer * Thread_CommunicationServer::server()
+{
+	return m_server;
+}
+
+void Thread_CommunicationServer::run()
+{
+	m_server->moveToThread(thread());
+	m_server->start();
+
+	while (m_server->isListening()) {
+
+	}
+
+	qDebug() << this << "Server exited";
 }
