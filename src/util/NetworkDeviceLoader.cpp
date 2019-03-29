@@ -61,12 +61,14 @@ void NetworkDeviceLoader::processConnection(NetworkDevice &device,
     gDbSignal->publish(connection);
 }
 
-void NetworkDeviceLoader::loadAsynchronously(QObject *sender,
-                                             const QHostAddress &hostAddress,
+void NetworkDeviceLoader::loadAsynchronously(const QHostAddress &hostAddress,
                                              const std::function<void(const NetworkDevice &)> &listener)
 {
-    GThread::startIndependent([sender, hostAddress, listener](GThread *thisThread) {
-        const NetworkDevice &device = load(sender, hostAddress);
+    GThread::startIndependent([hostAddress, listener](GThread *thisThread) {
+    	auto* object = new QObject;
+    	object->moveToThread(thisThread);
+
+        const NetworkDevice &device = load(object, hostAddress);
 
         if (listener != nullptr)
             listener(device);

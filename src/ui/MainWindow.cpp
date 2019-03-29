@@ -12,7 +12,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent), m_ui(new Ui::MainWindow),
-	m_seamlessServer(new Thread_SeamlessServer), m_commServer(new Thread_CommunicationServer),
+	m_seamlessServer(new SeamlessServer), m_commServer(new CommunicationServer),
 	m_groupModel(new TransferGroupModel()), m_deviceModel(new NetworkDeviceModel),
 	m_discoveryService(new DNSSDService)
 {
@@ -33,14 +33,11 @@ MainWindow::MainWindow(QWidget *parent)
 		connect(error, &QMessageBox::finished, this, &MainWindow::close);
 	}
 	else {
-		m_commServer->start();
-		m_seamlessServer->start();
-		
-		connect(m_commServer->server(), &CommunicationServer::textReceived, this, &MainWindow::showReceivedText);
-		connect(m_commServer->server(), &CommunicationServer::transferRequest, this, &MainWindow::showTransferRequest);
-		connect(m_commServer->server(), &CommunicationServer::deviceBlocked, this, &MainWindow::deviceBlocked);
+		connect(m_commServer, &CommunicationServer::textReceived, this, &MainWindow::showReceivedText);
+		connect(m_commServer, &CommunicationServer::transferRequest, this, &MainWindow::showTransferRequest);
+		connect(m_commServer, &CommunicationServer::deviceBlocked, this, &MainWindow::deviceBlocked);
 
-		if (!(*m_seamlessServer)->isListening() || !(*m_commServer)->isListening()) {
+		if (!m_commServer->start() || !m_seamlessServer->start()) {
 			auto *error = new QMessageBox(this);
 			error->setWindowTitle(QString("Server error"));
 			error->setText(QString("TrebleShot server has returned with an error. "
@@ -316,7 +313,7 @@ void MainWindow::deviceBlocked(const QString &deviceId, const QHostAddress &addr
 		});
 
 		connect(blockButton, &QPushButton::pressed, [this, address]() {
-			(*m_commServer)->blockAddress(address);
+			m_commServer->blockAddress(address);
 		});
 
 		box.exec();

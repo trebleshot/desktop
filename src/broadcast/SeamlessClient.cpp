@@ -25,7 +25,8 @@ void SeamlessClient::run()
 	TransferGroup group(m_groupId);
 	TransferAssignee assignee(m_groupId, m_deviceId, nullptr);
 	DeviceConnection connection; // Adapter name will be passed when assignee reconstruction is successful
-	auto *client = new CommunicationBridge(this);
+	auto *client = new CommunicationBridge;
+	client->moveToThread(this);
 
 	auto connectionLambda = [&connection, &assignee]() -> DeviceConnection & {
 		connection.deviceId = assignee.deviceId;
@@ -69,7 +70,7 @@ void SeamlessClient::run()
 
 			{
 				auto *activeConnection = CSClient::openConnection(connection.hostAddress, PORT_SEAMLESS,
-					TIMEOUT_SOCKET_DEFAULT, this);
+					TIMEOUT_SOCKET_DEFAULT, client);
 
 				qDebug() << this << "Seamless port is open";
 

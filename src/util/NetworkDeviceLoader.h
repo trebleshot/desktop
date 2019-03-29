@@ -18,8 +18,7 @@ public:
 
     static QString convertToInet4Address(int ipv4Address, bool parentOnly = false);
 
-    static void loadAsynchronously(QObject *sender,
-                                   const QHostAddress &hostAddress,
+    static void loadAsynchronously(const QHostAddress &hostAddress,
                                    const std::function<void(const NetworkDevice &)> &listener);
 
     static NetworkDevice load(QObject *sender, const QHostAddress &hostAddress);

@@ -16,15 +16,20 @@ CSServer::~CSServer()
 
 void CSServer::incomingConnection(qintptr handle)
 {
-	auto *socket = new QTcpSocket(this);
-	auto *connection = new CSActiveConnection(socket, timeout(), this);
+	GThread::startIndependent([this, handle](GThread* thread) {
+		auto *socket = new QTcpSocket;
+		auto *connection = new CSActiveConnection(socket, timeout());
 
-	if (socket->setSocketDescriptor(handle) && socket->waitForConnected(TIMEOUT_SOCKET_DEFAULT)) {
-		connected(connection);
-		socket->disconnectFromHost();
-	}
+		socket->moveToThread(thread);
+		connection->moveToThread(thread);
 
-	delete connection;
+		if (socket->setSocketDescriptor(handle) && socket->waitForConnected(TIMEOUT_SOCKET_DEFAULT)) {
+			connected(connection);
+			socket->disconnectFromHost();
+		}
+
+		delete connection;
+	});
 }
 
 bool CSServer::start()

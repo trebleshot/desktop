@@ -16,9 +16,9 @@ void GThread::run()
     m_callback(this);
 }
 
-GThread *GThread::startIndependent(const std::function<void(GThread *)> &function, QObject *parent)
+GThread *GThread::startIndependent(const std::function<void(GThread *)> &function)
 {
-    auto *thread = new GThread(function, true, parent);
+    auto *thread = new GThread(function, true);
     thread->start();
     return thread;
 }

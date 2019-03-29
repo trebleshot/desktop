@@ -17,7 +17,7 @@ public:
                      bool deleteOnFinish = false,
                      QObject *parent = nullptr);
 
-    static GThread *startIndependent(const std::function<void(GThread *)> &function, QObject *parent = nullptr);
+    static GThread *startIndependent(const std::function<void(GThread *)> &function);
 
 signals:
 

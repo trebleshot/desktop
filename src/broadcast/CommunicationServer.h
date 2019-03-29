@@ -34,22 +34,3 @@ public slots:
 protected:
 	QList<QHostAddress> m_blockedAddresses;
 };
-
-class Thread_CommunicationServer : public QThread {
-	Q_OBJECT
-
-public:
-	explicit Thread_CommunicationServer(QObject *parent = nullptr);
-
-	~Thread_CommunicationServer();
-
-	CommunicationServer* server();
-
-	CommunicationServer* operator->() {
-		return m_server;
-	}
-protected:
-	CommunicationServer* m_server;
-
-	void run() override;
-};

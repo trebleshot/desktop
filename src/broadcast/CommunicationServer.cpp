@@ -10,7 +10,7 @@
 CommunicationServer::CommunicationServer(QObject *parent)
         : CSServer(QHostAddress::Any, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT, parent)
 {
-    
+
 }
 
 void CommunicationServer::connected(CSActiveConnection *connection)
@@ -60,9 +60,7 @@ void CommunicationServer::connected(CSActiveConnection *connection)
                 if (!device.isRestricted)
                     shouldContinue = true;
             } else {
-                device = NetworkDeviceLoader::load(
-                        this,
-                        connection->socket()->peerAddress());
+                device = NetworkDeviceLoader::load(connection, connection->socket()->peerAddress());
 
                 device.isTrusted = false;
                 device.isRestricted = true;
@@ -89,7 +87,6 @@ void CommunicationServer::connected(CSActiveConnection *connection)
                                 responseJSON.value(KEYWORD_FILES_INDEX).toString().toStdString())).array();
 
                         result = true;
-
                         GThread::startIndependent([this, filesIndex, groupId, device, deviceConnection](
                                 GThread *thisThread) {
                             TransferGroup transferGroup(groupId);
@@ -151,7 +148,7 @@ void CommunicationServer::connected(CSActiveConnection *connection)
 
                             if (filesTotal > 0)
                                     emit transferRequest(device.id, transferGroup.id, filesTotal);
-                        }, this);
+                        });
                     }
                 } else if (request == KEYWORD_REQUEST_RESPONSE) {
                     if (responseJSON.contains(KEYWORD_TRANSFER_GROUP_ID)) {
@@ -211,33 +208,5 @@ void CommunicationServer::pushReply(CSActiveConnection *activeConnection, QJsonO
 
 void CommunicationServer::blockAddress(const QHostAddress &address)
 {
-    m_blockedAddresses << address;
-}
-
-Thread_CommunicationServer::Thread_CommunicationServer(QObject *parent) 
-	: QThread(parent), m_server(new CommunicationServer)
-{
-
-}
-
-Thread_CommunicationServer::~Thread_CommunicationServer()
-{
-	delete m_server;
-}
-
-CommunicationServer * Thread_CommunicationServer::server()
-{
-	return m_server;
-}
-
-void Thread_CommunicationServer::run()
-{
-	m_server->moveToThread(thread());
-	m_server->start();
-
-	while (m_server->isListening()) {
-
-	}
-
-	qDebug() << this << "Server exited";
+	m_blockedAddresses << address;
 }

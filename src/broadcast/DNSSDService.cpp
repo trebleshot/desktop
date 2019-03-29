@@ -24,7 +24,7 @@ void DNSSDService::serviceFound(KDNSSD::RemoteService::Ptr service)
     const auto &resolvedAddress = KDNSSD::ServiceBrowser::resolveHostName(service.data()->hostName());
 
     if (!resolvedAddress.isNull())
-        NetworkDeviceLoader::loadAsynchronously(nullptr, resolvedAddress, nullptr);
+        NetworkDeviceLoader::loadAsynchronously(resolvedAddress, nullptr);
 }
 
 void DNSSDService::start()
