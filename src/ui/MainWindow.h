@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <src/database/AccessDatabase.h>
 #include <src/broadcast/CommunicationServer.h>
@@ -72,7 +71,7 @@ public slots:
 
     void setStorageLocation();
 
-    void showReceivedFiles();
+    static void showReceivedFiles();
 
     void showReceivedText(const QString &text, const QString &deviceId);
 
@@ -90,7 +89,5 @@ public slots:
 
     void transferContextMenu(const QPoint &point);
 
-    void usernameChanged(QString username);
+    static void usernameChanged(const QString& username);
 };
-
-#endif // MAINWINDOW_H

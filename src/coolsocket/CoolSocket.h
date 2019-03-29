@@ -1,5 +1,4 @@
-﻿#ifndef COOLSOCKET_H
-#define COOLSOCKET_H
+﻿#pragma once
 
 #define COOLSOCKET_KEYWORD_LENGTH "length"
 #define COOLSOCKET_HEADER_DIVIDER "\nHEADER_END\n"
@@ -35,7 +34,7 @@ Q_OBJECT
     QHostAddress m_hostAddress;
 
 public:
-    explicit CSServer(QHostAddress hostAddress, quint16 port = 0, int timeout = COOLSOCKET_NO_TIMEOUT,
+    explicit CSServer(const QHostAddress& hostAddress, quint16 port = 0, int timeout = COOLSOCKET_NO_TIMEOUT,
                       QObject *parent = nullptr);
 
     ~CSServer() override;
@@ -158,5 +157,3 @@ public:
     static CSActiveConnection *openConnection(const QHostAddress &hostName, quint16 port,
                                               int timeoutMSeconds = TIMEOUT_SOCKET_DEFAULT, QObject *sender = nullptr);
 };
-
-#endif // COOLSOCKET_H

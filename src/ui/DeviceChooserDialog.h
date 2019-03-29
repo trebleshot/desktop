@@ -2,8 +2,7 @@
 // Created by veli on 2/24/19.
 //
 
-#ifndef TREBLESHOT_DEVICECHOOSERDIALOG_H
-#define TREBLESHOT_DEVICECHOOSERDIALOG_H
+#pragma once
 
 #include <QtWidgets/QDialog>
 #include <QPushButton>
@@ -38,6 +37,3 @@ protected:
     Ui::DeviceChooserDialog *m_ui;
     NetworkDeviceModel *m_deviceModel;
 };
-
-
-#endif //TREBLESHOT_DEVICECHOOSERDIALOG_H

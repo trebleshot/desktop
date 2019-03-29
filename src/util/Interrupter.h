@@ -2,8 +2,7 @@
 // Created by veli on 2/24/19.
 //
 
-#ifndef TREBLESHOT_INTERRUPTER_H
-#define TREBLESHOT_INTERRUPTER_H
+#pragma once
 
 #include <QObject>
 
@@ -18,6 +17,3 @@ public:
 
     void reset();
 };
-
-
-#endif //TREBLESHOT_INTERRUPTER_H

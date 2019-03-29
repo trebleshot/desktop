@@ -7,7 +7,7 @@
 #include "TransferObjectModel.h"
 
 TransferObjectModel::TransferObjectModel(groupid groupId, const QString &deviceId, QObject *parent)
-	: QAbstractTableModel(parent), m_deviceId(deviceId)
+		: QAbstractTableModel(parent), m_deviceId(deviceId)
 {
 	m_groupId = groupId;
 	connect(gDatabase, &AccessDatabase::databaseChanged, this, &TransferObjectModel::databaseChanged);
@@ -29,19 +29,18 @@ QVariant TransferObjectModel::headerData(int section, Qt::Orientation orientatio
 	if (role == Qt::DisplayRole) {
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
-			case ColumnNames::Status:
-				return tr("Status");
-			case ColumnNames::FileName:
-				return tr("File name");
-			case ColumnNames::Size:
-				return tr("Size");
-			case ColumnNames::Directory:
-				return tr("Directory");
-			default:
-				return QString("?");
+				case ColumnNames::Status:
+					return tr("Status");
+				case ColumnNames::FileName:
+					return tr("File name");
+				case ColumnNames::Size:
+					return tr("Size");
+				case ColumnNames::Directory:
+					return tr("Directory");
+				default:
+					return QString("?");
 			}
-		}
-		else
+		} else
 			return QString("%1").arg(section);
 	}
 
@@ -54,31 +53,30 @@ QVariant TransferObjectModel::data(const QModelIndex &index, int role) const
 		const auto &currentObject = list()->at(index.row());
 
 		switch (index.column()) {
-		case ColumnNames::FileName:
-			return currentObject.friendlyName;
-		case ColumnNames::Status:
-			return TransferUtils::getFlagString(currentObject.flag);
-		case ColumnNames::Size:
-			return TransferUtils::sizeExpression(currentObject.fileSize, false);
-		case ColumnNames::Directory:
-			return currentObject.directory;
-		default:
-			return QString("Data id %1x%2")
-				.arg(index.row())
-				.arg(index.column());
+			case ColumnNames::FileName:
+				return currentObject.friendlyName;
+			case ColumnNames::Status:
+				return TransferUtils::getFlagString(currentObject.flag);
+			case ColumnNames::Size:
+				return TransferUtils::sizeExpression(currentObject.fileSize, false);
+			case ColumnNames::Directory:
+				return currentObject.directory;
+			default:
+				return QString("Data id %1x%2")
+						.arg(index.row())
+						.arg(index.column());
 		}
-	}
-	else if (role == Qt::DecorationRole) {
+	} else if (role == Qt::DecorationRole) {
 		switch (index.column()) {
-		case ColumnNames::FileName: {
-			const auto &currentGroup = list()->at(index.row());
-			return QIcon(currentGroup.type == TransferObject::Type::Incoming
-				? ":/icon/arrow_down"
-				: ":/icon/arrow_up");
-		}
-		default: {
-			// do nothing
-		}
+			case ColumnNames::FileName: {
+				const auto &currentGroup = list()->at(index.row());
+				return QIcon(currentGroup.type == TransferObject::Type::Incoming
+				             ? ":/icon/arrow_down"
+				             : ":/icon/arrow_up");
+			}
+			default: {
+				// do nothing
+			}
 		}
 	}
 
@@ -87,25 +85,23 @@ QVariant TransferObjectModel::data(const QModelIndex &index, int role) const
 
 void TransferObjectModel::databaseChanged(const SqlSelection &change, ChangeType type)
 {
-	if (change.valid() && change.tableName != DB_TABLE_TRANSFER && change.tableName != DB_DIVIS_TRANSFER)
-		return;
-
-	if (accessList()) {
+	if ((!change.valid() || change.tableName == DB_TABLE_TRANSFER || change.tableName == DB_DIVIS_TRANSFER)
+	    && gAccessList(this)) {
 		emit layoutAboutToBeChanged();
 		clearList();
 
 		SqlSelection selection;
 		selection.setTableName(DB_TABLE_TRANSFER);
 		selection.setOrderBy(QString("%1 ASC, %2 ASC")
-			.arg(DB_FIELD_TRANSFER_NAME)
-			.arg(DB_FIELD_TRANSFER_DIRECTORY));
+				                     .arg(DB_FIELD_TRANSFER_NAME)
+				                     .arg(DB_FIELD_TRANSFER_DIRECTORY));
 
 		if (m_deviceId.isEmpty())
 			selection.setWhere(QString("%1 = ?").arg(DB_FIELD_TRANSFER_GROUPID));
 		else {
 			selection.setWhere(QString("%1 = ? AND %2 = ?")
-				.arg(DB_FIELD_TRANSFER_DEVICEID)
-				.arg(DB_FIELD_TRANSFER_GROUPID));
+					                   .arg(DB_FIELD_TRANSFER_DEVICEID)
+					                   .arg(DB_FIELD_TRANSFER_GROUPID));
 			selection.whereArgs << m_deviceId;
 		}
 
@@ -119,7 +115,6 @@ void TransferObjectModel::databaseChanged(const SqlSelection &change, ChangeType
 		}
 
 		emit layoutChanged();
-		releaseList();
 	}
 }
 

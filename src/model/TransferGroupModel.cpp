@@ -25,19 +25,18 @@ QVariant TransferGroupModel::headerData(int section, Qt::Orientation orientation
 	if (role == Qt::DisplayRole) {
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
-			case ColumnNames::Status:
-				return tr("Status");
-			case ColumnNames::Devices:
-				return tr("Devices");
-			case ColumnNames::Date:
-				return tr("Date");
-			case ColumnNames::Size:
-				return tr("Size");
-			default:
-				return QString("?");
+				case ColumnNames::Status:
+					return tr("Status");
+				case ColumnNames::Devices:
+					return tr("Devices");
+				case ColumnNames::Date:
+					return tr("Date");
+				case ColumnNames::Size:
+					return tr("Size");
+				default:
+					return QString("?");
 			}
-		}
-		else
+		} else
 			return QString("%1").arg(section);
 	}
 
@@ -50,48 +49,47 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
 		const auto &currentGroup = list()->at(index.row());
 
 		switch (index.column()) {
-		case ColumnNames::Devices: {
-			QString devicesString;
+			case ColumnNames::Devices: {
+				QString devicesString;
 
-			if (currentGroup.assignees.empty())
-				devicesString.append("-");
-			else {
-				for (const auto &assigneeInfo : currentGroup.assignees) {
-					if (devicesString.length() > 0)
-						devicesString.append(", ");
+				if (currentGroup.assignees.empty())
+					devicesString.append("-");
+				else {
+					for (const auto &assigneeInfo : currentGroup.assignees) {
+						if (devicesString.length() > 0)
+							devicesString.append(", ");
 
-					devicesString.append(assigneeInfo.device.nickname);
+						devicesString.append(assigneeInfo.device.nickname);
+					}
 				}
-			}
 
-			return devicesString;
+				return devicesString;
+			}
+			case ColumnNames::Status:
+				return QString("%1 of %2")
+						.arg(currentGroup.completed)
+						.arg(currentGroup.total);
+			case ColumnNames::Size:
+				return TransferUtils::sizeExpression(currentGroup.totalBytes, false);
+			case ColumnNames::Date:
+				return QDateTime::fromTime_t(static_cast<uint>(currentGroup.group.dateCreated))
+						.toString("ddd, d MMM");
+			default:
+				return QString("Data id %1x%2")
+						.arg(index.row())
+						.arg(index.column());
 		}
-		case ColumnNames::Status:
-			return QString("%1 of %2")
-				.arg(currentGroup.completed)
-				.arg(currentGroup.total);
-		case ColumnNames::Size:
-			return TransferUtils::sizeExpression(currentGroup.totalBytes, false);
-		case ColumnNames::Date:
-			return QDateTime::fromTime_t(static_cast<uint>(currentGroup.group.dateCreated))
-				.toString("ddd, d MMM");
-		default:
-			return QString("Data id %1x%2")
-				.arg(index.row())
-				.arg(index.column());
-		}
-	}
-	else if (role == Qt::DecorationRole) {
+	} else if (role == Qt::DecorationRole) {
 		switch (index.column()) {
-		case ColumnNames::Devices: {
-			const auto &currentGroup = list()->at(index.row());
-			return QIcon(currentGroup.hasIncoming
-				? ":/icon/arrow_down"
-				: ":/icon/arrow_up");
-		}
-		default: {
-			// do nothing
-		}
+			case ColumnNames::Devices: {
+				const auto &currentGroup = list()->at(index.row());
+				return QIcon(currentGroup.hasIncoming
+				             ? ":/icon/arrow_down"
+				             : ":/icon/arrow_up");
+			}
+			default: {
+				// do nothing
+			}
 		}
 	}
 
@@ -100,10 +98,8 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
 
 void TransferGroupModel::databaseChanged(const SqlSelection &change, ChangeType changeType)
 {
-	if (change.valid() && change.tableName != DB_TABLE_TRANSFERGROUP && change.tableName != DB_TABLE_TRANSFER)
-		return;
-
-	if (gAccessList(this)) {
+	if ((!change.valid() || change.tableName == DB_TABLE_TRANSFERGROUP || change.tableName == DB_TABLE_TRANSFER)
+	    && gAccessList(this)) {
 		emit layoutAboutToBeChanged();
 		clearList();
 

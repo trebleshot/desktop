@@ -2,8 +2,7 @@
 // Created by veli on 2/16/19.
 //
 
-#ifndef TREBLESHOT_TRANSFERWINDOW_H
-#define TREBLESHOT_TRANSFERWINDOW_H
+#pragma once
 
 #include <QDialog>
 #include <ui_ShowTransferDialog.h>
@@ -43,7 +42,7 @@ public slots:
 
 	void saveDirectory();
 
-	void sendToDevices(groupid groupId, QList<NetworkDevice> devices);
+	void sendToDevices(groupid groupId, const QList<NetworkDevice>& devices);
 
 	void showFiles();
 
@@ -72,6 +71,3 @@ protected:
 	TransferGroupInfo m_groupInfo;
 	qint64 m_fileSessionSize = 0;
 };
-
-
-#endif //TREBLESHOT_TRANSFERWINDOW_H

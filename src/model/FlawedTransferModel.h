@@ -1,9 +1,6 @@
-//
-// Created by veli on 3/5/19.
-//
+#pragma once
 
-#ifndef TREBLESHOT_FLAWEDTRANSFERMODEL_H
-#define TREBLESHOT_FLAWEDTRANSFERMODEL_H
+// Created by veli on 3/5/19.
 
 #include <QIcon>
 #include <QtCore/QAbstractTableModel>
@@ -37,5 +34,3 @@ public slots:
 protected:
 	groupid m_groupId;
 };
-
-#endif //TREBLESHOT_FLAWEDTRANSFERMODEL_H

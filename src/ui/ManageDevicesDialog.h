@@ -2,8 +2,7 @@
 // Created by veli on 2/16/19.
 //
 
-#ifndef TREBLESHOT_MANAGEDEVICESWIDGET_H
-#define TREBLESHOT_MANAGEDEVICESWIDGET_H
+#pragma once
 
 #include <QDialog>
 #include <QAction>
@@ -30,5 +29,3 @@ protected:
     Ui::ManageDevicesDialog *m_ui;
     NetworkDeviceModel *m_deviceModel;
 };
-
-#endif //TREBLESHOT_MANAGEDEVICESWIDGET_H

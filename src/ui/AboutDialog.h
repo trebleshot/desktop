@@ -2,8 +2,7 @@
 // Created by veli on 3/24/19.
 //
 
-#ifndef TREBLESHOT_ABOUTDIALOG_H
-#define TREBLESHOT_ABOUTDIALOG_H
+#pragma once
 
 #include <QtWidgets/QDialog>
 #include "ui_AboutDialog.h"
@@ -21,6 +20,3 @@ protected:
 public:
     explicit AboutDialog(QWidget* parent);
 };
-
-
-#endif //TREBLESHOT_ABOUTDIALOG_H

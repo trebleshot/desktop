@@ -2,8 +2,7 @@
 // Created by veli on 2/7/19.
 //
 
-#ifndef TREBLESHOT_GTHREAD_H
-#define TREBLESHOT_GTHREAD_H
+#pragma once
 
 #include <QtCore/QThread>
 #include <QDebug>
@@ -31,6 +30,3 @@ public slots:
 protected:
     void run() override;
 };
-
-
-#endif //TREBLESHOT_GTHREAD_H

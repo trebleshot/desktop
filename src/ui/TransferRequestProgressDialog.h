@@ -2,8 +2,7 @@
 // Created by veli on 3/2/19.
 //
 
-#ifndef TREBLESHOT_TRANSFERREQUESTPROGRESSDIALOG_H
-#define TREBLESHOT_TRANSFERREQUESTPROGRESSDIALOG_H
+#pragma once
 
 #include "ui_TransferRequestProgressDialog.h"
 #include <QtWidgets/QDialog>
@@ -45,6 +44,3 @@ protected:
 
     void task(GThread *thread, const groupid &groupId, const QList<NetworkDevice> &devices);
 };
-
-
-#endif //TREBLESHOT_TRANSFERREQUESTPROGRESSDIALOG_H

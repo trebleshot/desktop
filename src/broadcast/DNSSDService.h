@@ -1,8 +1,7 @@
 //
 // Created by veli on 3/6/19.
 //
-#ifndef TREBLESHOT_BONJOURSERVICE_H
-#define TREBLESHOT_BONJOURSERVICE_H
+#pragma once
 
 #ifdef USE_DNSSD_FEATURE
 #include <KDNSSD/DNSSD/PublicService>
@@ -38,5 +37,3 @@ public:
 	void start();
 };
 #endif // USE_DNSSD_FEATURE
-
-#endif //TREBLESHOT_BONJOURSERVICE_H

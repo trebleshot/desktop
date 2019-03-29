@@ -2,8 +2,7 @@
 // Created by veli on 2/12/19.
 //
 
-#ifndef TREBLESHOT_TRANSFERUTILS_H
-#define TREBLESHOT_TRANSFERUTILS_H
+#pragma once
 
 #include <src/database/AccessDatabase.h>
 #include <src/database/object/TransferObject.h>
@@ -113,6 +112,3 @@ public:
 
     static QString sizeExpression(size_t size, bool notUseByte);
 };
-
-
-#endif //TREBLESHOT_TRANSFERUTILS_H

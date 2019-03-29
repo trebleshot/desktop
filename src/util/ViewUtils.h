@@ -2,9 +2,7 @@
 // Created by veli on 3/3/19.
 //
 
-#ifndef TREBLESHOT_VIEWUTILS_H
-#define TREBLESHOT_VIEWUTILS_H
-
+#pragma once
 
 #include <QtCore/QList>
 #include <QtCore/QItemSelectionModel>
@@ -16,6 +14,3 @@ public:
 
     static QList<int> getSelectionRows(const QModelIndexList &index);
 };
-
-
-#endif //TREBLESHOT_VIEWUTILS_H

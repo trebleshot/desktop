@@ -1,5 +1,4 @@
-#ifndef KEYWORD_H
-#define KEYWORD_H
+#pragma once
 
 #define KEYWORD_REQUEST "request"
 #define KEYWORD_RESULT "result"
@@ -51,5 +50,3 @@
 
 // local
 #define KEYWORD_UNKNOWN_INTERFACE "unk0";
-
-#endif // KEYWORD_H

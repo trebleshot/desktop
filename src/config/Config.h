@@ -1,5 +1,4 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#pragma once
 
 #define TS_SERVICE_NAME "TSComm"
 #define TS_SERVICE_TYPE "_tscomm._tcp."
@@ -31,5 +30,3 @@ QString getDeviceTypeName();
 QString getDeviceNameForOS();
 
 void initAppEnvironment();
-
-#endif // CONFIG_H

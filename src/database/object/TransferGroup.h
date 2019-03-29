@@ -2,8 +2,7 @@
 // Created by veli on 9/25/18.
 //
 
-#ifndef TREBLESHOT_TRANSFERGROUP_H
-#define TREBLESHOT_TRANSFERGROUP_H
+#pragma once
 
 #include <ctime>
 #include <QtCore/QString>
@@ -49,5 +48,3 @@ public:
 
     void onRemovingObject(AccessDatabase *db, DatabaseObject *parent) override;
 };
-
-#endif //TREBLESHOT_TRANSFERGROUP_H

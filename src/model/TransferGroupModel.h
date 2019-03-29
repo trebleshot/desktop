@@ -2,8 +2,7 @@
 // Created by veli on 1/22/19.
 //
 
-#ifndef TREBLESHOT_TRANSFERGROUPLISTMODEL_H
-#define TREBLESHOT_TRANSFERGROUPLISTMODEL_H
+#pragma once
 
 #include "src/util/TransferUtils.h"
 #include <iostream>
@@ -45,6 +44,3 @@ public slots:
 
     void databaseChanged(const SqlSelection &change, ChangeType changeType);
 };
-
-
-#endif //TREBLESHOT_TRANSFERGROUPLISTMODEL_H

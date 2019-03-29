@@ -1,5 +1,4 @@
-#ifndef TRANSFEROBJECT_H
-#define TRANSFEROBJECT_H
+#pragma once
 
 #include <src/database/AccessDatabase.h>
 #include "TransferGroup.h"
@@ -47,5 +46,3 @@ public:
 
     void onRemovingObject(AccessDatabase *db, DatabaseObject* parent) override;
 };
-
-#endif // TRANSFEROBJECT_H

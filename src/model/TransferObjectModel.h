@@ -2,8 +2,7 @@
 // Created by veli on 3/4/19.
 //
 
-#ifndef TREBLESHOT_TRANSFEROBJECTMODEL_H
-#define TREBLESHOT_TRANSFEROBJECTMODEL_H
+#pragma once
 
 #include <QtCore/QAbstractTableModel>
 #include <src/database/object/TransferObject.h>
@@ -42,6 +41,3 @@ protected:
     QString m_deviceId;
     groupid m_groupId;
 };
-
-
-#endif //TREBLESHOT_TRANSFEROBJECTMODEL_H

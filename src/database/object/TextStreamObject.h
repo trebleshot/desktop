@@ -2,8 +2,7 @@
 // Created by veli on 2/14/19.
 //
 
-#ifndef TREBLESHOT_TEXTSTREAMOBJECT_H
-#define TREBLESHOT_TEXTSTREAMOBJECT_H
+#pragma once
 
 #include <src/database/AccessDatabase.h>
 
@@ -21,6 +20,3 @@ public:
 
     void onGeneratingValues(const DbObjectMap &record) override;
 };
-
-
-#endif //TREBLESHOT_TEXTSTREAMOBJECT_H

@@ -2,8 +2,7 @@
 // Created by veli on 2/16/19.
 //
 
-#ifndef TREBLESHOT_NETWORKDEVICEMODEL_H
-#define TREBLESHOT_NETWORKDEVICEMODEL_H
+#pragma once
 
 #include <QtCore/QAbstractTableModel>
 #include <src/database/object/NetworkDevice.h>
@@ -39,6 +38,3 @@ public slots:
 protected:
     QList<NetworkDevice> *m_list;
 };
-
-
-#endif //TREBLESHOT_NETWORKDEVICEMODEL_H

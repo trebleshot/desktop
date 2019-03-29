@@ -2,8 +2,7 @@
 // Created by veli on 2/9/19.
 //
 
-#ifndef TREBLESHOT_SEAMLESSCLIENT_H
-#define TREBLESHOT_SEAMLESSCLIENT_H
+#pragma once
 
 #include <QtCore/QThread>
 #include <QFile>
@@ -29,6 +28,3 @@ signals:
 protected:
     void run() override;
 };
-
-
-#endif //TREBLESHOT_SEAMLESSCLIENT_H

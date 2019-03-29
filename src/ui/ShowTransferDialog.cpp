@@ -13,9 +13,9 @@
 #include "TransferRequestProgressDialog.h"
 
 ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
-	: QDialog(parent), m_ui(new Ui::ShowTransferDialog), m_objectModel(new TransferObjectModel(groupId)),
-	m_errorsModel(new FlawedTransferModel(groupId)), m_group(groupId), 
-	m_assigneeList(new QList<AssigneeInfo>), m_groupInfo()
+		: QDialog(parent), m_ui(new Ui::ShowTransferDialog), m_objectModel(new TransferObjectModel(groupId)),
+		  m_errorsModel(new FlawedTransferModel(groupId)), m_assigneeList(new QList<AssigneeInfo>),
+		  m_group(groupId), m_groupInfo()
 {
 	m_ui->setupUi(this);
 	m_ui->errorTreeView->setModel(m_errorsModel);
@@ -148,9 +148,9 @@ void ShowTransferDialog::addDevices()
 	dialog->show();
 }
 
-void ShowTransferDialog::sendToDevices(groupid groupId, QList<NetworkDevice> devices)
+void ShowTransferDialog::sendToDevices(groupid groupId, const QList<NetworkDevice>& devices)
 {
-	auto* dialog = new TransferRequestProgressDialog(this, groupId, devices);
+	auto *dialog = new TransferRequestProgressDialog(this, groupId, devices);
 	connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
 	dialog->show();
 }
@@ -161,10 +161,10 @@ void ShowTransferDialog::removeTransfer()
 		SqlSelection selection;
 		selection.setTableName(DB_TABLE_TRANSFERASSIGNEE);
 		selection.setWhere(QString("%1 = ? AND %2 = ?")
-			.arg(DB_FIELD_TRANSFERASSIGNEE_DEVICEID)
-			.arg(DB_FIELD_TRANSFERASSIGNEE_GROUPID));
+				                   .arg(DB_FIELD_TRANSFERASSIGNEE_DEVICEID)
+				                   .arg(DB_FIELD_TRANSFERASSIGNEE_GROUPID));
 		selection.whereArgs << m_ui->assigneesComboBox->currentData().toString()
-			<< m_group.id;
+		                    << m_group.id;
 
 		gDatabase->removeAsObject(selection, TransferAssignee());
 		return;
@@ -210,7 +210,7 @@ void ShowTransferDialog::showFiles()
 void ShowTransferDialog::updateStats()
 {
 	m_ui->progressBar->setMaximum(100);
-	m_ui->progressBar->setValue((int)(((double)m_groupInfo.completedBytes / m_groupInfo.totalBytes) * 100));
+	m_ui->progressBar->setValue((int) (((double) m_groupInfo.completedBytes / m_groupInfo.totalBytes) * 100));
 	m_ui->textFilesLeft->setText(tr("%1 of %2").arg(m_groupInfo.completed).arg(m_groupInfo.total));
 }
 
@@ -220,8 +220,7 @@ void ShowTransferDialog::transferBitChange(groupid groupId, const QString &devic
 		if (m_fileSessionSize == 0) {
 			m_groupInfo.completedBytes += file;
 			m_fileSessionSize = file;
-		}
-		else
+		} else
 			m_groupInfo.completedBytes += bit;
 	}
 
@@ -246,11 +245,10 @@ void ShowTransferDialog::transferItemActivated(const QModelIndex &modelIndex)
 	auto item = m_objectModel->list()->at(modelIndex.row());
 
 	if (modelIndex.column() == TransferObjectModel::Status && item.flag != TransferObject::Done
-		&& item.flag != TransferObject::Removed) {
+	    && item.flag != TransferObject::Removed) {
 		item.flag = TransferObject::Pending;
 		gDatabase->update(item);
-	}
-	else if (item.flag == TransferObject::Flag::Done && item.type == TransferObject::Type::Incoming)
+	} else if (item.flag == TransferObject::Flag::Done && item.type == TransferObject::Type::Incoming)
 		QDesktopServices::openUrl(QUrl::fromLocalFile(TransferUtils::getIncomingFilePath(m_group, item)));
 	else if (item.type == TransferObject::Type::Outgoing && QFile::exists(item.file))
 		QDesktopServices::openUrl(QUrl::fromLocalFile(item.file));
@@ -262,9 +260,9 @@ void ShowTransferDialog::retryReceiving()
 	selection.setTableName(DB_TABLE_TRANSFER);
 	selection.setWhere(QString("%1 = ? AND %2 = ?").arg(DB_FIELD_TRANSFER_GROUPID).arg(DB_FIELD_TRANSFER_FLAG));
 	selection.whereArgs << m_group.id
-		<< TransferObject::Flag::Interrupted;
+	                    << TransferObject::Flag::Interrupted;
 
 	gDatabase->update(selection, DbObjectMap{
 			{DB_FIELD_TRANSFER_FLAG, TransferObject::Flag::Pending}
-		});
+	});
 }

@@ -2,8 +2,7 @@
 // Created by veli on 9/29/18.
 //
 
-#ifndef TREBLESHOT_COMMUNICATIONBRIDGE_H
-#define TREBLESHOT_COMMUNICATIONBRIDGE_H
+#pragma once
 
 #include <src/coolsocket/CoolSocket.h>
 #include <src/config/Config.h>
@@ -51,6 +50,3 @@ public:
     NetworkDevice updateDeviceIfOkay(CSActiveConnection *connection,
                                      NetworkDevice &device);
 };
-
-
-#endif //TREBLESHOT_COMMUNICATIONBRIDGE_H

@@ -2,8 +2,7 @@
 // Created by veli on 9/28/18.
 //
 
-#ifndef TREBLESHOT_NETWORKDEVICELOADER_H
-#define TREBLESHOT_NETWORKDEVICELOADER_H
+#pragma once
 
 #include "src/config/Config.h"
 #include "src/database/object/NetworkDevice.h"
@@ -31,6 +30,3 @@ public:
 
     static void processConnection(NetworkDevice &device, DeviceConnection &connection);
 };
-
-
-#endif //TREBLESHOT_NETWORKDEVICELOADER_H

@@ -3,23 +3,19 @@
 #include <QList>
 #include <QMutex>
 
-#define gAccessList(list) ListSynchronizerScopedAccess(list) == true
+#define gAccessList(list) MutexEnablingScope(list).accessed()
 
-class ListSynchronizer {
-	QMutex *m_listMutex = new QMutex(QMutex::NonRecursive); // Non-recursive
+class ListMutex {
+	QMutex *m_listMutex = new QMutex(QMutex::NonRecursive);
 
 public:
-	bool accessList() {
-		return m_listMutex->tryLock(2000);
-	}
+	bool accessList();
 
-	void releaseList() {
-		m_listMutex->unlock();
-	}
+	void releaseList();
 };
 
 template<typename T>
-class SynchronizedList : public ListSynchronizer {
+class SynchronizedList : public ListMutex {
 	QList<T> *m_list = new QList<T>;
 
 public:
@@ -37,21 +33,14 @@ public:
 	}
 };
 
-class ListSynchronizerScopedAccess {
-	ListSynchronizer *m_list;
+class MutexEnablingScope {
+	ListMutex *m_list;
 	bool m_accessed;
 
 public:
-	ListSynchronizerScopedAccess(ListSynchronizer *list) : m_list(list) {
-		m_accessed = list->accessList();
-	}
+	explicit MutexEnablingScope(ListMutex *list);
 
-	~ListSynchronizerScopedAccess() {
-		if (m_accessed)
-			m_list->releaseList();
-	}
+	~MutexEnablingScope();
 
-	bool operator==(bool compare) {
-		return compare == m_accessed;
-	}
+	bool accessed();
 };

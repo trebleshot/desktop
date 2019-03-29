@@ -2,8 +2,7 @@
 // Created by veli on 12/10/18.
 //
 
-#ifndef TREBLESHOT_WELCOMEDIALOG_H
-#define TREBLESHOT_WELCOMEDIALOG_H
+#pragma once
 
 #include <QtWidgets/QDialog>
 
@@ -20,6 +19,3 @@ public:
 protected:
     Ui::WelcomeDialog *ui;
 };
-
-
-#endif //TREBLESHOT_WELCOMEDIALOG_H

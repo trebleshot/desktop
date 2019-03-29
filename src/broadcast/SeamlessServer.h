@@ -2,8 +2,7 @@
 // Created by veli on 2/9/19.
 //
 
-#ifndef TREBLESHOT_SEAMLESSSERVER_H
-#define TREBLESHOT_SEAMLESSSERVER_H
+#pragma once
 
 #include <src/util/Interrupter.h>
 #include "src/coolsocket/CoolSocket.h"
@@ -24,6 +23,3 @@ signals:
 
     void taskDone(groupid groupId, QString deviceId);
 };
-
-
-#endif //TREBLESHOT_SEAMLESSSERVER_H

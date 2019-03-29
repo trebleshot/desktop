@@ -2,8 +2,7 @@
 // Created by veli on 9/25/18.
 //
 
-#ifndef TREBLESHOT_NETWORKDEVICE_H
-#define TREBLESHOT_NETWORKDEVICE_H
+#pragma once
 
 #include <QtNetwork/QHostAddress>
 #include <QtCore/QString>
@@ -55,6 +54,3 @@ public:
 
     void onGeneratingValues(const DbObjectMap &record) override;
 };
-
-
-#endif //TREBLESHOT_NETWORKDEVICE_H

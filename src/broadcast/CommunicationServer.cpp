@@ -213,3 +213,8 @@ void CommunicationServer::blockAddress(const QHostAddress &address)
 {
     m_blockedAddresses << address;
 }
+
+Thread_CommunicationServer::Thread_CommunicationServer(QObject *parent) : QThread(parent)
+{
+
+}

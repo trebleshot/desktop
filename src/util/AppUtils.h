@@ -2,8 +2,7 @@
 // Created by veli on 12/7/18.
 //
 
-#ifndef TREBLESHOT_APPUTILS_H
-#define TREBLESHOT_APPUTILS_H
+#pragma once
 
 #include "src/config/Config.h"
 #include "src/config/Keyword.h"
@@ -141,6 +140,3 @@ public:
 
     static AccessDatabase *newDatabaseInstance(QObject *parent = nullptr);
 };
-
-
-#endif //TREBLESHOT_APPUTILS_H

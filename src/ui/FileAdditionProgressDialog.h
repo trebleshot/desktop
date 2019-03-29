@@ -2,8 +2,7 @@
 // Created by veli on 2/24/19.
 //
 
-#ifndef TREBLESHOT_FILEADDITIONPROGRESSDILAOG_H
-#define TREBLESHOT_FILEADDITIONPROGRESSDILAOG_H
+#pragma once
 
 #include <ui_FileAdditionProgressDialog.h>
 #include <QtWidgets/QDialog>
@@ -34,6 +33,3 @@ protected:
     Ui::FileAdditionProgressDialog *m_ui;
     GThread *m_thread;
 };
-
-
-#endif //TREBLESHOT_FILEADDITIONPROGRESSDILAOG_H

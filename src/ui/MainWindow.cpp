@@ -260,17 +260,15 @@ void MainWindow::showTransfer()
 
 	const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
 
-	if (ids.size() == 1 && !m_groupModel->list()->empty())
+	if (gAccessList(m_groupModel) && ids.size() == 1 && !m_groupModel->list()->empty())
 		showTransfer(m_groupModel->list()->at(ids[0]).group.id);
 }
 
 void MainWindow::removeTransfer()
 {
 	if (gAccessList(m_groupModel)) {
-		auto *list = m_groupModel->list();
-
 		for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
-			TransferGroup group = list->at(row).group;
+			TransferGroup group = m_groupModel->list()->at(row).group;
 			gDatabase->remove(group);
 		}
 	}
@@ -324,7 +322,7 @@ void MainWindow::deviceBlocked(const QString &deviceId, const QHostAddress &addr
 	}
 }
 
-void MainWindow::usernameChanged(QString username)
+void MainWindow::usernameChanged(const QString& username)
 {
 	if (!username.isEmpty())
 		AppUtils::getDefaultSettings().setValue("nickname", username);
@@ -430,7 +428,7 @@ void MainWindow::transferSelectionChanged(const QItemSelection &selected, const 
 
 	const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
 
-	if (ids.size() == 1) {
+	if (ids.size() == 1 && gAccessList(m_groupModel)) {
 		const auto &item = m_groupModel->list()->at(ids[0]);
 		const bool running = gTaskMgr->hasActiveTasksFor(item.group.id);
 
@@ -460,7 +458,7 @@ void MainWindow::transferContextMenu(const QPoint &point)
 	QMenu menu(m_ui->transfersTreeView);
 	const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
 
-	if (ids.size() == 1) {
+	if (ids.size() == 1 && gAccessList(m_groupModel)) {
 		const auto &item = m_groupModel->list()->at(ids[0]);
 		const bool running = gTaskMgr->hasActiveTasksFor(item.group.id);
 
@@ -494,7 +492,7 @@ void MainWindow::taskToggle()
 	QMenu menu(m_ui->transfersTreeView);
 	const QList<int> &ids = ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel());
 
-	if (ids.size() == 1) {
+	if (ids.size() == 1 && gAccessList(m_groupModel)) {
 		const auto &item = m_groupModel->list()->at(ids[0]);
 		const bool running = gTaskMgr->hasActiveTasksFor(item.group.id);
 
@@ -505,7 +503,7 @@ void MainWindow::taskToggle()
 				TransferUtils::startTransfer(item.group.id, assigneeInfo.device.id);
 		}
 	}
-	else {
+	else if (gAccessList(m_groupModel)) {
 		for (int index : ids) {
 			const auto &item = m_groupModel->list()->at(index);
 			gTaskMgr->pauseTasks(item.group.id);

@@ -1,5 +1,4 @@
-#ifndef COMMUNICATIONSERVER_H
-#define COMMUNICATIONSERVER_H
+#pragma once
 
 #include <src/config/Config.h>
 #include <src/config/Keyword.h>
@@ -13,27 +12,32 @@
 class CommunicationServer : public CSServer {
 Q_OBJECT
 
-    void pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result);
+	void pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result);
 
 public:
-    explicit CommunicationServer(QObject *parent = nullptr);
+	explicit CommunicationServer(QObject *parent = nullptr);
 
-    void connected(CSActiveConnection *connection) override;
+	void connected(CSActiveConnection *connection) override;
 
 signals:
 
-    void deviceBlocked(const QString &deviceId, const QHostAddress &address);
+	void deviceBlocked(const QString &deviceId, const QHostAddress &address);
 
-    void textReceived(const QString &text, const QString &deviceId);
+	void textReceived(const QString &text, const QString &deviceId);
 
-    void transferRequest(const QString &deviceId, groupid groupId, int filesTotal);
+	void transferRequest(const QString &deviceId, groupid groupId, int filesTotal);
 
 public slots:
 
-    void blockAddress(const QHostAddress &address);
+	void blockAddress(const QHostAddress &address);
 
 protected:
-    QList<QHostAddress> m_blockedAddresses;
+	QList<QHostAddress> m_blockedAddresses;
 };
 
-#endif // COMMUNICATIONSERVER_H
+class Thread_CommunicationServer : public QThread {
+Q_OBJECT
+
+public:
+	explicit Thread_CommunicationServer(QObject *parent = nullptr);
+};

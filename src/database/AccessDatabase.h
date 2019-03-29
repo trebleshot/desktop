@@ -1,5 +1,4 @@
-#ifndef ACCESSDATABASE_H
-#define ACCESSDATABASE_H
+#pragma once
 
 #include <QDebug>
 #include <QMimeData>
@@ -329,5 +328,3 @@ signals:
 
     bool update(const SqlSelection &selection, const DbObjectMap &values);
 };
-
-#endif // ACCESSDATABASE_H
