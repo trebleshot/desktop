@@ -128,6 +128,8 @@ public:
 
     static AccessDatabase *getDatabase();
 
+    static QThread *getDatabaseWorker();
+
     static AccessDatabaseSignaller *getDatabaseSignaller();
 
     static QSettings &getDefaultSettings();
@@ -137,6 +139,4 @@ public:
     static NetworkDevice getLocalDevice();
 
     static TransferTaskManager *getTransferTaskManager();
-
-    static AccessDatabase *newDatabaseInstance(QObject *parent = nullptr);
 };

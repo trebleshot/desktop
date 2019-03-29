@@ -72,7 +72,22 @@ AccessDatabase *AppUtils::getDatabase()
     static AccessDatabase *accessDatabase = nullptr;
 
     if (accessDatabase == nullptr)
-        accessDatabase = newDatabaseInstance(QApplication::instance());
+    {
+	    QSqlDatabase *db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
+	    const auto &location = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation);
+	    QDir saveDir(location);
+
+	    if (saveDir.exists() || saveDir.mkdir(location)) {
+		    db->setDatabaseName(saveDir.filePath("default.db"));
+
+		    if (db->open()) {
+			    cout << "Database has opened" << endl;
+
+			    accessDatabase = new AccessDatabase(db);
+			    accessDatabase->initialize();
+		    }
+	    }
+    }
 
     return accessDatabase;
 }
@@ -85,6 +100,12 @@ AccessDatabaseSignaller *AppUtils::getDatabaseSignaller()
         signaller = new AccessDatabaseSignaller(getDatabase());
 
     return signaller;
+}
+
+QThread *AppUtils::getDatabaseWorker()
+{
+	static auto *databaseWorker = new QThread;
+	return databaseWorker;
 }
 
 QSettings &AppUtils::getDefaultSettings()
@@ -116,29 +137,6 @@ QString AppUtils::getDeviceId()
         settings.setValue("deviceUUID", QUuid::createUuid().toString());
 
     return settings.value("deviceUUID", QString()).toString();
-}
-
-AccessDatabase *AppUtils::newDatabaseInstance(QObject *parent)
-{
-    QSqlDatabase *db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
-    const auto &location = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation);
-    QDir saveDir(location);
-
-    if (!saveDir.exists() && !saveDir.mkdir(location))
-        return nullptr;
-
-    db->setDatabaseName(saveDir.filePath("default.db"));
-
-    if (db->open()) {
-        cout << "Database has opened" << endl;
-
-        auto *database = new AccessDatabase(db, parent);
-        database->initialize();
-
-        return database;
-    }
-
-    return nullptr;
 }
 
 TransferTaskManager *AppUtils::getTransferTaskManager()
