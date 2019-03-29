@@ -8,8 +8,9 @@
 #include <QIcon>
 #include <QtCore/QAbstractTableModel>
 #include <src/database/object/TransferObject.h>
+#include <src/util/SynchronizedList.h>
 
-class FlawedTransferModel : public QAbstractTableModel {
+class FlawedTransferModel : public QAbstractTableModel, public SynchronizedList<TransferObject> {
 	Q_OBJECT
 
 public:
@@ -21,8 +22,6 @@ public:
 
 	explicit FlawedTransferModel(groupid groupId, QObject *parent = nullptr);
 
-	~FlawedTransferModel();
-
 	int columnCount(const QModelIndex &parent) const override;
 
 	int rowCount(const QModelIndex &parent) const override;
@@ -31,14 +30,11 @@ public:
 
 	QVariant data(const QModelIndex &index, int role) const override;
 
-	const QList<TransferObject> *list() const;
-
 public slots:
 
 	void databaseChanged(const SqlSelection &change, ChangeType type);
 
 protected:
-	QList<TransferObject> *m_list;
 	groupid m_groupId;
 };
 

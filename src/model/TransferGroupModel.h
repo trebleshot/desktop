@@ -17,8 +17,9 @@
 #include <QIcon>
 #include <QtGui/QIconEngine>
 #include <QtCore/QMutex>
+#include <src/util/SynchronizedList.h>
 
-class TransferGroupModel : public QAbstractTableModel {
+class TransferGroupModel : public QAbstractTableModel, public SynchronizedList<TransferGroupInfo> {
 Q_OBJECT
 
 public:
@@ -32,8 +33,6 @@ public:
 
     explicit TransferGroupModel(QObject *parent = nullptr);
 
-	~TransferGroupModel();
-
     int columnCount(const QModelIndex &parent) const override;
 
     int rowCount(const QModelIndex &parent) const override;
@@ -42,15 +41,9 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
 
-    const QList<TransferGroupInfo> *list() const;
-
 public slots:
 
     void databaseChanged(const SqlSelection &change, ChangeType changeType);
-
-protected:
-    QList<TransferGroupInfo> *m_list;
-    QMutex m_mutex;
 };
 
 

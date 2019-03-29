@@ -130,8 +130,10 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::transferItemActivated(const QModelIndex &modelIndex)
 {
-	const auto &data = m_groupModel->list()->at(modelIndex.row());
-	showTransfer(data.group.id);
+	if (gAccessList(m_groupModel)) {
+		const auto &data = m_groupModel->list()->at(modelIndex.row());
+		showTransfer(data.group.id);
+	}
 }
 
 void MainWindow::about()
@@ -264,11 +266,13 @@ void MainWindow::showTransfer()
 
 void MainWindow::removeTransfer()
 {
-	auto *list = m_groupModel->list();
+	if (gAccessList(m_groupModel)) {
+		auto *list = m_groupModel->list();
 
-	for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
-		TransferGroup group = list->at(row).group;
-		gDatabase->remove(group);
+		for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
+			TransferGroup group = list->at(row).group;
+			gDatabase->remove(group);
+		}
 	}
 }
 
@@ -342,27 +346,31 @@ void MainWindow::savePathChanged()
 
 void MainWindow::deviceContextMenu(const QPoint &point)
 {
-	const QModelIndex &modelIndex = m_ui->devicesTreeView->indexAt(point);
+	if (gAccessList(m_groupModel)) {
+		const QModelIndex &modelIndex = m_ui->devicesTreeView->indexAt(point);
 
-	if (modelIndex.isValid()) {
-		NetworkDevice device = m_deviceModel->list()->at(modelIndex.row());
+		if (modelIndex.isValid()) {
+			NetworkDevice device = m_deviceModel->list()->at(modelIndex.row());
 
-		QMenu menu(m_ui->devicesTreeView);
-		menu.addAction(device.isRestricted ? "Allow to access" : "Restrict", [&device]() {
-			device.isRestricted = !device.isRestricted;
-			gDatabase->publish(device);
-		});
-		menu.addAction("Remove", [&device]() {
-			gDatabase->remove(device);
-		});
+			QMenu menu(m_ui->devicesTreeView);
+			menu.addAction(device.isRestricted ? "Allow to access" : "Restrict", [&device]() {
+				device.isRestricted = !device.isRestricted;
+				gDatabase->publish(device);
+			});
+			menu.addAction("Remove", [&device]() {
+				gDatabase->remove(device);
+			});
 
-		menu.exec(m_ui->devicesTreeView->mapToGlobal(point));
+			menu.exec(m_ui->devicesTreeView->mapToGlobal(point));
+		}
 	}
 }
 
 void MainWindow::deviceSelected(const QModelIndex &modelIndex)
 {
-	if (modelIndex.isValid() && modelIndex.column() == NetworkDeviceModel::Status) {
+	if (modelIndex.isValid() && modelIndex.column() == NetworkDeviceModel::Status
+		&& gAccessList(m_groupModel)) {
+
 		NetworkDevice device = m_deviceModel->list()->at(modelIndex.row());
 		device.isRestricted = !device.isRestricted;
 		gDatabase->publish(device);
@@ -391,26 +399,25 @@ void MainWindow::selectFilesToSend()
 
 void MainWindow::taskStart()
 {
-	auto *list = m_groupModel->list();
+	if (gAccessList(m_groupModel)) {
+		for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
+			const auto &group = m_groupModel->list()->at(row).group;
+			QList<AssigneeInfo> assignees;
+			TransferUtils::getAllAssigneeInfo(group, assignees);
 
-	for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
-		const auto &group = list->at(row).group;
-		QList<AssigneeInfo> assignees;
-
-		TransferUtils::getAllAssigneeInfo(group, assignees);
-
-		if (!assignees.empty())
-			TransferUtils::startTransfer(group.id, assignees[0].device.id);
+			if (!assignees.empty())
+				TransferUtils::startTransfer(group.id, assignees[0].device.id);
+		}
 	}
 }
 
 void MainWindow::taskPause()
 {
-	auto *list = m_groupModel->list();
-
-	for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
-		TransferGroup group = list->at(row).group;
-		gTaskMgr->pauseTasks(group.id);
+	if (gAccessList(m_groupModel)) {
+		for (int row : ViewUtils::getSelectionRows(m_ui->transfersTreeView->selectionModel())) {
+			TransferGroup group = m_groupModel->list()->at(row).group;
+			gTaskMgr->pauseTasks(group.id);
+		}
 	}
 }
 

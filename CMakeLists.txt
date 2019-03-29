@@ -160,6 +160,8 @@ set(UTIL_LIBRARY
         src/util/Interrupter.cpp
         src/util/NetworkDeviceLoader.h
         src/util/NetworkDeviceLoader.cpp
+		src/util/SynchronizedList.h
+		src/util/SynchronizedList.cpp
         src/util/TransferUtils.h
         src/util/TransferUtils.cpp
         src/util/ViewUtils.h

@@ -5,12 +5,12 @@
 #ifndef TREBLESHOT_TRANSFEROBJECTMODEL_H
 #define TREBLESHOT_TRANSFEROBJECTMODEL_H
 
-
 #include <QtCore/QAbstractTableModel>
 #include <src/database/object/TransferObject.h>
+#include <src/util/SynchronizedList.h>
 #include <QIcon>
 
-class TransferObjectModel : public QAbstractTableModel {
+class TransferObjectModel : public QAbstractTableModel, public SynchronizedList<TransferObject> {
 Q_OBJECT
 
 public:
@@ -24,8 +24,6 @@ public:
 
     explicit TransferObjectModel(groupid groupId, const QString &deviceId = QString(), QObject *parent = nullptr);
 
-	~TransferObjectModel();
-
     int columnCount(const QModelIndex &parent) const override;
 
     int rowCount(const QModelIndex &parent) const override;
@@ -34,8 +32,6 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
 
-    const QList<TransferObject> *list() const;
-
     void setDeviceId(const QString &deviceId);
 
 public slots:
@@ -43,7 +39,6 @@ public slots:
     void databaseChanged(const SqlSelection &change, ChangeType type);
 
 protected:
-    QList<TransferObject> *m_list;
     QString m_deviceId;
     groupid m_groupId;
 };

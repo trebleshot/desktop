@@ -4,25 +4,25 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication application(argc, argv);
+	QApplication application(argc, argv);
 
-    initAppEnvironment();
+	initAppEnvironment();
 
-    //todo: Implement language support
-    /**
-    QTranslator translator;
+	//todo: Implement language support
+	/**
+	QTranslator translator;
 
-    if (translator.load("Turkish.qm", QLatin1String(":/translation")))
-        QApplication::installTranslator(&translator);
-     **/
+	if (translator.load("Turkish.qm", QLatin1String(":/translation")))
+		QApplication::installTranslator(&translator);
+	 **/
 
-    QApplication::setWindowIcon(QIcon(":/logo/trebleshot_small"));
-    QApplication::setApplicationName(TREBLESHOT_NAME);
-    QApplication::setApplicationVersion(TREBLESHOT_VERSION_NAME);
-    QApplication::setApplicationDisplayName(QString("%1 %2").arg(TREBLESHOT_NAME).arg(TREBLESHOT_VERSION_NAME));
+	QApplication::setWindowIcon(QIcon(":/logo/trebleshot_small"));
+	QApplication::setApplicationName(TREBLESHOT_NAME);
+	QApplication::setApplicationVersion(TREBLESHOT_VERSION_NAME);
+	QApplication::setApplicationDisplayName(QString("%1 %2").arg(TREBLESHOT_NAME).arg(TREBLESHOT_VERSION_NAME));
 
-    MainWindow mainWindow;
-    mainWindow.show();
+	MainWindow mainWindow;
+	mainWindow.show();
 
-    return QApplication::exec();
+	return QApplication::exec();
 }
