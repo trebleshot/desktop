@@ -32,9 +32,9 @@ Section ""
 	
 	CreateDirectory $INSTDIR\platforms
 	
-	File ${CMAKE_CURRENT_BINARY_DIR}\trebleshot.exe
+	File ${CMAKE_CURRENT_BINARY_DIR}\${PROJECT_EXECUTABLE}.exe
 	File ${CMAKE_CURRENT_SOURCE_DIR}\COPYING
-	File ${CMAKE_CURRENT_SOURCE_DIR}\assets\drawable\trebleshot.ico
+	File ${CMAKE_CURRENT_SOURCE_DIR}\assets\drawable\${PROJECT_EXECUTABLE}.ico
 
 	#
 	File ${QT_BINARY_DIR}\Qt5Widgets${QT_LIBRARY_SUFFIX}
@@ -49,7 +49,7 @@ Section ""
 	
 	SetOutPath $INSTDIR
 	WriteUninstaller $INSTDIR\uninstall.exe
-	CreateShortCut "$SMPROGRAMS\${PROJECT_NAME}.lnk" "$INSTDIR\trebleshot.exe" "" "$INSTDIR\trebleshot.ico" 0
+	CreateShortCut "$SMPROGRAMS\${PROJECT_NAME}.lnk" "$INSTDIR\${PROJECT_EXECUTABLE}.exe" "" "$INSTDIR\${PROJECT_EXECUTABLE}.ico" 0
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}" \
                  "DisplayName" "${PROJECT_NAME}"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}" \
@@ -69,7 +69,7 @@ Section "Uninstall"
 	Delete $INSTDIR\LICENSE
 	Delete $INSTDIR\*.dll
 	Delete $INSTDIR\platforms\*.dll
-	Delete $INSTDIR\trebleshot.exe
+	Delete $INSTDIR\${PROJECT_EXECUTABLE}.exe
 	Delete $INSTDIR\uninstall.exe
 	Delete $SMPROGRAMS\${PROJECT_NAME}.lnk
 	RMDir $INSTDIR\platforms
@@ -79,5 +79,5 @@ SectionEnd
 
 ; ===== Functions =====
 Function RunApplication
-	ExecShell "" "$INSTDIR\trebleshot.exe"
+	ExecShell "" "$INSTDIR\${PROJECT_EXECUTABLE}.exe"
 FunctionEnd

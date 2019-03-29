@@ -20,7 +20,7 @@ BEGIN
             VALUE "FileVersion", "@PROJECT_VERSION@"
             VALUE "LegalCopyright", "@COPYRIGHT@"
             VALUE "InternalName", "@PROJECT_NAME@"
-            VALUE "OriginalFilename", "trebleshot.exe"
+            VALUE "OriginalFilename", "@PROJECT_EXECUTABLE@.exe"
             VALUE "ProductName", "@PROJECT_NAME@"
             VALUE "ProductVersion", "@PROJECT_VERSION@"
         END

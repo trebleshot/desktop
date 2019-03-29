@@ -29,7 +29,8 @@ if (WIN32)
 endif ()
 
 set(PROJECT_NAME "TrebleShot")
-set(PROJECT_DESCRIPTION "Sophisticated and multi-platform file-sharing software")
+set(PROJECT_EXECUTABLE "trebleshot")
+set(PROJECT_DESCRIPTION "Multi-platform file-sharing software")
 set(PROJECT_AUTHOR "Genonbeta")
 set(PROJECT_URL "https://github.com/genonbeta/TrebleShot-Desktop")
 
@@ -168,34 +169,65 @@ if (KF5DNSSD_FOUND)
     add_definitions(-DUSE_DNSSD_FEATURE=1)
 endif ()
 
-add_executable(trebleshot src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
+add_executable(${PROJECT_EXECUTABLE} src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 
 # Add the Qt5 Widgets for linking
 if (NOT TARGET Qt5::WinMain)
     add_library(Qt5::WinMain STATIC IMPORTED)
 endif ()
 
-target_link_libraries(trebleshot PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets)
+target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets)
 
 if (KF5DNSSD_FOUND)
-    target_link_libraries(trebleshot PUBLIC KF5::DNSSD)
+    target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC KF5::DNSSD)
 endif ()
 
 fix_win_compiler()
 
 if (NOT WIN32)
-    install(TARGETS trebleshot
+    install(TARGETS ${PROJECT_EXECUTABLE}
             RUNTIME DESTINATION bin
             LIBRARY DESTINATION lib)
-endif ()
+elseif(WIN32 AND MSVC)
+	install(TARGETS ${PROJECT_EXECUTABLE}
+		RUNTIME DESTINATION "/"
+		LIBRARY DESTINATION lib)
+
+	# The Qt5 Debug configuration library files have a 'd' postfix
+	install(FILES
+			${QT_BINARY_DIR}/Qt5Cored.dll
+			${QT_BINARY_DIR}/Qt5Guid.dll
+			${QT_BINARY_DIR}/Qt5Networkd.dll
+			${QT_BINARY_DIR}/Qt5Widgetsd.dll
+			${QT_BINARY_DIR}/Qt5Sqld.dll
+		DESTINATION "/"
+		CONFIGURATIONS Debug)
+	# The Qt5 Release configuration files don't have a postfix
+	install(FILES
+			${QT_BINARY_DIR}/Qt5Core.dll
+			${QT_BINARY_DIR}/Qt5Gui.dll
+			${QT_BINARY_DIR}/Qt5Network.dll
+			${QT_BINARY_DIR}/Qt5Widgets.dll
+			${QT_BINARY_DIR}/Qt5Sql.dll
+		DESTINATION "/"
+		CONFIGURATIONS Release)
+	# The files below are common to all configurations
+	install(FILES
+		${QT_BINARY_DIR}/plugins/platforms/qwindows.dll
+		DESTINATION platforms)
+
+	install(FILES
+			distri/winlaunch.bat
+		DESTINATION "/")
+endif()
 
 if (UNIX AND NOT APPLE)
-    install(FILES assets/drawable/trebleshot.png
+    install(FILES assets/drawable/${PROJECT_EXECUTABLE}.png
             DESTINATION share/icons/hicolor/256x256/apps/)
 
-    install(FILES dist/trebleshot.desktop
+    install(FILES dist/${PROJECT_EXECUTABLE}.desktop
             DESTINATION share/applications/)
 
-    install(FILES dist/trebleshot.desktop.appdata.xml
+    install(FILES dist/${PROJECT_EXECUTABLE}.desktop.appdata.xml
             DESTINATION share/appdata/)
 endif (UNIX AND NOT APPLE)

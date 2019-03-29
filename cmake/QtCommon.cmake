@@ -10,7 +10,7 @@ endmacro()
 
 macro(add_project_meta FILES_TO_INCLUDE)
     if (NOT ICON_NAME)
-        set(ICON_NAME trebleshot)
+        set(ICON_NAME ${PROJECT_EXECUTABLE})
     endif ()
 
     if (APPLE)
@@ -61,7 +61,7 @@ endmacro()
 
 macro(fix_win_compiler)
     if (MSVC)
-        set_target_properties(trebleshot PROPERTIES
+        set_target_properties(${PROJECT_EXECUTABLE} PROPERTIES
                 WIN32_EXECUTABLE YES
                 LINK_FLAGS "/ENTRY:mainCRTStartup"
                 )
