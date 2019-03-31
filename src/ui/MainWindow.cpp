@@ -81,7 +81,7 @@ MainWindow::MainWindow(QWidget *parent)
 		transferSelectionChanged(QItemSelection(), QItemSelection());
 		m_ui->usernameLineEdit->setText(getUserNickname());
 
-#ifdef _DEBUG
+#ifdef DEBUG
 		auto &thisDevice = AppUtils::getLocalDevice();
 		DeviceConnection connection(thisDevice.id, "loop0");
 		connection.hostAddress = QHostAddress("127.0.0.1");
@@ -103,6 +103,9 @@ MainWindow::~MainWindow()
 	delete m_deviceModel;
 	delete m_commServer;
 	delete m_discoveryService;
+	delete gTaskMgr;
+	delete gDbSignal;
+	delete gDatabase;
 }
 
 

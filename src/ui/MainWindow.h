@@ -32,8 +32,6 @@ protected:
     Ui::MainWindow *m_ui;
     SeamlessServer *m_seamlessServer;
     CommunicationServer *m_commServer;
-    QThread m_communicationWorker;
-	QThread m_seamlessWorker;
     TransferGroupModel *m_groupModel;
     NetworkDeviceModel *m_deviceModel;
 	DNSSDService *m_discoveryService;
