@@ -28,11 +28,11 @@ int main(int argc, char *argv[])
 
 	//todo: Implement language support
 	/**
-	QTranslator translator;
-
-	if (translator.load("Turkish.qm", QLatin1String(":/translation")))
-		QApplication::installTranslator(&translator);
-	 **/
+	* QTranslator translator;
+	*
+	* if (translator.load("Turkish.qm", QLatin1String(":/translation")))
+	* 	QApplication::installTranslator(&translator);
+	**/
 
 	QApplication::setWindowIcon(QIcon(":/logo/trebleshot_small"));
 	QApplication::setApplicationName(TREBLESHOT_NAME);

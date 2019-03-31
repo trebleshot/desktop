@@ -1,6 +1,3 @@
-#include <utility>
-#include <src/util/TransferUtils.h>
-
 /*
 * Copyright (C) 2019 Veli Tasalı, created on 9/25/18
 *
@@ -18,6 +15,9 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
+
+#include <utility>
+#include <src/util/TransferUtils.h>
 
 TransferGroup::TransferGroup(groupid groupId) : DatabaseObject()
 {
