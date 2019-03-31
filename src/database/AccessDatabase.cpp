@@ -422,7 +422,7 @@ QSqlQuery SqlSelection::toDeletionQuery() const
 
 QSqlQuery SqlSelection::toInsertionQuery() const
 {
-    // Not implement since not required
+    // Do not implement since not required
     return QSqlQuery();
 }
 

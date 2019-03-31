@@ -88,7 +88,15 @@ class DatabaseObject;
 
 class SqlSelection;
 
+/**
+ * When a change occurs, a signal is emitted
+ * by the database. This defines the type of that change.
+ */
 enum ChangeType {
+	/**
+	 * The value 'Any' is used when the slots are called out
+	 * of the signal/slot mechanism.
+	 */
     Any = -1,
     Delete,
     Update,
