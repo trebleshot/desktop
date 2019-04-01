@@ -61,19 +61,20 @@ struct TransferGroupInfo {
 
 	TransferGroupInfo() = default;
 
-	TransferGroupInfo(const TransferGroup &group, const QList<AssigneeInfo> &assignees, int total = 0,
-	                  int completed = 0, bool hasError = false, bool hasIncoming = false, bool hasOutgoing = false,
-	                  size_t totalBytes = 0, size_t completedBytes = 0)
+	TransferGroupInfo(const TransferGroup &group)
 	{
 		this->group = group;
-		this->assignees = assignees;
-		this->total = total;
-		this->completed = completed;
-		this->hasError = hasError;
-		this->hasIncoming = hasIncoming;
-		this->hasOutgoing = hasOutgoing;
-		this->totalBytes = totalBytes;
-		this->completedBytes = completedBytes;
+	}
+
+	void resetCalculations()
+	{
+		total = 0;
+		completed = 0;
+		hasError = false;
+		hasIncoming = false;
+		hasOutgoing = false;
+		totalBytes = 0;
+		completedBytes = 0;
 	}
 };
 
@@ -106,7 +107,7 @@ public:
 
 	static QString getFlagString(TransferObject::Flag flag);
 
-	static Reason getErrorReason(QString errorCode);
+	static Reason getErrorReason(const QString& errorCode);
 
 	static QString getIncomingFilePath(const TransferGroup &transferGroup, const TransferObject &object);
 
@@ -117,6 +118,10 @@ public:
 	static void getAllAssigneeInfo(const TransferGroup &group, QList<AssigneeInfo> &list);
 
 	static TransferGroupInfo getInfo(const TransferGroup &group);
+
+	static void getInfo(const TransferGroup &group, TransferGroupInfo &info);
+
+	static void getInfo(TransferGroupInfo &info, const QList<TransferObject> &objectList, bool resetFirst = false);
 
 	static AssigneeInfo getInfo(const TransferAssignee &assignee);
 

@@ -24,8 +24,7 @@ FlawedTransferModel::FlawedTransferModel(groupid groupId, QObject *parent)
 		: QAbstractTableModel(parent)
 {
 	m_groupId = groupId;
-	connect(gDatabase, &AccessDatabase::databaseChanged, this, &FlawedTransferModel::databaseChanged);
-	databaseChanged(SqlSelection(), ChangeType::Any);
+	DatabaseLoader::databaseChanged();
 }
 
 int FlawedTransferModel::columnCount(const QModelIndex &parent) const

@@ -20,8 +20,7 @@
 
 TransferGroupModel::TransferGroupModel(QObject *parent) : QAbstractTableModel(parent)
 {
-	connect(gDatabase, &AccessDatabase::databaseChanged, this, &TransferGroupModel::databaseChanged);
-	databaseChanged(SqlSelection(), ChangeType::Any);
+	DatabaseLoader::databaseChanged();
 }
 
 int TransferGroupModel::columnCount(const QModelIndex &parent) const

@@ -227,11 +227,15 @@ void SeamlessClient::run()
 															lastUpdate = currentTime;
 														}
 
-														if (currentTime - lastDataAvailable > TIMEOUT_SOCKET_DEFAULT)
+														if (currentTime - lastDataAvailable > TIMEOUT_SOCKET_DEFAULT / 1000) {
+															qDebug() << this << "Timed out!";
 															throw exception();
+														}
 
-														if (interrupted())
+														if (interrupted()) {
+															qDebug() << this << "Interrupted by user";
 															break;
+														}
 													}
 
 													socket->disconnectFromHost();
@@ -243,6 +247,8 @@ void SeamlessClient::run()
 																[&group, &transferObject](AccessDatabase *db) {
 																	TransferUtils::saveIncomingFile(group, transferObject);
 																});
+
+														qDebug() << this << "Saving file";
 													} else {
 														qDebug() << this << "The size did not match";
 														transferObject.flag = TransferObject::Flag::Interrupted;

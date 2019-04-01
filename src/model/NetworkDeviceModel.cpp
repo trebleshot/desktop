@@ -23,8 +23,7 @@
 NetworkDeviceModel::NetworkDeviceModel(QObject *parent)
 		: QAbstractTableModel(parent)
 {
-	connect(gDatabase, &AccessDatabase::databaseChanged, this, &NetworkDeviceModel::databaseChanged);
-	databaseChanged(SqlSelection(), ChangeType::Any);
+	DatabaseLoader::databaseChanged();
 }
 
 int NetworkDeviceModel::columnCount(const QModelIndex &parent) const

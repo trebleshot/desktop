@@ -22,8 +22,10 @@
 #include <src/database/object/TransferObject.h>
 #include <src/util/SynchronizedList.h>
 #include <QIcon>
+#include <src/database/DatabaseLoader.h>
 
-class TransferObjectModel : public QAbstractTableModel, public SynchronizedList<TransferObject> {
+class TransferObjectModel : public QAbstractTableModel, public SynchronizedList<TransferObject>,
+                            public DatabaseLoader {
 Q_OBJECT
 
 public:
@@ -35,7 +37,7 @@ public:
 		__itemCount
 	};
 
-	explicit TransferObjectModel(groupid groupId, const QString &deviceId = QString(), QObject *parent = nullptr);
+	explicit TransferObjectModel(groupid groupId, QString deviceId = QString(), QObject *parent = nullptr);
 
 	int columnCount(const QModelIndex &parent) const override;
 
@@ -46,8 +48,6 @@ public:
 	QVariant data(const QModelIndex &index, int role) const override;
 
 	void setDeviceId(const QString &deviceId);
-
-public slots:
 
 	void databaseChanged(const SqlSelection &change, ChangeType type);
 

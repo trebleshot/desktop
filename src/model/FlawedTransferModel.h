@@ -22,8 +22,10 @@
 #include <QtCore/QAbstractTableModel>
 #include <src/database/object/TransferObject.h>
 #include <src/util/SynchronizedList.h>
+#include <src/database/DatabaseLoader.h>
 
-class FlawedTransferModel : public QAbstractTableModel, public SynchronizedList<TransferObject> {
+class FlawedTransferModel : public QAbstractTableModel, public SynchronizedList<TransferObject>,
+                            public DatabaseLoader {
 Q_OBJECT
 
 public:
@@ -43,9 +45,7 @@ public:
 
 	QVariant data(const QModelIndex &index, int role) const override;
 
-public slots:
-
-	void databaseChanged(const SqlSelection &change, ChangeType type);
+	void databaseChanged(const SqlSelection &change, ChangeType type) override;
 
 protected:
 	groupid m_groupId;

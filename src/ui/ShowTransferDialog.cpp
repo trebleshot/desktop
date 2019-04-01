@@ -51,6 +51,7 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
 	connect(m_ui->removeButton, &QPushButton::pressed, this, &ShowTransferDialog::removeTransfer);
 	connect(m_ui->chooseDirectoryButton, &QPushButton::pressed, this, &ShowTransferDialog::changeSavePath);
 	connect(m_ui->addDevicesButton, &QPushButton::pressed, this, &ShowTransferDialog::addDevices);
+	connect(m_objectModel, &QAbstractTableModel::layoutChanged, this, &ShowTransferDialog::updateStats);
 
 	checkGroupIntegrity(SqlSelection(), ChangeType::Any);
 }
@@ -67,7 +68,7 @@ void ShowTransferDialog::changeSavePath()
 {
 	auto *fileDialog = new QFileDialog();
 
-	fileDialog->setWindowTitle("Choose a folder where the files will be put");
+	fileDialog->setWindowTitle(tr("Choose a folder where the files will be put"));
 	fileDialog->setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
 	fileDialog->setDirectory(TransferUtils::getSavePath(m_group));
 	fileDialog->setFileMode(QFileDialog::FileMode::DirectoryOnly);
@@ -88,8 +89,8 @@ void ShowTransferDialog::saveDirectory()
 
 	if (text.isEmpty() || !QFileInfo::exists(text)) {
 		QMessageBox box;
-		box.setWindowTitle("Error");
-		box.setText("The entered path cannot be used.");
+		box.setWindowTitle(tr("Error"));
+		box.setText(tr("The entered path cannot be used."));
 		box.exec();
 	}
 
@@ -141,7 +142,7 @@ void ShowTransferDialog::updateButtons()
 	bool hasRunning = gTaskMgr->hasActiveTasksFor(m_group.id);
 
 	m_ui->startButton->setEnabled(m_groupInfo.hasIncoming || hasRunning);
-	m_ui->startButton->setText(hasRunning ? "Pause" : "Start");
+	m_ui->startButton->setText(hasRunning ? tr("Pause") : tr("Start"));
 	m_ui->addDevicesButton->setEnabled(m_groupInfo.hasOutgoing);
 	m_ui->saveDirectoryButton->setEnabled(m_groupInfo.hasIncoming);
 	m_ui->storageLineEdit->setEnabled(m_groupInfo.hasIncoming);
@@ -221,6 +222,9 @@ void ShowTransferDialog::showFiles()
 
 void ShowTransferDialog::updateStats()
 {
+	if (gAccessList(m_objectModel))
+		TransferUtils::getInfo(m_groupInfo, *m_objectModel->list(), true);
+
 	m_ui->progressBar->setMaximum(100);
 	m_ui->progressBar->setValue((int) (((double) m_groupInfo.completedBytes / m_groupInfo.totalBytes) * 100));
 	m_ui->textFilesLeft->setText(tr("%1 of %2").arg(m_groupInfo.completed).arg(m_groupInfo.total));

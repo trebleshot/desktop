@@ -78,6 +78,5 @@ protected:
 	FlawedTransferModel *m_errorsModel;
 	QList<AssigneeInfo> *m_assigneeList;
 	TransferGroup m_group;
-	TransferGroupInfo m_groupInfo;
-	qint64 m_fileSessionSize = 0;
+	TransferGroupInfo m_groupInfo;;
 };

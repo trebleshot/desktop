@@ -1,3 +1,5 @@
+#include <utility>
+
 /*
 * Copyright (C) 2019 Veli Tasalı, created on 3/4/19
 *
@@ -20,12 +22,11 @@
 #include <src/util/TransferUtils.h>
 #include "TransferObjectModel.h"
 
-TransferObjectModel::TransferObjectModel(groupid groupId, const QString &deviceId, QObject *parent)
-		: QAbstractTableModel(parent), m_deviceId(deviceId)
+TransferObjectModel::TransferObjectModel(groupid groupId, QString deviceId, QObject *parent)
+		: QAbstractTableModel(parent), m_deviceId(std::move(deviceId))
 {
 	m_groupId = groupId;
-	connect(gDatabase, &AccessDatabase::databaseChanged, this, &TransferObjectModel::databaseChanged);
-	databaseChanged(SqlSelection(), ChangeType::Any);
+	DatabaseLoader::databaseChanged();
 }
 
 int TransferObjectModel::columnCount(const QModelIndex &parent) const

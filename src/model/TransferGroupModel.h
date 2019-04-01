@@ -31,8 +31,10 @@
 #include <QtGui/QIconEngine>
 #include <QtCore/QMutex>
 #include <src/util/SynchronizedList.h>
+#include <src/database/DatabaseLoader.h>
 
-class TransferGroupModel : public QAbstractTableModel, public SynchronizedList<TransferGroupInfo> {
+class TransferGroupModel : public QAbstractTableModel, public SynchronizedList<TransferGroupInfo>,
+                           public DatabaseLoader {
 Q_OBJECT
 
 public:
@@ -54,7 +56,5 @@ public:
 
 	QVariant data(const QModelIndex &index, int role) const override;
 
-public slots:
-
-	void databaseChanged(const SqlSelection &change, ChangeType changeType);
+	void databaseChanged(const SqlSelection &change, ChangeType changeType) override;
 };

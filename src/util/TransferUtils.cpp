@@ -36,10 +36,7 @@ SqlSelection TransferUtils::createSqlSelection(groupid groupId, const QString &d
 	                       << deviceId;
 
 	if (flag != TransferObject::Flag::Any) {
-		sqlStatement.append(QString(" AND %1 %2 ?")
-				                    .arg(DB_FIELD_TRANSFER_FLAG)
-				                    .arg(equals ? "==" : "!="));
-
+		sqlStatement.append(QString(" AND %1 %2 ?").arg(DB_FIELD_TRANSFER_FLAG).arg(equals ? "==" : "!="));
 		sqlSelection.whereArgs << flag;
 	}
 
@@ -151,7 +148,7 @@ QString TransferUtils::getDefaultSavePath()
 	return downloadsFolder;
 }
 
-Reason TransferUtils::getErrorReason(QString error)
+Reason TransferUtils::getErrorReason(const QString &error)
 {
 	if (error == KEYWORD_ERROR_NOT_FOUND)
 		return Reason::NotFound;
@@ -252,18 +249,33 @@ QString TransferUtils::saveIncomingFile(const TransferGroup &group, TransferObje
 
 TransferGroupInfo TransferUtils::getInfo(const TransferGroup &group)
 {
-	QList<AssigneeInfo> assignees;
-	getAllAssigneeInfo(group, assignees);
+	TransferGroupInfo groupInfo(group);
+	getInfo(group, groupInfo);
+	return groupInfo;
+}
+
+void TransferUtils::getInfo(const TransferGroup &group, TransferGroupInfo &groupInfo)
+{
+	groupInfo.assignees.clear();
+	getAllAssigneeInfo(group, groupInfo.assignees);
 
 	SqlSelection selection;
-	selection.setTableName(assignees.empty() ? DB_DIVIS_TRANSFER : DB_TABLE_TRANSFER);
+	selection.setTableName(groupInfo.assignees.empty() ? DB_DIVIS_TRANSFER : DB_TABLE_TRANSFER);
 	selection.setWhere(QString("`%1` = ?").arg(DB_FIELD_TRANSFER_GROUPID));
 	selection.whereArgs << group.id;
 
 	QList<TransferObject> list;
 	gDatabase->castQuery(selection, list);
 
-	TransferGroupInfo groupInfo(group, assignees, list.size());
+	getInfo(groupInfo, list, false);
+}
+
+void TransferUtils::getInfo(TransferGroupInfo &groupInfo, const QList<TransferObject> &list, bool resetFirst)
+{
+	if (resetFirst)
+		groupInfo.resetCalculations();
+
+	groupInfo.total = list.size();
 
 	for (const auto &object: list) {
 		if (!groupInfo.hasError
@@ -283,8 +295,6 @@ TransferGroupInfo TransferUtils::getInfo(const TransferGroup &group)
 		if (!groupInfo.hasOutgoing && object.type == TransferObject::Type::Outgoing)
 			groupInfo.hasOutgoing = true;
 	}
-
-	return groupInfo;
 }
 
 AssigneeInfo TransferUtils::getInfo(const TransferAssignee &assignee)
