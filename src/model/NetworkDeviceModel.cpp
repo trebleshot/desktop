@@ -21,25 +21,20 @@
 #include "NetworkDeviceModel.h"
 
 NetworkDeviceModel::NetworkDeviceModel(QObject *parent)
-        : QAbstractTableModel(parent), m_list(new QList<NetworkDevice>)
+        : QAbstractTableModel(parent)
 {
     connect(gDatabase, &AccessDatabase::databaseChanged, this, &NetworkDeviceModel::databaseChanged);
     databaseChanged(SqlSelection(), ChangeType::Any);
 }
 
-NetworkDeviceModel::~NetworkDeviceModel()
-{
-	delete m_list;
-}
-
 int NetworkDeviceModel::columnCount(const QModelIndex &parent) const
 {
-    return ColumnNames::__itemCount;
+    return ColumnName::__itemCount;
 }
 
 int NetworkDeviceModel::rowCount(const QModelIndex &parent) const
 {
-    return m_list->size();
+    return list()->size();
 }
 
 void NetworkDeviceModel::databaseChanged(const SqlSelection &change, ChangeType changeType)
@@ -47,17 +42,18 @@ void NetworkDeviceModel::databaseChanged(const SqlSelection &change, ChangeType 
     if (change.valid() && change.tableName != DB_TABLE_DEVICES)
         return;
 
-    emit layoutAboutToBeChanged();
-	delete m_list;
-	m_list = new QList<NetworkDevice>;
+    if (gAccessList(this)) {
+	    emit layoutAboutToBeChanged();
+	    clearList();
 
-    SqlSelection selection;
-    selection.setTableName(DB_TABLE_DEVICES);
-    selection.setOrderBy(DB_FIELD_DEVICES_LASTUSAGETIME, false);
+	    SqlSelection selection;
+	    selection.setTableName(DB_TABLE_DEVICES);
+	    selection.setOrderBy(DB_FIELD_DEVICES_LASTUSAGETIME, false);
 
-    gDatabase->castQuery(selection, *m_list);
+	    gDatabase->castQuery(selection, *list());
 
-    emit layoutChanged();
+	    emit layoutChanged();
+    }
 }
 
 QVariant NetworkDeviceModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -65,11 +61,11 @@ QVariant NetworkDeviceModel::headerData(int section, Qt::Orientation orientation
     if (role == Qt::DisplayRole) {
         if (orientation == Qt::Horizontal) {
             switch (section) {
-                case ColumnNames::Status:
+                case ColumnName::Status:
                     return tr("Status");
-                case ColumnNames::Name:
+                case ColumnName::Name:
                     return tr("Name");
-                case ColumnNames::LastUsageDate:
+                case ColumnName::LastUsageDate:
                     return tr("Last usage");
                 default:
                     return QString("?");
@@ -84,16 +80,16 @@ QVariant NetworkDeviceModel::headerData(int section, Qt::Orientation orientation
 QVariant NetworkDeviceModel::data(const QModelIndex &index, int role) const
 {
     if (role == Qt::DisplayRole) {
-        const auto &thisDevice = m_list->at(index.row());
+        const auto &thisDevice = list()->at(index.row());
 
         switch (index.column()) {
-            case ColumnNames::Name:
+            case ColumnName::Name:
                 return thisDevice.nickname;
-            case ColumnNames::Status:
+            case ColumnName::Status:
                 return thisDevice.isRestricted
                        ? QString("Restricted")
                        : QString("Normal");
-            case ColumnNames::LastUsageDate:
+            case ColumnName::LastUsageDate:
                 return QDateTime::fromTime_t(static_cast<uint>(thisDevice.lastUsageTime))
                         .toString("ddd, d MMM");
             default:
@@ -104,9 +100,4 @@ QVariant NetworkDeviceModel::data(const QModelIndex &index, int role) const
     }
 
     return QVariant();
-}
-
-const QList<NetworkDevice> *NetworkDeviceModel::list()
-{
-    return m_list;
 }

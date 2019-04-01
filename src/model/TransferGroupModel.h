@@ -36,7 +36,7 @@ class TransferGroupModel : public QAbstractTableModel, public SynchronizedList<T
 Q_OBJECT
 
 public:
-    enum ColumnNames {
+    enum ColumnName {
         Devices,
         Size,
         Status,

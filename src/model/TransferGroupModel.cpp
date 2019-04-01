@@ -26,7 +26,7 @@ TransferGroupModel::TransferGroupModel(QObject *parent) : QAbstractTableModel(pa
 
 int TransferGroupModel::columnCount(const QModelIndex &parent) const
 {
-	return ColumnNames::__itemCount;
+	return ColumnName::__itemCount;
 }
 
 int TransferGroupModel::rowCount(const QModelIndex &parent) const
@@ -39,13 +39,13 @@ QVariant TransferGroupModel::headerData(int section, Qt::Orientation orientation
 	if (role == Qt::DisplayRole) {
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
-				case ColumnNames::Status:
+				case ColumnName::Status:
 					return tr("Status");
-				case ColumnNames::Devices:
+				case ColumnName::Devices:
 					return tr("Devices");
-				case ColumnNames::Date:
+				case ColumnName::Date:
 					return tr("Date");
-				case ColumnNames::Size:
+				case ColumnName::Size:
 					return tr("Size");
 				default:
 					return QString("?");
@@ -63,7 +63,7 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
 		const auto &currentGroup = list()->at(index.row());
 
 		switch (index.column()) {
-			case ColumnNames::Devices: {
+			case ColumnName::Devices: {
 				QString devicesString;
 
 				if (currentGroup.assignees.empty())
@@ -79,13 +79,13 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
 
 				return devicesString;
 			}
-			case ColumnNames::Status:
+			case ColumnName::Status:
 				return QString("%1 of %2")
 						.arg(currentGroup.completed)
 						.arg(currentGroup.total);
-			case ColumnNames::Size:
+			case ColumnName::Size:
 				return TransferUtils::sizeExpression(currentGroup.totalBytes, false);
-			case ColumnNames::Date:
+			case ColumnName::Date:
 				return QDateTime::fromTime_t(static_cast<uint>(currentGroup.group.dateCreated))
 						.toString("ddd, d MMM");
 			default:
@@ -95,7 +95,7 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
 		}
 	} else if (role == Qt::DecorationRole) {
 		switch (index.column()) {
-			case ColumnNames::Devices: {
+			case ColumnName::Devices: {
 				const auto &currentGroup = list()->at(index.row());
 				return QIcon(currentGroup.hasIncoming
 				             ? ":/icon/arrow_down"

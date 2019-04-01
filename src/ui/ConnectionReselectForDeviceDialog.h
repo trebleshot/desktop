@@ -1,6 +1,6 @@
 /*
-* Copyright (C) 2019 Veli Tasalı, created on 3/24/19
-*
+* Copyright (C) 2019 Veli Tasalı, created on 4/1/19
+* 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
 * as published by the Free Software Foundation; either version 2
@@ -19,18 +19,33 @@
 #pragma once
 
 #include <QtWidgets/QDialog>
-#include "ui_AboutDialog.h"
+#include <QPushButton>
+#include <QMessageBox>
+#include <src/model/ConnectionModel.h>
+#include <src/util/ViewUtils.h>
+#include "ui_ConnectionReselectForDeviceDialog.h"
 
 namespace Ui {
-    class AboutDialog;
+	class ConnectionReselectForDeviceDialog;
 }
 
-class AboutDialog : public QDialog {
+class ConnectionReselectForDeviceDialog
+		: public QDialog {
 Q_OBJECT
 
 public:
-    explicit AboutDialog(QWidget* parent);
+	explicit ConnectionReselectForDeviceDialog(QWidget* parent, const QString& deviceId);
+
+	~ConnectionReselectForDeviceDialog() override;
+
+public slots:
+	void defaultButtonsClicked(QAbstractButton* button);
+
+signals:
+	void connectionSelected(const QString& adapterName);
 
 protected:
-	Ui::AboutDialog *m_ui;
+	Ui::ConnectionReselectForDeviceDialog* m_ui;
+	ConnectionModel* m_connectionModel;
 };
+

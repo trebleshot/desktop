@@ -1,6 +1,6 @@
 /*
-* Copyright (C) 2019 Veli Tasalı, created on 3/5/19
-*
+* Copyright (C) 2019 Veli Tasalı, created on 4/1/19
+* 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
 * as published by the Free Software Foundation; either version 2
@@ -18,22 +18,24 @@
 
 #pragma once
 
-#include <QIcon>
 #include <QtCore/QAbstractTableModel>
-#include <src/database/object/TransferObject.h>
-#include <src/util/SynchronizedList.h>
+#include <src/database/object/NetworkDevice.h>
+#include <src/database/DatabaseLoader.h>
+#include <QDateTime>
 
-class FlawedTransferModel : public QAbstractTableModel, public SynchronizedList<TransferObject> {
-	Q_OBJECT
+class ConnectionModel : public QAbstractTableModel, public SynchronizedList<DeviceConnection>,
+                        public DatabaseLoader {
+Q_OBJECT
 
 public:
 	enum ColumnName {
-		FileName,
-		Status,
+		AdapterName,
+		IpAddress,
+		LastCheckedData,
 		__itemCount
 	};
 
-	explicit FlawedTransferModel(groupid groupId, QObject *parent = nullptr);
+	explicit ConnectionModel(const QString &deviceId, QObject *parent = nullptr);
 
 	int columnCount(const QModelIndex &parent) const override;
 
@@ -43,10 +45,9 @@ public:
 
 	QVariant data(const QModelIndex &index, int role) const override;
 
-public slots:
-
-	void databaseChanged(const SqlSelection &change, ChangeType type);
+	void databaseChanged(const SqlSelection &change, ChangeType type) override;
 
 protected:
-	groupid m_groupId;
+	QString m_deviceId;
 };
+

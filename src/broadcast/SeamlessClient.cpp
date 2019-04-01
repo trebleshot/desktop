@@ -215,7 +215,9 @@ void SeamlessClient::run()
 													auto lastUpdate = (clock_t)0;
 													auto lastKnownSize = (qint64)0;
 
-													while (socket->isReadable() && currentFile.size() < fileSize) {
+													qDebug() << this << "Socket open?:" << socket->isOpen();
+
+													while (socket->isOpen() && currentFile.size() < fileSize) {
 														if (socket->waitForReadyRead(2000)) {
 															currentFile.write(socket->read(BUFFER_LENGTH_DEFAULT));
 															currentFile.flush();
@@ -233,6 +235,8 @@ void SeamlessClient::run()
 																size);
 															lastKnownSize = size;
 															lastUpdate = clock();
+
+															qDebug() << this << "Updated the status";
 														}
 
 														if (lastDataAvailable < clock() - TIMEOUT_SOCKET_DEFAULT)

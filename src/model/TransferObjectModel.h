@@ -27,7 +27,7 @@ class TransferObjectModel : public QAbstractTableModel, public SynchronizedList<
 Q_OBJECT
 
 public:
-    enum ColumnNames {
+    enum ColumnName {
         FileName,
         Size,
         Status,

@@ -1,6 +1,6 @@
 /*
-* Copyright (C) 2019 Veli Tasalı, created on 3/5/19
-*
+* Copyright (C) 2019 Veli Tasalı, created on 4/1/19
+* 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
 * as published by the Free Software Foundation; either version 2
@@ -18,35 +18,38 @@
 
 #pragma once
 
-#include <QIcon>
-#include <QtCore/QAbstractTableModel>
-#include <src/database/object/TransferObject.h>
 #include <src/util/SynchronizedList.h>
+#include <QtCore/QArgument>
+#include <QObject>
+#include <src/util/AppUtils.h>
+#include "AccessDatabase.h"
 
-class FlawedTransferModel : public QAbstractTableModel, public SynchronizedList<TransferObject> {
-	Q_OBJECT
+class DatabaseLoader;
+
+class DatabaseLoaderPrivate : public QObject {
+Q_OBJECT
 
 public:
-	enum ColumnName {
-		FileName,
-		Status,
-		__itemCount
-	};
-
-	explicit FlawedTransferModel(groupid groupId, QObject *parent = nullptr);
-
-	int columnCount(const QModelIndex &parent) const override;
-
-	int rowCount(const QModelIndex &parent) const override;
-
-	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-
-	QVariant data(const QModelIndex &index, int role) const override;
+	explicit DatabaseLoaderPrivate(QObject* parent, DatabaseLoader* loader);
 
 public slots:
-
 	void databaseChanged(const SqlSelection &change, ChangeType type);
 
 protected:
-	groupid m_groupId;
+	DatabaseLoader *m_loader;
 };
+
+class DatabaseLoader {
+
+public:
+	explicit DatabaseLoader(QObject *parent = nullptr);
+
+public:
+	void databaseChanged();
+
+	virtual void databaseChanged(const SqlSelection &change, ChangeType type) = 0;
+
+protected:
+	DatabaseLoaderPrivate m_private;
+};
+

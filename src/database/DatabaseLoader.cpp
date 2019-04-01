@@ -1,6 +1,6 @@
 /*
-* Copyright (C) 2019 Veli Tasalı, created on 3/24/19
-*
+* Copyright (C) 2019 Veli Tasalı, created on 4/1/19
+* 
 * This program is free software; you can redistribute it and/or
 * modify it under the terms of the GNU General Public License
 * as published by the Free Software Foundation; either version 2
@@ -16,21 +16,23 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#pragma once
+#include "DatabaseLoader.h"
 
-#include <QtWidgets/QDialog>
-#include "ui_AboutDialog.h"
-
-namespace Ui {
-    class AboutDialog;
+DatabaseLoaderPrivate::DatabaseLoaderPrivate(QObject *parent, DatabaseLoader *loader) : m_loader(loader)
+{
+	connect(gDatabase, &AccessDatabase::databaseChanged, this, &DatabaseLoaderPrivate::databaseChanged);
 }
 
-class AboutDialog : public QDialog {
-Q_OBJECT
+void DatabaseLoaderPrivate::databaseChanged(const SqlSelection &change, ChangeType type)
+{
+	m_loader->databaseChanged(change, type);
+}
 
-public:
-    explicit AboutDialog(QWidget* parent);
+DatabaseLoader::DatabaseLoader(QObject *parent) : m_private(parent, this)
+{
+}
 
-protected:
-	Ui::AboutDialog *m_ui;
-};
+void DatabaseLoader::databaseChanged()
+{
+	databaseChanged(SqlSelection(), ChangeType::Any);
+}

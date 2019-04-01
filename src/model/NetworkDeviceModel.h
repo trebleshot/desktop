@@ -20,12 +20,13 @@
 
 #include <QtCore/QAbstractTableModel>
 #include <src/database/object/NetworkDevice.h>
+#include <src/util/SynchronizedList.h>
 
-class NetworkDeviceModel : public QAbstractTableModel {
+class NetworkDeviceModel : public QAbstractTableModel, public SynchronizedList<NetworkDevice> {
 Q_OBJECT
 
 public:
-    enum ColumnNames {
+    enum ColumnName {
         Name,
         LastUsageDate,
         Status,
@@ -33,8 +34,6 @@ public:
     };
 
     explicit NetworkDeviceModel(QObject *parent = nullptr);
-
-	~NetworkDeviceModel();
 
     int columnCount(const QModelIndex &parent) const override;
 
@@ -44,11 +43,6 @@ public:
 
     QVariant data(const QModelIndex &index, int role) const override;
 
-    const QList<NetworkDevice> *list();
-
 public slots:
     void databaseChanged(const SqlSelection& change, ChangeType type);
-
-protected:
-    QList<NetworkDevice> *m_list;
 };

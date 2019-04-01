@@ -30,7 +30,7 @@ TransferObjectModel::TransferObjectModel(groupid groupId, const QString &deviceI
 
 int TransferObjectModel::columnCount(const QModelIndex &parent) const
 {
-	return ColumnNames::__itemCount;
+	return ColumnName::__itemCount;
 }
 
 int TransferObjectModel::rowCount(const QModelIndex &parent) const
@@ -43,13 +43,13 @@ QVariant TransferObjectModel::headerData(int section, Qt::Orientation orientatio
 	if (role == Qt::DisplayRole) {
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
-				case ColumnNames::Status:
+				case ColumnName::Status:
 					return tr("Status");
-				case ColumnNames::FileName:
+				case ColumnName::FileName:
 					return tr("File name");
-				case ColumnNames::Size:
+				case ColumnName::Size:
 					return tr("Size");
-				case ColumnNames::Directory:
+				case ColumnName::Directory:
 					return tr("Directory");
 				default:
 					return QString("?");
@@ -67,13 +67,13 @@ QVariant TransferObjectModel::data(const QModelIndex &index, int role) const
 		const auto &currentObject = list()->at(index.row());
 
 		switch (index.column()) {
-			case ColumnNames::FileName:
+			case ColumnName::FileName:
 				return currentObject.friendlyName;
-			case ColumnNames::Status:
+			case ColumnName::Status:
 				return TransferUtils::getFlagString(currentObject.flag);
-			case ColumnNames::Size:
+			case ColumnName::Size:
 				return TransferUtils::sizeExpression(currentObject.fileSize, false);
-			case ColumnNames::Directory:
+			case ColumnName::Directory:
 				return currentObject.directory;
 			default:
 				return QString("Data id %1x%2")
@@ -82,7 +82,7 @@ QVariant TransferObjectModel::data(const QModelIndex &index, int role) const
 		}
 	} else if (role == Qt::DecorationRole) {
 		switch (index.column()) {
-			case ColumnNames::FileName: {
+			case ColumnName::FileName: {
 				const auto &currentGroup = list()->at(index.row());
 				return QIcon(currentGroup.type == TransferObject::Type::Incoming
 				             ? ":/icon/arrow_down"

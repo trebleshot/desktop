@@ -30,7 +30,7 @@ FlawedTransferModel::FlawedTransferModel(groupid groupId, QObject *parent)
 
 int FlawedTransferModel::columnCount(const QModelIndex &parent) const
 {
-	return ColumnNames::__itemCount;
+	return ColumnName::__itemCount;
 }
 
 int FlawedTransferModel::rowCount(const QModelIndex &parent) const
@@ -43,9 +43,9 @@ QVariant FlawedTransferModel::headerData(int section, Qt::Orientation orientatio
 	if (role == Qt::DisplayRole) {
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
-				case ColumnNames::Status:
+				case ColumnName::Status:
 					return tr("Error");
-				case ColumnNames::FileName:
+				case ColumnName::FileName:
 					return tr("File name");
 				default:
 					return QString("?");
@@ -63,9 +63,9 @@ QVariant FlawedTransferModel::data(const QModelIndex &index, int role) const
 		const auto &currentObject = list()->at(index.row());
 
 		switch (index.column()) {
-			case ColumnNames::FileName:
+			case ColumnName::FileName:
 				return currentObject.friendlyName;
-			case ColumnNames::Status:
+			case ColumnName::Status:
 				return TransferUtils::getFlagString(currentObject.flag);
 			default:
 				return QString("Data id %1x%2")
@@ -74,7 +74,7 @@ QVariant FlawedTransferModel::data(const QModelIndex &index, int role) const
 		}
 	} else if (role == Qt::DecorationRole) {
 		switch (index.column()) {
-			case ColumnNames::FileName: {
+			case ColumnName::FileName: {
 				const auto &currentGroup = list()->at(index.row());
 				return QIcon(currentGroup.type == TransferObject::Type::Incoming
 				             ? ":/icon/arrow_down"

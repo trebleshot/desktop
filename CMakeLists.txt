@@ -91,6 +91,7 @@ qt5_add_resources(QRCS
 
 qt5_wrap_ui(UI_HEADERS
         src/ui/AboutDialog.ui
+		src/ui/ConnectionReselectForDeviceDialog.ui
         src/ui/DeviceChooserDialog.ui
         src/ui/FileAdditionProgressDialog.ui
         src/ui/MainWindow.ui
@@ -138,6 +139,8 @@ set(UTIL_LIBRARY
         src/model/TransferObjectModel.cpp
         src/ui/AboutDialog.h
         src/ui/AboutDialog.cpp
+		src/ui/ConnectionReselectForDeviceDialog.h
+		src/ui/ConnectionReselectForDeviceDialog.cpp
         src/ui/DeviceChooserDialog.h
         src/ui/DeviceChooserDialog.cpp
         src/ui/FileAdditionProgressDialog.h
@@ -165,7 +168,7 @@ set(UTIL_LIBRARY
         src/util/TransferUtils.h
         src/util/TransferUtils.cpp
         src/util/ViewUtils.h
-        src/util/ViewUtils.cpp)
+        src/util/ViewUtils.cpp src/model/ConnectionModel.cpp src/model/ConnectionModel.h src/database/DatabaseLoader.cpp src/database/DatabaseLoader.h)
 
 if (KF5DNSSD_FOUND)
     add_definitions(-DUSE_DNSSD_FEATURE=1)
