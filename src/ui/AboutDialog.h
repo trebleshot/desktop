@@ -22,14 +22,14 @@
 #include "ui_AboutDialog.h"
 
 namespace Ui {
-    class AboutDialog;
+	class AboutDialog;
 }
 
 class AboutDialog : public QDialog {
 Q_OBJECT
 
 public:
-    explicit AboutDialog(QWidget* parent);
+	explicit AboutDialog(QWidget *parent);
 
 protected:
 	Ui::AboutDialog *m_ui;

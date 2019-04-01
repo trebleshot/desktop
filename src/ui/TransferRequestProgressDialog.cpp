@@ -22,9 +22,9 @@
 #include "TransferRequestProgressDialog.h"
 
 TransferRequestProgressDialog::TransferRequestProgressDialog(QWidget *parent, const groupid &groupId,
-	const QList<NetworkDevice> &devices,
-	bool signalOnSuccess)
-	: QDialog(parent), m_ui(new Ui::TransferRequestProgressDialog)
+                                                             const QList<NetworkDevice> &devices,
+                                                             bool signalOnSuccess)
+		: QDialog(parent), m_ui(new Ui::TransferRequestProgressDialog)
 {
 	m_ui->setupUi(this);
 	m_signalOnSuccess = signalOnSuccess;
@@ -78,8 +78,7 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
 
 		if (connections.empty()) {
 			qDebug() << "deviceForAddedFiles << No connection for" << thisDevice.nickname;
-		}
-		else {
+		} else {
 			bool shouldTryNext = true;
 			bool successful = false;
 
@@ -88,7 +87,9 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
 					break;
 
 				CSActiveConnection *connection = nullptr;
-				CommunicationBridge bridge(thread);
+				CommunicationBridge bridge;
+
+				bridge.moveToThread(thread);
 				bridge.setDevice(thisDevice);
 
 				TransferAssignee assignee(groupId, thisDevice.id, thisConnection.adapterName);
@@ -105,7 +106,7 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
 
 					QJsonObject jsonObject{
 							{KEYWORD_INDEX_FILE_NAME,     object.friendlyName},
-							{KEYWORD_INDEX_FILE_SIZE,     QVariant((qulonglong)object.fileSize).toLongLong()},
+							{KEYWORD_INDEX_FILE_SIZE,     QVariant((qulonglong) object.fileSize).toLongLong()},
 							{KEYWORD_TRANSFER_REQUEST_ID, QVariant(object.id).toLongLong()},
 							{KEYWORD_INDEX_FILE_MIME,     object.fileMimeType}
 					};
@@ -134,8 +135,7 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
 
 							qDebug() << "deviceForAddedFiles << Successful for" << thisDevice.nickname;
 							gDbSignal->publish(assignee);
-						}
-						else
+						} else
 							qDebug() << "deviceForAddedFiles << Failed for <<" << thisDevice.nickname << thisReply;
 					}
 				}
@@ -157,7 +157,7 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
 	}
 
 	if (!failedDevices.isEmpty())
-		emit errorOccurred(groupId, failedDevices);
+			emit errorOccurred(groupId, failedDevices);
 
 	if (addedAny) {
 		for (const NetworkDevice &device : passedDevices) {
@@ -167,16 +167,15 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
 			SqlSelection deviceSelection;
 			deviceSelection.setTableName(DB_TABLE_TRANSFER);
 			deviceSelection.setWhere(QString("%1 = ? AND %2 = ? AND %3 = ?")
-				.arg(DB_FIELD_TRANSFER_GROUPID)
-				.arg(DB_FIELD_TRANSFER_DEVICEID)
-				.arg(DB_FIELD_TRANSFER_TYPE));
+					                         .arg(DB_FIELD_TRANSFER_GROUPID)
+					                         .arg(DB_FIELD_TRANSFER_DEVICEID)
+					                         .arg(DB_FIELD_TRANSFER_TYPE));
 			deviceSelection.whereArgs << groupId << device.id << TransferObject::Type::Outgoing;
 			deviceSelection.setLimit(1);
 
 			if (gDbSignal->contains(deviceSelection)) {
 				qDebug() << "deviceForAddedFiles << Already contains for" << device.nickname;
-			}
-			else {
+			} else {
 				if (gDbSignal->transaction()) {
 					int iterator = 0;
 
@@ -197,11 +196,10 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
 		}
 
 		if (m_signalOnSuccess)
-			emit transferReady(groupId);
+				emit transferReady(groupId);
 
 		accept();
-	}
-	else
+	} else
 		reject();
 }
 
@@ -228,13 +226,13 @@ void TransferRequestProgressDialog::showError(const groupid &groupId, const QLis
 	dialog->setWindowTitle("Connection Error");
 	dialog->setText(QString("Failed to connect to the devices below:\n\n%1").arg(devicesString));
 	dialog->addButton(QMessageBox::StandardButton::Close);
-	QPushButton* retryButton = dialog->addButton(QMessageBox::StandardButton::Retry);
+	QPushButton *retryButton = dialog->addButton(QMessageBox::StandardButton::Retry);
 	dialog->show();
 
 	connect(retryButton, &QPushButton::pressed, [groupId, devices, dialog]() {
 		dialog->close();
 
-		auto* progressDialog = new TransferRequestProgressDialog(nullptr, groupId, devices, false);
+		auto *progressDialog = new TransferRequestProgressDialog(nullptr, groupId, devices, false);
 		connect(progressDialog, &QDialog::finished, progressDialog, &QObject::deleteLater);
 		progressDialog->show();
 	});

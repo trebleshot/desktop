@@ -29,7 +29,7 @@ namespace Ui {
 }
 
 class ShowTransferDialog : public QDialog {
-	Q_OBJECT
+Q_OBJECT
 
 public:
 	explicit ShowTransferDialog(QWidget *parentWindow, groupid groupId);
@@ -56,7 +56,7 @@ public slots:
 
 	void saveDirectory();
 
-	void sendToDevices(groupid groupId, const QList<NetworkDevice>& devices);
+	void sendToDevices(groupid groupId, const QList<NetworkDevice> &devices);
 
 	void showFiles();
 
@@ -64,11 +64,7 @@ public slots:
 
 	void taskToggle();
 
-	void transferItemActivated(const QModelIndex& modelIndex);
-
-	void transferBitChange(groupid groupId, const QString &deviceId, int type, qint64 bit, qint64 fileSessionSize);
-
-	void transferFileChange(groupid groupId, const QString &deviceId, int type);
+	void transferItemActivated(const QModelIndex &modelIndex);
 
 	void updateAssignees();
 

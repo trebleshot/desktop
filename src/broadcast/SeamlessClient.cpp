@@ -23,7 +23,7 @@
 #include "SeamlessClient.h"
 
 SeamlessClient::SeamlessClient(groupid groupId, const QString &deviceId, bool autoDelete, QObject *parent)
-	: QThread(parent), TransferTask(groupId, deviceId, TransferObject::Type::Incoming)
+		: QThread(parent), TransferTask(groupId, deviceId, TransferObject::Type::Incoming)
 {
 	if (autoDelete)
 		connect(this, &QThread::finished, this, &QObject::deleteLater);
@@ -50,17 +50,17 @@ void SeamlessClient::run()
 	};
 
 	if (gDbSignal->reconstruct(device)
-		&& gDbSignal->reconstruct(group)
-		&& gDbSignal->reconstruct(assignee)
-		&& gDbSignal->reconstruct(connectionLambda())) {
+	    && gDbSignal->reconstruct(group)
+	    && gDbSignal->reconstruct(assignee)
+	    && gDbSignal->reconstruct(connectionLambda())) {
 
 		client->setDevice(device);
 
 		try {
 			{
 				qDebug() << this << "Receive process for" << device.nickname << "for group" << group.id
-					<< "with connection"
-					<< connection.hostAddress.toString() << "of adapter" << connection.adapterName;
+				         << "with connection"
+				         << connection.hostAddress.toString() << "of adapter" << connection.adapterName;
 
 				auto *activeConnection = client->communicate(device, connection);
 
@@ -84,7 +84,7 @@ void SeamlessClient::run()
 
 			{
 				auto *activeConnection = CSClient::openConnection(connection.hostAddress, PORT_SEAMLESS,
-					TIMEOUT_SOCKET_DEFAULT, client);
+				                                                  TIMEOUT_SOCKET_DEFAULT, client);
 
 				qDebug() << this << "Seamless port is open";
 
@@ -105,16 +105,15 @@ void SeamlessClient::run()
 					if (KEYWORD_ERROR_NOT_FOUND == errorCode) {
 						gDbSignal->doSynchronized([this](AccessDatabase *database) {
 							const auto &sqlSelection = TransferUtils::createSqlSelection(m_groupId, m_deviceId,
-								TransferObject::Flag::Done,
-								false);
+							                                                             TransferObject::Flag::Done,
+							                                                             false);
 
 							database->update(sqlSelection, DbObjectMap{
 									{DB_FIELD_TRANSFER_FLAG, QVariant(TransferObject::Flag::Removed)}
-								});
+							});
 						});
 					}
-				}
-				else {
+				} else {
 					while (activeConnection->socket()->isOpen()) {
 						if (interrupted())
 							break;
@@ -131,8 +130,7 @@ void SeamlessClient::run()
 							if (!constStatus) {
 								emit taskFailed(m_groupId, m_deviceId, Reason::NoPendingTransfer);
 								break;
-							}
-							else {
+							} else {
 								QFile currentFile(TransferUtils::getIncomingFilePath(group, transferObject));
 								currentFile.open(QFile::OpenModeFlag::Append);
 
@@ -160,14 +158,13 @@ void SeamlessClient::run()
 
 									if (!fileResponseJSON.value(KEYWORD_RESULT).toBool(false)) {
 										if (fileResponseJSON.contains(KEYWORD_TRANSFER_JOB_DONE)
-											&& !fileResponseJSON.value(KEYWORD_TRANSFER_JOB_DONE).toBool(false)) {
+										    && !fileResponseJSON.value(KEYWORD_TRANSFER_JOB_DONE).toBool(false)) {
 											interrupt();
 											qDebug() << this << "The other side requested the task to be cancelled";
 											break;
-										}
-										else if (fileResponseJSON.contains(KEYWORD_FLAG)
-											&& fileResponseJSON.value(KEYWORD_FLAG).toString()
-											== KEYWORD_FLAG_GROUP_EXISTS) {
+										} else if (fileResponseJSON.contains(KEYWORD_FLAG)
+										           && fileResponseJSON.value(KEYWORD_FLAG).toString()
+										              == KEYWORD_FLAG_GROUP_EXISTS) {
 											if (fileResponseJSON.contains(KEYWORD_ERROR)) {
 												QString error = fileResponseJSON.value(KEYWORD_ERROR).toString();
 
@@ -176,21 +173,19 @@ void SeamlessClient::run()
 												if (error == KEYWORD_ERROR_NOT_FOUND)
 													transferObject.flag = TransferObject::Flag::Removed;
 												else if (error == KEYWORD_ERROR_UNKNOWN
-													|| error == KEYWORD_ERROR_NOT_ACCESSIBLE)
+												         || error == KEYWORD_ERROR_NOT_ACCESSIBLE)
 													transferObject.flag = TransferObject::Flag::Interrupted;
-											}
-											else {
+											} else {
 												transferObject.flag = TransferObject::Flag::Interrupted;
 											}
 										}
-									}
-									else {
+									} else {
 										bool canContinue = true;
 
 										if (fileResponseJSON.contains(KEYWORD_SIZE_CHANGED)) {
 											size_t currentSize = fileResponseJSON.value(KEYWORD_SIZE_CHANGED)
-												.toVariant()
-												.toUInt();
+													.toVariant()
+													.toUInt();
 
 											if (currentSize != transferObject.fileSize && currentFile.size() > 0) {
 												transferObject.fileSize = currentSize;
@@ -210,33 +205,29 @@ void SeamlessClient::run()
 													}
 
 													auto *socket = tcpServer.nextPendingConnection();
-													auto lastDataAvailable = clock();
+													auto lastDataAvailable = 0;
 													auto fileSize = static_cast<qint64>(transferObject.fileSize);
-													auto lastUpdate = (clock_t)0;
-													auto lastKnownSize = (qint64)0;
+													auto lastUpdate = (time_t) 0;
 
 													qDebug() << this << "Socket open?:" << socket->isOpen();
 
 													while (socket->isOpen() && currentFile.size() < fileSize) {
+														time_t currentTime = time(nullptr);
+
 														if (socket->waitForReadyRead(2000)) {
 															currentFile.write(socket->read(BUFFER_LENGTH_DEFAULT));
 															currentFile.flush();
 
-															lastDataAvailable = clock();
+															lastDataAvailable = currentTime;
 														}
 
-														if (clock() - lastUpdate > 200000
-															|| currentFile.size() == fileSize) {
-															auto size = currentFile.size();
-															emit gTaskMgr->taskByteTransferred(m_groupId, m_deviceId,
-																TransferObject::Incoming,
-																size - lastKnownSize,
-																size);
-															lastKnownSize = size;
-															lastUpdate = clock();
+														if (currentTime - lastUpdate > 2000) {
+															// only emit current file size
+															// also always update when a file status changes
+															lastUpdate = currentTime;
 														}
 
-														if (lastDataAvailable < clock() - TIMEOUT_SOCKET_DEFAULT)
+														if (currentTime - lastDataAvailable > TIMEOUT_SOCKET_DEFAULT)
 															throw exception();
 
 														if (interrupted())
@@ -249,20 +240,15 @@ void SeamlessClient::run()
 														currentFile.close();
 
 														gDbSignal->doSynchronized(
-															[&group, &transferObject](AccessDatabase *db) {
-															TransferUtils::saveIncomingFile(group, transferObject);
-														});
-
-														emit gTaskMgr->taskItemTransferred(m_groupId, m_deviceId,
-															TransferObject::Incoming);
-													}
-													else {
+																[&group, &transferObject](AccessDatabase *db) {
+																	TransferUtils::saveIncomingFile(group, transferObject);
+																});
+													} else {
 														qDebug() << this << "The size did not match";
 														transferObject.flag = TransferObject::Flag::Interrupted;
 													}
 												}
-											}
-											else {
+											} else {
 												qDebug() << this << "The other device did not connect in time";
 											}
 										}
@@ -282,13 +268,13 @@ void SeamlessClient::run()
 					}
 
 					bool hasLeftFiles = gDbSignal->contains(TransferUtils::createSqlSelection(
-						m_groupId, m_deviceId, TransferObject::Flag::Done, false));
+							m_groupId, m_deviceId, TransferObject::Flag::Done, false));
 					bool isJobDone = !retry && !hasLeftFiles;
 
 					activeConnection->reply({
-													{KEYWORD_RESULT,            false},
-													{KEYWORD_TRANSFER_JOB_DONE, isJobDone}
-						});
+							                        {KEYWORD_RESULT,            false},
+							                        {KEYWORD_TRANSFER_JOB_DONE, isJobDone}
+					                        });
 
 					if (isJobDone) {
 						emit taskDone(m_groupId, m_deviceId);
@@ -305,10 +291,9 @@ void SeamlessClient::run()
 			run();
 			m_attemptsLeft--;
 		}
-	}
-	else {
+	} else {
 		qDebug() << this << "Could not produce information within given group id" << m_groupId
-			<< "and device id" << m_deviceId;
+		         << "and device id" << m_deviceId;
 	}
 
 	delete client;

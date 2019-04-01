@@ -25,473 +25,473 @@ using DbStructure::generateTableCreationSql;
 using DbStructure::transformType;
 
 AccessDatabase::AccessDatabase(QSqlDatabase *db, QObject *parent)
-        : QObject(parent), db(db)
+		: QObject(parent), db(db)
 {
-    connect(this, &AccessDatabase::signalPublish, this, &AccessDatabase::publish);
+	connect(this, &AccessDatabase::signalPublish, this, &AccessDatabase::publish);
 }
 
 QSqlDatabase *AccessDatabase::getDatabase()
 {
-    return this->db;
+	return this->db;
 }
 
 void AccessDatabase::initialize()
 {
-    QSqlQuery queryExecutor(*getDatabase());
-    QMap<QString, QSqlRecord> tables = getPassiveTables();
+	QSqlQuery queryExecutor(*getDatabase());
+	QMap<QString, QSqlRecord> tables = getPassiveTables();
 
-    for (const QString &dbTableKey : tables.keys()) {
-        QSqlRecord dbRecord = tables.value(dbTableKey);
-        QString sql = generateTableCreationSql(dbTableKey, dbRecord, true);
+	for (const QString &dbTableKey : tables.keys()) {
+		QSqlRecord dbRecord = tables.value(dbTableKey);
+		QString sql = generateTableCreationSql(dbTableKey, dbRecord, true);
 
-        queryExecutor.exec(sql);
-    }
+		queryExecutor.exec(sql);
+	}
 }
 
 QMap<QString, QSqlRecord> AccessDatabase::getPassiveTables()
 {
-    static QMap<QString, QSqlRecord> dbMap;
+	static QMap<QString, QSqlRecord> dbMap;
 
-    if (dbMap.count() <= 0) {
-        QSqlRecord tableTransfer;
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_ID, QVariant::Int, false));
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_GROUPID, QVariant::Int, false));
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_DEVICEID, QVariant::String, true));
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_FILE, QVariant::String, true));
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_NAME, QVariant::String, false));
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_SIZE, QVariant::Int, true));
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_MIME, QVariant::String, true));
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_TYPE, QVariant::String, false));
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_DIRECTORY, QVariant::String, true));
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_ACCESSPORT, QVariant::Int, true));
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_SKIPPEDBYTES, QVariant::Size, false));
-        tableTransfer.append(generateField(DB_FIELD_TRANSFER_FLAG, QVariant::Int, true));
+	if (dbMap.count() <= 0) {
+		QSqlRecord tableTransfer;
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_ID, QVariant::Int, false));
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_GROUPID, QVariant::Int, false));
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_DEVICEID, QVariant::String, true));
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_FILE, QVariant::String, true));
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_NAME, QVariant::String, false));
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_SIZE, QVariant::Int, true));
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_MIME, QVariant::String, true));
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_TYPE, QVariant::String, false));
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_DIRECTORY, QVariant::String, true));
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_ACCESSPORT, QVariant::Int, true));
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_SKIPPEDBYTES, QVariant::Size, false));
+		tableTransfer.append(generateField(DB_FIELD_TRANSFER_FLAG, QVariant::Int, true));
 
-        QSqlRecord tableGroup;
-        tableGroup.append(generateField(DB_FIELD_TRANSFERGROUP_ID, QVariant::Int, false));
-        tableGroup.append(generateField(DB_FIELD_TRANSFERGROUP_DATECREATED, QVariant::Time, false));
-        tableGroup.append(generateField(DB_FIELD_TRANSFERGROUP_SAVEPATH, QVariant::String, true));
+		QSqlRecord tableGroup;
+		tableGroup.append(generateField(DB_FIELD_TRANSFERGROUP_ID, QVariant::Int, false));
+		tableGroup.append(generateField(DB_FIELD_TRANSFERGROUP_DATECREATED, QVariant::Time, false));
+		tableGroup.append(generateField(DB_FIELD_TRANSFERGROUP_SAVEPATH, QVariant::String, true));
 
-        QSqlRecord tableDevices;
-        tableDevices.append(generateField(DB_FIELD_DEVICES_ID, QVariant::String, false));
-        tableDevices.append(generateField(DB_FIELD_DEVICES_USER, QVariant::String, false));
-        tableDevices.append(generateField(DB_FIELD_DEVICES_BRAND, QVariant::String, false));
-        tableDevices.append(generateField(DB_FIELD_DEVICES_MODEL, QVariant::String, false));
-        tableDevices.append(generateField(DB_FIELD_DEVICES_BUILDNAME, QVariant::String, false));
-        tableDevices.append(generateField(DB_FIELD_DEVICES_BUILDNUMBER, QVariant::Int, false));
-        tableDevices.append(generateField(DB_FIELD_DEVICES_LASTUSAGETIME, QVariant::Time, false));
-        tableDevices.append(generateField(DB_FIELD_DEVICES_ISRESTRICTED, QVariant::Bool, false));
-        tableDevices.append(generateField(DB_FIELD_DEVICES_ISTRUSTED, QVariant::Bool, false));
-        tableDevices.append(generateField(DB_FIELD_DEVICES_ISLOCALADDRESS, QVariant::Bool, false));
-        tableDevices.append(generateField(DB_FIELD_DEVICES_TMPSECUREKEY, QVariant::Int, true));
+		QSqlRecord tableDevices;
+		tableDevices.append(generateField(DB_FIELD_DEVICES_ID, QVariant::String, false));
+		tableDevices.append(generateField(DB_FIELD_DEVICES_USER, QVariant::String, false));
+		tableDevices.append(generateField(DB_FIELD_DEVICES_BRAND, QVariant::String, false));
+		tableDevices.append(generateField(DB_FIELD_DEVICES_MODEL, QVariant::String, false));
+		tableDevices.append(generateField(DB_FIELD_DEVICES_BUILDNAME, QVariant::String, false));
+		tableDevices.append(generateField(DB_FIELD_DEVICES_BUILDNUMBER, QVariant::Int, false));
+		tableDevices.append(generateField(DB_FIELD_DEVICES_LASTUSAGETIME, QVariant::Time, false));
+		tableDevices.append(generateField(DB_FIELD_DEVICES_ISRESTRICTED, QVariant::Bool, false));
+		tableDevices.append(generateField(DB_FIELD_DEVICES_ISTRUSTED, QVariant::Bool, false));
+		tableDevices.append(generateField(DB_FIELD_DEVICES_ISLOCALADDRESS, QVariant::Bool, false));
+		tableDevices.append(generateField(DB_FIELD_DEVICES_TMPSECUREKEY, QVariant::Int, true));
 
-        QSqlRecord tableConnection;
-        tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_IPADDRESS, QVariant::String, false));
-        tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_DEVICEID, QVariant::String, false));
-        tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_ADAPTERNAME, QVariant::String, false));
-        tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant::Time, false));
+		QSqlRecord tableConnection;
+		tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_IPADDRESS, QVariant::String, false));
+		tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_DEVICEID, QVariant::String, false));
+		tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_ADAPTERNAME, QVariant::String, false));
+		tableConnection.append(generateField(DB_FIELD_DEVICECONNECTION_LASTCHECKEDDATE, QVariant::Time, false));
 
-        QSqlRecord tableClipboard;
-        tableClipboard.append(generateField(DB_FIELD_CLIPBOARD_ID, QVariant::Int, false));
-        tableClipboard.append(generateField(DB_FIELD_CLIPBOARD_TEXT, QVariant::String, false));
-        tableClipboard.append(generateField(DB_FIELD_CLIPBOARD_TIME, QVariant::Time, false));
+		QSqlRecord tableClipboard;
+		tableClipboard.append(generateField(DB_FIELD_CLIPBOARD_ID, QVariant::Int, false));
+		tableClipboard.append(generateField(DB_FIELD_CLIPBOARD_TEXT, QVariant::String, false));
+		tableClipboard.append(generateField(DB_FIELD_CLIPBOARD_TIME, QVariant::Time, false));
 
-        QSqlRecord tableAssignee;
-        tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_GROUPID, QVariant::Int, false));
-        tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_DEVICEID, QVariant::String, false));
-        tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER, QVariant::String, true));
-        tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_ISCLONE, QVariant::Bool, true));
+		QSqlRecord tableAssignee;
+		tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_GROUPID, QVariant::Int, false));
+		tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_DEVICEID, QVariant::String, false));
+		tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_CONNECTIONADAPTER, QVariant::String, true));
+		tableAssignee.append(generateField(DB_FIELD_TRANSFERASSIGNEE_ISCLONE, QVariant::Bool, true));
 
-        dbMap.insert(QString(DB_TABLE_TRANSFER), tableTransfer);
-        dbMap.insert(QString(DB_DIVIS_TRANSFER), tableTransfer); // Generate division table
-        dbMap.insert(QString(DB_TABLE_TRANSFERGROUP), tableGroup);
-        dbMap.insert(QString(DB_TABLE_DEVICES), tableDevices);
-        dbMap.insert(QString(DB_TABLE_CLIPBOARD), tableClipboard);
-        dbMap.insert(QString(DB_TABLE_TRANSFERASSIGNEE), tableAssignee);
-        dbMap.insert(QString(DB_TABLE_DEVICECONNECTION), tableConnection);
-    }
+		dbMap.insert(QString(DB_TABLE_TRANSFER), tableTransfer);
+		dbMap.insert(QString(DB_DIVIS_TRANSFER), tableTransfer); // Generate division table
+		dbMap.insert(QString(DB_TABLE_TRANSFERGROUP), tableGroup);
+		dbMap.insert(QString(DB_TABLE_DEVICES), tableDevices);
+		dbMap.insert(QString(DB_TABLE_CLIPBOARD), tableClipboard);
+		dbMap.insert(QString(DB_TABLE_TRANSFERASSIGNEE), tableAssignee);
+		dbMap.insert(QString(DB_TABLE_DEVICECONNECTION), tableConnection);
+	}
 
-    return dbMap;
+	return dbMap;
 }
 
 bool AccessDatabase::commit()
 {
-    return getDatabase()->commit();
+	return getDatabase()->commit();
 }
 
 bool AccessDatabase::contains(const DatabaseObject &dbObject)
 {
-    return contains(dbObject.getWhere());
+	return contains(dbObject.getWhere());
 }
 
 bool AccessDatabase::contains(const SqlSelection &selection)
 {
-    QSqlQuery query = selection.toSelectionQuery();
-    query.exec();
+	QSqlQuery query = selection.toSelectionQuery();
+	query.exec();
 
-    const auto &lastError = query.lastError();
+	const auto &lastError = query.lastError();
 
-    if (lastError.type() != QSqlError::ErrorType::NoError)
-        qDebug() << lastError << endl << query.executedQuery();
+	if (lastError.type() != QSqlError::ErrorType::NoError)
+		qDebug() << lastError << endl << query.executedQuery();
 
-    return query.next();
+	return query.next();
 }
 
 bool AccessDatabase::insert(DatabaseObject &dbObject)
 {
-    dbObject.onInsertingObject(this);
+	dbObject.onInsertingObject(this);
 
-    const auto &selection = dbObject.getWhere();
-    QSqlTableModel *model = DbStructure::gatherTableModel(selection.tableName);
-    bool state = model->insertRecord(-1, record(dbObject, model));
+	const auto &selection = dbObject.getWhere();
+	QSqlTableModel *model = DbStructure::gatherTableModel(selection.tableName);
+	bool state = model->insertRecord(-1, record(dbObject, model));
 
-    emit databaseChanged(selection, ChangeType::Insert);
+	emit databaseChanged(selection, ChangeType::Insert);
 
-    delete model;
-    return state;
+	delete model;
+	return state;
 }
 
 bool AccessDatabase::publish(DatabaseObject &dbObject)
 {
-    return (this->contains(dbObject) && this->update(dbObject))
-           || this->insert(dbObject);
+	return (this->contains(dbObject) && this->update(dbObject))
+	       || this->insert(dbObject);
 }
 
 bool AccessDatabase::reconstructSilently(DatabaseObject &dbObject)
 {
-    try {
-        reconstruct(dbObject);
-        return true;
-    } catch (...) {
-        // do nothing here
-    }
+	try {
+		reconstruct(dbObject);
+		return true;
+	} catch (...) {
+		// do nothing here
+	}
 
-    return false;
+	return false;
 }
 
 void AccessDatabase::reconstruct(DatabaseObject &dbObject)
 {
-    QSqlQuery query = dbObject.getWhere().toSelectionQuery();
+	QSqlQuery query = dbObject.getWhere().toSelectionQuery();
 
-    query.exec();
+	query.exec();
 
-    if (!query.first())
-        throw ReconstructionException();
+	if (!query.first())
+		throw ReconstructionException();
 
-    dbObject.generateValues(query.record());
+	dbObject.generateValues(query.record());
 }
 
 bool AccessDatabase::remove(const SqlSelection &selection)
 {
-    bool result = selection.toDeletionQuery().exec();
-    emit databaseChanged(selection, ChangeType::Delete);
+	bool result = selection.toDeletionQuery().exec();
+	emit databaseChanged(selection, ChangeType::Delete);
 
-    return result;
+	return result;
 }
 
 bool AccessDatabase::remove(DatabaseObject &dbObject)
 {
-    if (remove(dbObject.getWhere())) {
-        dbObject.onRemovingObject(this, nullptr);
-        return true;
-    }
+	if (remove(dbObject.getWhere())) {
+		dbObject.onRemovingObject(this, nullptr);
+		return true;
+	}
 
-    return false;
+	return false;
 }
 
 bool AccessDatabase::transaction()
 {
-    return getDatabase()->transaction();
+	return getDatabase()->transaction();
 }
 
 bool AccessDatabase::update(DatabaseObject &dbObject)
 {
-    dbObject.onUpdatingObject(this);
-    return update(dbObject.getWhere(), dbObject.getValues());
+	dbObject.onUpdatingObject(this);
+	return update(dbObject.getWhere(), dbObject.getValues());
 }
 
 bool AccessDatabase::update(const SqlSelection &selection, const DbObjectMap &map)
 {
-    bool result = selection.toUpdateQuery(map).exec();
-    emit databaseChanged(selection, ChangeType::Update);
-    return result;
+	bool result = selection.toUpdateQuery(map).exec();
+	emit databaseChanged(selection, ChangeType::Update);
+	return result;
 }
 
 QSqlRecord AccessDatabase::record(const DatabaseObject &object, QSqlTableModel *tableModel)
 {
-    return record(object.getValues(), tableModel);
+	return record(object.getValues(), tableModel);
 }
 
 QSqlRecord AccessDatabase::record(const DbObjectMap &objectMap, QSqlTableModel *tableModel)
 {
-    QSqlRecord record = tableModel->record();
+	QSqlRecord record = tableModel->record();
 
-    for (const auto &key : objectMap.keys())
-        record.setValue(key, objectMap.value(key));
+	for (const auto &key : objectMap.keys())
+		record.setValue(key, objectMap.value(key));
 
-    return record;
+	return record;
 }
 
 QSqlRecord AccessDatabase::record(const DatabaseObject &object)
 {
-    return QSqlRecord();
+	return QSqlRecord();
 }
 
 QSqlField DbStructure::generateField(const QString &key, const QVariant::Type &type, bool nullable)
 {
-    QSqlField field(key, type);
-    field.setRequired(!nullable);
+	QSqlField field(key, type);
+	field.setRequired(!nullable);
 
-    return field;
+	return field;
 }
 
 QString DbStructure::transformType(const QVariant::Type &type)
 {
-    switch (type) {
-        case QVariant::Bool:
-        case QVariant::Int:
-        case QVariant::LongLong:
-        case QVariant::UInt:
-        case QVariant::ULongLong:
-            return "integer";
-        case QVariant::Double:
-            return "double";
-        case QVariant::Time:
-            return "time";
-        case QVariant::Date:
-            return "date";
-        case QVariant::DateTime:
-            return "datetime";
-        case QVariant::String:
-        case QVariant::Url:
-            return "text";
-        default:
-            return QVariant::typeToName(type);
-    }
+	switch (type) {
+		case QVariant::Bool:
+		case QVariant::Int:
+		case QVariant::LongLong:
+		case QVariant::UInt:
+		case QVariant::ULongLong:
+			return "integer";
+		case QVariant::Double:
+			return "double";
+		case QVariant::Time:
+			return "time";
+		case QVariant::Date:
+			return "date";
+		case QVariant::DateTime:
+			return "datetime";
+		case QVariant::String:
+		case QVariant::Url:
+			return "text";
+		default:
+			return QVariant::typeToName(type);
+	}
 }
 
 QString DbStructure::generateTableCreationSql(const QString &tableName, const QSqlRecord &record, bool mayExist)
 {
-    QString sql("create table ");
+	QString sql("create table ");
 
-    if (mayExist)
-        sql.append("if not exists ");
+	if (mayExist)
+		sql.append("if not exists ");
 
-    sql.append("`");
-    sql.append(tableName);
-    sql.append("` (");
+	sql.append("`");
+	sql.append(tableName);
+	sql.append("` (");
 
-    for (int iterate = 0; iterate < record.count(); iterate++) {
-        QSqlField thisField = record.field(iterate);
+	for (int iterate = 0; iterate < record.count(); iterate++) {
+		QSqlField thisField = record.field(iterate);
 
-        if (iterate > 0)
-            sql.append(", ");
+		if (iterate > 0)
+			sql.append(", ");
 
-        sql.append("`");
-        sql.append(thisField.name());
-        sql.append("` ");
-        sql.append(transformType(thisField.type()));
-        sql.append(" ");
-        sql.append(thisField.requiredStatus() == QSqlField::RequiredStatus::Required ? "not null" : "null");
-    }
+		sql.append("`");
+		sql.append(thisField.name());
+		sql.append("` ");
+		sql.append(transformType(thisField.type()));
+		sql.append(" ");
+		sql.append(thisField.requiredStatus() == QSqlField::RequiredStatus::Required ? "not null" : "null");
+	}
 
-    sql.append(")");
+	sql.append(")");
 
-    return sql;
+	return sql;
 }
 
 QSqlField DbStructure::generateField(const QString &key, const QVariant &value)
 {
-    QSqlField field(key);
-    field.setValue(value);
+	QSqlField field(key);
+	field.setValue(value);
 
-    return field;
+	return field;
 }
 
 QSqlTableModel *DbStructure::gatherTableModel(const DatabaseObject &dbObject)
 {
-    return gatherTableModel(dbObject.getWhere().tableName);
+	return gatherTableModel(dbObject.getWhere().tableName);
 }
 
 QSqlTableModel *DbStructure::gatherTableModel(const QString &tableName)
 {
-    auto *model = new QSqlTableModel(gDatabase, *gDatabase->getDatabase());
+	auto *model = new QSqlTableModel(gDatabase, *gDatabase->getDatabase());
 
-    model->setTable(tableName);
+	model->setTable(tableName);
 
-    return model;
+	return model;
 }
 
 void SqlSelection::bindWhereClause(QSqlQuery &query) const
 {
-    for (const QVariant &whereArg : this->whereArgs)
-        query.addBindValue(whereArg);
+	for (const QVariant &whereArg : this->whereArgs)
+		query.addBindValue(whereArg);
 }
 
 QString SqlSelection::generateSpecifierClause(bool fromStatement) const
 {
-    QString queryString;
+	QString queryString;
 
-    if (fromStatement) {
-        queryString.append(" from `");
-        queryString.append(this->tableName);
-        queryString.append("`");
-    }
+	if (fromStatement) {
+		queryString.append(" from `");
+		queryString.append(this->tableName);
+		queryString.append("`");
+	}
 
-    if (this->where.length() > 0) {
-        queryString.append(" where ");
-        queryString.append(this->where);
-    }
+	if (this->where.length() > 0) {
+		queryString.append(" where ");
+		queryString.append(this->where);
+	}
 
-    if (this->groupBy.length() > 0) {
-        queryString.append(" group by ");
-        queryString.append(this->groupBy);
-    }
+	if (this->groupBy.length() > 0) {
+		queryString.append(" group by ");
+		queryString.append(this->groupBy);
+	}
 
-    if (this->orderBy.length() > 0) {
-        queryString.append(" order by ");
-        queryString.append(this->orderBy);
-    }
+	if (this->orderBy.length() > 0) {
+		queryString.append(" order by ");
+		queryString.append(this->orderBy);
+	}
 
-    if (this->limit != -1) {
-        queryString.append(" limit ");
-        queryString.append(QVariant(this->limit).toString());
-    }
+	if (this->limit != -1) {
+		queryString.append(" limit ");
+		queryString.append(QVariant(this->limit).toString());
+	}
 
-    return queryString;
+	return queryString;
 }
 
 void SqlSelection::setHaving(const QString &having)
 {
-    this->having = having;
+	this->having = having;
 }
 
 void SqlSelection::setGroupBy(const QString &field, bool ascending)
 {
-    this->groupBy = "`";
-    this->groupBy.append(field);
-    this->groupBy.append("`");
-    this->groupBy.append(ascending ? " asc" : " desc");
+	this->groupBy = "`";
+	this->groupBy.append(field);
+	this->groupBy.append("`");
+	this->groupBy.append(ascending ? " asc" : " desc");
 }
 
 void SqlSelection::setGroupBy(const QString &orderBy)
 {
-    this->orderBy = orderBy;
+	this->orderBy = orderBy;
 }
 
 void SqlSelection::setLimit(int limit)
 {
-    this->limit = limit;
+	this->limit = limit;
 }
 
 void SqlSelection::setOrderBy(const QString &field, bool ascending)
 {
-    this->orderBy = "`";
-    this->orderBy.append(field);
-    this->orderBy.append("`");
-    this->orderBy.append(ascending ? " asc" : " desc");
+	this->orderBy = "`";
+	this->orderBy.append(field);
+	this->orderBy.append("`");
+	this->orderBy.append(ascending ? " asc" : " desc");
 }
 
 void SqlSelection::setOrderBy(const QString &field)
 {
-    this->orderBy = field;
+	this->orderBy = field;
 }
 
 void SqlSelection::setTableName(const QString &tableName)
 {
-    this->tableName = tableName;
+	this->tableName = tableName;
 }
 
 void SqlSelection::setWhere(const QString &whereString)
 {
-    this->where = whereString;
+	this->where = whereString;
 }
 
 QSqlQuery SqlSelection::toDeletionQuery() const
 {
-    QString queryString = "delete";
-    queryString.append(generateSpecifierClause());
+	QString queryString = "delete";
+	queryString.append(generateSpecifierClause());
 
-    QSqlQuery query;
-    query.prepare(queryString);
+	QSqlQuery query;
+	query.prepare(queryString);
 
-    bindWhereClause(query);
+	bindWhereClause(query);
 
-    return query;
+	return query;
 }
 
 QSqlQuery SqlSelection::toInsertionQuery() const
 {
-    // Do not implement since not required
-    return QSqlQuery();
+	// Do not implement since not required
+	return QSqlQuery();
 }
 
 QSqlQuery SqlSelection::toSelectionQuery() const
 {
-    QString queryString = "select ";
-    queryString.append(this->toSelectionColumns());
-    queryString.append(generateSpecifierClause());
+	QString queryString = "select ";
+	queryString.append(this->toSelectionColumns());
+	queryString.append(generateSpecifierClause());
 
-    QSqlQuery query;
-    query.prepare(queryString);
+	QSqlQuery query;
+	query.prepare(queryString);
 
-    bindWhereClause(query);
+	bindWhereClause(query);
 
-    return query;
+	return query;
 }
 
 QString SqlSelection::toSelectionColumns() const
 {
-    QString output = QString();
+	QString output = QString();
 
-    if (this->columns.empty())
-        output.append("*");
-    else if (!this->columns.empty())
-        for (const QString &item : this->columns) {
-            if (output.length() > 0)
-                output.append(", ");
+	if (this->columns.empty())
+		output.append("*");
+	else if (!this->columns.empty())
+		for (const QString &item : this->columns) {
+			if (output.length() > 0)
+				output.append(", ");
 
-            output.append("`");
-            output.append(item);
-            output.append("`");
-        }
+			output.append("`");
+			output.append(item);
+			output.append("`");
+		}
 
-    return output;
+	return output;
 }
 
 QSqlQuery SqlSelection::toUpdateQuery(const DbObjectMap &map) const
 {
-    QSqlQuery query;
-    QString queryString = "update `";
-    queryString.append(this->tableName);
-    queryString.append("` set ");
-    QString updateIndex;
+	QSqlQuery query;
+	QString queryString = "update `";
+	queryString.append(this->tableName);
+	queryString.append("` set ");
+	QString updateIndex;
 
-    for (const auto& key : map.keys()) {
-        if (updateIndex.length() > 0)
-            updateIndex.append(", ");
+	for (const auto &key : map.keys()) {
+		if (updateIndex.length() > 0)
+			updateIndex.append(", ");
 
-        updateIndex.append("`");
-        updateIndex.append(key);
-        updateIndex.append("` = ?");
-    }
+		updateIndex.append("`");
+		updateIndex.append(key);
+		updateIndex.append("` = ?");
+	}
 
-    queryString.append(updateIndex);
-    queryString.append(generateSpecifierClause(false));
+	queryString.append(updateIndex);
+	queryString.append(generateSpecifierClause(false));
 
-    query.prepare(queryString);
+	query.prepare(queryString);
 
-    for (const auto& key : map.keys())
-        query.addBindValue(map.value(key));
+	for (const auto &key : map.keys())
+		query.addBindValue(map.value(key));
 
-    bindWhereClause(query);
+	bindWhereClause(query);
 
-    return query;
+	return query;
 }
 
 bool SqlSelection::valid() const
 {
-    return tableName != nullptr;
+	return tableName != nullptr;
 }
 
 /***
@@ -506,13 +506,13 @@ bool SqlSelection::valid() const
      */
 void DatabaseObject::generateValues(const QSqlRecord &record)
 {
-    DbObjectMap map;
+	DbObjectMap map;
 
-    //todo: This is not the best way to handle this
-    for (int pos = 0; pos < record.count(); pos++) {
-        const QSqlField &thisField = record.field(pos);
-        map.insert(thisField.name(), thisField.value());
-    }
+	//todo: This is not the best way to handle this
+	for (int pos = 0; pos < record.count(); pos++) {
+		const QSqlField &thisField = record.field(pos);
+		map.insert(thisField.name(), thisField.value());
+	}
 
-    onGeneratingValues(map);
+	onGeneratingValues(map);
 }

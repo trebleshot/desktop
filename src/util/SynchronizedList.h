@@ -52,7 +52,8 @@ class SynchronizedList : public ListMutex {
 	QList<T> *m_list = new QList<T>;
 
 public:
-	~SynchronizedList() {
+	~SynchronizedList()
+	{
 		delete m_list;
 	}
 
@@ -61,7 +62,8 @@ public:
 	 * and allocating another list object.
 	 * @note Should already have access to the list.
 	 */
-	void clearList() {
+	void clearList()
+	{
 		delete m_list;
 		m_list = new QList<T>;
 	}
@@ -70,7 +72,8 @@ public:
 	 * Get the actual instance of the list.
 	 * @return Returns the list pointer.
 	 */
-	QList<T> *list() const {
+	QList<T> *list() const
+	{
 		return m_list;
 	}
 };

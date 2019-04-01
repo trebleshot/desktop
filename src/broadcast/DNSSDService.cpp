@@ -19,33 +19,35 @@
 #include "DNSSDService.h"
 
 #ifdef USE_DNSSD_FEATURE
+
 DNSSDService::DNSSDService(QObject *parent)
-        : QObject(parent),
-          m_serviceBroadcast(new KDNSSD::PublicService(TS_SERVICE_NAME, TS_SERVICE_TYPE, PORT_COMMUNICATION_DEFAULT)),
-          m_serviceBrowser(new KDNSSD::ServiceBrowser(QStringLiteral(TS_SERVICE_TYPE), true))
+		: QObject(parent),
+		  m_serviceBroadcast(new KDNSSD::PublicService(TS_SERVICE_NAME, TS_SERVICE_TYPE, PORT_COMMUNICATION_DEFAULT)),
+		  m_serviceBrowser(new KDNSSD::ServiceBrowser(QStringLiteral(TS_SERVICE_TYPE), true))
 {
-    connect(m_serviceBrowser, &KDNSSD::ServiceBrowser::serviceAdded, this, &DNSSDService::serviceFound);
+	connect(m_serviceBrowser, &KDNSSD::ServiceBrowser::serviceAdded, this, &DNSSDService::serviceFound);
 }
 
 DNSSDService::~DNSSDService()
 {
-    delete m_serviceBrowser;
-    delete m_serviceBroadcast;
+	delete m_serviceBrowser;
+	delete m_serviceBroadcast;
 }
 
 void DNSSDService::serviceFound(KDNSSD::RemoteService::Ptr service)
 {
-    const auto &resolvedAddress = KDNSSD::ServiceBrowser::resolveHostName(service.data()->hostName());
+	const auto &resolvedAddress = KDNSSD::ServiceBrowser::resolveHostName(service.data()->hostName());
 
-    if (!resolvedAddress.isNull())
-        NetworkDeviceLoader::loadAsynchronously(resolvedAddress, nullptr);
+	if (!resolvedAddress.isNull())
+		NetworkDeviceLoader::loadAsynchronously(resolvedAddress, nullptr);
 }
 
 void DNSSDService::start()
 {
-    m_serviceBrowser->startBrowse();
-    m_serviceBroadcast->publish();
+	m_serviceBrowser->startBrowse();
+	m_serviceBroadcast->publish();
 }
+
 #else
 DNSSDService::DNSSDService(QObject *parent) : QObject(parent)
 {}

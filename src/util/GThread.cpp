@@ -20,25 +20,29 @@
 #include "GThread.h"
 
 GThread::GThread(std::function<void(GThread *)> function, bool deleteOnFinish, QObject *parent)
-        : QThread(parent), m_callback(std::move(function))
+		: QThread(parent), m_callback(std::move(function))
 {
-    if (deleteOnFinish)
-        connect(this, &GThread::finished, this, &GThread::deleteLater);
+	if (deleteOnFinish)
+		connect(this, &GThread::finished, this, &GThread::deleteLater);
 }
 
 void GThread::run()
 {
-    m_callback(this);
+	static int threadNumber = 0;
+
+	qDebug() << this << "Started" << ++threadNumber;
+	m_callback(this);
+	qDebug() << this << "Exited" << --threadNumber;
 }
 
 GThread *GThread::startIndependent(const std::function<void(GThread *)> &function)
 {
-    auto *thread = new GThread(function, true);
-    thread->start();
-    return thread;
+	auto *thread = new GThread(function, true);
+	thread->start();
+	return thread;
 }
 
 void GThread::notifyInterrupt()
 {
-    Interrupter::interrupt();
+	Interrupter::interrupt();
 }

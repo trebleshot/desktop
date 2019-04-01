@@ -30,99 +30,99 @@
 #include "GThread.h"
 
 struct AssigneeInfo {
-    NetworkDevice device;
-    TransferAssignee assignee;
-    bool valid = false;
+	NetworkDevice device;
+	TransferAssignee assignee;
+	bool valid = false;
 
 public:
-    AssigneeInfo()
-    {
-        this->valid = false;
-    }
+	AssigneeInfo()
+	{
+		this->valid = false;
+	}
 
-    AssigneeInfo(const NetworkDevice &device, const TransferAssignee &assignee)
-    {
-        this->device = device;
-        this->assignee = assignee;
-        this->valid = true;
-    }
+	AssigneeInfo(const NetworkDevice &device, const TransferAssignee &assignee)
+	{
+		this->device = device;
+		this->assignee = assignee;
+		this->valid = true;
+	}
 };
 
 struct TransferGroupInfo {
-    TransferGroup group;
-    QList<AssigneeInfo> assignees;
-    int total = 0;
-    int completed = 0;
-    bool hasError = false;
-    bool hasIncoming = false;
-    bool hasOutgoing = false;
-    size_t totalBytes = 0;
-    size_t completedBytes = 0;
+	TransferGroup group;
+	QList<AssigneeInfo> assignees;
+	int total = 0;
+	int completed = 0;
+	bool hasError = false;
+	bool hasIncoming = false;
+	bool hasOutgoing = false;
+	size_t totalBytes = 0;
+	size_t completedBytes = 0;
 
-    TransferGroupInfo() = default;
+	TransferGroupInfo() = default;
 
-    TransferGroupInfo(const TransferGroup &group, const QList<AssigneeInfo> &assignees, int total = 0,
-                      int completed = 0, bool hasError = false, bool hasIncoming = false, bool hasOutgoing = false,
-                      size_t totalBytes = 0, size_t completedBytes = 0)
-    {
-        this->group = group;
-        this->assignees = assignees;
-        this->total = total;
-        this->completed = completed;
-        this->hasError = hasError;
-        this->hasIncoming = hasIncoming;
-        this->hasOutgoing = hasOutgoing;
-        this->totalBytes = totalBytes;
-        this->completedBytes = completedBytes;
-    }
+	TransferGroupInfo(const TransferGroup &group, const QList<AssigneeInfo> &assignees, int total = 0,
+	                  int completed = 0, bool hasError = false, bool hasIncoming = false, bool hasOutgoing = false,
+	                  size_t totalBytes = 0, size_t completedBytes = 0)
+	{
+		this->group = group;
+		this->assignees = assignees;
+		this->total = total;
+		this->completed = completed;
+		this->hasError = hasError;
+		this->hasIncoming = hasIncoming;
+		this->hasOutgoing = hasOutgoing;
+		this->totalBytes = totalBytes;
+		this->completedBytes = completedBytes;
+	}
 };
 
 enum Reason {
-    Unknown,
-    Blocked,
-    Rejected,
-    NotAccessible,
-    NotFound,
-    NoPendingTransfer
+	Unknown,
+	Blocked,
+	Rejected,
+	NotAccessible,
+	NotFound,
+	NoPendingTransfer
 };
 
 class TransferUtils {
 public:
-    static SqlSelection createSqlSelection(groupid groupId, const QString &deviceId,
-                                           TransferObject::Flag flag = TransferObject::Flag::Any,
-                                           bool equals = true);
+	static SqlSelection createSqlSelection(groupid groupId, const QString &deviceId,
+	                                       TransferObject::Flag flag = TransferObject::Flag::Any,
+	                                       bool equals = true);
 
-    static void createTransferMap(GThread *thread, QList<TransferObject *> *objectList,
-                                  const TransferGroup &group, const QMimeDatabase &mimeDatabase,
-                                  requestid &requestId, const QString &filePath, const QString &directory = nullptr);
+	static void createTransferMap(GThread *thread, QList<TransferObject *> *objectList,
+	                              const TransferGroup &group, const QMimeDatabase &mimeDatabase,
+	                              requestid &requestId, const QString &filePath, const QString &directory = nullptr);
 
-    static void getPaths(const QList<QUrl> &urls, QList<QString> &list);
+	static void getPaths(const QList<QUrl> &urls, QList<QString> &list);
 
-    static TransferObject firstAvailableTransfer(groupid groupId, const QString &deviceId);
+	static TransferObject firstAvailableTransfer(groupid groupId, const QString &deviceId);
 
-    static bool firstAvailableTransfer(TransferObject &object, groupid groupId, const QString &deviceId);
+	static bool firstAvailableTransfer(TransferObject &object, groupid groupId, const QString &deviceId);
 
-    static QString getDefaultSavePath();
+	static QString getDefaultSavePath();
 
-    static QString getFlagString(TransferObject::Flag flag);
+	static QString getFlagString(TransferObject::Flag flag);
 
-    static Reason getErrorReason(QString errorCode);
+	static Reason getErrorReason(QString errorCode);
 
-    static QString getIncomingFilePath(const TransferGroup &transferGroup, const TransferObject &object);
+	static QString getIncomingFilePath(const TransferGroup &transferGroup, const TransferObject &object);
 
-    static QString getSavePath(const TransferGroup &group);
+	static QString getSavePath(const TransferGroup &group);
 
-    static QString getUniqueFileName(const QString &filePath, bool tryActualFile);
+	static QString getUniqueFileName(const QString &filePath, bool tryActualFile);
 
-    static void getAllAssigneeInfo(const TransferGroup &group, QList<AssigneeInfo> &list);
+	static void getAllAssigneeInfo(const TransferGroup &group, QList<AssigneeInfo> &list);
 
-    static TransferGroupInfo getInfo(const TransferGroup &group);
+	static TransferGroupInfo getInfo(const TransferGroup &group);
 
-    static AssigneeInfo getInfo(const TransferAssignee &assignee);
+	static AssigneeInfo getInfo(const TransferAssignee &assignee);
 
-    static void startTransfer(groupid groupId, const QString &deviceId);
+	static void startTransfer(groupid groupId, const QString &deviceId);
 
-    static QString saveIncomingFile(const TransferGroup &group, TransferObject &object);
+	static QString saveIncomingFile(const TransferGroup &group, TransferObject &object);
 
-    static QString sizeExpression(size_t size, bool notUseByte);
+	static QString sizeExpression(size_t size, bool notUseByte);
 };

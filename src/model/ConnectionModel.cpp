@@ -18,8 +18,8 @@
 
 #include "ConnectionModel.h"
 
-ConnectionModel::ConnectionModel(const QString &deviceId, QObject* parent)
-	: QAbstractTableModel(parent), DatabaseLoader(parent)
+ConnectionModel::ConnectionModel(const QString &deviceId, QObject *parent)
+		: QAbstractTableModel(parent), DatabaseLoader(parent)
 {
 	m_deviceId = deviceId;
 	DatabaseLoader::databaseChanged();

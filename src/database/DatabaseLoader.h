@@ -30,9 +30,10 @@ class DatabaseLoaderPrivate : public QObject {
 Q_OBJECT
 
 public:
-	explicit DatabaseLoaderPrivate(QObject* parent, DatabaseLoader* loader);
+	explicit DatabaseLoaderPrivate(QObject *parent, DatabaseLoader *loader);
 
 public slots:
+
 	void databaseChanged(const SqlSelection &change, ChangeType type);
 
 protected:

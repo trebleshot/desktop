@@ -24,22 +24,22 @@
 #include "ui_ManageDevicesDialog.h"
 
 namespace Ui {
-    class ManageDevicesDialog;
+	class ManageDevicesDialog;
 }
 
 class ManageDevicesDialog : public QDialog {
 Q_OBJECT
 
 public:
-    explicit ManageDevicesDialog(QWidget *parent);
+	explicit ManageDevicesDialog(QWidget *parent);
 
-    ~ManageDevicesDialog() override;
+	~ManageDevicesDialog() override;
 
-    void itemContextMenu(const QPoint& point);
+	void itemContextMenu(const QPoint &point);
 
-    void itemSelected(const QModelIndex& modelIndex);
+	void itemSelected(const QModelIndex &modelIndex);
 
 protected:
-    Ui::ManageDevicesDialog *m_ui;
-    NetworkDeviceModel *m_deviceModel;
+	Ui::ManageDevicesDialog *m_ui;
+	NetworkDeviceModel *m_deviceModel;
 };

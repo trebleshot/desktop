@@ -20,121 +20,121 @@
 
 QString NetworkDeviceLoader::convertToInet4Address(const QHostAddress &hostAddress, bool parentOnly)
 {
-    return convertToInet4Address(hostAddress.toIPv4Address(), parentOnly);
+	return convertToInet4Address(hostAddress.toIPv4Address(), parentOnly);
 }
 
 
 QString NetworkDeviceLoader::convertToInet4Address(int ipv4Address, bool parentOnly)
 {
-    QString inet4Address = QString("%1.%2.%3")
-            .arg(ipv4Address >> 24 & 0xff)
-            .arg(ipv4Address >> 16 & 0xff)
-            .arg(ipv4Address >> 8 & 0xff);
+	QString inet4Address = QString("%1.%2.%3")
+			.arg(ipv4Address >> 24 & 0xff)
+			.arg(ipv4Address >> 16 & 0xff)
+			.arg(ipv4Address >> 8 & 0xff);
 
 
-    if (!parentOnly) {
-        inet4Address = inet4Address.append(".%1")
-                .arg(ipv4Address & 0xff);
-    }
+	if (!parentOnly) {
+		inet4Address = inet4Address.append(".%1")
+				.arg(ipv4Address & 0xff);
+	}
 
-    return inet4Address;
+	return inet4Address;
 }
 
 DeviceConnection NetworkDeviceLoader::processConnection(NetworkDevice &device,
                                                         const QHostAddress &hostAddress)
 {
-    DeviceConnection connection(hostAddress);
+	DeviceConnection connection(hostAddress);
 
-    processConnection(device, connection);
+	processConnection(device, connection);
 
-    return connection;
+	return connection;
 }
 
 void NetworkDeviceLoader::processConnection(NetworkDevice &device,
                                             DeviceConnection &connection)
 {
-    if (!AppUtils::applyAdapterName(connection) && !gDbSignal->reconstruct(connection))
-        connection.adapterName = KEYWORD_UNKNOWN_INTERFACE;
+	if (!AppUtils::applyAdapterName(connection) && !gDbSignal->reconstruct(connection))
+		connection.adapterName = KEYWORD_UNKNOWN_INTERFACE;
 
-    time(&connection.lastCheckedDate);
-    connection.deviceId = device.id;
+	time(&connection.lastCheckedDate);
+	connection.deviceId = device.id;
 
-    SqlSelection selection;
+	SqlSelection selection;
 
-    selection.setTableName(DB_TABLE_DEVICECONNECTION);
-    selection.setWhere(QString("`%1` = ? AND (`%2` = ? OR `%3` = ?)")
-                               .arg(DB_FIELD_DEVICECONNECTION_DEVICEID)
-                               .arg(DB_FIELD_DEVICECONNECTION_ADAPTERNAME)
-                               .arg(DB_FIELD_DEVICECONNECTION_IPADDRESS));
+	selection.setTableName(DB_TABLE_DEVICECONNECTION);
+	selection.setWhere(QString("`%1` = ? AND (`%2` = ? OR `%3` = ?)")
+			                   .arg(DB_FIELD_DEVICECONNECTION_DEVICEID)
+			                   .arg(DB_FIELD_DEVICECONNECTION_ADAPTERNAME)
+			                   .arg(DB_FIELD_DEVICECONNECTION_IPADDRESS));
 
-    selection.whereArgs << QVariant(connection.deviceId)
-                        << QVariant(connection.adapterName)
-                        << QVariant(NetworkDeviceLoader::convertToInet4Address(connection.hostAddress));
+	selection.whereArgs << QVariant(connection.deviceId)
+	                    << QVariant(connection.adapterName)
+	                    << QVariant(NetworkDeviceLoader::convertToInet4Address(connection.hostAddress));
 
-    gDbSignal->remove(selection);
-    gDbSignal->publish(connection);
+	gDbSignal->remove(selection);
+	gDbSignal->publish(connection);
 }
 
 void NetworkDeviceLoader::loadAsynchronously(const QHostAddress &hostAddress,
                                              const std::function<void(const NetworkDevice &)> &listener)
 {
-    GThread::startIndependent([hostAddress, listener](GThread *thisThread) {
-    	auto* object = new QObject;
-    	object->moveToThread(thisThread);
+	GThread::startIndependent([hostAddress, listener](GThread *thisThread) {
+		auto *object = new QObject;
+		object->moveToThread(thisThread);
 
-        const NetworkDevice &device = load(object, hostAddress);
+		const NetworkDevice &device = load(object, hostAddress);
 
-        if (listener != nullptr)
-            listener(device);
+		if (listener != nullptr)
+			listener(device);
 
-        delete object;
-    });
+		delete object;
+	});
 }
 
 NetworkDevice NetworkDeviceLoader::load(QObject *sender, const QHostAddress &hostAddress)
 {
-    try {
-        auto *bridge = new CommunicationBridge(sender);
-        auto device = bridge->loadDevice(hostAddress);
+	try {
+		auto *bridge = new CommunicationBridge(sender);
+		auto device = bridge->loadDevice(hostAddress);
 
-        if (device.id != nullptr) {
-            const NetworkDevice &localDevice = AppUtils::getLocalDevice();
+		if (device.id != nullptr) {
+			const NetworkDevice &localDevice = AppUtils::getLocalDevice();
 
-            processConnection(device, hostAddress);
+			processConnection(device, hostAddress);
 
-            if (localDevice.id != device.id) {
-                time(&device.lastUsageTime);
-                gDbSignal->publish(device);
-            }
-        }
+			if (localDevice.id != device.id) {
+				time(&device.lastUsageTime);
+				gDbSignal->publish(device);
+			}
+		}
 
-        delete bridge;
-        return device;
-    } catch (...) {
-        // do nothing
-    }
+		delete bridge;
+		return device;
+	} catch (...) {
+		// do nothing
+	}
 
-    return NetworkDevice();
+	return NetworkDevice();
 }
 
 NetworkDevice NetworkDeviceLoader::loadFrom(const QJsonObject &jsonIndex)
 {
-    QJsonObject deviceInfo = jsonIndex.value(KEYWORD_DEVICE_INFO).toObject();
-    QJsonObject appInfo = jsonIndex.value(KEYWORD_APP_INFO).toObject();
+	QJsonObject deviceInfo = jsonIndex.value(KEYWORD_DEVICE_INFO).toObject();
+	QJsonObject appInfo = jsonIndex.value(KEYWORD_APP_INFO).toObject();
 
-    NetworkDevice networkDevice(deviceInfo.value(KEYWORD_DEVICE_INFO_SERIAL).toString());
+	NetworkDevice networkDevice(deviceInfo.value(KEYWORD_DEVICE_INFO_SERIAL).toString());
 
-    gDbSignal->reconstruct(networkDevice);
+	gDbSignal->reconstruct(networkDevice);
 
-    time(&networkDevice.lastUsageTime);
-    networkDevice.brand = deviceInfo.value(KEYWORD_DEVICE_INFO_BRAND).toString();
-    networkDevice.model = deviceInfo.value(KEYWORD_DEVICE_INFO_MODEL).toString();
-    networkDevice.nickname = deviceInfo.value(KEYWORD_DEVICE_INFO_USER).toString();
-    networkDevice.versionNumber = appInfo.value(KEYWORD_APP_INFO_VERSION_CODE).toInt();
-    networkDevice.versionName = appInfo.value(KEYWORD_APP_INFO_VERSION_NAME).toString();
+	time(&networkDevice.lastUsageTime);
+	networkDevice.brand = deviceInfo.value(KEYWORD_DEVICE_INFO_BRAND).toString();
+	networkDevice.model = deviceInfo.value(KEYWORD_DEVICE_INFO_MODEL).toString();
+	networkDevice.nickname = deviceInfo.value(KEYWORD_DEVICE_INFO_USER).toString();
+	networkDevice.versionNumber = appInfo.value(KEYWORD_APP_INFO_VERSION_CODE).toInt();
+	networkDevice.versionName = appInfo.value(KEYWORD_APP_INFO_VERSION_NAME).toString();
 
-    if (networkDevice.nickname.length() > NICKNAME_LENGTH_MAX)
-        networkDevice.nickname = networkDevice.nickname.left(NICKNAME_LENGTH_MAX - 1);
+	if (networkDevice.nickname.length() > NICKNAME_LENGTH_MAX)
+		networkDevice.nickname = networkDevice.nickname.left(NICKNAME_LENGTH_MAX - 1);
 
-    return networkDevice;
+	return networkDevice;
 }

@@ -27,31 +27,31 @@ class TransferObjectModel : public QAbstractTableModel, public SynchronizedList<
 Q_OBJECT
 
 public:
-    enum ColumnName {
-        FileName,
-        Size,
-        Status,
-        Directory,
-        __itemCount
-    };
+	enum ColumnName {
+		FileName,
+		Size,
+		Status,
+		Directory,
+		__itemCount
+	};
 
-    explicit TransferObjectModel(groupid groupId, const QString &deviceId = QString(), QObject *parent = nullptr);
+	explicit TransferObjectModel(groupid groupId, const QString &deviceId = QString(), QObject *parent = nullptr);
 
-    int columnCount(const QModelIndex &parent) const override;
+	int columnCount(const QModelIndex &parent) const override;
 
-    int rowCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent) const override;
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    QVariant data(const QModelIndex &index, int role) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 
-    void setDeviceId(const QString &deviceId);
+	void setDeviceId(const QString &deviceId);
 
 public slots:
 
-    void databaseChanged(const SqlSelection &change, ChangeType type);
+	void databaseChanged(const SqlSelection &change, ChangeType type);
 
 protected:
-    QString m_deviceId;
-    groupid m_groupId;
+	QString m_deviceId;
+	groupid m_groupId;
 };

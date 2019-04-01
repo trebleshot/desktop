@@ -29,91 +29,90 @@
 
 bool AppUtils::applyAdapterName(DeviceConnection &connection)
 {
-    quint32 ipv4Address = connection.hostAddress.toIPv4Address();
+	quint32 ipv4Address = connection.hostAddress.toIPv4Address();
 
-    if (ipv4Address <= 0)
-        return false;
+	if (ipv4Address <= 0)
+		return false;
 
-    QNetworkConfigurationManager manager;
+	QNetworkConfigurationManager manager;
 
-    const QList<QNetworkConfiguration> &activeConfigurations
-            = manager.allConfigurations(QNetworkConfiguration::StateFlag::Active);
+	const QList<QNetworkConfiguration> &activeConfigurations
+			= manager.allConfigurations(QNetworkConfiguration::StateFlag::Active);
 
-    for (const QNetworkConfiguration &config : activeConfigurations) {
-        QNetworkSession session(config);
-        const QString &interfaceName(session.interface().name());
+	for (const QNetworkConfiguration &config : activeConfigurations) {
+		QNetworkSession session(config);
+		const QString &interfaceName(session.interface().name());
 
-        for (const QNetworkAddressEntry &address : session.interface().addressEntries()) {
-            quint32 broadcast = address.broadcast().toIPv4Address();
+		for (const QNetworkAddressEntry &address : session.interface().addressEntries()) {
+			quint32 broadcast = address.broadcast().toIPv4Address();
 
-            if (broadcast <= 0)
-                continue;
+			if (broadcast <= 0)
+				continue;
 
-            if (broadcast - 255 < ipv4Address && broadcast >= ipv4Address) {
-                connection.adapterName = interfaceName;
-                return true;
-            }
-        }
-    }
+			if (broadcast - 255 < ipv4Address && broadcast >= ipv4Address) {
+				connection.adapterName = interfaceName;
+				return true;
+			}
+		}
+	}
 
-    connection.adapterName = nullptr;
+	connection.adapterName = nullptr;
 
-    return false;
+	return false;
 }
 
 void AppUtils::applyDeviceToJSON(QJsonObject &object)
 {
-    const NetworkDevice &device = getLocalDevice();
+	const NetworkDevice &device = getLocalDevice();
 
-    QJsonObject deviceInfo{
-            {KEYWORD_DEVICE_INFO_SERIAL, device.id},
-            {KEYWORD_DEVICE_INFO_BRAND,  device.brand},
-            {KEYWORD_DEVICE_INFO_MODEL,  device.model},
-            {KEYWORD_DEVICE_INFO_USER,   device.nickname}
-    };
+	QJsonObject deviceInfo{
+			{KEYWORD_DEVICE_INFO_SERIAL, device.id},
+			{KEYWORD_DEVICE_INFO_BRAND,  device.brand},
+			{KEYWORD_DEVICE_INFO_MODEL,  device.model},
+			{KEYWORD_DEVICE_INFO_USER,   device.nickname}
+	};
 
-    QJsonObject appInfo{
-            {KEYWORD_APP_INFO_VERSION_CODE, device.versionNumber},
-            {KEYWORD_APP_INFO_VERSION_NAME, device.versionName}
-    };
+	QJsonObject appInfo{
+			{KEYWORD_APP_INFO_VERSION_CODE, device.versionNumber},
+			{KEYWORD_APP_INFO_VERSION_NAME, device.versionName}
+	};
 
-    object.insert(KEYWORD_APP_INFO, appInfo);
-    object.insert(KEYWORD_DEVICE_INFO, deviceInfo);
+	object.insert(KEYWORD_APP_INFO, appInfo);
+	object.insert(KEYWORD_DEVICE_INFO, deviceInfo);
 }
 
 AccessDatabase *AppUtils::getDatabase()
 {
-    static AccessDatabase *accessDatabase = nullptr;
+	static AccessDatabase *accessDatabase = nullptr;
 
-    if (accessDatabase == nullptr)
-    {
-	    QSqlDatabase *db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
-	    const auto &location = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation);
-	    QDir saveDir(location);
+	if (accessDatabase == nullptr) {
+		QSqlDatabase *db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE"));
+		const auto &location = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation);
+		QDir saveDir(location);
 
-	    if (saveDir.exists() || saveDir.mkdir(location)) {
-		    db->setDatabaseName(saveDir.filePath("default.db"));
+		if (saveDir.exists() || saveDir.mkdir(location)) {
+			db->setDatabaseName(saveDir.filePath("default.db"));
 
-		    if (db->open()) {
-			    cout << "Database has opened" << endl;
+			if (db->open()) {
+				cout << "Database has opened" << endl;
 
-			    accessDatabase = new AccessDatabase(db);
-			    accessDatabase->initialize();
-		    }
-	    }
-    }
+				accessDatabase = new AccessDatabase(db);
+				accessDatabase->initialize();
+			}
+		}
+	}
 
-    return accessDatabase;
+	return accessDatabase;
 }
 
 AccessDatabaseSignaller *AppUtils::getDatabaseSignaller()
 {
-    static AccessDatabaseSignaller *signaller = nullptr;
+	static AccessDatabaseSignaller *signaller = nullptr;
 
-    if (signaller == nullptr)
-        signaller = new AccessDatabaseSignaller(getDatabase());
+	if (signaller == nullptr)
+		signaller = new AccessDatabaseSignaller(getDatabase());
 
-    return signaller;
+	return signaller;
 }
 
 QThread *AppUtils::getDatabaseWorker()
@@ -124,37 +123,37 @@ QThread *AppUtils::getDatabaseWorker()
 
 QSettings &AppUtils::getDefaultSettings()
 {
-    static QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Genonbeta",
-                              QApplication::applicationName());
+	static QSettings settings(QSettings::IniFormat, QSettings::UserScope, "Genonbeta",
+	                          QApplication::applicationName());
 
-    return settings;
+	return settings;
 }
 
 NetworkDevice AppUtils::getLocalDevice()
 {
-    NetworkDevice thisDevice(getDeviceId());
+	NetworkDevice thisDevice(getDeviceId());
 
-    thisDevice.brand = getDeviceTypeName();
-    thisDevice.model = getDeviceNameForOS();
-    thisDevice.nickname = getUserNickname();
-    thisDevice.versionName = getApplicationVersion();
-    thisDevice.versionNumber = getApplicationVersionCode();
+	thisDevice.brand = getDeviceTypeName();
+	thisDevice.model = getDeviceNameForOS();
+	thisDevice.nickname = getUserNickname();
+	thisDevice.versionName = getApplicationVersion();
+	thisDevice.versionNumber = getApplicationVersionCode();
 
-    return thisDevice;
+	return thisDevice;
 }
 
 QString AppUtils::getDeviceId()
 {
-    QSettings &settings = getDefaultSettings();
+	QSettings &settings = getDefaultSettings();
 
-    if (!settings.contains("deviceUUID"))
-        settings.setValue("deviceUUID", QUuid::createUuid().toString());
+	if (!settings.contains("deviceUUID"))
+		settings.setValue("deviceUUID", QUuid::createUuid().toString());
 
-    return settings.value("deviceUUID", QString()).toString();
+	return settings.value("deviceUUID", QString()).toString();
 }
 
 TransferTaskManager *AppUtils::getTransferTaskManager()
 {
-    static auto *taskManager = new TransferTaskManager;
-    return taskManager;
+	static auto *taskManager = new TransferTaskManager;
+	return taskManager;
 }

@@ -148,13 +148,14 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 									socket.setSocketOption(QTcpSocket::SocketOption::LowDelayOption, 1);
 								}
 
-								char* buffer = new char[BUFFER_LENGTH_DEFAULT];
+								char *buffer = new char[BUFFER_LENGTH_DEFAULT];
 
 								try {
-									qint64 lastSize = 0;
-									clock_t lastUpdated = 0;
+									time_t lastUpdated = 0;
 
 									while (!file.atEnd()) {
+										time_t currentTime = time(nullptr);
+
 										if (socket.bytesToWrite() == 0) {
 											//socket.write(file.read(BUFFER_LENGTH_DEFAULT));
 											qint64 readSize = file.read(buffer, BUFFER_LENGTH_DEFAULT);
@@ -167,21 +168,12 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 											throw exception();
 										}
 
-										if (clock() - lastUpdated > 2000 || file.atEnd()) {
-											auto size = file.pos();
-											emit gTaskMgr->taskByteTransferred(thisTask->m_groupId, thisTask->m_deviceId,
-											                                   TransferObject::Outgoing,
-											                                   size - lastSize,
-											                                   size);
-											lastSize = size;
-											lastUpdated = clock();
-
-											qDebug() << this << "Update";
+										if (currentTime - lastUpdated > 2000) {
+											// only emit current file size
+											// also always update when a file status changes
+											lastUpdated = currentTime;
 										}
 									}
-
-									emit gTaskMgr->taskItemTransferred(thisTask->m_groupId, thisTask->m_deviceId,
-									                                   TransferObject::Outgoing);
 
 									qDebug() << this << "I/O Completed";
 									transferObject.flag = TransferObject::Flag::Done;

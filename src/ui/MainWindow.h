@@ -22,74 +22,74 @@
 #include "ui_MainWindow.h"
 
 namespace Ui {
-    class MainWindow;
+	class MainWindow;
 }
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
 protected:
-    Ui::MainWindow *m_ui;
-    SeamlessServer *m_seamlessServer;
-    CommunicationServer *m_commServer;
-    TransferGroupModel *m_groupModel;
-    NetworkDeviceModel *m_deviceModel;
+	Ui::MainWindow *m_ui;
+	SeamlessServer *m_seamlessServer;
+	CommunicationServer *m_commServer;
+	TransferGroupModel *m_groupModel;
+	NetworkDeviceModel *m_deviceModel;
 	DNSSDService *m_discoveryService;
 
-    void dragEnterEvent(QDragEnterEvent *event) override;
+	void dragEnterEvent(QDragEnterEvent *event) override;
 
-    void dropEvent(QDropEvent *event) override;
+	void dropEvent(QDropEvent *event) override;
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+	explicit MainWindow(QWidget *parent = nullptr);
 
-    ~MainWindow() override;
+	~MainWindow() override;
 
 public slots:
 
-    void about();
+	void about();
 
-    void aboutQt();
+	void aboutQt();
 
-    void deviceBlocked(const QString &deviceId, const QHostAddress &address);
+	void deviceBlocked(const QString &deviceId, const QHostAddress &address);
 
-    void deviceContextMenu(const QPoint &point);
+	void deviceContextMenu(const QPoint &point);
 
-    void deviceSelected(const QModelIndex &modelIndex);
+	void deviceSelected(const QModelIndex &modelIndex);
 
-    void showTransfer();
+	void showTransfer();
 
-    void showTransfer(groupid groupId);
+	void showTransfer(groupid groupId);
 
-    void removeTransfer();
+	void removeTransfer();
 
-    void refreshStorageLocation();
+	void refreshStorageLocation();
 
-    void savePathChanged();
+	void savePathChanged();
 
-    void selectFilesToSend();
+	void selectFilesToSend();
 
-    void setStorageLocation();
+	void setStorageLocation();
 
-    static void showReceivedFiles();
+	static void showReceivedFiles();
 
-    void showReceivedText(const QString &text, const QString &deviceId);
+	void showReceivedText(const QString &text, const QString &deviceId);
 
-    void showTransferRequest(const QString &deviceId, groupid groupId, int filesTotal);
+	void showTransferRequest(const QString &deviceId, groupid groupId, int filesTotal);
 
-    void taskStart();
+	void taskStart();
 
-    void taskPause();
+	void taskPause();
 
-    void taskToggle();
+	void taskToggle();
 
-    void transferItemActivated(const QModelIndex &modelIndex);
+	void transferItemActivated(const QModelIndex &modelIndex);
 
-    void transferSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+	void transferSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
-    void transferContextMenu(const QPoint &point);
+	void transferContextMenu(const QPoint &point);
 
-    void updateButtons();
+	void updateButtons();
 
-    static void usernameChanged(const QString& username);
+	void usernameChanged();
 };

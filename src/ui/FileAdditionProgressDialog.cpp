@@ -30,78 +30,77 @@
 #include "FileAdditionProgressDialog.h"
 
 FileAdditionProgressDialog::FileAdditionProgressDialog(QWidget *parent, const QList<QString> &files)
-        : QDialog(parent), m_ui(new Ui::FileAdditionProgressDialog)
+		: QDialog(parent), m_ui(new Ui::FileAdditionProgressDialog)
 {
-    m_thread = new GThread([this, files](GThread *thread) { task(thread, files); }, true);
-    m_ui->setupUi(this);
+	m_thread = new GThread([this, files](GThread *thread) { task(thread, files); }, true);
+	m_ui->setupUi(this);
 
-    connect(m_thread, &GThread::statusUpdate, this, &FileAdditionProgressDialog::taskProgress);
-    connect(m_thread, &GThread::finished, this, &FileAdditionProgressDialog::close);
-    connect(this, &QDialog::finished, m_thread, &GThread::notifyInterrupt);
+	connect(m_thread, &GThread::statusUpdate, this, &FileAdditionProgressDialog::taskProgress);
+	connect(m_thread, &GThread::finished, this, &FileAdditionProgressDialog::close);
+	connect(this, &QDialog::finished, m_thread, &GThread::notifyInterrupt);
 
-    m_thread->start();
+	m_thread->start();
 }
 
 FileAdditionProgressDialog::~FileAdditionProgressDialog()
 {
-    delete m_ui;
+	delete m_ui;
 }
 
 void FileAdditionProgressDialog::task(GThread *thread, const QList<QString> &files)
 {
-    QList<TransferObject *> transferMap;
+	QList<TransferObject *> transferMap;
 
-    try {
-        auto groupId = QRandomGenerator::global()->bounded(static_cast<groupid>(time(nullptr)), sizeof(int));
-        requestid requestId = groupId + 1;
-        TransferGroup group(groupId);
-        QMimeDatabase mimeDb;
+	try {
+		auto groupId = QRandomGenerator::global()->bounded(static_cast<groupid>(time(nullptr)), sizeof(int));
+		requestid requestId = groupId + 1;
+		TransferGroup group(groupId);
+		QMimeDatabase mimeDb;
 
-        {
-            int position = 0;
-            for (const auto &path : files) {
-                if (thread->interrupted())
-                    throw std::exception();
+		{
+			int position = 0;
+			for (const auto &path : files) {
+				if (thread->interrupted())
+					throw std::exception();
 
-                TransferUtils::createTransferMap(thread, &transferMap, group, mimeDb, requestId, path);
-                emit thread->statusUpdate(files.size(), position++, path);
-            }
-        }
+				TransferUtils::createTransferMap(thread, &transferMap, group, mimeDb, requestId, path);
+				emit thread->statusUpdate(files.size(), position++, path);
+			}
+		}
 
-        try {
-            if (gDbSignal->transaction()) {
-                int position = 0;
-                for (auto transferObject : transferMap) {
-                    if (thread->interrupted())
-                        throw std::exception();
+		try {
+			if (gDbSignal->transaction()) {
+				int position = 0;
+				for (auto transferObject : transferMap) {
+					if (thread->interrupted())
+						throw std::exception();
 
-                    gDbSignal->insert(*transferObject);
-                    emit thread->statusUpdate(transferMap.size(), position++, transferObject->friendlyName);
-                }
+					gDbSignal->insert(*transferObject);
+					emit thread->statusUpdate(transferMap.size(), position++, transferObject->friendlyName);
+				}
 
-                if (!transferMap.empty()) {
-                    gDbSignal->insert(group);
-                    emit filesAdded(group.id);
-                }
-            }
-        } catch (...) {
-            // do nothing
-        }
-    } catch (...) {
-        // do nothing
-    }
+				if (!transferMap.empty()) {
+					gDbSignal->insert(group);
+					emit filesAdded(group.id);
+				}
+			}
+		} catch (...) {
+			// do nothing
+		}
+	} catch (...) {
+		// do nothing
+	}
 
-    qDeleteAll(transferMap);
-    gDbSignal->commit();
-    qDebug() << thread << "Exited";
+	qDeleteAll(transferMap);
+	gDbSignal->commit();
 }
 
 void FileAdditionProgressDialog::taskProgress(int max, int progress, const QString &text)
 {
-    if (max >= 0 && progress >= 0) {
-        m_ui->progressBar->setMaximum(max);
-        m_ui->progressBar->setValue(progress);
-    }
+	if (max >= 0 && progress >= 0) {
+		m_ui->progressBar->setMaximum(max);
+		m_ui->progressBar->setValue(progress);
+	}
 
-    m_ui->label->setText(text);
+	m_ui->label->setText(text);
 }

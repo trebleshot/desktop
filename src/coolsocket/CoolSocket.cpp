@@ -34,7 +34,7 @@ CSServer::~CSServer()
 
 void CSServer::incomingConnection(qintptr handle)
 {
-	GThread::startIndependent([this, handle](GThread* thread) {
+	GThread::startIndependent([this, handle](GThread *thread) {
 		auto *socket = new QTcpSocket;
 		auto *connection = new CSActiveConnection(socket, timeout());
 

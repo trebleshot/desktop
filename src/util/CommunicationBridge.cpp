@@ -21,101 +21,101 @@
 CSActiveConnection *CommunicationBridge::communicate(NetworkDevice &targetDevice,
                                                      const DeviceConnection &targetConnection)
 {
-    CSActiveConnection *connection = connectWithHandshake(targetConnection.hostAddress, false);
+	CSActiveConnection *connection = connectWithHandshake(targetConnection.hostAddress, false);
 
-    communicate(connection, targetDevice);
+	communicate(connection, targetDevice);
 
-    return connection;
+	return connection;
 }
 
 CSActiveConnection *CommunicationBridge::communicate(CSActiveConnection *connection,
                                                      NetworkDevice &device)
 {
-    updateDeviceIfOkay(connection, device);
-    return connection;
+	updateDeviceIfOkay(connection, device);
+	return connection;
 }
 
 CSActiveConnection *CommunicationBridge::connect(const QHostAddress &hostAddress)
 {
-    return CSClient::openConnection(hostAddress, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT, this);
+	return CSClient::openConnection(hostAddress, PORT_COMMUNICATION_DEFAULT, TIMEOUT_SOCKET_DEFAULT, this);
 }
 
 CSActiveConnection *CommunicationBridge::connect(DeviceConnection *connection)
 {
-    return connect(connection->hostAddress);
+	return connect(connection->hostAddress);
 }
 
 CSActiveConnection *CommunicationBridge::connectWithHandshake(const QHostAddress &hostAddress,
                                                               bool handshakeOnly)
 {
-    return handshake(connect(hostAddress), handshakeOnly);
+	return handshake(connect(hostAddress), handshakeOnly);
 }
 
 NetworkDevice CommunicationBridge::getDevice()
 {
-    return this->m_device;
+	return this->m_device;
 }
 
 CSActiveConnection *CommunicationBridge::handshake(CSActiveConnection *connection,
                                                    bool handshakeOnly)
 {
-    try {
-        QJsonObject replyJSON{
-                {KEYWORD_HANDSHAKE_REQUIRED, true},
-                {KEYWORD_HANDSHAKE_ONLY,     handshakeOnly},
-                {KEYWORD_DEVICE_INFO_SERIAL, getDeviceId()},
-                {KEYWORD_DEVICE_SECURE_KEY,  m_device.id == nullptr ? m_secureKey : m_device.tmpSecureKey}
-        };
+	try {
+		QJsonObject replyJSON{
+				{KEYWORD_HANDSHAKE_REQUIRED, true},
+				{KEYWORD_HANDSHAKE_ONLY,     handshakeOnly},
+				{KEYWORD_DEVICE_INFO_SERIAL, getDeviceId()},
+				{KEYWORD_DEVICE_SECURE_KEY,  m_device.id == nullptr ? m_secureKey : m_device.tmpSecureKey}
+		};
 
-        connection->reply(replyJSON);
-    } catch (exception &e) {
-        throw exception();
-    }
+		connection->reply(replyJSON);
+	} catch (exception &e) {
+		throw exception();
+	}
 
-    return connection;
+	return connection;
 }
 
 NetworkDevice CommunicationBridge::loadDevice(const QHostAddress &hostAddress)
 {
-    return loadDevice(connectWithHandshake(hostAddress, true));
+	return loadDevice(connectWithHandshake(hostAddress, true));
 }
 
 NetworkDevice CommunicationBridge::loadDevice(CSActiveConnection *connection)
 {
-    try {
-        return NetworkDeviceLoader::loadFrom(connection->receive().asJson());
-    } catch (exception &e) {
-        throw exception();
-    }
+	try {
+		return NetworkDeviceLoader::loadFrom(connection->receive().asJson());
+	} catch (exception &e) {
+		throw exception();
+	}
 }
 
 void CommunicationBridge::setDevice(const NetworkDevice &device)
 {
-    this->m_device = device;
+	this->m_device = device;
 }
 
 void CommunicationBridge::setSecureKey(int key)
 {
-    this->m_secureKey = key;
+	this->m_secureKey = key;
 }
 
 NetworkDevice CommunicationBridge::updateDeviceIfOkay(CSActiveConnection *activeConnection,
                                                       NetworkDevice &device)
 {
-    NetworkDevice loadedDevice = loadDevice(activeConnection);
+	NetworkDevice loadedDevice = loadDevice(activeConnection);
 
-    NetworkDeviceLoader::processConnection(loadedDevice, activeConnection->socket()->peerAddress());
+	NetworkDeviceLoader::processConnection(loadedDevice, activeConnection->socket()->peerAddress());
 
-    if (device.id != loadedDevice.id) {
-        qDebug() << "Compared" << device.nickname << "with" << loadedDevice.nickname;
-        throw exception();
-    } else {
-        device = loadedDevice;
+	if (device.id != loadedDevice.id) {
+		qDebug() << "Compared" << device.nickname << "with" << loadedDevice.nickname;
+		throw exception();
+	} else {
+		device = loadedDevice;
 
-        time(&loadedDevice.lastUsageTime);
-        gDbSignal->publish(loadedDevice);
-        setDevice(loadedDevice);
-    }
+		time(&loadedDevice.lastUsageTime);
+		gDbSignal->publish(loadedDevice);
+		setDevice(loadedDevice);
+	}
 
-    return loadedDevice;
+	return loadedDevice;
 }

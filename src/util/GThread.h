@@ -24,23 +24,23 @@
 
 class GThread : public QThread, public Interrupter {
 Q_OBJECT
-    const std::function<void(GThread *)> m_callback;
+	const std::function<void(GThread *)> m_callback;
 
 public:
-    explicit GThread(std::function<void(GThread *)> function,
-                     bool deleteOnFinish = false,
-                     QObject *parent = nullptr);
+	explicit GThread(std::function<void(GThread *)> function,
+	                 bool deleteOnFinish = false,
+	                 QObject *parent = nullptr);
 
-    static GThread *startIndependent(const std::function<void(GThread *)> &function);
+	static GThread *startIndependent(const std::function<void(GThread *)> &function);
 
 signals:
 
-    void statusUpdate(int max, int progress, const QString &text);
+	void statusUpdate(int max, int progress, const QString &text);
 
 public slots:
 
-    void notifyInterrupt();
+	void notifyInterrupt();
 
 protected:
-    void run() override;
+	void run() override;
 };

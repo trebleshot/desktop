@@ -27,34 +27,34 @@
 #include <QPushButton>
 
 namespace Ui {
-    class TransferRequestProgressDialog;
+	class TransferRequestProgressDialog;
 }
 
 class TransferRequestProgressDialog : public QDialog {
 Q_OBJECT
 
 public:
-    explicit TransferRequestProgressDialog(QWidget *parent, const groupid &groupId,
-                                           const QList<NetworkDevice> &devices, bool signalOnSuccess = true);
+	explicit TransferRequestProgressDialog(QWidget *parent, const groupid &groupId,
+	                                       const QList<NetworkDevice> &devices, bool signalOnSuccess = true);
 
 public slots:
 
-    void showError(const groupid &groupId,
-                   const QList<NetworkDevice> &devices);
+	void showError(const groupid &groupId,
+	               const QList<NetworkDevice> &devices);
 
-    void statusUpdate(int total, int progress, QString statusText);
+	void statusUpdate(int total, int progress, QString statusText);
 
 
 signals:
 
-    void errorOccurred(groupid groupId, const QList<NetworkDevice> &devices);
+	void errorOccurred(groupid groupId, const QList<NetworkDevice> &devices);
 
-    void transferReady(groupid groupId);
+	void transferReady(groupid groupId);
 
 protected:
-    Ui::TransferRequestProgressDialog *m_ui;
-    GThread *m_thread;
-    bool m_signalOnSuccess;
+	Ui::TransferRequestProgressDialog *m_ui;
+	GThread *m_thread;
+	bool m_signalOnSuccess;
 
-    void task(GThread *thread, const groupid &groupId, const QList<NetworkDevice> &devices);
+	void task(GThread *thread, const groupid &groupId, const QList<NetworkDevice> &devices);
 };

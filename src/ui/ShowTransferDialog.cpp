@@ -41,8 +41,6 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
 
 	connect(gTaskMgr, &TransferTaskManager::taskAdded, this, &ShowTransferDialog::globalTaskStarted);
 	connect(gTaskMgr, &TransferTaskManager::taskRemoved, this, &ShowTransferDialog::globalTaskFinished);
-	connect(gTaskMgr, &TransferTaskManager::taskItemTransferred, this, &ShowTransferDialog::transferFileChange);
-	connect(gTaskMgr, &TransferTaskManager::taskByteTransferred, this, &ShowTransferDialog::transferBitChange);
 	connect(gDatabase, &AccessDatabase::databaseChanged, this, &ShowTransferDialog::checkGroupIntegrity);
 	connect(m_ui->retryReceivingButton, &QPushButton::pressed, this, &ShowTransferDialog::retryReceiving);
 	connect(m_ui->transfersTreeView, &QTreeView::activated, this, &ShowTransferDialog::transferItemActivated);
@@ -162,7 +160,7 @@ void ShowTransferDialog::addDevices()
 	dialog->show();
 }
 
-void ShowTransferDialog::sendToDevices(groupid groupId, const QList<NetworkDevice>& devices)
+void ShowTransferDialog::sendToDevices(groupid groupId, const QList<NetworkDevice> &devices)
 {
 	auto *dialog = new TransferRequestProgressDialog(this, groupId, devices);
 	connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
@@ -226,29 +224,6 @@ void ShowTransferDialog::updateStats()
 	m_ui->progressBar->setMaximum(100);
 	m_ui->progressBar->setValue((int) (((double) m_groupInfo.completedBytes / m_groupInfo.totalBytes) * 100));
 	m_ui->textFilesLeft->setText(tr("%1 of %2").arg(m_groupInfo.completed).arg(m_groupInfo.total));
-}
-
-void ShowTransferDialog::transferBitChange(groupid groupId, const QString &deviceId, int type, qint64 bit, qint64 file)
-{
-	if (groupId == m_group.id) {
-		if (m_fileSessionSize == 0) {
-			m_groupInfo.completedBytes += file;
-			m_fileSessionSize = file;
-		} else
-			m_groupInfo.completedBytes += bit;
-	}
-
-	updateStats();
-}
-
-void ShowTransferDialog::transferFileChange(groupid groupId, const QString &deviceId, int type)
-{
-	if (groupId == m_group.id) {
-		m_groupInfo.completed++;
-		m_fileSessionSize = 0;
-	}
-
-	updateStats();
 }
 
 void ShowTransferDialog::transferItemActivated(const QModelIndex &modelIndex)

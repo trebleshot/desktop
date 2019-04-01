@@ -26,41 +26,41 @@
 #include <src/util/NetworkDeviceLoader.h>
 
 class CommunicationBridge : public CSClient {
-    NetworkDevice m_device;
-    int m_secureKey = -1;
+	NetworkDevice m_device;
+	int m_secureKey = -1;
 
 public:
-    explicit CommunicationBridge(QObject *parent = nullptr, const NetworkDevice &target = NetworkDevice())
-            : CSClient(parent)
-    {
-        m_device = target;
-    }
+	explicit CommunicationBridge(QObject *parent = nullptr, const NetworkDevice &target = NetworkDevice())
+			: CSClient(parent)
+	{
+		m_device = target;
+	}
 
-    CSActiveConnection *communicate(NetworkDevice &targetDevice,
-                                              const DeviceConnection &targetConnection);
+	CSActiveConnection *communicate(NetworkDevice &targetDevice,
+	                                const DeviceConnection &targetConnection);
 
-    CSActiveConnection *communicate(CSActiveConnection *connection,
-                                              NetworkDevice &device);
+	CSActiveConnection *communicate(CSActiveConnection *connection,
+	                                NetworkDevice &device);
 
-    CSActiveConnection *connect(const QHostAddress &hostAddress);
+	CSActiveConnection *connect(const QHostAddress &hostAddress);
 
-    CSActiveConnection *connect(DeviceConnection *connection);
+	CSActiveConnection *connect(DeviceConnection *connection);
 
-    CSActiveConnection *connectWithHandshake(const QHostAddress &hostAddress, bool handshakeOnly);
+	CSActiveConnection *connectWithHandshake(const QHostAddress &hostAddress, bool handshakeOnly);
 
-    NetworkDevice getDevice();
+	NetworkDevice getDevice();
 
-    CSActiveConnection *handshake(CSActiveConnection *connection,
-                                            bool handshakeOnly);
+	CSActiveConnection *handshake(CSActiveConnection *connection,
+	                              bool handshakeOnly);
 
-    NetworkDevice loadDevice(const QHostAddress &hostAddress);
+	NetworkDevice loadDevice(const QHostAddress &hostAddress);
 
-    NetworkDevice loadDevice(CSActiveConnection *connection);
+	NetworkDevice loadDevice(CSActiveConnection *connection);
 
-    void setDevice(const NetworkDevice &device);
+	void setDevice(const NetworkDevice &device);
 
-    void setSecureKey(int key);
+	void setSecureKey(int key);
 
-    NetworkDevice updateDeviceIfOkay(CSActiveConnection *connection,
-                                     NetworkDevice &device);
+	NetworkDevice updateDeviceIfOkay(CSActiveConnection *connection,
+	                                 NetworkDevice &device);
 };

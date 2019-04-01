@@ -20,19 +20,19 @@
 
 QList<int> ViewUtils::getSelectionRows(QItemSelectionModel *model)
 {
-    return getSelectionRows(model->selectedIndexes());
+	return getSelectionRows(model->selectedIndexes());
 }
 
 QList<int> ViewUtils::getSelectionRows(const QModelIndexList &index)
 {
-    QList<int> list;
+	QList<int> list;
 
-    for (const auto &modelIndex : index) {
-        if (!modelIndex.isValid() || modelIndex.column() != 0)
-            continue;
+	for (const auto &modelIndex : index) {
+		if (!modelIndex.isValid() || modelIndex.column() != 0)
+			continue;
 
-        list << modelIndex.row();
-    }
+		list << modelIndex.row();
+	}
 
-    return list;
+	return list;
 }

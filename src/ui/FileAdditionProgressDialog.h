@@ -22,28 +22,28 @@
 #include <QtWidgets/QDialog>
 
 namespace Ui {
-    class FileAdditionProgressDialog;
+	class FileAdditionProgressDialog;
 }
 
 class FileAdditionProgressDialog : public QDialog {
 Q_OBJECT
 
 public:
-    explicit FileAdditionProgressDialog(QWidget *parent, const QList<QString> &files);
+	explicit FileAdditionProgressDialog(QWidget *parent, const QList<QString> &files);
 
-    ~FileAdditionProgressDialog() override;
+	~FileAdditionProgressDialog() override;
 
-    void task(GThread *thread, const QList<QString> &files);
+	void task(GThread *thread, const QList<QString> &files);
 
 public slots:
 
-    void taskProgress(int max, int progress, const QString &text);
+	void taskProgress(int max, int progress, const QString &text);
 
 signals:
 
-    void filesAdded(groupid groupId);
+	void filesAdded(groupid groupId);
 
 protected:
-    Ui::FileAdditionProgressDialog *m_ui;
-    GThread *m_thread;
+	Ui::FileAdditionProgressDialog *m_ui;
+	GThread *m_thread;
 };

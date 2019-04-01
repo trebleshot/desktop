@@ -38,119 +38,115 @@ class TransferTaskManager;
 class TransferTask : public Interrupter {
 
 public:
-    friend TransferTaskManager;
-    friend SeamlessServer;
+	friend TransferTaskManager;
+	friend SeamlessServer;
 
-    explicit TransferTask(groupid groupId, const QString &deviceId, TransferObject::Type type)
-    {
-        m_groupId = groupId;
-        m_deviceId = deviceId;
-        m_type = type;
-    }
+	explicit TransferTask(groupid groupId, const QString &deviceId, TransferObject::Type type)
+	{
+		m_groupId = groupId;
+		m_deviceId = deviceId;
+		m_type = type;
+	}
 
 protected:
-    TransferObject::Type m_type = TransferObject::Type::Incoming;
-    groupid m_groupId;
-    QString m_deviceId;
+	TransferObject::Type m_type = TransferObject::Type::Incoming;
+	groupid m_groupId;
+	QString m_deviceId;
 };
 
 class TransferTaskManager : public QObject {
 Q_OBJECT
-    QMutex m_mutex;
+	QMutex m_mutex;
 
 protected:
-    QList<TransferTask *> m_activeTasks;
+	QList<TransferTask *> m_activeTasks;
 
 public:
-    friend class TransferTask;
+	friend class TransferTask;
 
-    void attachTask(TransferTask *task)
-    {
-        m_mutex.lock();
-        m_activeTasks << task;
-        emit taskAdded(task->m_groupId, task->m_deviceId, task->m_type);
-        m_mutex.unlock();
-    }
+	void attachTask(TransferTask *task)
+	{
+		m_mutex.lock();
+		m_activeTasks << task;
+		emit taskAdded(task->m_groupId, task->m_deviceId, task->m_type);
+		m_mutex.unlock();
+	}
 
-    bool hasActiveTasksFor(groupid groupId, const QString &deviceId = QString())
-    {
-        m_mutex.lock();
+	bool hasActiveTasksFor(groupid groupId, const QString &deviceId = QString())
+	{
+		m_mutex.lock();
 
-        for (const auto *task : m_activeTasks)
-            if (task->m_groupId == groupId && (deviceId == nullptr || task->m_deviceId == deviceId)) {
-                m_mutex.unlock();
-                return true;
-            }
+		for (const auto *task : m_activeTasks)
+			if (task->m_groupId == groupId && (deviceId == nullptr || task->m_deviceId == deviceId)) {
+				m_mutex.unlock();
+				return true;
+			}
 
-        m_mutex.unlock();
-        return false;
-    }
+		m_mutex.unlock();
+		return false;
+	}
 
-    QList<TransferTask> getActiveTasksFor(groupid groupId)
-    {
-        QList<TransferTask> tasks;
+	QList<TransferTask> getActiveTasksFor(groupid groupId)
+	{
+		QList<TransferTask> tasks;
 
-        m_mutex.lock();
-        for (const auto *task : m_activeTasks) {
-            if (task->m_groupId == groupId)
-                tasks << TransferTask(*task);
-        }
-        m_mutex.unlock();
+		m_mutex.lock();
+		for (const auto *task : m_activeTasks) {
+			if (task->m_groupId == groupId)
+				tasks << TransferTask(*task);
+		}
+		m_mutex.unlock();
 
-        return tasks;
-    }
+		return tasks;
+	}
 
-    int pauseTasks(groupid groupId, const QString &deviceId = QString())
-    {
-        int foundTotal = 0;
+	int pauseTasks(groupid groupId, const QString &deviceId = QString())
+	{
+		int foundTotal = 0;
 
-        m_mutex.lock();
-        for (auto *task : m_activeTasks)
-            if (task->m_groupId == groupId && (deviceId == nullptr || deviceId == task->m_deviceId)) {
-                task->interrupt();
-                foundTotal++;
-            }
-        m_mutex.unlock();
+		m_mutex.lock();
+		for (auto *task : m_activeTasks)
+			if (task->m_groupId == groupId && (deviceId == nullptr || deviceId == task->m_deviceId)) {
+				task->interrupt();
+				foundTotal++;
+			}
+		m_mutex.unlock();
 
-        return foundTotal;
-    }
+		return foundTotal;
+	}
 
-    void detachTask(TransferTask *task)
-    {
-        m_mutex.lock();
-        m_activeTasks.removeOne(task);
-        emit taskRemoved(task->m_groupId, task->m_deviceId, task->m_type);
-        m_mutex.unlock();
-    }
+	void detachTask(TransferTask *task)
+	{
+		m_mutex.lock();
+		m_activeTasks.removeOne(task);
+		emit taskRemoved(task->m_groupId, task->m_deviceId, task->m_type);
+		m_mutex.unlock();
+	}
 
 signals:
 
-    void taskAdded(groupid groupId, const QString &device, int type);
+	void taskAdded(groupid groupId, const QString &device, int type);
 
-    void taskRemoved(groupid groupId, const QString &device, int type);
-
-    void taskByteTransferred(groupid groupId, const QString &device, int type, qint64 change, qint64 fileSessionSize);
-
-    void taskItemTransferred(groupid groupId, const QString &device, int type);
+	void taskRemoved(groupid groupId, const QString &device, int type);
 };
 
 class AppUtils {
 public:
-    static bool applyAdapterName(DeviceConnection &connection);
+	static bool applyAdapterName(DeviceConnection &connection);
 
-    static void applyDeviceToJSON(QJsonObject &object);
+	static void applyDeviceToJSON(QJsonObject &object);
 
-    static AccessDatabase *getDatabase();
+	static AccessDatabase *getDatabase();
 
-    static QThread *getDatabaseWorker();
+	static QThread *getDatabaseWorker();
 
-    static AccessDatabaseSignaller *getDatabaseSignaller();
+	static AccessDatabaseSignaller *getDatabaseSignaller();
 
-    static QSettings &getDefaultSettings();
+	static QSettings &getDefaultSettings();
 
-    static QString getDeviceId();
+	static QString getDeviceId();
 
-    static NetworkDevice getLocalDevice();
+	static NetworkDevice getLocalDevice();
 
-    static TransferTaskManager *getTransferTaskManager();
+	static TransferTaskManager *getTransferTaskManager();
 };

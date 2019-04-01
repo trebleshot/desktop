@@ -34,18 +34,20 @@ class ConnectionReselectForDeviceDialog
 Q_OBJECT
 
 public:
-	explicit ConnectionReselectForDeviceDialog(QWidget* parent, const QString& deviceId);
+	explicit ConnectionReselectForDeviceDialog(QWidget *parent, const QString &deviceId);
 
 	~ConnectionReselectForDeviceDialog() override;
 
 public slots:
-	void defaultButtonsClicked(QAbstractButton* button);
+
+	void defaultButtonsClicked(QAbstractButton *button);
 
 signals:
-	void connectionSelected(const QString& adapterName);
+
+	void connectionSelected(const QString &adapterName);
 
 protected:
-	Ui::ConnectionReselectForDeviceDialog* m_ui;
-	ConnectionModel* m_connectionModel;
+	Ui::ConnectionReselectForDeviceDialog *m_ui;
+	ConnectionModel *m_connectionModel;
 };
 

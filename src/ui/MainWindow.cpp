@@ -19,14 +19,14 @@ MainWindow::MainWindow(QWidget *parent)
 	m_ui->setupUi(this);
 
 	setAcceptDrops(true);
-	setWindowTitle("Home");
+	setWindowTitle(tr("Home"));
 
 	if (AppUtils::getDatabase() == nullptr) {
 		auto *error = new QMessageBox(this);
 
-		error->setWindowTitle("Database error");
-		error->setText("The database used to store information did not open. Refer to the development notes. "
-		               "The program will force close.");
+		error->setWindowTitle(tr("Database error"));
+		error->setText(tr("The database used to store information did not open. Refer to the development notes. "
+		                  "The program will force close."));
 
 		error->show();
 
@@ -38,9 +38,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 		if (!m_commServer->start() || !m_seamlessServer->start()) {
 			auto *error = new QMessageBox(this);
-			error->setWindowTitle(QString("Server error"));
-			error->setText(QString("TrebleShot server has returned with an error. "
-			                       "Try restarting the application to solve the problem."));
+			error->setWindowTitle(tr("Server error"));
+			error->setText(tr("TrebleShot server has returned with an error. "
+			                  "Try restarting the application to solve the problem."));
 			connect(this, &MainWindow::destroyed, error, &QObject::deleteLater);
 			error->show();
 		}
@@ -59,9 +59,11 @@ MainWindow::MainWindow(QWidget *parent)
 		connect(m_ui->startPauseButton, &QPushButton::pressed, this, &MainWindow::taskToggle);
 		connect(m_ui->showButton, SIGNAL(pressed()), this, SLOT(showTransfer()));
 		connect(m_ui->removeButton, &QPushButton::pressed, this, &MainWindow::removeTransfer);
-		connect(m_ui->devicesTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::deviceContextMenu);
+		connect(m_ui->devicesTreeView, &QTreeView::customContextMenuRequested, this,
+		        &MainWindow::deviceContextMenu);
 		connect(m_ui->devicesTreeView, &QTreeView::activated, this, &MainWindow::deviceSelected);
-		connect(m_ui->transfersTreeView, &QTreeView::customContextMenuRequested, this, &MainWindow::transferContextMenu);
+		connect(m_ui->transfersTreeView, &QTreeView::customContextMenuRequested, this,
+		        &MainWindow::transferContextMenu);
 		connect(m_ui->transfersTreeView, &QTreeView::activated, this, &MainWindow::transferItemActivated);
 		connect(m_ui->transfersTreeView->selectionModel(), &QItemSelectionModel::selectionChanged,
 		        this, &MainWindow::transferSelectionChanged);
@@ -73,7 +75,7 @@ MainWindow::MainWindow(QWidget *parent)
 		connect(m_ui->actionStorage_location, &QAction::triggered, this, &MainWindow::setStorageLocation);
 		connect(m_ui->changeStorageFolderButton, &QPushButton::clicked, this, &MainWindow::setStorageLocation);
 		connect(m_ui->actionShow_received_files, &QAction::triggered, this, &MainWindow::showReceivedFiles);
-		connect(m_ui->usernameLineEdit, &QLineEdit::textChanged, this, &MainWindow::usernameChanged);
+		connect(m_ui->usernameLineEdit, &QLineEdit::editingFinished, this, &MainWindow::usernameChanged);
 		connect(m_ui->saveStorageButton, &QPushButton::clicked, this, &MainWindow::savePathChanged);
 
 		refreshStorageLocation();
@@ -152,11 +154,11 @@ void MainWindow::showReceivedText(const QString &text, const QString &deviceId)
 
 		QMessageBox messageBox(this);
 
-		messageBox.setWindowTitle(QString("Text received from %1").arg(device.nickname));
+		messageBox.setWindowTitle(tr("Text received from %1").arg(device.nickname));
 		messageBox.setText(text);
 		messageBox.addButton(QMessageBox::StandardButton::Close);
 
-		QPushButton *buttonCopy = messageBox.addButton(QString("Copy to clipboard"), QMessageBox::ButtonRole::ActionRole);
+		QPushButton *buttonCopy = messageBox.addButton(tr("Copy to clipboard"), QMessageBox::ButtonRole::ActionRole);
 
 		connect(buttonCopy, &QPushButton::pressed, [text]() {
 			QClipboard *clipboard = QApplication::clipboard();
@@ -180,7 +182,7 @@ void MainWindow::showTransferRequest(const QString &deviceId, groupid groupId, i
 		QMessageBox messageBox(this);
 
 		messageBox.setWindowTitle(QString("%1").arg(device.nickname));
-		messageBox.setText(QString("Receive files from %1, %2 in total?")
+		messageBox.setText(tr("Receive files from %1, %2 in total?")
 				                   .arg(device.nickname)
 				                   .arg(filesTotal));
 		auto *okButton = messageBox.addButton(QMessageBox::StandardButton::Yes);
@@ -266,7 +268,7 @@ void MainWindow::setStorageLocation()
 {
 	auto *fileDialog = new QFileDialog();
 
-	fileDialog->setWindowTitle("Choose a folder where files will be put");
+	fileDialog->setWindowTitle(tr("Choose a folder where files will be put"));
 	fileDialog->setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
 	fileDialog->setDirectory(TransferUtils::getDefaultSavePath());
 	fileDialog->setFileMode(QFileDialog::FileMode::DirectoryOnly);
@@ -287,10 +289,10 @@ void MainWindow::deviceBlocked(const QString &deviceId, const QHostAddress &addr
 	if (gDatabase->reconstructSilently(device)) {
 		QMessageBox box(this);
 		box.setWindowTitle(device.nickname);
-		box.setText(QString("Restricted %1 is trying to communicate with you?").arg(device.nickname));
+		box.setText(tr("Restricted %1 is trying to communicate with you?").arg(device.nickname));
 		box.addButton(QMessageBox::StandardButton::Ignore);
-		QPushButton *allowButton = box.addButton("Allow", QMessageBox::ButtonRole::AcceptRole);
-		QPushButton *blockButton = box.addButton("Deny for this session", QMessageBox::ButtonRole::RejectRole);
+		QPushButton *allowButton = box.addButton(tr("Allow"), QMessageBox::ButtonRole::AcceptRole);
+		QPushButton *blockButton = box.addButton(tr("Deny for this session"), QMessageBox::ButtonRole::RejectRole);
 
 		connect(allowButton, &QPushButton::pressed, [&device]() {
 			device.isRestricted = false;
@@ -305,8 +307,10 @@ void MainWindow::deviceBlocked(const QString &deviceId, const QHostAddress &addr
 	}
 }
 
-void MainWindow::usernameChanged(const QString &username)
+void MainWindow::usernameChanged()
 {
+	const auto &username = m_ui->usernameLineEdit->text();
+
 	if (!username.isEmpty())
 		AppUtils::getDefaultSettings().setValue("nickname", username);
 }
@@ -319,8 +323,8 @@ void MainWindow::savePathChanged()
 		AppUtils::getDefaultSettings().setValue("savePath", path);
 	else {
 		QMessageBox box;
-		box.setWindowTitle("Inappropriate folder path");
-		box.setText("Non-existing folders cannot be set");
+		box.setWindowTitle(tr("Inappropriate folder path"));
+		box.setText(tr("Non-existing folders cannot be set"));
 		box.exec();
 	}
 }
@@ -357,7 +361,7 @@ void MainWindow::selectFilesToSend()
 {
 	auto *fileDialog = new QFileDialog();
 
-	fileDialog->setWindowTitle("Choose files to send");
+	fileDialog->setWindowTitle(tr("Choose files to send"));
 	fileDialog->setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
 	fileDialog->setFileMode(QFileDialog::FileMode::ExistingFiles);
 	fileDialog->show();
@@ -430,8 +434,7 @@ void MainWindow::taskToggle()
 	QList<TransferGroupInfo> resultList;
 
 	if (ViewUtils::gatherSelections(m_ui->transfersTreeView->selectionModel(), m_groupModel, resultList)) {
-		for (auto &item : resultList)
-		{
+		for (auto &item : resultList) {
 			if (gTaskMgr->hasActiveTasksFor(item.group.id))
 				gTaskMgr->pauseTasks(item.group.id);
 			else if (item.hasIncoming && !item.assignees.empty())

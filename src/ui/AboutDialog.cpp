@@ -23,12 +23,12 @@
 #include "AboutDialog.h"
 
 AboutDialog::AboutDialog(QWidget *parent)
-        : QDialog(parent), m_ui(new Ui::AboutDialog)
+		: QDialog(parent), m_ui(new Ui::AboutDialog)
 {
-    m_ui->setupUi(this);
-    auto *moreButton = m_ui->buttonBox->addButton("More", QDialogButtonBox::ButtonRole::NoRole);
+	m_ui->setupUi(this);
+	auto *moreButton = m_ui->buttonBox->addButton(tr("More"), QDialogButtonBox::ButtonRole::NoRole);
 
-    connect(moreButton, &QPushButton::pressed, []() {
-        QDesktopServices::openUrl(QUrl(URI_APP_HOME));
-    });
+	connect(moreButton, &QPushButton::pressed, []() {
+		QDesktopServices::openUrl(QUrl(URI_APP_HOME));
+	});
 }

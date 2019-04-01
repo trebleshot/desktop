@@ -24,7 +24,7 @@
 #include <src/util/SynchronizedList.h>
 
 class FlawedTransferModel : public QAbstractTableModel, public SynchronizedList<TransferObject> {
-	Q_OBJECT
+Q_OBJECT
 
 public:
 	enum ColumnName {

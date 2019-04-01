@@ -20,12 +20,12 @@
 
 class Interrupter {
 
-    bool m_interrupted = false;
+	bool m_interrupted = false;
 
 public:
-    bool interrupted();
+	bool interrupted();
 
-    void interrupt();
+	void interrupt();
 
-    void reset();
+	void reset();
 };

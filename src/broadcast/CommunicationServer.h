@@ -28,9 +28,9 @@
 #include <QApplication>
 
 class CommunicationServer : public CSServer {
-	Q_OBJECT
+Q_OBJECT
 
-		void pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result);
+	void pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result);
 
 public:
 	explicit CommunicationServer(QObject *parent = nullptr);

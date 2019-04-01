@@ -97,260 +97,260 @@ enum ChangeType {
 	 * The value 'Any' is used when the slots are called out
 	 * of the signal/slot mechanism.
 	 */
-    Any = -1,
-    Delete,
-    Update,
-    Insert
+			Any = -1,
+	Delete,
+	Update,
+	Insert
 };
 
 namespace DbStructure {
-    extern QSqlField generateField(const QString &key, const QVariant::Type &type, bool nullable = true);
+	extern QSqlField generateField(const QString &key, const QVariant::Type &type, bool nullable = true);
 
-    extern QSqlField generateField(const QString &key, const QVariant &type);
+	extern QSqlField generateField(const QString &key, const QVariant &type);
 
-    extern QString generateTableCreationSql(const QString &tableName, const QSqlRecord &record, bool mayExist = false);
+	extern QString generateTableCreationSql(const QString &tableName, const QSqlRecord &record, bool mayExist = false);
 
-    extern QString transformType(const QVariant::Type &type);
+	extern QString transformType(const QVariant::Type &type);
 
-    extern QSqlTableModel *gatherTableModel(const DatabaseObject &dbObject);
+	extern QSqlTableModel *gatherTableModel(const DatabaseObject &dbObject);
 
-    extern QSqlTableModel *gatherTableModel(const QString &tableName);
+	extern QSqlTableModel *gatherTableModel(const QString &tableName);
 }
 
 class SqlSelection {
 public:
-    QString tag;
-    QString tableName;
-    QStringList columns;
-    QString where;
-    QList<QVariant> whereArgs;
-    QString groupBy;
-    QString having;
-    QString orderBy;
-    int limit = -1;
+	QString tag;
+	QString tableName;
+	QStringList columns;
+	QString where;
+	QList<QVariant> whereArgs;
+	QString groupBy;
+	QString having;
+	QString orderBy;
+	int limit = -1;
 
-    explicit SqlSelection() = default;
+	explicit SqlSelection() = default;
 
-    void bindWhereClause(QSqlQuery &query) const;
+	void bindWhereClause(QSqlQuery &query) const;
 
-    QString generateSpecifierClause(bool fromStatement = true) const;
+	QString generateSpecifierClause(bool fromStatement = true) const;
 
-    void setHaving(const QString &having);
+	void setHaving(const QString &having);
 
-    void setGroupBy(const QString &field, bool ascending);
+	void setGroupBy(const QString &field, bool ascending);
 
-    void setGroupBy(const QString &orderBy);
+	void setGroupBy(const QString &orderBy);
 
-    void setLimit(int limit);
+	void setLimit(int limit);
 
-    void setOrderBy(const QString &field, bool ascending);
+	void setOrderBy(const QString &field, bool ascending);
 
-    void setOrderBy(const QString &limit);
+	void setOrderBy(const QString &limit);
 
-    void setTableName(const QString &tableName);
+	void setTableName(const QString &tableName);
 
-    void setWhere(const QString &whereString);
+	void setWhere(const QString &whereString);
 
-    QSqlQuery toDeletionQuery() const;
+	QSqlQuery toDeletionQuery() const;
 
-    QSqlQuery toInsertionQuery() const;
+	QSqlQuery toInsertionQuery() const;
 
-    QSqlQuery toSelectionQuery() const;
+	QSqlQuery toSelectionQuery() const;
 
-    QString toSelectionColumns() const;
+	QString toSelectionColumns() const;
 
-    QSqlQuery toUpdateQuery(const DbObjectMap &map) const;
+	QSqlQuery toUpdateQuery(const DbObjectMap &map) const;
 
-    bool valid() const;
+	bool valid() const;
 };
 
 class DatabaseObject {
 public:
-    DatabaseObject() = default;
+	DatabaseObject() = default;
 
-    virtual ~DatabaseObject() = default;
+	virtual ~DatabaseObject() = default;
 
-    void generateValues(const QSqlRecord &record);
+	void generateValues(const QSqlRecord &record);
 
-    virtual SqlSelection getWhere() const = 0;
+	virtual SqlSelection getWhere() const = 0;
 
-    virtual DbObjectMap getValues() const = 0;
+	virtual DbObjectMap getValues() const = 0;
 
-    virtual void onGeneratingValues(const DbObjectMap &record) = 0;
+	virtual void onGeneratingValues(const DbObjectMap &record) = 0;
 
-    virtual void onUpdatingObject(AccessDatabase *db)
-    {
-        // Implement by overriding
-    }
+	virtual void onUpdatingObject(AccessDatabase *db)
+	{
+		// Implement by overriding
+	}
 
-    virtual void onInsertingObject(AccessDatabase *db)
-    {
-        // Implement by overriding
-    }
+	virtual void onInsertingObject(AccessDatabase *db)
+	{
+		// Implement by overriding
+	}
 
-    virtual void onRemovingObject(AccessDatabase *db, DatabaseObject *parent)
-    {
-        // Implement by overriding
-    }
+	virtual void onRemovingObject(AccessDatabase *db, DatabaseObject *parent)
+	{
+		// Implement by overriding
+	}
 };
 
 class AccessDatabase : public QObject {
 Q_OBJECT
-    QSqlDatabase *db;
+	QSqlDatabase *db;
 
 public:
-    explicit AccessDatabase(QSqlDatabase *db, QObject *parent = nullptr);
+	explicit AccessDatabase(QSqlDatabase *db, QObject *parent = nullptr);
 
-    static QMap<QString, QSqlRecord> getPassiveTables();
+	static QMap<QString, QSqlRecord> getPassiveTables();
 
-    QSqlDatabase *getDatabase();
+	QSqlDatabase *getDatabase();
 
-    template<typename T = DatabaseObject>
-    void castQuery(const SqlSelection &sqlSelection, QList<T> &resultList)
-    {
-        QSqlQuery query = sqlSelection.toSelectionQuery();
+	template<typename T = DatabaseObject>
+	void castQuery(const SqlSelection &sqlSelection, QList<T> &resultList)
+	{
+		QSqlQuery query = sqlSelection.toSelectionQuery();
 
-        query.exec();
+		query.exec();
 
-        if (query.first())
-            do {
-                T dbObject;
-                dbObject.generateValues(query.record());
-                resultList.append(dbObject);
-            } while (query.next());
-    }
+		if (query.first())
+			do {
+				T dbObject;
+				dbObject.generateValues(query.record());
+				resultList.append(dbObject);
+			} while (query.next());
+	}
 
-    void initialize();
+	void initialize();
 
-    template<typename T = DatabaseObject>
-    bool removeAsObject(const SqlSelection &selection, const T &type, DatabaseObject *parent = nullptr)
-    {
+	template<typename T = DatabaseObject>
+	bool removeAsObject(const SqlSelection &selection, const T &type, DatabaseObject *parent = nullptr)
+	{
 		QList<T> objects;
 		castQuery(selection, objects);
 
-        for (auto resultingObject : objects)
-            resultingObject.onRemovingObject(this, parent);
+		for (auto resultingObject : objects)
+			resultingObject.onRemovingObject(this, parent);
 
-        return remove(selection);
-    }
+		return remove(selection);
+	}
 
 public slots:
 
-    bool commit();
+	bool commit();
 
-    bool contains(const DatabaseObject &dbObject);
+	bool contains(const DatabaseObject &dbObject);
 
-    bool contains(const SqlSelection &dbObject);
+	bool contains(const SqlSelection &dbObject);
 
-    void doSynchronized(const std::function<void(AccessDatabase *)> &listener)
-    {
-        listener(this);
-    }
+	void doSynchronized(const std::function<void(AccessDatabase *)> &listener)
+	{
+		listener(this);
+	}
 
-    bool insert(DatabaseObject &dbObject);
+	bool insert(DatabaseObject &dbObject);
 
-    bool publish(DatabaseObject &dbObject);
+	bool publish(DatabaseObject &dbObject);
 
-    bool reconstructSilently(DatabaseObject &dbObject);
+	bool reconstructSilently(DatabaseObject &dbObject);
 
-    void reconstruct(DatabaseObject &dbObject);
+	void reconstruct(DatabaseObject &dbObject);
 
-    QSqlRecord record(const DatabaseObject &object);
+	QSqlRecord record(const DatabaseObject &object);
 
-    QSqlRecord record(const DatabaseObject &object, QSqlTableModel *tableModel);
+	QSqlRecord record(const DatabaseObject &object, QSqlTableModel *tableModel);
 
-    QSqlRecord record(const DbObjectMap &objectMap, QSqlTableModel *tableModel);
+	QSqlRecord record(const DbObjectMap &objectMap, QSqlTableModel *tableModel);
 
-    bool remove(const SqlSelection &selection);
+	bool remove(const SqlSelection &selection);
 
-    bool remove(DatabaseObject &dbObject);
+	bool remove(DatabaseObject &dbObject);
 
-    bool transaction();
+	bool transaction();
 
-    bool update(DatabaseObject &dbObject);
+	bool update(DatabaseObject &dbObject);
 
-    bool update(const SqlSelection &selection, const DbObjectMap &record);
+	bool update(const SqlSelection &selection, const DbObjectMap &record);
 
 signals:
 
-    void databaseChanged(const SqlSelection &, ChangeType);
+	void databaseChanged(const SqlSelection &, ChangeType);
 
-    bool signalPublish(DatabaseObject &);
+	bool signalPublish(DatabaseObject &);
 };
 
 class AccessDatabaseSignaller : public QObject {
 Q_OBJECT
 
 public:
-    explicit AccessDatabaseSignaller(AccessDatabase *db, QObject *parent = nullptr)
-            : QObject(parent)
-    {
-        connect(this, &AccessDatabaseSignaller::commit, db, &AccessDatabase::commit, Qt::BlockingQueuedConnection);
-        connect(this, SIGNAL(contains(
-                                     const DatabaseObject & )),
-                db, SLOT(contains(
-                                 const DatabaseObject & )), Qt::BlockingQueuedConnection);
-        connect(this, SIGNAL(contains(
-                                     const SqlSelection & )),
-                db, SLOT(contains(
-                                 const SqlSelection & )), Qt::BlockingQueuedConnection);
-        connect(this, &AccessDatabaseSignaller::doNonDirect, db, &AccessDatabase::doSynchronized);
-        connect(this, &AccessDatabaseSignaller::doSynchronized, db, &AccessDatabase::doSynchronized,
-                Qt::BlockingQueuedConnection);
-        connect(this, &AccessDatabaseSignaller::insert, db, &AccessDatabase::insert, Qt::BlockingQueuedConnection);
-        connect(this, &AccessDatabaseSignaller::publish, db, &AccessDatabase::publish, Qt::BlockingQueuedConnection);
-        connect(this, &AccessDatabaseSignaller::reconstruct,
-                db, &AccessDatabase::reconstructSilently, Qt::BlockingQueuedConnection);
+	explicit AccessDatabaseSignaller(AccessDatabase *db, QObject *parent = nullptr)
+			: QObject(parent)
+	{
+		connect(this, &AccessDatabaseSignaller::commit, db, &AccessDatabase::commit, Qt::BlockingQueuedConnection);
+		connect(this, SIGNAL(contains(
+				                     const DatabaseObject & )),
+		        db, SLOT(contains(
+				                 const DatabaseObject & )), Qt::BlockingQueuedConnection);
+		connect(this, SIGNAL(contains(
+				                     const SqlSelection & )),
+		        db, SLOT(contains(
+				                 const SqlSelection & )), Qt::BlockingQueuedConnection);
+		connect(this, &AccessDatabaseSignaller::doNonDirect, db, &AccessDatabase::doSynchronized);
+		connect(this, &AccessDatabaseSignaller::doSynchronized, db, &AccessDatabase::doSynchronized,
+		        Qt::BlockingQueuedConnection);
+		connect(this, &AccessDatabaseSignaller::insert, db, &AccessDatabase::insert, Qt::BlockingQueuedConnection);
+		connect(this, &AccessDatabaseSignaller::publish, db, &AccessDatabase::publish, Qt::BlockingQueuedConnection);
+		connect(this, &AccessDatabaseSignaller::reconstruct,
+		        db, &AccessDatabase::reconstructSilently, Qt::BlockingQueuedConnection);
 
-        connect(this, SIGNAL(remove(
-                                     const SqlSelection & )),
-                db, SLOT(remove(
-                                 const SqlSelection & )), Qt::BlockingQueuedConnection);
+		connect(this, SIGNAL(remove(
+				                     const SqlSelection & )),
+		        db, SLOT(remove(
+				                 const SqlSelection & )), Qt::BlockingQueuedConnection);
 
-        connect(this, SIGNAL(remove(DatabaseObject & )),
-                db, SLOT(remove(DatabaseObject & )), Qt::BlockingQueuedConnection);
+		connect(this, SIGNAL(remove(DatabaseObject & )),
+		        db, SLOT(remove(DatabaseObject & )), Qt::BlockingQueuedConnection);
 
-        connect(this, &AccessDatabaseSignaller::transaction, db, &AccessDatabase::transaction, Qt::BlockingQueuedConnection);
+		connect(this, &AccessDatabaseSignaller::transaction, db, &AccessDatabase::transaction, Qt::BlockingQueuedConnection);
 
-        connect(this, SIGNAL(update(
-                                     const SqlSelection &, const DbObjectMap & )),
-                db, SLOT(update(
-                                 const SqlSelection &, const DbObjectMap & )), Qt::BlockingQueuedConnection);
+		connect(this, SIGNAL(update(
+				                     const SqlSelection &, const DbObjectMap & )),
+		        db, SLOT(update(
+				                 const SqlSelection &, const DbObjectMap & )), Qt::BlockingQueuedConnection);
 
-        connect(this, SIGNAL(update(DatabaseObject & )),
-                db, SLOT(update(DatabaseObject & )), Qt::BlockingQueuedConnection);
-    }
+		connect(this, SIGNAL(update(DatabaseObject & )),
+		        db, SLOT(update(DatabaseObject & )), Qt::BlockingQueuedConnection);
+	}
 
-    void operator<<(const std::function<void(AccessDatabase *)> &listener)
-    {
-        emit doSynchronized(listener);
-    }
+	void operator<<(const std::function<void(AccessDatabase *)> &listener)
+	{
+		emit doSynchronized(listener);
+	}
 
 signals:
 
-    bool commit();
+	bool commit();
 
-    bool contains(const DatabaseObject &dbObject);
+	bool contains(const DatabaseObject &dbObject);
 
-    bool contains(const SqlSelection &selection);
+	bool contains(const SqlSelection &selection);
 
-    void doNonDirect(const std::function<void(AccessDatabase *)> &listener);
+	void doNonDirect(const std::function<void(AccessDatabase *)> &listener);
 
-    void doSynchronized(const std::function<void(AccessDatabase *)> &listener);
+	void doSynchronized(const std::function<void(AccessDatabase *)> &listener);
 
-    bool insert(DatabaseObject &dbObject);
+	bool insert(DatabaseObject &dbObject);
 
-    bool publish(DatabaseObject &dbObject);
+	bool publish(DatabaseObject &dbObject);
 
-    bool reconstruct(DatabaseObject &dbObject);
+	bool reconstruct(DatabaseObject &dbObject);
 
-    bool remove(const SqlSelection &selection);
+	bool remove(const SqlSelection &selection);
 
-    bool remove(DatabaseObject &dbObject);
+	bool remove(DatabaseObject &dbObject);
 
-    bool transaction();
+	bool transaction();
 
-    bool update(DatabaseObject &dbObject);
+	bool update(DatabaseObject &dbObject);
 
-    bool update(const SqlSelection &selection, const DbObjectMap &values);
+	bool update(const SqlSelection &selection, const DbObjectMap &values);
 };

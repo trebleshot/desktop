@@ -22,15 +22,15 @@
 
 class TextStreamObject : public DatabaseObject {
 public:
-    int id;
-    QString text;
-    time_t dateCreated;
+	int id;
+	QString text;
+	time_t dateCreated;
 
-    explicit TextStreamObject(int id = 0, const QString &text = nullptr);
+	explicit TextStreamObject(int id = 0, const QString &text = nullptr);
 
-    SqlSelection getWhere() const override;
+	SqlSelection getWhere() const override;
 
-    DbObjectMap getValues() const override;
+	DbObjectMap getValues() const override;
 
-    void onGeneratingValues(const DbObjectMap &record) override;
+	void onGeneratingValues(const DbObjectMap &record) override;
 };

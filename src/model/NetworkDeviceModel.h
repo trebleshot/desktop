@@ -26,23 +26,24 @@ class NetworkDeviceModel : public QAbstractTableModel, public SynchronizedList<N
 Q_OBJECT
 
 public:
-    enum ColumnName {
-        Name,
-        LastUsageDate,
-        Status,
-        __itemCount // to count his enum
-    };
+	enum ColumnName {
+		Name,
+		LastUsageDate,
+		Status,
+		__itemCount // to count his enum
+	};
 
-    explicit NetworkDeviceModel(QObject *parent = nullptr);
+	explicit NetworkDeviceModel(QObject *parent = nullptr);
 
-    int columnCount(const QModelIndex &parent) const override;
+	int columnCount(const QModelIndex &parent) const override;
 
-    int rowCount(const QModelIndex &parent) const override;
+	int rowCount(const QModelIndex &parent) const override;
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    QVariant data(const QModelIndex &index, int role) const override;
+	QVariant data(const QModelIndex &index, int role) const override;
 
 public slots:
-    void databaseChanged(const SqlSelection& change, ChangeType type);
+
+	void databaseChanged(const SqlSelection &change, ChangeType type);
 };

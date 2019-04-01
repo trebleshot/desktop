@@ -27,18 +27,18 @@
 
 class SeamlessClient : public QThread, public TransferTask {
 Q_OBJECT
-    int m_attemptsLeft = 2;
+	int m_attemptsLeft = 2;
 
 public:
-    explicit SeamlessClient(groupid groupId, const QString &deviceId, bool autoDelete = false,
-                            QObject *parent = nullptr);
+	explicit SeamlessClient(groupid groupId, const QString &deviceId, bool autoDelete = false,
+	                        QObject *parent = nullptr);
 
 signals:
 
-    void taskDone(groupid groupId, QString deviceId);
+	void taskDone(groupid groupId, QString deviceId);
 
-    void taskFailed(groupid groupId, QString deviceId, Reason reason);
+	void taskFailed(groupid groupId, QString deviceId, Reason reason);
 
 protected:
-    void run() override;
+	void run() override;
 };

@@ -18,14 +18,16 @@
 #pragma once
 
 #ifdef USE_DNSSD_FEATURE
+
 #include <KDNSSD/DNSSD/PublicService>
 #include <KDNSSD/DNSSD/ServiceBrowser>
 #include <src/util/NetworkDeviceLoader.h>
+
 class DNSSDService : public QObject {
-	Q_OBJECT
+Q_OBJECT
 
 public:
-	explicit DNSSDService(QObject* parent = nullptr);
+	explicit DNSSDService(QObject *parent = nullptr);
 
 	void start();
 
@@ -39,6 +41,7 @@ protected:
 	KDNSSD::PublicService *m_serviceBroadcast;
 	KDNSSD::ServiceBrowser *m_serviceBrowser;
 };
+
 #else
 #include <QObject>
 
