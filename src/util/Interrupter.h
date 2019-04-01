@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <QObject>
-
 class Interrupter {
 
     bool m_interrupted = false;

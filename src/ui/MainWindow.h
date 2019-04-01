@@ -89,5 +89,7 @@ public slots:
 
     void transferContextMenu(const QPoint &point);
 
+    void updateButtons();
+
     static void usernameChanged(const QString& username);
 };

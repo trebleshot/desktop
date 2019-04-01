@@ -21,7 +21,7 @@
 #include <QList>
 #include <QMutex>
 
-#define gAccessList(list) MutexEnablingScope(list).accessed()
+#define gAccessList(list) MutexEnablingScope(list)
 
 /**
  * Handles queued access to a class. Most probably to a list.
@@ -99,5 +99,7 @@ public:
 	/*
 	 * Check the access state
 	 */
-	bool accessed();
+	bool accessed() const;
+
+	explicit operator bool() const;
 };

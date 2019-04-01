@@ -181,14 +181,36 @@
            </widget>
           </item>
           <item row="3" column="1">
+           <widget class="QLineEdit" name="storageFolderLineEdit"/>
+          </item>
+          <item row="4" column="1">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetFixedSize</enum>
+            </property>
             <item>
-             <widget class="QLineEdit" name="storageFolderLineEdit"/>
+             <widget class="QPushButton" name="changeStorageFolderButton">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTipDuration">
+               <number>0</number>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string>Choose</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QPushButton" name="saveStorageButton">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -200,22 +222,10 @@
             </item>
            </layout>
           </item>
-          <item row="4" column="1">
-           <widget class="QPushButton" name="changeStorageFolderButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTipDuration">
-             <number>0</number>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
+          <item row="1" column="1">
+           <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Choose</string>
+             <string>(saved when you are done writing)</string>
             </property>
            </widget>
           </item>

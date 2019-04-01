@@ -225,8 +225,7 @@ void SeamlessClient::run()
 															lastDataAvailable = clock();
 														}
 
-														// make sure, when about to complete, notify the last bits
-														if (clock() - lastUpdate > 2000
+														if (clock() - lastUpdate > 200000
 															|| currentFile.size() == fileSize) {
 															auto size = currentFile.size();
 															emit gTaskMgr->taskByteTransferred(m_groupId, m_deviceId,
@@ -235,8 +234,6 @@ void SeamlessClient::run()
 																size);
 															lastKnownSize = size;
 															lastUpdate = clock();
-
-															qDebug() << this << "Updated the status";
 														}
 
 														if (lastDataAvailable < clock() - TIMEOUT_SOCKET_DEFAULT)

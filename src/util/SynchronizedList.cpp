@@ -38,7 +38,12 @@ MutexEnablingScope::~MutexEnablingScope()
         m_list->releaseList();
 }
 
-bool MutexEnablingScope::accessed()
+bool MutexEnablingScope::accessed() const
 {
 	return m_accessed;
+}
+
+MutexEnablingScope::operator bool() const
+{
+	return accessed();
 }

@@ -20,11 +20,27 @@
 
 #include <QtCore/QList>
 #include <QtCore/QItemSelectionModel>
+#include "SynchronizedList.h"
 
 class ViewUtils {
 public:
 
-    static QList<int> getSelectionRows(QItemSelectionModel *model);
+	static QList<int> getSelectionRows(QItemSelectionModel *model);
 
-    static QList<int> getSelectionRows(const QModelIndexList &index);
+	static QList<int> getSelectionRows(const QModelIndexList &index);
+
+	template<typename T>
+	static bool gatherSelections(QItemSelectionModel *model, SynchronizedList<T> *parentList, QList<T> &resultList)
+	{
+		const auto &selectedRows = getSelectionRows(model);
+
+		if (!selectedRows.empty() && gAccessList(parentList)) {
+			for (const int row : selectedRows)
+				resultList.append(parentList->list()->at(row));
+
+			return true;
+		}
+
+		return false;
+	}
 };
