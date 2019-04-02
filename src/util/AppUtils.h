@@ -129,7 +129,8 @@ signals:
 
 	void taskRemoved(groupid groupId, const QString &deviceId, int type);
 
-	void taskStatus(groupid groupId, const QString &deviceId, int type, qint64 completed);
+	void taskStatus(groupid groupId, const QString &deviceId, int type, qint64 completed,
+	                const TransferObject &object);
 };
 
 class AppUtils {

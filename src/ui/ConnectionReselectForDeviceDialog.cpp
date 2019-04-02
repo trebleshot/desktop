@@ -27,6 +27,13 @@ ConnectionReselectForDeviceDialog::ConnectionReselectForDeviceDialog(QWidget *pa
 
 	connect(m_ui->defaultButtonBox, &QDialogButtonBox::clicked, this,
 	        &ConnectionReselectForDeviceDialog::defaultButtonsClicked);
+
+	NetworkDevice device(deviceId);
+
+	if (gDatabase->reconstructSilently(device))
+		m_ui->deviceNameLabel->setText(device.nickname);
+	else
+		reject();
 }
 
 ConnectionReselectForDeviceDialog::~ConnectionReselectForDeviceDialog()

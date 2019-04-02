@@ -50,7 +50,8 @@ public slots:
 
 	void globalTaskRemoved(groupid groupId, const QString &deviceId, int type);
 
-	void globalTaskStatus(groupid groupId, const QString &deviceId, int type, qint64 completed);
+	void globalTaskStatus(groupid groupId, const QString &deviceId, int type, qint64 completed,
+	                      const TransferObject &object);
 
 	void removeTransfer();
 
@@ -82,5 +83,17 @@ protected:
 	FlawedTransferModel *m_errorsModel;
 	TransferGroup m_group;
 	TransferGroupInfo m_groupInfo;
-	qint64 m_ongoingCompletedBytes = 0;
+	bool m_showAddDeviceDialog;
+
+	struct {
+		TransferObject object;
+		qint64 completedBytes = 0;
+
+		void reset() {
+			object = TransferObject();
+			completedBytes = 0;
+		}
+	} m_ongoingTaskInfo;
+
+	void paintEvent(QPaintEvent *event) override;
 };

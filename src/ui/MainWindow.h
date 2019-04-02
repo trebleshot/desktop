@@ -57,10 +57,6 @@ public slots:
 
 	void deviceSelected(const QModelIndex &modelIndex);
 
-	void showTransfer();
-
-	void showTransfer(groupid groupId);
-
 	void removeTransfer();
 
 	void refreshStorageLocation();
@@ -76,6 +72,12 @@ public slots:
 	void showReceivedText(const QString &text, const QString &deviceId);
 
 	void showTransferRequest(const QString &deviceId, groupid groupId, int filesTotal);
+
+	void showTransfer();
+
+	void showTransferWithAddDevicesDialog(groupid groupId);
+
+	void showTransfer(groupid groupId, bool showAddDeviceDialog = false);
 
 	void taskStart();
 

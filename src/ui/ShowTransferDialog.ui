@@ -79,7 +79,7 @@
         <string>Add devices</string>
        </property>
        <property name="default">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="flat">
         <bool>true</bool>
@@ -221,6 +221,48 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
+      <widget class="QLabel" name="transferObjectTextView">
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>120</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Current file</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QProgressBar" name="progressBarPerFile">
+       <property name="value">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QProgressBar" name="progressBar">
        <property name="value">
         <number>0</number>
@@ -233,6 +275,12 @@
         <size>
          <width>120</width>
          <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>120</width>
+         <height>16777215</height>
         </size>
        </property>
        <property name="cursor">

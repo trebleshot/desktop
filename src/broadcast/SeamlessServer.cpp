@@ -174,7 +174,8 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 											qDebug() << this << "Notified updated";
 											emit gTaskMgr->taskStatus(thisTask->m_groupId, thisTask->m_deviceId,
 											                           TransferObject::Type::Incoming,
-											                           file.pos());
+											                           file.pos(),
+											                           transferObject);
 											lastUpdated = currentTime;
 										}
 									}

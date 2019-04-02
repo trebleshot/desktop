@@ -115,7 +115,7 @@ void MainWindow::dropEvent(QDropEvent *event)
 		TransferUtils::getPaths(event->mimeData()->urls(), paths);
 
 		FileAdditionProgressDialog progressDialog(this, paths);
-		connect(&progressDialog, SIGNAL(filesAdded(groupid)), this, SLOT(showTransfer(groupid)));
+		connect(&progressDialog, SIGNAL(filesAdded(groupid)), this, SLOT(showTransferWithAddDevicesDialog(groupid)));
 		progressDialog.exec();
 	}
 }
@@ -139,10 +139,13 @@ void MainWindow::aboutQt()
 {
 	QApplication::aboutQt();
 }
+void MainWindow::showTransferWithAddDevicesDialog(groupid groupId) {
+	showTransfer(groupId, true);
+}
 
-void MainWindow::showTransfer(groupid groupId)
+void MainWindow::showTransfer(groupid groupId, bool showAddDeviceDialog)
 {
-	ShowTransferDialog(this, groupId).exec();
+	ShowTransferDialog(this, groupId, showAddDeviceDialog).exec();
 }
 
 void MainWindow::showReceivedText(const QString &text, const QString &deviceId)

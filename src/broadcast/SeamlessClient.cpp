@@ -230,8 +230,9 @@ void SeamlessClient::run()
 															// also always update when a file status changes
 															qDebug() << this << "Notified updated";
 															emit gTaskMgr->taskStatus(m_groupId, m_deviceId,
-															                           TransferObject::Type::Incoming,
-															                           currentFile.size());
+															                          TransferObject::Type::Incoming,
+															                          currentFile.size(),
+															                          transferObject);
 															lastUpdated = currentTime;
 														}
 
