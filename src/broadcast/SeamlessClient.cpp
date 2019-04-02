@@ -281,6 +281,9 @@ void SeamlessClient::run()
 
 						if (transferObject.id != 0)
 							gDbSignal->update(transferObject);
+
+						if (retry)
+							break;
 					}
 
 					bool hasLeftFiles = gDbSignal->contains(TransferUtils::createSqlSelection(
@@ -302,11 +305,6 @@ void SeamlessClient::run()
 		catch (...) {
 			qDebug() << this << "Connection failed to the server";
 		}
-
-		if (retry && m_attemptsLeft > 0 && !interrupted()) {
-			run();
-			m_attemptsLeft--;
-		}
 	} else {
 		qDebug() << this << "Could not produce information within given group id" << m_groupId
 		         << "and device id" << m_deviceId;
@@ -316,4 +314,13 @@ void SeamlessClient::run()
 
 	qDebug() << this << "-- SeamlessClient --";
 	gTaskMgr->detachTask(this);
+
+	if (retry && m_attemptsLeft > 0 && !interrupted()) {
+		run();
+		reset(); // reset interrupter
+
+		m_attemptsLeft--;
+
+		qDebug() << "Restarting";
+	}
 }

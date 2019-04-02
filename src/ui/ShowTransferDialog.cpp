@@ -25,6 +25,7 @@
 #include "ShowTransferDialog.h"
 #include "DeviceChooserDialog.h"
 #include "TransferRequestProgressDialog.h"
+#include "ConnectionReselectForDeviceDialog.h"
 
 ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId, bool showDeviceSelector)
 		: QDialog(parent), m_ui(new Ui::ShowTransferDialog), m_objectModel(new TransferObjectModel(groupId)),
@@ -51,13 +52,13 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId, bool sh
 	connect(m_ui->saveDirectoryButton, &QPushButton::pressed, this, &ShowTransferDialog::saveDirectory);
 	connect(m_ui->removeButton, &QPushButton::pressed, this, &ShowTransferDialog::removeTransfer);
 	connect(m_ui->chooseDirectoryButton, &QPushButton::pressed, this, &ShowTransferDialog::changeSavePath);
-	connect(m_ui->addDevicesButton, &QPushButton::pressed, this, &ShowTransferDialog::addDevices);
+	connect(m_ui->addAndChConnectionButton, &QPushButton::pressed, this, &ShowTransferDialog::addDevOrChangeConnection);
 	connect(m_objectModel, &QAbstractTableModel::layoutChanged, this, &ShowTransferDialog::updateStats);
 
 	checkGroupIntegrity(SqlSelection(), ChangeType::Any);
 
 	if (showDeviceSelector)
-		addDevices();
+		addDevOrChangeConnection();
 }
 
 ShowTransferDialog::~ShowTransferDialog()
@@ -71,7 +72,7 @@ void ShowTransferDialog::changeSavePath()
 {
 	auto *fileDialog = new QFileDialog();
 
-	fileDialog->setWindowTitle(tr("Choose a folder where the files will be put"));
+	fileDialog->setWindowTitle(tr("Choose the folder where the files will be put"));
 	fileDialog->setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
 	fileDialog->setDirectory(TransferUtils::getSavePath(m_group));
 	fileDialog->setFileMode(QFileDialog::FileMode::DirectoryOnly);
@@ -84,6 +85,17 @@ void ShowTransferDialog::changeSavePath()
 	});
 
 	connect(fileDialog, &QDialog::finished, fileDialog, &QObject::deleteLater);
+}
+
+void ShowTransferDialog::connectionChanged(const QString &adapterName)
+{
+	if (m_groupInfo.assignees.empty())
+		return;
+
+	auto assignee = m_groupInfo.assignees[0].assignee;
+	assignee.connectionAdapter = adapterName;
+
+	gDatabase->update(assignee);
 }
 
 void ShowTransferDialog::saveDirectory()
@@ -104,8 +116,10 @@ void ShowTransferDialog::saveDirectory()
 void ShowTransferDialog::checkGroupIntegrity(const SqlSelection &change, ChangeType type)
 {
 	if (!change.valid() || change.tableName == DB_TABLE_TRANSFERASSIGNEE) {
-		m_assigneeList.clear();
-		TransferUtils::getAllAssigneeInfo(m_group, m_assigneeList);
+		qDebug() << this << "Refreshing assignee list";
+
+		m_groupInfo.assignees.clear();
+		TransferUtils::getAllAssigneeInfo(m_group, m_groupInfo.assignees);
 		updateAssignees();
 	}
 
@@ -130,9 +144,11 @@ void ShowTransferDialog::checkGroupIntegrity(const SqlSelection &change, ChangeT
 void ShowTransferDialog::updateAssignees()
 {
 	m_ui->assigneesComboBox->clear();
-	m_ui->assigneesComboBox->addItem(tr("All"), QString());
 
-	for (const auto &info : m_assigneeList)
+	if (m_groupInfo.assignees.size() > 1)
+		m_ui->assigneesComboBox->addItem(tr("All"), QString());
+
+	for (const auto &info : m_groupInfo.assignees)
 		m_ui->assigneesComboBox->addItem(info.device.nickname, info.device.id);
 
 	assigneeChanged(0);
@@ -140,11 +156,10 @@ void ShowTransferDialog::updateAssignees()
 
 void ShowTransferDialog::updateButtons()
 {
-	bool hasRunning = gTaskMgr->hasActiveTasksFor(m_group.id);
+	bool hasRunning = gTaskMgr->hasActiveTasksFor(m_group.id, m_objectModel->m_deviceId);
 
 	m_ui->startButton->setEnabled(m_groupInfo.hasIncoming || hasRunning);
 	m_ui->startButton->setText(hasRunning ? tr("Pause") : tr("Start"));
-	m_ui->addDevicesButton->setEnabled(m_groupInfo.hasOutgoing);
 	m_ui->saveDirectoryButton->setEnabled(m_groupInfo.hasIncoming);
 	m_ui->storageLineEdit->setEnabled(m_groupInfo.hasIncoming);
 	m_ui->storageText->setEnabled(m_groupInfo.hasIncoming);
@@ -152,6 +167,7 @@ void ShowTransferDialog::updateButtons()
 	m_ui->chooseDirectoryButton->setEnabled(m_groupInfo.hasIncoming);
 	m_ui->noIncomingFileText->setVisible(!m_groupInfo.hasIncoming);
 	m_ui->retryReceivingButton->setEnabled(m_groupInfo.hasIncoming);
+	m_ui->addAndChConnectionButton->setText(m_groupInfo.hasOutgoing ? tr("Add devices") : tr("Change connection"));
 
 	if (!hasRunning && m_ongoingCompletedBytes > 0) {
 		m_ongoingCompletedBytes = 0;
@@ -159,12 +175,22 @@ void ShowTransferDialog::updateButtons()
 	}
 }
 
-void ShowTransferDialog::addDevices()
+void ShowTransferDialog::addDevOrChangeConnection()
 {
-	auto *dialog = new DeviceChooserDialog(this, m_group.id);
-	connect(dialog, &DeviceChooserDialog::devicesSelected, this, &ShowTransferDialog::sendToDevices);
-	connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
-	dialog->show();
+	if (m_groupInfo.hasOutgoing) {
+		auto *dialog = new DeviceChooserDialog(this, m_group.id);
+		connect(dialog, &DeviceChooserDialog::devicesSelected, this, &ShowTransferDialog::sendToDevices);
+		connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
+		dialog->show();
+	} else if (!m_groupInfo.assignees.empty()) {
+		auto *dialog = new ConnectionReselectForDeviceDialog(this, m_groupInfo.assignees[0].device.id);
+
+		connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
+		connect(dialog, &ConnectionReselectForDeviceDialog::connectionSelected,
+		        this, &ShowTransferDialog::connectionChanged);
+
+		dialog->show();
+	}
 }
 
 void ShowTransferDialog::sendToDevices(groupid groupId, const QList<NetworkDevice> &devices)
@@ -176,20 +202,37 @@ void ShowTransferDialog::sendToDevices(groupid groupId, const QList<NetworkDevic
 
 void ShowTransferDialog::removeTransfer()
 {
-	if (m_ui->assigneesComboBox->currentIndex() > 0 && !m_groupInfo.hasIncoming) {
-		SqlSelection selection;
-		selection.setTableName(DB_TABLE_TRANSFERASSIGNEE);
-		selection.setWhere(QString("%1 = ? AND %2 = ?")
-				                   .arg(DB_FIELD_TRANSFERASSIGNEE_DEVICEID)
-				                   .arg(DB_FIELD_TRANSFERASSIGNEE_GROUPID));
-		selection.whereArgs << m_ui->assigneesComboBox->currentData().toString()
-		                    << m_group.id;
+	const auto &removedDevice = m_ui->assigneesComboBox->currentText();
+	const auto &removedDeviceId = m_ui->assigneesComboBox->currentData().toString();
+	const auto removeAssignee = m_ui->assigneesComboBox->currentIndex() > 0 && !m_groupInfo.hasIncoming;
+	auto *messageBox = new QMessageBox(this);
 
-		gDatabase->removeAsObject(selection, TransferAssignee());
-		return;
-	}
+	messageBox->setWindowTitle(tr("Remove"));
+	messageBox->setText(removeAssignee ? tr("Remove %1 from this transfer?").arg(removedDevice)
+	                                   : tr("Remove this transfer altogether?"));
 
-	gDatabase->remove(m_group);
+	messageBox->addButton(QMessageBox::StandardButton::Cancel);
+	auto *button = messageBox->addButton(QMessageBox::StandardButton::Ok);
+
+	connect(button, &QPushButton::pressed, [this, removeAssignee, removedDeviceId]() {
+		if (removeAssignee) {
+			SqlSelection selection;
+			selection.setTableName(DB_TABLE_TRANSFERASSIGNEE);
+			selection.setWhere(QString("%1 = ? AND %2 = ?")
+					                   .arg(DB_FIELD_TRANSFERASSIGNEE_DEVICEID)
+					                   .arg(DB_FIELD_TRANSFERASSIGNEE_GROUPID));
+			selection.whereArgs << removedDeviceId
+			                    << m_group.id;
+
+			gDatabase->removeAsObject(selection, TransferAssignee());
+			return;
+		}
+
+		gDatabase->remove(m_group);
+	});
+
+	connect(messageBox, &QMessageBox::finished, messageBox, &QObject::deleteLater);
+	messageBox->show();
 }
 
 void ShowTransferDialog::startTransfer()
@@ -199,8 +242,12 @@ void ShowTransferDialog::startTransfer()
 
 void ShowTransferDialog::assigneeChanged(int index)
 {
+	m_ongoingCompletedBytes = 0;
+
 	m_objectModel->setDeviceId(m_ui->assigneesComboBox->itemData(index).toString());
 	m_objectModel->databaseChanged(SqlSelection(), ChangeType::Any);
+
+	updateButtons();
 }
 
 void ShowTransferDialog::globalTaskAdded(groupid groupId, const QString &deviceId, int type)
@@ -224,10 +271,10 @@ void ShowTransferDialog::globalTaskStatus(groupid groupId, const QString &device
 
 void ShowTransferDialog::taskToggle()
 {
-	if (gTaskMgr->hasActiveTasksFor(m_group.id))
-		gTaskMgr->pauseTasks(m_group.id);
-	else if (m_groupInfo.hasIncoming && !m_assigneeList.empty())
-		TransferUtils::startTransfer(m_group.id, m_assigneeList[0].device.id);
+	if (gTaskMgr->hasActiveTasksFor(m_group.id, m_objectModel->m_deviceId))
+		gTaskMgr->pauseTasks(m_group.id, m_objectModel->m_deviceId);
+	else if (m_groupInfo.hasIncoming && !m_groupInfo.assignees.empty())
+		TransferUtils::startTransfer(m_group.id, m_groupInfo.assignees[0].device.id);
 }
 
 void ShowTransferDialog::showFiles()

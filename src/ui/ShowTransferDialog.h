@@ -38,11 +38,13 @@ public:
 
 public slots:
 
-	void addDevices();
+	void addDevOrChangeConnection();
 
 	void assigneeChanged(int index);
 
 	void changeSavePath();
+
+	void connectionChanged(const QString &adapterName);
 
 	void globalTaskAdded(groupid groupId, const QString &deviceId, int type);
 
@@ -78,7 +80,6 @@ protected:
 	Ui::ShowTransferDialog *m_ui;
 	TransferObjectModel *m_objectModel;
 	FlawedTransferModel *m_errorsModel;
-	QList<AssigneeInfo> m_assigneeList;
 	TransferGroup m_group;
 	TransferGroupInfo m_groupInfo;
 	qint64 m_ongoingCompletedBytes = 0;
