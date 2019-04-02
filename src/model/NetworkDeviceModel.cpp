@@ -21,7 +21,7 @@
 #include "NetworkDeviceModel.h"
 
 NetworkDeviceModel::NetworkDeviceModel(QObject *parent)
-		: QAbstractTableModel(parent)
+		: QAbstractTableModel(parent), DatabaseLoader(parent)
 {
 	DatabaseLoader::databaseChanged();
 }
@@ -38,18 +38,18 @@ int NetworkDeviceModel::rowCount(const QModelIndex &parent) const
 
 void NetworkDeviceModel::databaseChanged(const SqlSelection &change, ChangeType changeType)
 {
-	if (change.valid() && change.tableName != DB_TABLE_DEVICES)
-		return;
-
-	if (gAccessList(this)) {
+	if (!change.valid() || change.tableName == DB_TABLE_DEVICES) {
 		emit layoutAboutToBeChanged();
-		clearList();
 
 		SqlSelection selection;
 		selection.setTableName(DB_TABLE_DEVICES);
 		selection.setOrderBy(DB_FIELD_DEVICES_LASTUSAGETIME, false);
 
-		gDatabase->castQuery(selection, *list());
+		{
+			MutexEnablingScope scope(this);
+			clearList();
+			gDatabase->castQuery(selection, *list());
+		}
 
 		emit layoutChanged();
 	}

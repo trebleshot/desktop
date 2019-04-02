@@ -18,7 +18,7 @@
 
 #include "TransferGroupModel.h"
 
-TransferGroupModel::TransferGroupModel(QObject *parent) : QAbstractTableModel(parent)
+TransferGroupModel::TransferGroupModel(QObject *parent) : QAbstractTableModel(parent), DatabaseLoader(parent)
 {
 	DatabaseLoader::databaseChanged();
 }
@@ -111,10 +111,8 @@ QVariant TransferGroupModel::data(const QModelIndex &index, int role) const
 
 void TransferGroupModel::databaseChanged(const SqlSelection &change, ChangeType changeType)
 {
-	if ((!change.valid() || change.tableName == DB_TABLE_TRANSFERGROUP || change.tableName == DB_TABLE_TRANSFER)
-	    && gAccessList(this)) {
+	if (!change.valid() || change.tableName == DB_TABLE_TRANSFERGROUP || change.tableName == DB_TABLE_TRANSFER) {
 		emit layoutAboutToBeChanged();
-		clearList();
 
 		QList<TransferGroup> groupList;
 		SqlSelection selection;
@@ -123,8 +121,13 @@ void TransferGroupModel::databaseChanged(const SqlSelection &change, ChangeType 
 
 		gDatabase->castQuery(selection, groupList);
 
-		for (const auto &transferGroup : groupList)
-			list()->append(TransferUtils::getInfo(transferGroup));
+		{
+			MutexEnablingScope scope(this);
+			clearList();
+
+			for (const auto &transferGroup : groupList)
+				list()->append(TransferUtils::getInfo(transferGroup));
+		}
 
 		emit layoutChanged();
 	}

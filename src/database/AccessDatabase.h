@@ -135,21 +135,21 @@ public:
 
 	QString generateSpecifierClause(bool fromStatement = true) const;
 
-	void setHaving(const QString &having);
+	void setHaving(const QString &value);
 
 	void setGroupBy(const QString &field, bool ascending);
 
-	void setGroupBy(const QString &orderBy);
+	void setGroupBy(const QString &value);
 
-	void setLimit(int limit);
+	void setLimit(int value);
 
 	void setOrderBy(const QString &field, bool ascending);
 
-	void setOrderBy(const QString &limit);
+	void setOrderBy(const QString &value);
 
-	void setTableName(const QString &tableName);
+	void setTableName(const QString &value);
 
-	void setWhere(const QString &whereString);
+	void setWhere(const QString &value);
 
 	QSqlQuery toDeletionQuery() const;
 
@@ -238,9 +238,9 @@ public slots:
 
 	bool commit();
 
-	bool contains(const DatabaseObject &dbObject);
+	static bool contains(const DatabaseObject &dbObject);
 
-	bool contains(const SqlSelection &dbObject);
+	static bool contains(const SqlSelection &dbObject);
 
 	void doSynchronized(const std::function<void(AccessDatabase *)> &listener)
 	{

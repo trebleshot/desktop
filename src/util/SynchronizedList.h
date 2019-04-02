@@ -20,21 +20,20 @@
 
 #include <QList>
 #include <QMutex>
-
-#define gAccessList(list) MutexEnablingScope(list)
+#include <QDebug>
 
 /**
  * Handles queued access to a class. Most probably to a list.
  */
 class ListMutex {
 	QMutex *m_listMutex = new QMutex(QMutex::NonRecursive);
+	int m_counter = 0;
 
 public:
 	/**
-	 * Request access to the list when possible.
-	 * @return Access granted if true.
+	 * Access to the list when possible.
 	 */
-	bool accessList();
+	void accessList();
 
 	/**
 	 * Release the existing lock.
@@ -85,7 +84,6 @@ public:
  */
 class MutexEnablingScope {
 	ListMutex *m_list;
-	bool m_accessed;
 
 public:
 	/**
@@ -98,11 +96,4 @@ public:
 	 * Release the lock is access if access was provided.
 	 */
 	~MutexEnablingScope();
-
-	/*
-	 * Check the access state
-	 */
-	bool accessed() const;
-
-	explicit operator bool() const;
 };

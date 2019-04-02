@@ -34,7 +34,9 @@ public:
 	{
 		const auto &selectedRows = getSelectionRows(model);
 
-		if (!selectedRows.empty() && gAccessList(parentList)) {
+		if (!selectedRows.empty()) {
+			MutexEnablingScope mutexScope(parentList);
+
 			for (const int row : selectedRows)
 				resultList.append(parentList->list()->at(row));
 

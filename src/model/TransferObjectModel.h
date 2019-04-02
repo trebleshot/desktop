@@ -37,6 +37,8 @@ public:
 		__itemCount
 	};
 
+	friend class ShowTransferDialog;
+
 	explicit TransferObjectModel(groupid groupId, QString deviceId = QString(), QObject *parent = nullptr);
 
 	int columnCount(const QModelIndex &parent) const override;
@@ -49,7 +51,7 @@ public:
 
 	void setDeviceId(const QString &deviceId);
 
-	void databaseChanged(const SqlSelection &change, ChangeType type);
+	void databaseChanged(const SqlSelection &change, ChangeType type) override;
 
 protected:
 	QString m_deviceId;

@@ -30,7 +30,7 @@
 class CommunicationServer : public CSServer {
 Q_OBJECT
 
-	void pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result);
+	static void pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result);
 
 public:
 	explicit CommunicationServer(QObject *parent = nullptr);

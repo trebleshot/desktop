@@ -184,7 +184,9 @@ void AccessDatabase::reconstruct(DatabaseObject &dbObject)
 bool AccessDatabase::remove(const SqlSelection &selection)
 {
 	bool result = selection.toDeletionQuery().exec();
-	emit databaseChanged(selection, ChangeType::Delete);
+
+	if (result)
+			emit databaseChanged(selection, ChangeType::Delete);
 
 	return result;
 }
@@ -213,7 +215,10 @@ bool AccessDatabase::update(DatabaseObject &dbObject)
 bool AccessDatabase::update(const SqlSelection &selection, const DbObjectMap &map)
 {
 	bool result = selection.toUpdateQuery(map).exec();
-	emit databaseChanged(selection, ChangeType::Update);
+
+	if (result)
+			emit databaseChanged(selection, ChangeType::Update);
+
 	return result;
 }
 
@@ -361,9 +366,9 @@ QString SqlSelection::generateSpecifierClause(bool fromStatement) const
 	return queryString;
 }
 
-void SqlSelection::setHaving(const QString &having)
+void SqlSelection::setHaving(const QString &value)
 {
-	this->having = having;
+	this->having = value;
 }
 
 void SqlSelection::setGroupBy(const QString &field, bool ascending)
@@ -374,14 +379,14 @@ void SqlSelection::setGroupBy(const QString &field, bool ascending)
 	this->groupBy.append(ascending ? " asc" : " desc");
 }
 
-void SqlSelection::setGroupBy(const QString &orderBy)
+void SqlSelection::setGroupBy(const QString &value)
 {
-	this->orderBy = orderBy;
+	this->orderBy = value;
 }
 
-void SqlSelection::setLimit(int limit)
+void SqlSelection::setLimit(int value)
 {
-	this->limit = limit;
+	this->limit = value;
 }
 
 void SqlSelection::setOrderBy(const QString &field, bool ascending)
@@ -392,19 +397,19 @@ void SqlSelection::setOrderBy(const QString &field, bool ascending)
 	this->orderBy.append(ascending ? " asc" : " desc");
 }
 
-void SqlSelection::setOrderBy(const QString &field)
+void SqlSelection::setOrderBy(const QString &value)
 {
-	this->orderBy = field;
+	this->orderBy = value;
 }
 
-void SqlSelection::setTableName(const QString &tableName)
+void SqlSelection::setTableName(const QString &value)
 {
-	this->tableName = tableName;
+	this->tableName = value;
 }
 
-void SqlSelection::setWhere(const QString &whereString)
+void SqlSelection::setWhere(const QString &value)
 {
-	this->where = whereString;
+	this->where = value;
 }
 
 QSqlQuery SqlSelection::toDeletionQuery() const

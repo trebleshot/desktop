@@ -32,7 +32,7 @@ class ShowTransferDialog : public QDialog {
 Q_OBJECT
 
 public:
-	explicit ShowTransferDialog(QWidget *parentWindow, groupid groupId);
+	explicit ShowTransferDialog(QWidget *parentWindow, groupid groupId, bool showDeviceSelector = false);
 
 	~ShowTransferDialog() override;
 
@@ -44,9 +44,11 @@ public slots:
 
 	void changeSavePath();
 
-	void globalTaskStarted(groupid groupId, const QString &deviceId, int type);
+	void globalTaskAdded(groupid groupId, const QString &deviceId, int type);
 
-	void globalTaskFinished(groupid groupId, const QString &deviceId, int type);
+	void globalTaskRemoved(groupid groupId, const QString &deviceId, int type);
+
+	void globalTaskStatus(groupid groupId, const QString &deviceId, int type, qint64 completed);
 
 	void removeTransfer();
 
@@ -76,7 +78,8 @@ protected:
 	Ui::ShowTransferDialog *m_ui;
 	TransferObjectModel *m_objectModel;
 	FlawedTransferModel *m_errorsModel;
-	QList<AssigneeInfo> *m_assigneeList;
+	QList<AssigneeInfo> m_assigneeList;
 	TransferGroup m_group;
-	TransferGroupInfo m_groupInfo;;
+	TransferGroupInfo m_groupInfo;
+	qint64 m_ongoingCompletedBytes = 0;
 };

@@ -23,7 +23,7 @@
 #include "TransferObjectModel.h"
 
 TransferObjectModel::TransferObjectModel(groupid groupId, QString deviceId, QObject *parent)
-		: QAbstractTableModel(parent), m_deviceId(std::move(deviceId))
+		: QAbstractTableModel(parent), DatabaseLoader(parent), m_deviceId(std::move(deviceId))
 {
 	m_groupId = groupId;
 	DatabaseLoader::databaseChanged();
@@ -100,10 +100,8 @@ QVariant TransferObjectModel::data(const QModelIndex &index, int role) const
 
 void TransferObjectModel::databaseChanged(const SqlSelection &change, ChangeType type)
 {
-	if ((!change.valid() || change.tableName == DB_TABLE_TRANSFER || change.tableName == DB_DIVIS_TRANSFER)
-	    && gAccessList(this)) {
+	if (!change.valid() || change.tableName == DB_TABLE_TRANSFER || change.tableName == DB_DIVIS_TRANSFER) {
 		emit layoutAboutToBeChanged();
-		clearList();
 
 		SqlSelection selection;
 		selection.setTableName(DB_TABLE_TRANSFER);
@@ -122,11 +120,15 @@ void TransferObjectModel::databaseChanged(const SqlSelection &change, ChangeType
 
 		selection.whereArgs << m_groupId;
 
-		gDatabase->castQuery(selection, *list());
-
-		if (list()->empty()) {
-			selection.setTableName(DB_DIVIS_TRANSFER);
+		{
+			MutexEnablingScope scope(this);
+			clearList();
 			gDatabase->castQuery(selection, *list());
+
+			if (list()->empty()) {
+				selection.setTableName(DB_DIVIS_TRANSFER);
+				gDatabase->castQuery(selection, *list());
+			}
 		}
 
 		emit layoutChanged();

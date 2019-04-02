@@ -125,9 +125,11 @@ public:
 
 signals:
 
-	void taskAdded(groupid groupId, const QString &device, int type);
+	void taskAdded(groupid groupId, const QString &deviceId, int type);
 
-	void taskRemoved(groupid groupId, const QString &device, int type);
+	void taskRemoved(groupid groupId, const QString &deviceId, int type);
+
+	void taskStatus(groupid groupId, const QString &deviceId, int type, qint64 completed);
 };
 
 class AppUtils {

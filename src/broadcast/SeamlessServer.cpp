@@ -151,7 +151,7 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 								char *buffer = new char[BUFFER_LENGTH_DEFAULT];
 
 								try {
-									time_t lastUpdated = 0;
+									auto lastUpdated = time(nullptr);
 
 									while (!file.atEnd()) {
 										time_t currentTime = time(nullptr);
@@ -168,9 +168,13 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 											throw exception();
 										}
 
-										if (currentTime - lastUpdated > 2000) {
+										if (currentTime - lastUpdated > 2) {
 											// only emit current file size
 											// also always update when a file status changes
+											qDebug() << this << "Notified updated";
+											emit gTaskMgr->taskStatus(thisTask->m_groupId, thisTask->m_deviceId,
+											                           TransferObject::Type::Incoming,
+											                           file.pos());
 											lastUpdated = currentTime;
 										}
 									}

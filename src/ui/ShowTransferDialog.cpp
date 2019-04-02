@@ -26,9 +26,9 @@
 #include "DeviceChooserDialog.h"
 #include "TransferRequestProgressDialog.h"
 
-ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
+ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId, bool showDeviceSelector)
 		: QDialog(parent), m_ui(new Ui::ShowTransferDialog), m_objectModel(new TransferObjectModel(groupId)),
-		  m_errorsModel(new FlawedTransferModel(groupId)), m_assigneeList(new QList<AssigneeInfo>),
+		  m_errorsModel(new FlawedTransferModel(groupId)),
 		  m_group(groupId), m_groupInfo()
 {
 	m_ui->setupUi(this);
@@ -39,8 +39,9 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
 	m_ui->transfersTreeView->setColumnWidth(1, 80);
 	m_ui->transfersTreeView->setColumnWidth(2, 80);
 
-	connect(gTaskMgr, &TransferTaskManager::taskAdded, this, &ShowTransferDialog::globalTaskStarted);
-	connect(gTaskMgr, &TransferTaskManager::taskRemoved, this, &ShowTransferDialog::globalTaskFinished);
+	connect(gTaskMgr, &TransferTaskManager::taskStatus, this, &ShowTransferDialog::globalTaskStatus);
+	connect(gTaskMgr, &TransferTaskManager::taskAdded, this, &ShowTransferDialog::globalTaskAdded);
+	connect(gTaskMgr, &TransferTaskManager::taskRemoved, this, &ShowTransferDialog::globalTaskRemoved);
 	connect(gDatabase, &AccessDatabase::databaseChanged, this, &ShowTransferDialog::checkGroupIntegrity);
 	connect(m_ui->retryReceivingButton, &QPushButton::pressed, this, &ShowTransferDialog::retryReceiving);
 	connect(m_ui->transfersTreeView, &QTreeView::activated, this, &ShowTransferDialog::transferItemActivated);
@@ -54,6 +55,9 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId)
 	connect(m_objectModel, &QAbstractTableModel::layoutChanged, this, &ShowTransferDialog::updateStats);
 
 	checkGroupIntegrity(SqlSelection(), ChangeType::Any);
+
+	if (showDeviceSelector)
+		addDevices();
 }
 
 ShowTransferDialog::~ShowTransferDialog()
@@ -61,7 +65,6 @@ ShowTransferDialog::~ShowTransferDialog()
 	delete m_ui;
 	delete m_objectModel;
 	delete m_errorsModel;
-	delete m_assigneeList;
 }
 
 void ShowTransferDialog::changeSavePath()
@@ -101,10 +104,8 @@ void ShowTransferDialog::saveDirectory()
 void ShowTransferDialog::checkGroupIntegrity(const SqlSelection &change, ChangeType type)
 {
 	if (!change.valid() || change.tableName == DB_TABLE_TRANSFERASSIGNEE) {
-		delete m_assigneeList;
-		m_assigneeList = new QList<AssigneeInfo>;
-
-		TransferUtils::getAllAssigneeInfo(m_group, *m_assigneeList);
+		m_assigneeList.clear();
+		TransferUtils::getAllAssigneeInfo(m_group, m_assigneeList);
 		updateAssignees();
 	}
 
@@ -129,9 +130,9 @@ void ShowTransferDialog::checkGroupIntegrity(const SqlSelection &change, ChangeT
 void ShowTransferDialog::updateAssignees()
 {
 	m_ui->assigneesComboBox->clear();
-	m_ui->assigneesComboBox->addItem(tr("Any"), QString());
+	m_ui->assigneesComboBox->addItem(tr("All"), QString());
 
-	for (const auto &info : *m_assigneeList)
+	for (const auto &info : m_assigneeList)
 		m_ui->assigneesComboBox->addItem(info.device.nickname, info.device.id);
 
 	assigneeChanged(0);
@@ -151,6 +152,11 @@ void ShowTransferDialog::updateButtons()
 	m_ui->chooseDirectoryButton->setEnabled(m_groupInfo.hasIncoming);
 	m_ui->noIncomingFileText->setVisible(!m_groupInfo.hasIncoming);
 	m_ui->retryReceivingButton->setEnabled(m_groupInfo.hasIncoming);
+
+	if (!hasRunning && m_ongoingCompletedBytes > 0) {
+		m_ongoingCompletedBytes = 0;
+		updateStats();
+	}
 }
 
 void ShowTransferDialog::addDevices()
@@ -197,22 +203,31 @@ void ShowTransferDialog::assigneeChanged(int index)
 	m_objectModel->databaseChanged(SqlSelection(), ChangeType::Any);
 }
 
-void ShowTransferDialog::globalTaskStarted(groupid groupId, const QString &deviceId, int type)
+void ShowTransferDialog::globalTaskAdded(groupid groupId, const QString &deviceId, int type)
 {
 	updateButtons();
 }
 
-void ShowTransferDialog::globalTaskFinished(groupid groupId, const QString &deviceId, int type)
+void ShowTransferDialog::globalTaskRemoved(groupid groupId, const QString &deviceId, int type)
 {
 	updateButtons();
+}
+
+void ShowTransferDialog::globalTaskStatus(groupid groupId, const QString &deviceId, int type, qint64 completed)
+{
+	if (m_objectModel->m_groupId == groupId
+	    && (m_objectModel->m_deviceId.isNull() || m_objectModel->m_deviceId == deviceId)) {
+		m_ongoingCompletedBytes = completed;
+		updateStats();
+	}
 }
 
 void ShowTransferDialog::taskToggle()
 {
 	if (gTaskMgr->hasActiveTasksFor(m_group.id))
 		gTaskMgr->pauseTasks(m_group.id);
-	else if (m_groupInfo.hasIncoming && !m_assigneeList->empty())
-		TransferUtils::startTransfer(m_group.id, (*m_assigneeList)[0].device.id);
+	else if (m_groupInfo.hasIncoming && !m_assigneeList.empty())
+		TransferUtils::startTransfer(m_group.id, m_assigneeList[0].device.id);
 }
 
 void ShowTransferDialog::showFiles()
@@ -222,8 +237,12 @@ void ShowTransferDialog::showFiles()
 
 void ShowTransferDialog::updateStats()
 {
-	if (gAccessList(m_objectModel))
+	{
+		MutexEnablingScope mutexScope(m_objectModel);
 		TransferUtils::getInfo(m_groupInfo, *m_objectModel->list(), true);
+	}
+
+	m_groupInfo.completedBytes += m_ongoingCompletedBytes;
 
 	m_ui->progressBar->setMaximum(100);
 	m_ui->progressBar->setValue((int) (((double) m_groupInfo.completedBytes / m_groupInfo.totalBytes) * 100));

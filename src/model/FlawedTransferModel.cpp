@@ -21,7 +21,7 @@
 #include "FlawedTransferModel.h"
 
 FlawedTransferModel::FlawedTransferModel(groupid groupId, QObject *parent)
-		: QAbstractTableModel(parent)
+		: QAbstractTableModel(parent), DatabaseLoader(parent)
 {
 	m_groupId = groupId;
 	DatabaseLoader::databaseChanged();
@@ -90,10 +90,8 @@ QVariant FlawedTransferModel::data(const QModelIndex &index, int role) const
 
 void FlawedTransferModel::databaseChanged(const SqlSelection &change, ChangeType type)
 {
-	if ((!change.valid() || change.tableName == DB_TABLE_TRANSFER || change.tableName == DB_DIVIS_TRANSFER)
-	    && gAccessList(this)) {
+	if (!change.valid() || change.tableName == DB_TABLE_TRANSFER || change.tableName == DB_DIVIS_TRANSFER) {
 		emit layoutAboutToBeChanged();
-		clearList();
 
 		SqlSelection selection;
 		selection.setTableName(DB_TABLE_TRANSFER);
@@ -108,11 +106,15 @@ void FlawedTransferModel::databaseChanged(const SqlSelection &change, ChangeType
 		                    << TransferObject::Flag::Removed
 		                    << TransferObject::Flag::Interrupted;
 
-		gDatabase->castQuery(selection, *list());
-
-		if (list()->empty()) {
-			selection.setTableName(DB_DIVIS_TRANSFER);
+		{
+			MutexEnablingScope scope(this);
+			clearList();
 			gDatabase->castQuery(selection, *list());
+
+			if (list()->empty()) {
+				selection.setTableName(DB_DIVIS_TRANSFER);
+				gDatabase->castQuery(selection, *list());
+			}
 		}
 
 		emit layoutChanged();

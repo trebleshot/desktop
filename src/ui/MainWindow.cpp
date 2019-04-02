@@ -122,10 +122,10 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::transferItemActivated(const QModelIndex &modelIndex)
 {
-	if (gAccessList(m_groupModel)) {
-		const auto &data = m_groupModel->list()->at(modelIndex.row());
-		showTransfer(data.group.id);
-	}
+	MutexEnablingScope mutexScope(m_groupModel);
+	const auto &data = m_groupModel->list()->at(modelIndex.row());
+
+	showTransfer(data.group.id);
 }
 
 void MainWindow::about()
@@ -250,13 +250,11 @@ void MainWindow::showTransfer()
 
 void MainWindow::removeTransfer()
 {
-	if (gAccessList(m_groupModel)) {
-		QList<TransferGroupInfo> resultList;
+	QList<TransferGroupInfo> resultList;
 
-		if (ViewUtils::gatherSelections(m_ui->transfersTreeView->selectionModel(), m_groupModel, resultList))
-			for (auto &thisObject : resultList)
-				gDatabase->remove(thisObject.group);
-	}
+	if (ViewUtils::gatherSelections(m_ui->transfersTreeView->selectionModel(), m_groupModel, resultList))
+		for (auto &thisObject : resultList)
+			gDatabase->remove(thisObject.group);
 }
 
 void MainWindow::refreshStorageLocation()
@@ -348,11 +346,11 @@ void MainWindow::deviceContextMenu(const QPoint &point)
 
 void MainWindow::deviceSelected(const QModelIndex &modelIndex)
 {
-	if (modelIndex.isValid() && modelIndex.column() == NetworkDeviceModel::Status
-	    && gAccessList(m_groupModel)) {
-
+	if (modelIndex.isValid() && modelIndex.column() == NetworkDeviceModel::Status) {
+		MutexEnablingScope mutexScope(m_deviceModel);
 		NetworkDevice device = m_deviceModel->list()->at(modelIndex.row());
 		device.isRestricted = !device.isRestricted;
+
 		gDatabase->publish(device);
 	}
 }

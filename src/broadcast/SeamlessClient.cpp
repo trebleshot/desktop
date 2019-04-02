@@ -124,7 +124,8 @@ void SeamlessClient::run()
 							bool constStatus = false;
 
 							gDbSignal->doSynchronized([this, &transferObject, &constStatus](AccessDatabase *db) {
-								constStatus = TransferUtils::firstAvailableTransfer(transferObject, m_groupId, m_deviceId);
+								constStatus = TransferUtils::firstAvailableTransfer(transferObject, m_groupId,
+								                                                    m_deviceId);
 							});
 
 							if (!constStatus) {
@@ -140,7 +141,8 @@ void SeamlessClient::run()
 								{
 									QJsonObject reply{
 											{KEYWORD_TRANSFER_REQUEST_ID,  QVariant(transferObject.id).toLongLong()},
-											{KEYWORD_TRANSFER_GROUP_ID,    QVariant(transferObject.groupId).toLongLong()},
+											{KEYWORD_TRANSFER_GROUP_ID,    QVariant(transferObject.groupId)
+													                               .toLongLong()},
 											{KEYWORD_TRANSFER_SOCKET_PORT, tcpServer.serverPort()},
 											{KEYWORD_RESULT,               true}
 									};
@@ -204,10 +206,12 @@ void SeamlessClient::run()
 														gDbSignal->update(transferObject);
 													}
 
-													auto *socket = tcpServer.nextPendingConnection();
-													auto lastDataAvailable = 0;
+													QScopedPointer<QTcpSocket> socket(
+															tcpServer.nextPendingConnection());
+
+													auto lastDataAvailable = time(nullptr);
+													auto lastUpdated = time(nullptr);
 													auto fileSize = static_cast<qint64>(transferObject.fileSize);
-													auto lastUpdate = (time_t) 0;
 
 													qDebug() << this << "Socket open?:" << socket->isOpen();
 
@@ -221,13 +225,18 @@ void SeamlessClient::run()
 															lastDataAvailable = currentTime;
 														}
 
-														if (currentTime - lastUpdate > 2000) {
+														if (currentTime - lastUpdated > 2) {
 															// only emit current file size
 															// also always update when a file status changes
-															lastUpdate = currentTime;
+															qDebug() << this << "Notified updated";
+															emit gTaskMgr->taskStatus(m_groupId, m_deviceId,
+															                           TransferObject::Type::Incoming,
+															                           currentFile.size());
+															lastUpdated = currentTime;
 														}
 
-														if (currentTime - lastDataAvailable > TIMEOUT_SOCKET_DEFAULT / 1000) {
+														if (currentTime - lastDataAvailable >
+														    TIMEOUT_SOCKET_DEFAULT / 1000) {
 															qDebug() << this << "Timed out!";
 															throw exception();
 														}
@@ -245,7 +254,8 @@ void SeamlessClient::run()
 
 														gDbSignal->doSynchronized(
 																[&group, &transferObject](AccessDatabase *db) {
-																	TransferUtils::saveIncomingFile(group, transferObject);
+																	TransferUtils::saveIncomingFile(group,
+																	                                transferObject);
 																});
 
 														qDebug() << this << "Saving file";

@@ -18,33 +18,38 @@
 
 #include "SynchronizedList.h"
 
-bool ListMutex::accessList()
+void ListMutex::accessList()
 {
-	return m_listMutex->tryLock(2000);
+	m_counter++;
+
+	if (m_counter == 1) {
+		m_listMutex->lock();
+		return;
+	}
+
+	qDebug() << this << "Not safe to lock. Already has" << m_counter << "handles.";
+
+	if (!m_listMutex->tryLock(2000))
+		qDebug() << this << "Failed to lock in 2 secs. This is an issue. Fix this to secure concurrent edits on lists.";
 }
 
 void ListMutex::releaseList()
 {
+	if (m_counter == 0) {
+		qDebug() << this << "Nothing to unlock";
+		return;
+	}
+
+	m_counter--;
 	m_listMutex->unlock();
 }
 
 MutexEnablingScope::MutexEnablingScope(ListMutex *list) : m_list(list)
 {
-	m_accessed = list->accessList();
+	list->accessList();
 }
 
 MutexEnablingScope::~MutexEnablingScope()
 {
-	if (m_accessed)
-		m_list->releaseList();
-}
-
-bool MutexEnablingScope::accessed() const
-{
-	return m_accessed;
-}
-
-MutexEnablingScope::operator bool() const
-{
-	return accessed();
+	m_list->releaseList();
 }

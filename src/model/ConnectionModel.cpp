@@ -37,12 +37,8 @@ int ConnectionModel::rowCount(const QModelIndex &parent) const
 
 void ConnectionModel::databaseChanged(const SqlSelection &change, ChangeType changeType)
 {
-	if (change.valid() && change.tableName != DB_TABLE_DEVICECONNECTION)
-		return;
-
-	if (gAccessList(this)) {
+	if (!change.valid() || change.tableName == DB_TABLE_DEVICECONNECTION) {
 		emit layoutAboutToBeChanged();
-		clearList();
 
 		SqlSelection selection;
 		selection.setTableName(DB_TABLE_DEVICECONNECTION);
@@ -50,7 +46,11 @@ void ConnectionModel::databaseChanged(const SqlSelection &change, ChangeType cha
 		selection.setWhere(QString("%1 = ?").arg(DB_FIELD_DEVICECONNECTION_DEVICEID));
 		selection.whereArgs << m_deviceId;
 
-		gDatabase->castQuery(selection, *list());
+		{
+			MutexEnablingScope scope(this);
+			clearList();
+			gDatabase->castQuery(selection, *list());
+		}
 
 		emit layoutChanged();
 	}

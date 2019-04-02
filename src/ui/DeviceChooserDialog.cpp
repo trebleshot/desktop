@@ -55,6 +55,7 @@ void DeviceChooserDialog::modelPressed(const QModelIndex &modelIndex)
 void DeviceChooserDialog::selectionAccepted()
 {
 	QList<NetworkDevice> devices;
-	ViewUtils::gatherSelections(m_ui->treeView->selectionModel(), m_deviceModel, devices);
-	emit devicesSelected(m_groupId, devices);
+
+	if (ViewUtils::gatherSelections(m_ui->treeView->selectionModel(), m_deviceModel, devices))
+			emit devicesSelected(m_groupId, devices);
 }

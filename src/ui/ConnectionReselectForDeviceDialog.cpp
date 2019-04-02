@@ -38,19 +38,19 @@ ConnectionReselectForDeviceDialog::~ConnectionReselectForDeviceDialog()
 void ConnectionReselectForDeviceDialog::defaultButtonsClicked(QAbstractButton *button)
 {
 	if (button == m_ui->defaultButtonBox->button(QDialogButtonBox::StandardButton::Apply)) {
-		if (gAccessList(m_connectionModel)) {
-			auto *model = m_ui->connectionTreeView->selectionModel();
-			const auto &selectedItems = ViewUtils::getSelectionRows(model);
+		MutexEnablingScope mutexScope(m_connectionModel);
 
-			if (selectedItems.empty()) {
-				QMessageBox::warning(this, "Nothing selected", "Select one to continue");
-			} else {
-				int selectedRow = selectedItems[0];
+		auto *model = m_ui->connectionTreeView->selectionModel();
+		const auto &selectedItems = ViewUtils::getSelectionRows(model);
 
-				if (selectedRow < m_connectionModel->list()->size()) {
-					emit connectionSelected(m_connectionModel->list()->at(selectedRow).adapterName);
-					accept();
-				}
+		if (selectedItems.empty()) {
+			QMessageBox::warning(this, "Nothing selected", "Select one to continue");
+		} else {
+			int selectedRow = selectedItems[0];
+
+			if (selectedRow < m_connectionModel->list()->size()) {
+				emit connectionSelected(m_connectionModel->list()->at(selectedRow).adapterName);
+				accept();
 			}
 		}
 	}
