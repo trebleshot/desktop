@@ -22,6 +22,7 @@
 #include <QtWidgets/QFileDialog>
 #include <src/util/TransferUtils.h>
 #include <QtGui/QDesktopServices>
+#include <src/util/CommunicationBridge.h>
 #include "ShowTransferDialog.h"
 #include "DeviceChooserDialog.h"
 #include "TransferRequestProgressDialog.h"
@@ -159,7 +160,8 @@ void ShowTransferDialog::updateButtons()
 {
 	bool hasRunning = gTaskMgr->hasActiveTasksFor(m_group.id, m_objectModel->m_deviceId);
 
-	m_ui->startButton->setEnabled(m_groupInfo.hasIncoming || hasRunning);
+	m_ui->startButton->setEnabled(m_groupInfo.hasIncoming || hasRunning
+	                              || (m_groupInfo.hasOutgoing && m_objectModel->m_deviceId != nullptr));
 	m_ui->startButton->setText(hasRunning ? tr("Pause") : tr("Start"));
 	m_ui->saveDirectoryButton->setEnabled(m_groupInfo.hasIncoming);
 	m_ui->storageLineEdit->setEnabled(m_groupInfo.hasIncoming);
@@ -299,6 +301,44 @@ void ShowTransferDialog::taskToggle()
 		gTaskMgr->pauseTasks(m_group.id, m_objectModel->m_deviceId);
 	else if (m_groupInfo.hasIncoming && !m_groupInfo.assignees.empty())
 		TransferUtils::startTransfer(m_group.id, m_groupInfo.assignees[0].device.id);
+	else if (m_groupInfo.hasOutgoing && m_objectModel->m_deviceId != nullptr) {
+		AssigneeInfo assignee = m_groupInfo.assignees[m_ui->assigneesComboBox->currentIndex()];
+
+		GThread::startIndependent([assignee](GThread *thread) {
+			auto *object = new QObject();
+			object->moveToThread(thread);
+			auto *bridge = new CommunicationBridge(object);
+			NetworkDevice device(assignee.device);
+			DeviceConnection connection(device.id, assignee.assignee.connectionAdapter);
+
+			if (gDbSignal->reconstruct(connection))
+				try {
+					QScopedPointer<CSActiveConnection> activeConnection(bridge->communicate(device, connection));
+					activeConnection->reply({
+							                        {KEYWORD_REQUEST, KEYWORD_REQUEST_START_TRANSFER},
+							                        {KEYWORD_TRANSFER_GROUP_ID, QVariant(assignee.assignee.groupId)
+									                                                    .toLongLong()}
+					                        });
+
+					const auto &response = activeConnection->receive().asJson();
+
+					if (response.value(KEYWORD_RESULT).toBool(false))
+						qDebug() << thread << "Request was successful";
+					else
+						qDebug() << thread << "Request failed";
+				} catch (...) {
+					qDebug() << thread << "Connection for process starting on sender side failed"
+					         << connection.adapterName
+					         << connection.hostAddress.toString()
+					         << device.id;
+				}
+			else
+				qDebug() << thread << "Device was gone during the process";
+
+			delete bridge;
+			delete object;
+		});
+	}
 }
 
 void ShowTransferDialog::showFiles()

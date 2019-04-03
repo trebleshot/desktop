@@ -25,6 +25,7 @@
 #define KEYWORD_REQUEST_ACQUAINTANCE "requestAcquaintance"
 #define KEYWORD_REQUEST_CLIPBOARD "requestClipboard"
 #define KEYWORD_REQUEST_HANDSHAKE "requestHandshake"
+#define KEYWORD_REQUEST_START_TRANSFER "requestStartTransfer"
 #define KEYWORD_BACK_COMP_REQUEST_SEND_UPDATE "backCompRequestSendUpdate"
 #define KEYWORD_TRANSFER_REQUEST_ID "requestId"
 #define KEYWORD_TRANSFER_GROUP_ID "groupId"
