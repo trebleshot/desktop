@@ -69,12 +69,9 @@ ENDIF ()
 # For Windows installation Qt libraries will be determined by this suffix.
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
   set(QT_LIBRARY_SUFFIX "d.dll")
-ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
-  set(QT_LIBRARY_SUFFIX ".dll")
 ELSE()
   set(QT_LIBRARY_SUFFIX ".dll")
 ENDIF()
-
 
 configure_file(src/build.h.in src/build.h)
 
@@ -115,8 +112,10 @@ set(UTIL_LIBRARY
         src/config/Keyword.h
         src/coolsocket/CoolSocket.h
         src/coolsocket/CoolSocket.cpp
-        src/database/AccessDatabase.h
+		src/database/AccessDatabase.h
         src/database/AccessDatabase.cpp
+		src/database/DatabaseLoader.h
+		src/database/DatabaseLoader.cpp
         src/database/ReconstructionException.h
         src/database/ReconstructionException.cpp
         src/database/object/NetworkDevice.h
@@ -129,6 +128,8 @@ set(UTIL_LIBRARY
         src/database/object/TransferGroup.cpp
         src/dialog/WelcomeDialog.h
         src/dialog/WelcomeDialog.cpp
+		src/model/ConnectionModel.h
+		src/model/ConnectionModel.cpp
         src/model/FlawedTransferModel.h
         src/model/FlawedTransferModel.cpp
         src/model/NetworkDeviceModel.h
@@ -168,7 +169,7 @@ set(UTIL_LIBRARY
         src/util/TransferUtils.h
         src/util/TransferUtils.cpp
         src/util/ViewUtils.h
-        src/util/ViewUtils.cpp src/model/ConnectionModel.cpp src/model/ConnectionModel.h src/database/DatabaseLoader.cpp src/database/DatabaseLoader.h)
+        src/util/ViewUtils.cpp)
 
 if (KF5DNSSD_FOUND)
     add_definitions(-DUSE_DNSSD_FEATURE=1)

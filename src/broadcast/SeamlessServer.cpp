@@ -173,9 +173,9 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 											// also always update when a file status changes
 											qDebug() << this << "Notified updated";
 											emit gTaskMgr->taskStatus(thisTask->m_groupId, thisTask->m_deviceId,
-											                           TransferObject::Type::Incoming,
-											                           file.pos(),
-											                           transferObject);
+											                          thisTask->m_type,
+											                          file.pos(),
+											                          transferObject);
 											lastUpdated = currentTime;
 										}
 									}
@@ -203,6 +203,8 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 							}
 						} catch (...) {
 							qDebug() << this << "Some error occurred";
+							emit gTaskMgr->taskError(thisTask->m_groupId, thisTask->m_deviceId, thisTask->m_type,
+							                         TransferTaskManager::TaskError::DuringTask);
 						}
 
 						gDbSignal->update(transferObject);

@@ -24,7 +24,7 @@ QString NetworkDeviceLoader::convertToInet4Address(const QHostAddress &hostAddre
 }
 
 
-QString NetworkDeviceLoader::convertToInet4Address(int ipv4Address, bool parentOnly)
+QString NetworkDeviceLoader::convertToInet4Address(quint32 ipv4Address, bool parentOnly)
 {
 	QString inet4Address = QString("%1.%2.%3")
 			.arg(ipv4Address >> 24 & 0xff)

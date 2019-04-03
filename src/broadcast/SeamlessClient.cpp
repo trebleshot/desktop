@@ -278,6 +278,9 @@ void SeamlessClient::run()
 								transferObject.flag = TransferObject::Flag::Interrupted;
 							qDebug() << this << "Error occurred. Will retry";
 							retry = true;
+
+							emit gTaskMgr->taskError(m_groupId, m_deviceId, m_type,
+							                         TransferTaskManager::TaskError::DuringTask);
 						}
 
 						if (transferObject.id != 0)
@@ -305,6 +308,8 @@ void SeamlessClient::run()
 		}
 		catch (...) {
 			qDebug() << this << "Connection failed to the server";
+			emit gTaskMgr->taskError(m_groupId, m_deviceId, m_type,
+					TransferTaskManager::TaskError::InitialConnection);
 		}
 	} else {
 		qDebug() << this << "Could not produce information within given group id" << m_groupId

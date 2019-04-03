@@ -30,7 +30,7 @@ class NetworkDeviceLoader {
 public:
 	static QString convertToInet4Address(const QHostAddress &hostAddress, bool parentOnly = false);
 
-	static QString convertToInet4Address(int ipv4Address, bool parentOnly = false);
+	static QString convertToInet4Address(quint32 ipv4Address, bool parentOnly = false);
 
 	static void loadAsynchronously(const QHostAddress &hostAddress,
 	                               const std::function<void(const NetworkDevice &)> &listener);

@@ -45,6 +45,7 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId, bool sh
 	connect(gTaskMgr, &TransferTaskManager::taskStatus, this, &ShowTransferDialog::globalTaskStatus);
 	connect(gTaskMgr, &TransferTaskManager::taskAdded, this, &ShowTransferDialog::globalTaskAdded);
 	connect(gTaskMgr, &TransferTaskManager::taskRemoved, this, &ShowTransferDialog::globalTaskRemoved);
+	connect(gTaskMgr, &TransferTaskManager::taskError, this, &ShowTransferDialog::globalTaskError);
 	connect(gDatabase, &AccessDatabase::databaseChanged, this, &ShowTransferDialog::checkGroupIntegrity);
 	connect(m_ui->retryReceivingButton, &QPushButton::pressed, this, &ShowTransferDialog::retryReceiving);
 	connect(m_ui->transfersTreeView, &QTreeView::activated, this, &ShowTransferDialog::transferItemActivated);
@@ -54,7 +55,8 @@ ShowTransferDialog::ShowTransferDialog(QWidget *parent, groupid groupId, bool sh
 	connect(m_ui->saveDirectoryButton, &QPushButton::pressed, this, &ShowTransferDialog::saveDirectory);
 	connect(m_ui->removeButton, &QPushButton::pressed, this, &ShowTransferDialog::removeTransfer);
 	connect(m_ui->chooseDirectoryButton, &QPushButton::pressed, this, &ShowTransferDialog::changeSavePath);
-	connect(m_ui->addAndChConnectionButton, &QPushButton::pressed, this, &ShowTransferDialog::addDevOrChangeConnection);
+	connect(m_ui->addAndChConnectionButton, &QPushButton::pressed, this,
+	        &ShowTransferDialog::addDevOrChangeConnection);
 	connect(m_objectModel, &QAbstractTableModel::layoutChanged, this, &ShowTransferDialog::updateStats);
 
 	checkGroupIntegrity(SqlSelection(), ChangeType::Any);
@@ -268,6 +270,26 @@ void ShowTransferDialog::globalTaskStatus(groupid groupId, const QString &device
 		m_ongoingTaskInfo.object = object;
 
 		updateStats();
+	}
+}
+
+void ShowTransferDialog::globalTaskError(groupid groupId, const QString &deviceId, int type, int errorType)
+{
+	if (m_objectModel->m_groupId == groupId
+	    && (m_objectModel->m_deviceId.isNull() || m_objectModel->m_deviceId == deviceId)) {
+		NetworkDevice device(deviceId);
+		gDatabase->reconstructSilently(device);
+
+		if (type == TransferObject::Type::Outgoing && errorType == TransferTaskManager::TaskError::DuringTask)
+			QMessageBox::warning(this, tr("Transfer error"), tr("Something went wrong while sending files to %1")
+					.arg(device.nickname));
+		else if (type == TransferObject::Type::Incoming
+		         && errorType == TransferTaskManager::TaskError::InitialConnection)
+			QMessageBox::warning(this, tr("Transfer error"), tr("Something went wrong while receiving files "
+			                                                    "from %1. Check if the network connection is"
+			                                                    " working. Try other connections if there is any.")
+					.arg(device.nickname));
+
 	}
 }
 

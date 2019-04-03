@@ -53,6 +53,8 @@ public slots:
 	void globalTaskStatus(groupid groupId, const QString &deviceId, int type, qint64 completed,
 	                      const TransferObject &object);
 
+	void globalTaskError(groupid groupId, const QString &deviceId, int type, int errorType);
+
 	void removeTransfer();
 
 	void checkGroupIntegrity(const SqlSelection &change, ChangeType type);

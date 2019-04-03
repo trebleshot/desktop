@@ -62,6 +62,11 @@ protected:
 	QList<TransferTask *> m_activeTasks;
 
 public:
+	enum TaskError {
+		InitialConnection,
+		DuringTask
+	};
+
 	friend class TransferTask;
 
 	void attachTask(TransferTask *task)
@@ -131,6 +136,8 @@ signals:
 
 	void taskStatus(groupid groupId, const QString &deviceId, int type, qint64 completed,
 	                const TransferObject &object);
+
+	void taskError(groupid groupId, const QString &deviceId, int type, int errorType);
 };
 
 class AppUtils {
