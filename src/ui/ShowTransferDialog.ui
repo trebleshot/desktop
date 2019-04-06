@@ -35,7 +35,10 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Start</string>
+        <string>&amp;Start</string>
+       </property>
+       <property name="shortcut">
+        <string>Ctrl+S</string>
        </property>
        <property name="default">
         <bool>true</bool>
@@ -57,7 +60,10 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Remove</string>
+        <string>&amp;Remove</string>
+       </property>
+       <property name="shortcut">
+        <string>Del</string>
        </property>
        <property name="default">
         <bool>false</bool>
@@ -76,7 +82,10 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Add devices</string>
+        <string>&amp;Add devices</string>
+       </property>
+       <property name="shortcut">
+        <string>+</string>
        </property>
        <property name="default">
         <bool>false</bool>
@@ -95,7 +104,7 @@
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>Files</string>
+       <string>&amp;Files</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
@@ -112,7 +121,7 @@
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Options</string>
+       <string>&amp;Options</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout">
        <item row="0" column="0">

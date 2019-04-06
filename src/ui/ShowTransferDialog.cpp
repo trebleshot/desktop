@@ -74,7 +74,7 @@ void ShowTransferDialog::changeSavePath()
 {
 	auto *fileDialog = new QFileDialog();
 
-	fileDialog->setWindowTitle(tr("Choose the folder where the files will be put"));
+	fileDialog->setWindowTitle(tr("Choose a folder where the files will be put"));
 	fileDialog->setAcceptMode(QFileDialog::AcceptMode::AcceptOpen);
 	fileDialog->setDirectory(TransferUtils::getSavePath(m_group));
 	fileDialog->setFileMode(QFileDialog::FileMode::DirectoryOnly);
@@ -153,16 +153,18 @@ void ShowTransferDialog::updateAssignees()
 	for (const auto &info : m_groupInfo.assignees)
 		m_ui->assigneesComboBox->addItem(info.device.nickname, info.device.id);
 
-	assigneeChanged(0);
+	m_ui->assigneesComboBox->setCurrentIndex(0);
 }
 
 void ShowTransferDialog::updateButtons()
 {
 	bool hasRunning = gTaskMgr->hasActiveTasksFor(m_group.id, m_objectModel->m_deviceId);
 
-	m_ui->startButton->setEnabled(m_groupInfo.hasIncoming || hasRunning
-	                              || (m_groupInfo.hasOutgoing && m_objectModel->m_deviceId != nullptr));
-	m_ui->startButton->setText(hasRunning ? tr("Pause") : tr("Start"));
+	m_ui->startButton->setEnabled((m_groupInfo.hasOutgoing && m_objectModel->m_deviceId != nullptr)
+	                              || m_groupInfo.hasIncoming || hasRunning);
+	m_ui->startButton->setText(hasRunning ? tr("&Pause") : (m_groupInfo.hasIncoming == m_groupInfo.hasOutgoing
+	                                                       ? tr("&Start") : (m_groupInfo.hasIncoming ? tr("&Receive")
+	                                                                                                : tr("&Send"))));
 	m_ui->saveDirectoryButton->setEnabled(m_groupInfo.hasIncoming);
 	m_ui->storageLineEdit->setEnabled(m_groupInfo.hasIncoming);
 	m_ui->storageText->setEnabled(m_groupInfo.hasIncoming);
@@ -170,7 +172,7 @@ void ShowTransferDialog::updateButtons()
 	m_ui->chooseDirectoryButton->setEnabled(m_groupInfo.hasIncoming);
 	m_ui->noIncomingFileText->setVisible(!m_groupInfo.hasIncoming);
 	m_ui->retryReceivingButton->setEnabled(m_groupInfo.hasIncoming);
-	m_ui->addAndChConnectionButton->setText(m_groupInfo.hasOutgoing ? tr("Add devices") : tr("Change connection"));
+	m_ui->addAndChConnectionButton->setText(m_groupInfo.hasOutgoing ? tr("&Add devices") : tr("&Change connection"));
 
 	if (!hasRunning && m_ongoingTaskInfo.object.id != 0) {
 		m_ongoingTaskInfo.reset();
@@ -293,13 +295,11 @@ void ShowTransferDialog::globalTaskError(groupid groupId, const QString &deviceI
 			                                      " working. Try other connections if there is any.")
 					                                   .arg(device.nickname), QMessageBox::StandardButton::Apply
 			                                                                  | QMessageBox::StandardButton::Close,
-			                                                                  QMessageBox::StandardButton::Close);
+			                                   QMessageBox::StandardButton::Close);
 
 			if (button == QMessageBox::StandardButton::Apply)
 				addDevOrChangeConnection();
 		}
-
-
 	}
 }
 

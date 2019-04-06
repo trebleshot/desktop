@@ -225,10 +225,10 @@ void SeamlessClient::run()
 															lastDataAvailable = currentTime;
 														}
 
-														if (currentTime - lastUpdated > 2) {
+														if (currentTime - lastUpdated > 1) {
 															// only emit current file size
 															// also always update when a file status changes
-															qDebug() << this << "Notified updated";
+															qDebug() << this << "Notified update";
 															emit gTaskMgr->taskStatus(m_groupId, m_deviceId,
 															                          TransferObject::Type::Incoming,
 															                          currentFile.size(),

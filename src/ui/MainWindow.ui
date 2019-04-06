@@ -43,6 +43,9 @@
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
        <widget class="QTabWidget" name="tabWidget">
+        <property name="tabShape">
+         <enum>QTabWidget::Rounded</enum>
+        </property>
         <property name="currentIndex">
          <number>0</number>
         </property>
@@ -93,6 +96,9 @@
                 </property>
                 <property name="text">
                  <string>Remove</string>
+                </property>
+                <property name="shortcut">
+                 <string>Del</string>
                 </property>
                </widget>
               </item>
@@ -251,6 +257,9 @@
           </property>
           <property name="text">
            <string>Send files</string>
+          </property>
+          <property name="shortcut">
+           <string>Space</string>
           </property>
          </widget>
         </item>
