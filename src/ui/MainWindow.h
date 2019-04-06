@@ -28,18 +28,6 @@ namespace Ui {
 class MainWindow : public QMainWindow {
 Q_OBJECT
 
-protected:
-	Ui::MainWindow *m_ui;
-	SeamlessServer *m_seamlessServer;
-	CommunicationServer *m_commServer;
-	TransferGroupModel *m_groupModel;
-	NetworkDeviceModel *m_deviceModel;
-	DNSSDService *m_discoveryService;
-
-	void dragEnterEvent(QDragEnterEvent *event) override;
-
-	void dropEvent(QDropEvent *event) override;
-
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
 
@@ -94,4 +82,16 @@ public slots:
 	void updateButtons();
 
 	void usernameChanged();
+
+protected:
+	Ui::MainWindow *m_ui;
+	SeamlessServer *m_seamlessServer;
+	CommunicationServer *m_commServer;
+	TransferGroupModel *m_groupModel;
+	NetworkDeviceModel *m_deviceModel;
+	DNSSDService *m_discoveryService;
+
+	void dragEnterEvent(QDragEnterEvent *event) override;
+
+	void dropEvent(QDropEvent *event) override;
 };

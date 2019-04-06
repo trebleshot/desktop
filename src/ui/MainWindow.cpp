@@ -139,7 +139,9 @@ void MainWindow::aboutQt()
 {
 	QApplication::aboutQt();
 }
-void MainWindow::showTransferWithAddDevicesDialog(groupid groupId) {
+
+void MainWindow::showTransferWithAddDevicesDialog(groupid groupId)
+{
 	showTransfer(groupId, true);
 }
 
@@ -338,6 +340,11 @@ void MainWindow::deviceContextMenu(const QPoint &point)
 		QMenu menu(m_ui->devicesTreeView);
 		NetworkDevice device = resultList[0];
 
+		menu.addAction(device.isTrusted ? tr("Remove from TrustZone") : tr("Set as TrustZone"), [&device]() {
+			device.isTrusted = !device.isTrusted;
+			gDatabase->publish(device);
+		});
+
 		menu.addAction(device.isRestricted ? tr("Allow to access") : tr("Restrict"), [&device]() {
 			device.isRestricted = !device.isRestricted;
 			gDatabase->publish(device);
@@ -349,12 +356,18 @@ void MainWindow::deviceContextMenu(const QPoint &point)
 
 void MainWindow::deviceSelected(const QModelIndex &modelIndex)
 {
-	if (modelIndex.isValid() && modelIndex.column() == NetworkDeviceModel::Status) {
+	if (modelIndex.isValid()) {
 		MutexEnablingScope mutexScope(m_deviceModel);
-		NetworkDevice device = m_deviceModel->list()->at(modelIndex.row());
-		device.isRestricted = !device.isRestricted;
 
-		gDatabase->publish(device);
+		if (modelIndex.column() == NetworkDeviceModel::Status) {
+			NetworkDevice device = m_deviceModel->list()->at(modelIndex.row());
+			device.isRestricted = !device.isRestricted;
+			gDatabase->publish(device);
+		} else if (modelIndex.column() == NetworkDeviceModel::TrustZone) {
+			NetworkDevice device = m_deviceModel->list()->at(modelIndex.row());
+			device.isTrusted = !device.isTrusted;
+			gDatabase->publish(device);
+		}
 	}
 }
 

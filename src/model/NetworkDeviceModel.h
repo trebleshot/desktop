@@ -32,6 +32,7 @@ public:
 		Name,
 		LastUsageDate,
 		Status,
+		TrustZone,
 		__itemCount // to count his enum
 	};
 

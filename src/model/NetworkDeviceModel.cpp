@@ -66,6 +66,8 @@ QVariant NetworkDeviceModel::headerData(int section, Qt::Orientation orientation
 					return tr("Name");
 				case ColumnName::LastUsageDate:
 					return tr("Last usage");
+				case ColumnName::TrustZone:
+					return tr("TrustZone");
 				default:
 					return QString("?");
 			}
@@ -88,6 +90,10 @@ QVariant NetworkDeviceModel::data(const QModelIndex &index, int role) const
 				return thisDevice.isRestricted
 				       ? QString("Restricted")
 				       : QString("Normal");
+			case ColumnName::TrustZone:
+				return thisDevice.isTrusted
+				       ? QString("Allowed")
+				       : QString("Not allowed");
 			case ColumnName::LastUsageDate:
 				return QDateTime::fromTime_t(static_cast<uint>(thisDevice.lastUsageTime))
 						.toString("ddd, d MMM");
