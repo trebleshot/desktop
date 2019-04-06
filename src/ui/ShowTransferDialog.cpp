@@ -286,11 +286,19 @@ void ShowTransferDialog::globalTaskError(groupid groupId, const QString &deviceI
 			QMessageBox::warning(this, tr("Transfer error"), tr("Something went wrong while sending files to %1")
 					.arg(device.nickname));
 		else if (type == TransferObject::Type::Incoming
-		         && errorType == TransferTaskManager::TaskError::InitialConnection)
-			QMessageBox::warning(this, tr("Transfer error"), tr("Something went wrong while receiving files "
-			                                                    "from %1. Check if the network connection is"
-			                                                    " working. Try other connections if there is any.")
-					.arg(device.nickname));
+		         && errorType == TransferTaskManager::TaskError::InitialConnection) {
+			auto button = QMessageBox::warning(this, tr("Transfer error"),
+			                                   tr("Something went wrong while receiving files "
+			                                      "from %1. Check if the network connection is"
+			                                      " working. Try other connections if there is any.")
+					                                   .arg(device.nickname), QMessageBox::StandardButton::Apply
+			                                                                  | QMessageBox::StandardButton::Close,
+			                                                                  QMessageBox::StandardButton::Close);
+
+			if (button == QMessageBox::StandardButton::Apply)
+				addDevOrChangeConnection();
+		}
+
 
 	}
 }
@@ -348,16 +356,12 @@ void ShowTransferDialog::showFiles()
 
 void ShowTransferDialog::updateStats()
 {
-	bool hasOngoing = m_ongoingTaskInfo.object.id != 0;
-
 	{
 		MutexEnablingScope mutexScope(m_objectModel);
 		TransferUtils::getInfo(m_groupInfo, *m_objectModel->list(), true);
 	}
 
-	if (hasOngoing)
-		m_groupInfo.completedBytes += m_ongoingTaskInfo.completedBytes;
-
+	m_groupInfo.completedBytes += m_ongoingTaskInfo.completedBytes;
 	m_ui->progressBar->setValue((int) (((double) m_groupInfo.completedBytes / m_groupInfo.totalBytes) * 100));
 	m_ui->textFilesLeft->setText(tr("%1 of %2").arg(m_groupInfo.completed).arg(m_groupInfo.total));
 
@@ -365,7 +369,7 @@ void ShowTransferDialog::updateStats()
 		m_ui->transferObjectTextView->setText(tr("Completed"));
 		m_ui->progressBarPerFile->setValue(100);
 	} else {
-		if (hasOngoing) {
+		if (m_ongoingTaskInfo.object.id != 0) {
 			m_ui->transferObjectTextView->setText(m_ongoingTaskInfo.object.friendlyName);
 			m_ui->progressBarPerFile->setValue((int) (((double) m_ongoingTaskInfo.completedBytes
 			                                           / m_ongoingTaskInfo.object.fileSize) * 100));

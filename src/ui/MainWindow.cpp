@@ -122,10 +122,15 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::transferItemActivated(const QModelIndex &modelIndex)
 {
-	MutexEnablingScope mutexScope(m_groupModel);
-	const auto &data = m_groupModel->list()->at(modelIndex.row());
+	TransferGroupInfo info;
 
-	showTransfer(data.group.id);
+	{
+		MutexEnablingScope mutexScope(m_groupModel);
+		info = m_groupModel->list()->at(modelIndex.row());
+	}
+
+	if (info.group.id != 0)
+		showTransfer(info.group.id);
 }
 
 void MainWindow::about()
@@ -357,16 +362,21 @@ void MainWindow::deviceContextMenu(const QPoint &point)
 void MainWindow::deviceSelected(const QModelIndex &modelIndex)
 {
 	if (modelIndex.isValid()) {
-		MutexEnablingScope mutexScope(m_deviceModel);
+		NetworkDevice device;
 
-		if (modelIndex.column() == NetworkDeviceModel::Status) {
-			NetworkDevice device = m_deviceModel->list()->at(modelIndex.row());
-			device.isRestricted = !device.isRestricted;
-			gDatabase->publish(device);
-		} else if (modelIndex.column() == NetworkDeviceModel::TrustZone) {
-			NetworkDevice device = m_deviceModel->list()->at(modelIndex.row());
-			device.isTrusted = !device.isTrusted;
-			gDatabase->publish(device);
+		{
+			MutexEnablingScope mutexScope(m_deviceModel);
+			device = m_deviceModel->list()->at(modelIndex.row());
+		}
+
+		if (!device.id.isEmpty()) {
+			if (modelIndex.column() == NetworkDeviceModel::Status) {
+				device.isRestricted = !device.isRestricted;
+				gDatabase->publish(device);
+			} else if (modelIndex.column() == NetworkDeviceModel::TrustZone) {
+				device.isTrusted = !device.isTrusted;
+				gDatabase->publish(device);
+			}
 		}
 	}
 }
