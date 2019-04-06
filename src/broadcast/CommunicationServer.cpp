@@ -205,23 +205,27 @@ void CommunicationServer::connected(CSActiveConnection *connection)
 				} else if (request == KEYWORD_REQUEST_HANDSHAKE) {
 					result = true;
 				} else if (request == KEYWORD_REQUEST_START_TRANSFER) {
-					groupid groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID).toInt(-1);
-					TransferGroup group(groupId);
-					TransferAssignee assignee(groupId, deviceId);
+					if (!device.isTrusted)
+						replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_REQUIRE_TRUSTZONE);
+					else {
+						groupid groupId = responseJSON.value(KEYWORD_TRANSFER_GROUP_ID).toInt(-1);
+						TransferGroup group(groupId);
+						TransferAssignee assignee(groupId, deviceId);
 
-					if (gDbSignal->reconstruct(group) && gDbSignal->reconstruct(assignee)) {
-						if (assignee.connectionAdapter != deviceConnection.adapterName) {
-							assignee.connectionAdapter = deviceConnection.adapterName;
-							gDbSignal->update(assignee);
-						}
+						if (gDbSignal->reconstruct(group) && gDbSignal->reconstruct(assignee)) {
+							if (assignee.connectionAdapter != deviceConnection.adapterName) {
+								assignee.connectionAdapter = deviceConnection.adapterName;
+								gDbSignal->update(assignee);
+							}
 
-						if (groupId >= 0 && !gTaskMgr->hasActiveTasksFor(groupId, deviceId)) {
-							TransferUtils::startTransfer(groupId, deviceId);
-							result = true;
+							if (groupId >= 0 && !gTaskMgr->hasActiveTasksFor(groupId, deviceId)) {
+								TransferUtils::startTransfer(groupId, deviceId);
+								result = true;
+							} else
+								replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ACCESSIBLE);
 						} else
-							replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_ACCESSIBLE);
-					} else
-						replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_FOUND);
+							replyJSON.insert(KEYWORD_ERROR, KEYWORD_ERROR_NOT_FOUND);
+					}
 				}
 			}
 		}

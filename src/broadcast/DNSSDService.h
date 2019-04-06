@@ -35,7 +35,7 @@ public:
 
 public slots:
 
-	void serviceFound(KDNSSD::RemoteService::Ptr service);
+	static void serviceFound(KDNSSD::RemoteService::Ptr service);
 
 protected:
 	KDNSSD::PublicService *m_serviceBroadcast;
