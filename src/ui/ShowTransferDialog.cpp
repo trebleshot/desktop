@@ -373,8 +373,10 @@ void ShowTransferDialog::updateStats()
 			m_ui->transferObjectTextView->setText(m_ongoingTaskInfo.object.friendlyName);
 			m_ui->progressBarPerFile->setValue((int) (((double) m_ongoingTaskInfo.completedBytes
 			                                           / m_ongoingTaskInfo.object.fileSize) * 100));
-		} else
+		} else {
 			m_ui->transferObjectTextView->setText(tr("Paused"));
+			m_ui->progressBarPerFile->setValue(0);
+		}
 	}
 }
 

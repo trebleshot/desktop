@@ -6,6 +6,12 @@ is an Android file transferring tool. You can send big files with it
 without feeling anxiety while doing it, because, with TrebleShot, you 
 can resume when something goes wrong.
 
+## Monday, April 8, 2019
+```
+An end of the development cycle for another alpha release. And this time Windows 
+version is also included.  
+```
+
 
 ## Wednesday, March 27, 2019
 ```
