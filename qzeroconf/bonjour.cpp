@@ -281,7 +281,7 @@ void QZeroConf::startServicePublish(const char *name, const char *type, const ch
 	DNSServiceErrorType err;
 
 	if (pri->dnssRef) {
-		emit error(QZeroConf::serviceRegistrationFailed);
+		emit error(QZeroConf::registrationRefError);
 		return;
 	}
 
@@ -298,7 +298,7 @@ void QZeroConf::startServicePublish(const char *name, const char *type, const ch
 		int sockfd = DNSServiceRefSockFD(pri->dnssRef);
 		if (sockfd == -1) {
 			pri->cleanUp(pri->dnssRef);
-			emit error(QZeroConf::serviceRegistrationFailed);
+			emit error(QZeroConf::registrationSockFdError);
 		}
 		else {
 			pri->bs = new QSocketNotifier(sockfd, QSocketNotifier::Read, this);
@@ -307,7 +307,7 @@ void QZeroConf::startServicePublish(const char *name, const char *type, const ch
 	}
 	else {
 		pri->cleanUp(pri->dnssRef);
-		emit error(QZeroConf::serviceRegistrationFailed);
+		emit error((error_t) err);
 	}
 }
 

@@ -50,8 +50,30 @@ void DNSSDService::start()
 
 #else
 DNSSDService::DNSSDService(QObject *parent) : QObject(parent)
-{}
+{
+	connect(&m_zeroConf, &QZeroConf::error, this, &DNSSDService::error);
+	connect(&m_zeroConf, &QZeroConf::serviceAdded, this, &DNSSDService::serviceAdded);
+	m_zeroConf.addServiceTxtRecord("socket_URL", "{host}:{port}");
+}
+
+DNSSDService::~DNSSDService() {
+	m_zeroConf.stopServicePublish();
+	m_zeroConf.stopBrowser();
+}
+
+void DNSSDService::error(QZeroConf::error_t error) {
+	qDebug() << this << error;
+}
 
 void DNSSDService::start()
-{}
+{
+	m_zeroConf.startServicePublish(TS_SERVICE_NAME, TS_SERVICE_TYPE, nullptr, PORT_COMMUNICATION_DEFAULT);
+	m_zeroConf.startBrowser(TS_SERVICE_TYPE);
+}
+
+void DNSSDService::serviceAdded(QZeroConfService service)
+{
+	qDebug() << "service added";
+}
+
 #endif // USE_DNSSD_FEATURE

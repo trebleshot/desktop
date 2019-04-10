@@ -47,6 +47,8 @@ public:
 		serviceRegistrationFailed = -1,
 		serviceNameCollision = -2,
 		browserFailed = -3,
+		registrationRefError = -4,
+		registrationSockFdError = -5
 	};
     QZeroConf(QObject *parent = Q_NULLPTR);
 	~QZeroConf();

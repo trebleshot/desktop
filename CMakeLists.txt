@@ -173,7 +173,35 @@ set(UTIL_LIBRARY
 
 if (KF5DNSSD_FOUND)
     add_definitions(-DUSE_DNSSD_FEATURE=1)
+elseif (WIN32)
+	add_definitions(-DWIN32)
+	add_definitions(-DNDEBUG)
+	add_definitions(-D_WINDOWS)
+	add_definitions(-D_USRDLL)
+	add_definitions(-DQT_BUILD_ZEROCONF_LIB)
+	add_definitions(-DMDNS_DEBUGMSGS=1)
+	add_definitions(-DWIN32_LEAN_AND_MEAN)
+	add_definitions(-DUSE_TCP_LOOPBACK)
+	add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+	add_definitions(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1)
+	add_definitions(-DNOT_HAVE_SA_LEN)
+
+	set(UTIL_LIBRARY ${UTIL_LIBRARY}
+		qzeroconf/qzeroconfservice.h
+        qzeroconf/qzeroconfservice.cpp
+        qzeroconf/qzeroconfglobal.h
+        qzeroconf/qzeroconf.h
+        qzeroconf/bonjour_p.h
+        qzeroconf/bonjour.cpp
+		qzeroconf/bonjour-sdk/CommonServices.h
+		qzeroconf/bonjour-sdk/DebugServices.h
+		qzeroconf/bonjour-sdk/dns_sd.h
+        qzeroconf/bonjour-sdk/dnssd_clientlib.c
+        qzeroconf/bonjour-sdk/dnssd_clientstub.c
+        qzeroconf/bonjour-sdk/dnssd_ipc.c
+		qzeroconf/bonjour-sdk/dnssd_ipc.h)
 endif ()
+# old code was here
 
 add_executable(${PROJECT_EXECUTABLE} src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 
@@ -182,13 +210,13 @@ if (NOT TARGET Qt5::WinMain)
     add_library(Qt5::WinMain STATIC IMPORTED)
 endif ()
 
-target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets)
-
 if (KF5DNSSD_FOUND)
     target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC KF5::DNSSD)
-else ()
-    add_subdirectory(qzeroconf)
+elseif (WIN32)
+	target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC wsock32 ws2_32)
 endif ()
+
+target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets)
 
 fix_win_compiler()
 

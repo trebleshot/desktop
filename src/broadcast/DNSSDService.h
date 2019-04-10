@@ -42,8 +42,10 @@ protected:
 	KDNSSD::ServiceBrowser *m_serviceBrowser;
 };
 
-#else
+#elif defined(QT_BUILD_ZEROCONF_LIB)
 #include <QObject>
+#include <src/util/NetworkDeviceLoader.h>
+#include <qzeroconf/qzeroconf.h>
 
 class DNSSDService : public QObject {
 	Q_OBJECT
@@ -51,6 +53,15 @@ class DNSSDService : public QObject {
 public:
 	explicit DNSSDService(QObject* parent = nullptr);
 
+	~DNSSDService() override;
+
+	void error(QZeroConf::error_t error);
+
 	void start();
+
+	void serviceAdded(QZeroConfService service);
+
+protected:
+	QZeroConf m_zeroConf;
 };
 #endif // USE_DNSSD_FEATURE

@@ -27,7 +27,7 @@
 #ifndef QZEROCONFPRIVATE_H_
 #define QZEROCONFPRIVATE_H_
 
-#include <dns_sd.h>
+#include <qzeroconf/bonjour-sdk/dns_sd.h>
 #include <QSocketNotifier>
 #include <QtEndian>
 #include <QHostAddress>

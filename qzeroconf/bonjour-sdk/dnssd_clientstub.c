@@ -40,8 +40,8 @@ static int gDaemonErr = kDNSServiceErr_NoError;
 #if defined(_WIN32)
 
 	#define _SSIZE_T
-	#include <CommonServices.h>
-	#include <DebugServices.h>
+	#include <qzeroconf/bonjour-sdk/CommonServices.h>
+	#include <qzeroconf/bonjour-sdk/DebugServices.h>
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
 	#include <windows.h>
