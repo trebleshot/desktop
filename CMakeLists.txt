@@ -67,11 +67,11 @@ ELSE ()
 ENDIF ()
 
 # For Windows installation Qt libraries will be determined by this suffix.
-IF(CMAKE_BUILD_TYPE MATCHES Debug)
-  set(QT_LIBRARY_SUFFIX "d.dll")
-ELSE()
-  set(QT_LIBRARY_SUFFIX ".dll")
-ENDIF()
+IF (CMAKE_BUILD_TYPE MATCHES Debug)
+    set(QT_LIBRARY_SUFFIX "d.dll")
+ELSE ()
+    set(QT_LIBRARY_SUFFIX ".dll")
+ENDIF ()
 
 configure_file(src/build.h.in src/build.h)
 
@@ -88,7 +88,7 @@ qt5_add_resources(QRCS
 
 qt5_wrap_ui(UI_HEADERS
         src/ui/AboutDialog.ui
-		src/ui/ConnectionReselectForDeviceDialog.ui
+        src/ui/ConnectionReselectForDeviceDialog.ui
         src/ui/DeviceChooserDialog.ui
         src/ui/FileAdditionProgressDialog.ui
         src/ui/MainWindow.ui
@@ -112,10 +112,10 @@ set(UTIL_LIBRARY
         src/config/Keyword.h
         src/coolsocket/CoolSocket.h
         src/coolsocket/CoolSocket.cpp
-		src/database/AccessDatabase.h
+        src/database/AccessDatabase.h
         src/database/AccessDatabase.cpp
-		src/database/DatabaseLoader.h
-		src/database/DatabaseLoader.cpp
+        src/database/DatabaseLoader.h
+        src/database/DatabaseLoader.cpp
         src/database/ReconstructionException.h
         src/database/ReconstructionException.cpp
         src/database/object/NetworkDevice.h
@@ -128,8 +128,8 @@ set(UTIL_LIBRARY
         src/database/object/TransferGroup.cpp
         src/dialog/WelcomeDialog.h
         src/dialog/WelcomeDialog.cpp
-		src/model/ConnectionModel.h
-		src/model/ConnectionModel.cpp
+        src/model/ConnectionModel.h
+        src/model/ConnectionModel.cpp
         src/model/FlawedTransferModel.h
         src/model/FlawedTransferModel.cpp
         src/model/NetworkDeviceModel.h
@@ -140,8 +140,8 @@ set(UTIL_LIBRARY
         src/model/TransferObjectModel.cpp
         src/ui/AboutDialog.h
         src/ui/AboutDialog.cpp
-		src/ui/ConnectionReselectForDeviceDialog.h
-		src/ui/ConnectionReselectForDeviceDialog.cpp
+        src/ui/ConnectionReselectForDeviceDialog.h
+        src/ui/ConnectionReselectForDeviceDialog.cpp
         src/ui/DeviceChooserDialog.h
         src/ui/DeviceChooserDialog.cpp
         src/ui/FileAdditionProgressDialog.h
@@ -164,8 +164,8 @@ set(UTIL_LIBRARY
         src/util/Interrupter.cpp
         src/util/NetworkDeviceLoader.h
         src/util/NetworkDeviceLoader.cpp
-		src/util/SynchronizedList.h
-		src/util/SynchronizedList.cpp
+        src/util/SynchronizedList.h
+        src/util/SynchronizedList.cpp
         src/util/TransferUtils.h
         src/util/TransferUtils.cpp
         src/util/ViewUtils.h
@@ -186,6 +186,8 @@ target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC Qt5::Core Qt5::Gui Qt5::Netwo
 
 if (KF5DNSSD_FOUND)
     target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC KF5::DNSSD)
+else ()
+    add_subdirectory(qzeroconf)
 endif ()
 
 fix_win_compiler()
@@ -194,38 +196,38 @@ if (NOT WIN32)
     install(TARGETS ${PROJECT_EXECUTABLE}
             RUNTIME DESTINATION bin
             LIBRARY DESTINATION lib)
-elseif(WIN32 AND MSVC)
-	install(TARGETS ${PROJECT_EXECUTABLE}
-		RUNTIME DESTINATION "/"
-		LIBRARY DESTINATION lib)
+elseif (WIN32 AND MSVC)
+    install(TARGETS ${PROJECT_EXECUTABLE}
+            RUNTIME DESTINATION "/"
+            LIBRARY DESTINATION lib)
 
-	# The Qt5 Debug configuration library files have a 'd' postfix
-	install(FILES
-			${QT_BINARY_DIR}/Qt5Cored.dll
-			${QT_BINARY_DIR}/Qt5Guid.dll
-			${QT_BINARY_DIR}/Qt5Networkd.dll
-			${QT_BINARY_DIR}/Qt5Widgetsd.dll
-			${QT_BINARY_DIR}/Qt5Sqld.dll
-		DESTINATION "/"
-		CONFIGURATIONS Debug)
-	# The Qt5 Release configuration files don't have a postfix
-	install(FILES
-			${QT_BINARY_DIR}/Qt5Core.dll
-			${QT_BINARY_DIR}/Qt5Gui.dll
-			${QT_BINARY_DIR}/Qt5Network.dll
-			${QT_BINARY_DIR}/Qt5Widgets.dll
-			${QT_BINARY_DIR}/Qt5Sql.dll
-		DESTINATION "/"
-		CONFIGURATIONS Release)
-	# The files below are common to all configurations
-	install(FILES
-		${QT_BINARY_DIR}/plugins/platforms/qwindows.dll
-		DESTINATION platforms)
+    # The Qt5 Debug configuration library files have a 'd' postfix
+    install(FILES
+            ${QT_BINARY_DIR}/Qt5Cored.dll
+            ${QT_BINARY_DIR}/Qt5Guid.dll
+            ${QT_BINARY_DIR}/Qt5Networkd.dll
+            ${QT_BINARY_DIR}/Qt5Widgetsd.dll
+            ${QT_BINARY_DIR}/Qt5Sqld.dll
+            DESTINATION "/"
+            CONFIGURATIONS Debug)
+    # The Qt5 Release configuration files don't have a postfix
+    install(FILES
+            ${QT_BINARY_DIR}/Qt5Core.dll
+            ${QT_BINARY_DIR}/Qt5Gui.dll
+            ${QT_BINARY_DIR}/Qt5Network.dll
+            ${QT_BINARY_DIR}/Qt5Widgets.dll
+            ${QT_BINARY_DIR}/Qt5Sql.dll
+            DESTINATION "/"
+            CONFIGURATIONS Release)
+    # The files below are common to all configurations
+    install(FILES
+            ${QT_BINARY_DIR}/plugins/platforms/qwindows.dll
+            DESTINATION platforms)
 
-	install(FILES
-			distri/winlaunch.bat
-		DESTINATION "/")
-endif()
+    install(FILES
+            distri/winlaunch.bat
+            DESTINATION "/")
+endif ()
 
 if (UNIX AND NOT APPLE)
     install(FILES assets/drawable/${PROJECT_EXECUTABLE}.png
