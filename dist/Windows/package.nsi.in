@@ -35,17 +35,7 @@ Section ""
 	File ${CMAKE_CURRENT_BINARY_DIR}\${PROJECT_EXECUTABLE}.exe
 	File ${CMAKE_CURRENT_SOURCE_DIR}\COPYING
 	File ${CMAKE_CURRENT_SOURCE_DIR}\assets\drawable\${PROJECT_EXECUTABLE}.ico
-
-	#
-	File ${QT_BINARY_DIR}\Qt5Widgets${QT_LIBRARY_SUFFIX}
-	File ${QT_BINARY_DIR}\Qt5Gui${QT_LIBRARY_SUFFIX}
-	File ${QT_BINARY_DIR}\Qt5Core${QT_LIBRARY_SUFFIX}
-	File ${QT_BINARY_DIR}\Qt5Sql${QT_LIBRARY_SUFFIX}
-	File ${QT_BINARY_DIR}\Qt5Network${QT_LIBRARY_SUFFIX}
-	
-	SetOutPath $INSTDIR\platforms
-	File ${QT_PLUGINS_DIR}\platforms\qminimal${QT_LIBRARY_SUFFIX}
-	File ${QT_PLUGINS_DIR}\platforms\qwindows${QT_LIBRARY_SUFFIX}
+	File /r ${LINKED_LIBRARY_DIR}\*
 	
 	SetOutPath $INSTDIR
 	WriteUninstaller $INSTDIR\uninstall.exe
@@ -68,12 +58,23 @@ SectionEnd
 Section "Uninstall"	
 	Delete $INSTDIR\COPYING
 	Delete $INSTDIR\${PROJECT_EXECUTABLE}.ico
-	Delete $INSTDIR\${PROJECT_EXECUTABLE}.exe
+	Delete $INSTDIR\*.exe
 	Delete $INSTDIR\*.dll
+	Delete $INSTDIR\bearer\*.dll
+	Delete $INSTDIR\iconengines\*.dll
+	Delete $INSTDIR\imageformats\*.dll
 	Delete $INSTDIR\platforms\*.dll
-	Delete $INSTDIR\uninstall.exe
+	Delete $INSTDIR\sqldrivers\*.dll
+	Delete $INSTDIR\styles\*.dll
+	Delete $INSTDIR\translations\*.qm
 	Delete $SMPROGRAMS\${PROJECT_NAME}.lnk
+	RMDir $INSTDIR\bearer
+	RMDir $INSTDIR\iconengines
+	RMDir $INSTDIR\imageformats
 	RMDir $INSTDIR\platforms
+	RMDir $INSTDIR\sqldrivers
+	RMDir $INSTDIR\styles
+	RMDir $INSTDIR\translations
 	RMDir $INSTDIR
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROJECT_NAME}"
 SectionEnd

@@ -40,6 +40,9 @@ set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 set(PROJECT_VERSION_CODE 91)
 
+set(LINKED_LIBRARY_NAME "linked_libraries")
+set(LINKED_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${LINKED_LIBRARY_NAME})
+
 # Find the Qt5 libraries
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
@@ -225,38 +228,14 @@ if (NOT WIN32)
             RUNTIME DESTINATION bin
             LIBRARY DESTINATION lib)
 elseif (WIN32 AND MSVC)
+	make_directory(${LINKED_LIBRARY_DIR})
+
     install(TARGETS ${PROJECT_EXECUTABLE}
             RUNTIME DESTINATION "/"
             LIBRARY DESTINATION lib)
 
-    # The Qt5 Debug configuration library files have a 'd' postfix
-    install(FILES
-            ${QT_BINARY_DIR}/Qt5Cored.dll
-            ${QT_BINARY_DIR}/Qt5Guid.dll
-            ${QT_BINARY_DIR}/Qt5Networkd.dll
-            ${QT_BINARY_DIR}/Qt5Widgetsd.dll
-            ${QT_BINARY_DIR}/Qt5Sqld.dll
-            DESTINATION "/"
-            CONFIGURATIONS Debug)
-
-	install(FILES
-			${QT_PLUGINS_DIR}/platforms/qwindowsd.dll
-            DESTINATION platforms
-			CONFIGURATIONS Debug)
-    # The Qt5 Release configuration files don't have a postfix
-    install(FILES
-            ${QT_BINARY_DIR}/Qt5Core.dll
-            ${QT_BINARY_DIR}/Qt5Gui.dll
-            ${QT_BINARY_DIR}/Qt5Network.dll
-            ${QT_BINARY_DIR}/Qt5Widgets.dll
-            ${QT_BINARY_DIR}/Qt5Sql.dll
-            DESTINATION "/"
-            CONFIGURATIONS Release)
-
-	install(FILES
-            ${QT_PLUGINS_DIR}/platforms/qwindows.dll
-            DESTINATION platforms
-			CONFIGURATIONS Release)
+	execute_process(COMMAND ${QT_BINARY_DIR}/windeployqt.exe ${PROJECT_EXECUTABLE}.exe --dir ${LINKED_LIBRARY_DIR})
+	#CONFIGURATIONS Release #& Debug
 endif ()
 
 if (UNIX AND NOT APPLE)
