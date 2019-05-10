@@ -238,6 +238,11 @@ elseif (WIN32 AND MSVC)
             ${QT_BINARY_DIR}/Qt5Sqld.dll
             DESTINATION "/"
             CONFIGURATIONS Debug)
+
+	install(FILES
+			${QT_PLUGINS_DIR}/platforms/qwindowsd.dll
+            DESTINATION platforms
+			CONFIGURATIONS Debug)
     # The Qt5 Release configuration files don't have a postfix
     install(FILES
             ${QT_BINARY_DIR}/Qt5Core.dll
@@ -247,14 +252,11 @@ elseif (WIN32 AND MSVC)
             ${QT_BINARY_DIR}/Qt5Sql.dll
             DESTINATION "/"
             CONFIGURATIONS Release)
-    # The files below are common to all configurations
-    install(FILES
-            ${QT_BINARY_DIR}/plugins/platforms/qwindows.dll
-            DESTINATION platforms)
 
-    install(FILES
-            distri/winlaunch.bat
-            DESTINATION "/")
+	install(FILES
+            ${QT_PLUGINS_DIR}/platforms/qwindows.dll
+            DESTINATION platforms
+			CONFIGURATIONS Release)
 endif ()
 
 if (UNIX AND NOT APPLE)

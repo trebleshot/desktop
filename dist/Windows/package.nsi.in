@@ -44,8 +44,8 @@ Section ""
 	File ${QT_BINARY_DIR}\Qt5Network${QT_LIBRARY_SUFFIX}
 	
 	SetOutPath $INSTDIR\platforms
-	File ${QT_PLUGINS_DIR}\platforms\qminimal.dll
-	File ${QT_PLUGINS_DIR}\platforms\qwindows.dll
+	File ${QT_PLUGINS_DIR}\platforms\qminimal${QT_LIBRARY_SUFFIX}
+	File ${QT_PLUGINS_DIR}\platforms\qwindows${QT_LIBRARY_SUFFIX}
 	
 	SetOutPath $INSTDIR
 	WriteUninstaller $INSTDIR\uninstall.exe
@@ -66,10 +66,11 @@ SectionEnd
 
 ; ===== Uninstaller =====
 Section "Uninstall"	
-	Delete $INSTDIR\LICENSE
+	Delete $INSTDIR\COPYING
+	Delete $INSTDIR\${PROJECT_EXECUTABLE}.ico
+	Delete $INSTDIR\${PROJECT_EXECUTABLE}.exe
 	Delete $INSTDIR\*.dll
 	Delete $INSTDIR\platforms\*.dll
-	Delete $INSTDIR\${PROJECT_EXECUTABLE}.exe
 	Delete $INSTDIR\uninstall.exe
 	Delete $SMPROGRAMS\${PROJECT_NAME}.lnk
 	RMDir $INSTDIR\platforms
