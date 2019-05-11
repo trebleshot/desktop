@@ -234,8 +234,15 @@ elseif (WIN32 AND MSVC)
             RUNTIME DESTINATION "/"
             LIBRARY DESTINATION lib)
 
-	execute_process(COMMAND ${QT_BINARY_DIR}/windeployqt.exe ${PROJECT_EXECUTABLE}.exe --dir ${LINKED_LIBRARY_DIR})
-	#CONFIGURATIONS Release #& Debug
+	add_custom_command(TARGET ${PROJECT_EXECUTABLE} POST_BUILD
+                   COMMAND ${QT_BINARY_DIR}/windeployqt.exe ${PROJECT_EXECUTABLE}.exe --dir ${LINKED_LIBRARY_DIR})
+
+	add_custom_command(TARGET ${PROJECT_EXECUTABLE} POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${LINKED_LIBRARY_DIR} $<TARGET_FILE_DIR:${PROJECT_EXECUTABLE}>)
+
+	install(DIRECTORY ${LINKED_LIBRARY_DIR}/ DESTINATION .
+			PATTERN ${LINKED_LIBRARY_DIR}/*)
 endif ()
 
 if (UNIX AND NOT APPLE)

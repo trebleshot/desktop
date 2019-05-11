@@ -30,9 +30,11 @@ DeviceChooserDialog::DeviceChooserDialog(QWidget *parent, groupid groupId)
 	m_ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(false);
 	m_ui->treeView->setColumnWidth(0, 120);
 
-	connect(m_ui->treeView, &QTreeView::activated, this, &DeviceChooserDialog::modelActivated);
+	connect(m_ui->treeView, &QTreeView::activated, this, &DeviceChooserDialog::ipAddressReturnPressed);
 	connect(m_ui->treeView, &QTreeView::pressed, this, &DeviceChooserDialog::modelPressed);
-	connect(m_ui->buttonBox, &QDialogButtonBox::accepted, this, &DeviceChooserDialog::selectionAccepted);
+	connect(m_ui->buttonBox, &QDialogButtonBox::accepted, this, &DeviceChooserDialog::confirmed);
+	connect(m_ui->ipAddressLineEdit, &QLineEdit::returnPressed, this, &DeviceChooserDialog::selectionAccepted);
+	connect(m_ui->ipAddressLineEdit, &QLineEdit::textChanged, this, &DeviceChooserDialog::ipAddressChanged);
 }
 
 DeviceChooserDialog::~DeviceChooserDialog()
@@ -41,15 +43,39 @@ DeviceChooserDialog::~DeviceChooserDialog()
 	delete m_deviceModel;
 }
 
+void DeviceChooserDialog::confirmed() {
+	if (m_ui->ipAddressLineEdit->text().size() > 0)
+		ipAddressReturnPressed();
+	else
+		selectionAccepted();
+}
+
+void DeviceChooserDialog::deviceLoaded(const NetworkDevice &device) {
+	QList<NetworkDevice> devices;
+	devices << device;
+	emit devicesSelected(m_groupId, devices);
+}
+
 void DeviceChooserDialog::modelActivated(const QModelIndex &modelIndex)
 {
 	selectionAccepted();
 	accept();
 }
 
+void DeviceChooserDialog::ipAddressChanged(const QString &ipAddress) {
+	setConfirmButtonState(ipAddress.size() > 0);
+}
+
+void DeviceChooserDialog::ipAddressReturnPressed()
+{
+	QHostAddress hostAddress(m_ui->ipAddressLineEdit->text());
+	auto *loaderResult = NetworkDeviceLoader::loadAsynchronously(hostAddress, nullptr);
+	connect(loaderResult, &LoaderResult::deviceLoaded, this, &DeviceChooserDialog::deviceLoaded);
+}
+
 void DeviceChooserDialog::modelPressed(const QModelIndex &modelIndex)
 {
-	m_ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(modelIndex.isValid());
+	setConfirmButtonState(modelIndex.isValid());
 }
 
 void DeviceChooserDialog::selectionAccepted()
@@ -57,5 +83,9 @@ void DeviceChooserDialog::selectionAccepted()
 	QList<NetworkDevice> devices;
 
 	if (ViewUtils::gatherSelections(m_ui->treeView->selectionModel(), m_deviceModel, devices))
-			emit devicesSelected(m_groupId, devices);
+		emit devicesSelected(m_groupId, devices);
+}
+
+void DeviceChooserDialog::setConfirmButtonState(bool state) {
+	m_ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(state);
 }

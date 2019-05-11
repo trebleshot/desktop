@@ -20,8 +20,10 @@
 
 #include <QtWidgets/QDialog>
 #include <QPushButton>
+#include <QLineEdit>
 #include <src/database/object/TransferGroup.h>
 #include <src/model/NetworkDeviceModel.h>
+#include <src/util/NetworkDeviceLoader.h>
 
 namespace Ui {
 	class DeviceChooserDialog;
@@ -38,11 +40,21 @@ public:
 
 public slots:
 
+	void confirmed();
+
+	void deviceLoaded(const NetworkDevice &device);
+
+	void ipAddressChanged(const QString &ipAddress);
+
+	void ipAddressReturnPressed();
+
 	void modelActivated(const QModelIndex &modelIndex);
 
 	void modelPressed(const QModelIndex &modelIndex);
 
 	void selectionAccepted();
+
+	void setConfirmButtonState(bool state);
 
 signals:
 

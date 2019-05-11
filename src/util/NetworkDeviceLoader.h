@@ -26,13 +26,20 @@
 #include <QtCore/QJsonObject>
 #include <QHostAddress>
 
+class LoaderResult : public QObject {
+Q_OBJECT
+
+signals:
+	void deviceLoaded(const NetworkDevice &device);
+};
+
 class NetworkDeviceLoader {
 public:
 	static QString convertToInet4Address(const QHostAddress &hostAddress, bool parentOnly = false);
 
 	static QString convertToInet4Address(quint32 ipv4Address, bool parentOnly = false);
 
-	static void loadAsynchronously(const QHostAddress &hostAddress,
+	static LoaderResult* loadAsynchronously(const QHostAddress &hostAddress,
 	                               const std::function<void(const NetworkDevice &)> &listener);
 
 	static NetworkDevice load(QObject *sender, const QHostAddress &hostAddress);
