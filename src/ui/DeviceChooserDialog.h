@@ -40,9 +40,9 @@ public:
 
 public slots:
 
-	void confirmed();
-
 	void deviceLoaded(const NetworkDevice &device);
+
+	void enableAddDeviceViews();
 
 	void ipAddressChanged(const QString &ipAddress);
 
