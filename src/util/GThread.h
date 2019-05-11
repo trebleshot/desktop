@@ -37,6 +37,10 @@ signals:
 
 	void statusUpdate(int max, int progress, const QString &text);
 
+	void notifyFailure();
+
+	void notifySuccess();
+
 public slots:
 
 	void notifyInterrupt();

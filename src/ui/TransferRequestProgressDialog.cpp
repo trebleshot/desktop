@@ -32,6 +32,8 @@ TransferRequestProgressDialog::TransferRequestProgressDialog(QWidget *parent, co
 	m_thread->start();
 
 	connect(m_thread, &GThread::statusUpdate, this, &TransferRequestProgressDialog::statusUpdate);
+	connect(m_thread, &GThread::notifySuccess, this, &QDialog::accept);
+	connect(m_thread, &GThread::notifyFailure, this, &QDialog::reject);
 	connect(this, &QDialog::finished, m_thread, &GThread::notifyInterrupt);
 	connect(this, &TransferRequestProgressDialog::errorOccurred, this, &TransferRequestProgressDialog::showError);
 }
@@ -198,9 +200,9 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
 		if (m_signalOnSuccess)
 				emit transferReady(groupId);
 
-		accept();
+		emit thread->notifySuccess();
 	} else
-		reject();
+		emit thread->notifyFailure();
 }
 
 void TransferRequestProgressDialog::statusUpdate(int total, int progress, QString statusText)
