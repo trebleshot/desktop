@@ -49,31 +49,35 @@ void DNSSDService::start()
 }
 
 #else
-DNSSDService::DNSSDService(QObject *parent) : QObject(parent)
+DNSSDService::DNSSDService(QObject *parent)
+		: QObject(parent), m_hostname(&this->m_server), m_provider(&this->m_server, &this->m_hostname),
+		  m_browser(&this->m_server, TS_SERVICE_TYPE, &this->m_cache)
 {
-	connect(&m_zeroConf, &QZeroConf::error, this, &DNSSDService::error);
-	connect(&m_zeroConf, &QZeroConf::serviceAdded, this, &DNSSDService::serviceAdded);
-	m_zeroConf.addServiceTxtRecord("socket_URL", "{host}:{port}");
-}
-
-DNSSDService::~DNSSDService() {
-	m_zeroConf.stopServicePublish();
-	m_zeroConf.stopBrowser();
-}
-
-void DNSSDService::error(QZeroConf::error_t error) {
-	qDebug() << this << error;
+	connect(&m_browser, &QMdnsEngine::Browser::serviceAdded, this, &DNSSDService::loadService);
+	connect(&m_browser, &QMdnsEngine::Browser::serviceUpdated, this, &DNSSDService::loadService);
 }
 
 void DNSSDService::start()
 {
-	m_zeroConf.startServicePublish(TS_SERVICE_NAME, TS_SERVICE_TYPE, nullptr, PORT_COMMUNICATION_DEFAULT);
-	m_zeroConf.startBrowser(TS_SERVICE_TYPE);
+	m_service.setType(TS_SERVICE_TYPE);
+	m_service.setName(TS_SERVICE_NAME);
+	m_service.setPort(PORT_COMMUNICATION_DEFAULT);
+	m_provider.update(m_service);
 }
 
-void DNSSDService::serviceAdded(QZeroConfService service)
+void DNSSDService::loadService(const QMdnsEngine::Service &service)
 {
-	qDebug() << "service added";
+	if (service.port() == PORT_COMMUNICATION_DEFAULT) {
+		auto *resolver = new QMdnsEngine::Resolver(&m_server, service.hostname(), &m_cache);
+		connect(resolver, &QMdnsEngine::Resolver::resolved, [](const QHostAddress &address) {
+			NetworkDeviceLoader::loadAsynchronously(address, nullptr);
+		});
+	}
+}
+
+DNSSDService::~DNSSDService()
+{
+	qDeleteAll(m_resolverList);
 }
 
 #endif // USE_DNSSD_FEATURE

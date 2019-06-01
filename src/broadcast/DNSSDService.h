@@ -42,10 +42,16 @@ protected:
 	KDNSSD::ServiceBrowser *m_serviceBrowser;
 };
 
-#elif defined(QT_BUILD_ZEROCONF_LIB)
+#else
 #include <QObject>
+#include <qmdnsengine/server.h>
+#include <qmdnsengine/service.h>
+#include <qmdnsengine/hostname.h>
+#include <qmdnsengine/cache.h>
+#include <qmdnsengine/browser.h>
+#include <qmdnsengine/provider.h>
+#include <qmdnsengine/resolver.h>
 #include <src/util/NetworkDeviceLoader.h>
-#include <qzeroconf/qzeroconf.h>
 
 class DNSSDService : public QObject {
 	Q_OBJECT
@@ -55,13 +61,20 @@ public:
 
 	~DNSSDService() override;
 
-	void error(QZeroConf::error_t error);
-
 	void start();
 
-	void serviceAdded(QZeroConfService service);
+public slots:
+	void loadService(const QMdnsEngine::Service &service);
 
 protected:
-	QZeroConf m_zeroConf;
+	QMdnsEngine::Server m_server;
+	QMdnsEngine::Hostname m_hostname;
+
+	QMdnsEngine::Service m_service;
+	QMdnsEngine::Provider m_provider;
+
+	QMdnsEngine::Cache m_cache;
+	QMdnsEngine::Browser m_browser;
+	QList<QMdnsEngine::Resolver *> m_resolverList;
 };
 #endif // USE_DNSSD_FEATURE

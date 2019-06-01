@@ -1,0 +1,3 @@
+[submodule "qmdnsengine"]
+	path = qmdnsengine
+	url = https://github.com/nitroshare/qmdnsengine.git
