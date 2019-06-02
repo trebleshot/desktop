@@ -19,6 +19,7 @@
 #include <src/broadcast/SeamlessServer.h>
 #include <src/model/NetworkDeviceModel.h>
 #include <src/broadcast/DNSSDService.h>
+#include <src/model/TextStreamModel.h>
 #include "ui_MainWindow.h"
 
 namespace Ui {
@@ -38,6 +39,8 @@ public slots:
 	void about();
 
 	void aboutQt();
+
+	void copyTextStream();
 
 	void deviceBlocked(const QString &deviceId, const QHostAddress &address);
 
@@ -59,6 +62,8 @@ public slots:
 
 	void showReceivedText(const QString &text, const QString &deviceId);
 
+	void saveTextStream();
+
 	void showTransferRequest(const QString &deviceId, groupid groupId, int filesTotal);
 
 	void showTransfer();
@@ -72,6 +77,8 @@ public slots:
 	void taskPause();
 
 	void taskToggle();
+
+	void textItemActivated(const QModelIndex &modelIndex);
 
 	void transferItemActivated(const QModelIndex &modelIndex);
 
@@ -89,6 +96,7 @@ protected:
 	CommunicationServer *m_commServer;
 	TransferGroupModel *m_groupModel;
 	NetworkDeviceModel *m_deviceModel;
+	TextStreamModel *m_textStreamModel;
 	DNSSDService *m_discoveryService;
 
 	void dragEnterEvent(QDragEnterEvent *event) override;

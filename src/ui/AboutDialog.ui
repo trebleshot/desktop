@@ -106,10 +106,16 @@ p, li { white-space: pre-wrap; }
         </size>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This program is free software: you can redistribute it and/or modify &lt;br/&gt;it under the terms of the GNU General Public License as published &lt;br/&gt;by the Free Software Foundation, either version 2 of the License, or &lt;br/&gt;(at your option) any later version. This program is distributed in the &lt;br/&gt;hope that it will be useful, but WITHOUT ANY WARRANTY; without &lt;br/&gt;even the implied warranty of MERCHANTABILITY or FITNESS FOR A&lt;br/&gt;PARTICULAR PURPOSE. See the GNU General Public License for mo-&lt;br/&gt;re details. You should have received a copy of the GNU General Pub-&lt;br/&gt;lic License along with this program. If not, see &lt;br/&gt;https://www.gnu.org/licenses/&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p style=&quot;margin: 2em;&quot;&gt;This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 2 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program. If not, see https://www.gnu.org/licenses/&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+       <property name="margin">
+        <number>0</number>
        </property>
       </widget>
      </item>

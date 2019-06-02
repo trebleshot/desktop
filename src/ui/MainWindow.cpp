@@ -2,6 +2,7 @@
 #include <src/broadcast/SeamlessClient.h>
 #include <QtWidgets/QFileDialog>
 #include <src/util/ViewUtils.h>
+#include <QtCore/QRandomGenerator>
 #include "MainWindow.h"
 #include "ManageDevicesDialog.h"
 #include "ShowTransferDialog.h"
@@ -14,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
 		: QMainWindow(parent), m_ui(new Ui::MainWindow),
 		  m_seamlessServer(new SeamlessServer), m_commServer(new CommunicationServer),
 		  m_groupModel(new TransferGroupModel()), m_deviceModel(new NetworkDeviceModel),
-		  m_discoveryService(new DNSSDService)
+		  m_textStreamModel(new TextStreamModel()), m_discoveryService(new DNSSDService)
 {
 	m_ui->setupUi(this);
 
@@ -55,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
 		m_ui->devicesTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
 		m_ui->devicesTreeView->setModel(m_deviceModel);
 		m_ui->devicesTreeView->setColumnWidth(0, 160);
+		m_ui->textTreeView->setModel(m_textStreamModel);
 
 		connect(m_ui->startPauseButton, &QPushButton::pressed, this, &MainWindow::taskToggle);
 		connect(m_ui->showButton, SIGNAL(pressed()), this, SLOT(showTransfer()));
@@ -77,6 +79,9 @@ MainWindow::MainWindow(QWidget *parent)
 		connect(m_ui->actionShow_received_files, &QAction::triggered, this, &MainWindow::showReceivedFiles);
 		connect(m_ui->usernameLineEdit, &QLineEdit::editingFinished, this, &MainWindow::usernameChanged);
 		connect(m_ui->saveStorageButton, &QPushButton::clicked, this, &MainWindow::savePathChanged);
+		connect(m_ui->saveTextButton, &QPushButton::clicked, this, &MainWindow::saveTextStream);
+		connect(m_ui->textTreeView, &QTreeView::activated, this, &MainWindow::textItemActivated);
+		connect(m_ui->buttonClipboardCopy, &QPushButton::pressed, this, &MainWindow::copyTextStream);
 
 		refreshStorageLocation();
 		transferSelectionChanged(QItemSelection(), QItemSelection());
@@ -92,6 +97,7 @@ MainWindow::~MainWindow()
 	delete m_ui;
 	delete m_groupModel;
 	delete m_deviceModel;
+	delete m_textStreamModel;
 	delete m_commServer;
 	delete m_discoveryService;
 	delete gTaskMgr;
@@ -118,6 +124,18 @@ void MainWindow::dropEvent(QDropEvent *event)
 		connect(&progressDialog, SIGNAL(filesAdded(groupid)), this, SLOT(showTransferWithAddDevicesDialog(groupid)));
 		progressDialog.exec();
 	}
+}
+
+void MainWindow::textItemActivated(const QModelIndex &modelIndex) {
+	TextStreamObject streamObject;
+
+	{
+		MutexEnablingScope mutexScope(m_textStreamModel);
+		streamObject = m_textStreamModel->list()->at(modelIndex.row());
+	}
+
+	if (streamObject.id != 0)
+		m_ui->textStreamEdit->setText(streamObject.text);
 }
 
 void MainWindow::transferItemActivated(const QModelIndex &modelIndex)
@@ -180,6 +198,22 @@ void MainWindow::showReceivedText(const QString &text, const QString &deviceId)
 	catch (...) {
 		// do nothing
 	}
+}
+
+void MainWindow::saveTextStream()
+{
+	const auto &text = m_ui->textStreamEdit->toPlainText();
+
+	SqlSelection selection;
+	selection.setTableName(DB_TABLE_CLIPBOARD);
+	selection.setWhere(QString("%1 = ?").arg(DB_FIELD_CLIPBOARD_TEXT));
+	selection.whereArgs << text;
+
+	// remove old one to have the date updated
+	AppUtils::getDatabase()->remove(selection);
+
+	TextStreamObject object(QRandomGenerator().generate(), text);
+	AppUtils::getDatabase()->insert(object);
 }
 
 void MainWindow::showTransferRequest(const QString &deviceId, groupid groupId, int filesTotal)
@@ -288,6 +322,12 @@ void MainWindow::setStorageLocation()
 
 	connect(fileDialog, &QDialog::accepted, this, &MainWindow::refreshStorageLocation);
 	connect(fileDialog, &QDialog::finished, fileDialog, &QObject::deleteLater);
+}
+
+void MainWindow::copyTextStream()
+{
+	QClipboard *clipboard = QApplication::clipboard();
+	clipboard->setText(m_ui->textStreamEdit->toPlainText());
 }
 
 void MainWindow::deviceBlocked(const QString &deviceId, const QHostAddress &address)

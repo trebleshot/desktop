@@ -19,9 +19,8 @@
 #include "TextStreamObject.h"
 
 TextStreamObject::TextStreamObject(int id, const QString &text)
-		: DatabaseObject(), id(id), text(text)
+		: DatabaseObject(), id(id), text(text), dateCreated(time(nullptr))
 {
-
 }
 
 SqlSelection TextStreamObject::getWhere() const

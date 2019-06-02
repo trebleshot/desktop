@@ -69,19 +69,6 @@ ELSE ()
     MESSAGE(FATAL_ERROR "No Qt5 found!")
 ENDIF ()
 
-# For Windows installation Qt libraries will be determined by this suffix.
-IF (CMAKE_BUILD_TYPE MATCHES Debug)
-    set(QT_LIBRARY_SUFFIX "d.dll")
-ELSE ()
-    set(QT_LIBRARY_SUFFIX ".dll")
-ENDIF ()
-
-configure_file(src/build.h.in src/build.h)
-
-IF (WIN32)
-    configure_file(dist/Windows/package.nsi.in package.nsi)
-ENDIF ()
-
 configure_file(src/build.h.in src/build.h)
 
 add_project_meta(META_FILES_TO_INCLUDE)
@@ -172,7 +159,7 @@ set(UTIL_LIBRARY
         src/util/TransferUtils.h
         src/util/TransferUtils.cpp
         src/util/ViewUtils.h
-        src/util/ViewUtils.cpp)
+        src/util/ViewUtils.cpp src/model/TextStreamModel.cpp src/model/TextStreamModel.h)
 
 add_executable(${PROJECT_EXECUTABLE} src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 
@@ -200,6 +187,8 @@ if (NOT WIN32)
             LIBRARY DESTINATION lib)
 elseif (WIN32 AND MSVC)
 	make_directory(${LINKED_LIBRARY_DIR})
+
+    configure_file(dist/Windows/package.nsi.in package.nsi)
 
     install(TARGETS ${PROJECT_EXECUTABLE}
             RUNTIME DESTINATION "/"
