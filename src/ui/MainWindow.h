@@ -56,6 +56,10 @@ public slots:
 
 	void selectFilesToSend();
 
+	void sendTextTo();
+
+	void sendTextToDevices(const QList<NetworkDevice> &devices);
+
 	void setStorageLocation();
 
 	static void showReceivedFiles();

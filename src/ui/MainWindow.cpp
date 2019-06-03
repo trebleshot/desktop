@@ -82,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent)
 		connect(m_ui->saveTextButton, &QPushButton::clicked, this, &MainWindow::saveTextStream);
 		connect(m_ui->textTreeView, &QTreeView::activated, this, &MainWindow::textItemActivated);
 		connect(m_ui->buttonClipboardCopy, &QPushButton::pressed, this, &MainWindow::copyTextStream);
+		connect(m_ui->buttonTextBoxSendTo, &QPushButton::pressed, this, &MainWindow::sendTextTo);
 
 		refreshStorageLocation();
 		transferSelectionChanged(QItemSelection(), QItemSelection());
@@ -126,7 +127,8 @@ void MainWindow::dropEvent(QDropEvent *event)
 	}
 }
 
-void MainWindow::textItemActivated(const QModelIndex &modelIndex) {
+void MainWindow::textItemActivated(const QModelIndex &modelIndex)
+{
 	TextStreamObject streamObject;
 
 	{
@@ -304,6 +306,57 @@ void MainWindow::removeTransfer()
 void MainWindow::refreshStorageLocation()
 {
 	m_ui->storageFolderLineEdit->setText(TransferUtils::getDefaultSavePath());
+}
+
+void MainWindow::sendTextTo()
+{
+	auto *dialog = new DeviceChooserDialog(this);
+	connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
+	connect(dialog, &DeviceChooserDialog::devicesSelected, this, &MainWindow::sendTextToDevices);
+	dialog->show();
+}
+
+void MainWindow::sendTextToDevices(const QList<NetworkDevice> &devices)
+{
+	const auto &text = m_ui->textStreamEdit->toPlainText();
+
+	GThread::startIndependent([devices, text](GThread *thread) {
+		for (auto device : devices) {
+			auto *commBridge = new CommunicationBridge(nullptr, device);
+			commBridge->moveToThread(thread);
+
+			QList<DeviceConnection> connections;
+
+			{
+				auto *connPtr = &connections;
+
+				gDbSignal->doSynchronized([device, connPtr](AccessDatabase *db) {
+					SqlSelection selection;
+					selection.setTableName(DB_TABLE_DEVICECONNECTION);
+					selection.setWhere(QString("%1 = ?").arg(DB_FIELD_DEVICECONNECTION_DEVICEID));
+					selection.whereArgs << device.id;
+					db->castQuery(selection, *connPtr);
+				});
+			}
+
+			for (const auto &connection : connections)
+				try {
+					auto *activeConnection = commBridge->communicate(device, connection);
+					activeConnection->reply({
+							                        {KEYWORD_REQUEST, KEYWORD_REQUEST_CLIPBOARD},
+							                        {KEYWORD_TRANSFER_CLIPBOARD_TEXT, text}
+					                        });
+					activeConnection->receive();
+
+					// Assume the process was successful
+					break;
+				} catch (...) {
+					// do nothing
+				}
+
+			delete commBridge;
+		}
+	});
 }
 
 void MainWindow::setStorageLocation()

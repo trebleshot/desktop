@@ -31,10 +31,9 @@ namespace Ui {
 
 class DeviceChooserDialog : public QDialog {
 Q_OBJECT
-	groupid m_groupId;
 
 public:
-	explicit DeviceChooserDialog(QWidget *parent, groupid groupId);
+	explicit DeviceChooserDialog(QWidget *parent = nullptr);
 
 	~DeviceChooserDialog() override;
 
@@ -58,7 +57,7 @@ public slots:
 
 signals:
 
-	void devicesSelected(groupid groupId, QList<NetworkDevice> devices);
+	void devicesSelected(QList<NetworkDevice> devices);
 
 protected:
 	Ui::DeviceChooserDialog *m_ui;

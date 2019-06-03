@@ -183,7 +183,7 @@ void ShowTransferDialog::updateButtons()
 void ShowTransferDialog::addDevOrChangeConnection()
 {
 	if (m_groupInfo.hasOutgoing) {
-		auto *dialog = new DeviceChooserDialog(this, m_group.id);
+		auto *dialog = new DeviceChooserDialog(this);
 		connect(dialog, &DeviceChooserDialog::devicesSelected, this, &ShowTransferDialog::sendToDevices);
 		connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
 		dialog->show();
@@ -198,9 +198,9 @@ void ShowTransferDialog::addDevOrChangeConnection()
 	}
 }
 
-void ShowTransferDialog::sendToDevices(groupid groupId, const QList<NetworkDevice> &devices)
+void ShowTransferDialog::sendToDevices(const QList<NetworkDevice> &devices)
 {
-	auto *dialog = new TransferRequestProgressDialog(this, groupId, devices);
+	auto *dialog = new TransferRequestProgressDialog(this, m_group.id, devices);
 	connect(dialog, &QDialog::finished, dialog, &QObject::deleteLater);
 	dialog->show();
 }

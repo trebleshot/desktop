@@ -20,11 +20,9 @@
 #include <src/util/ViewUtils.h>
 #include "DeviceChooserDialog.h"
 
-DeviceChooserDialog::DeviceChooserDialog(QWidget *parent, groupid groupId)
+DeviceChooserDialog::DeviceChooserDialog(QWidget *parent)
 		: QDialog(parent), m_ui(new Ui::DeviceChooserDialog), m_deviceModel(new NetworkDeviceModel)
 {
-	m_groupId = groupId;
-
 	m_ui->setupUi(this);
 	m_ui->treeView->setModel(m_deviceModel);
 	m_ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(false);
@@ -56,7 +54,7 @@ void DeviceChooserDialog::deviceLoaded(const NetworkDevice &device) {
 	m_ui->ipAddressLineEdit->clear();
 	QList<NetworkDevice> devices;
 	devices << device;
-	emit devicesSelected(m_groupId, devices);
+	emit devicesSelected(devices);
 }
 
 void DeviceChooserDialog::modelActivated(const QModelIndex &modelIndex)
@@ -89,7 +87,7 @@ void DeviceChooserDialog::selectionAccepted()
 	QList<NetworkDevice> devices;
 
 	if (ViewUtils::gatherSelections(m_ui->treeView->selectionModel(), m_deviceModel, devices))
-		emit devicesSelected(m_groupId, devices);
+		emit devicesSelected(devices);
 }
 
 void DeviceChooserDialog::setConfirmButtonState(bool state) {

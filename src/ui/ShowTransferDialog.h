@@ -55,15 +55,17 @@ public slots:
 
 	void globalTaskError(groupid groupId, const QString &deviceId, int type, int errorType);
 
-	void removeTransfer();
+
 
 	void checkGroupIntegrity(const SqlSelection &change, ChangeType type);
+
+	void removeTransfer();
 
 	void retryReceiving();
 
 	void saveDirectory();
 
-	void sendToDevices(groupid groupId, const QList<NetworkDevice> &devices);
+	void sendToDevices(const QList<NetworkDevice> &devices);
 
 	void showFiles();
 
