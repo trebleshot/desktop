@@ -83,6 +83,8 @@ MainWindow::MainWindow(QWidget *parent)
 		connect(m_ui->textTreeView, &QTreeView::activated, this, &MainWindow::textItemActivated);
 		connect(m_ui->buttonClipboardCopy, &QPushButton::pressed, this, &MainWindow::copyTextStream);
 		connect(m_ui->buttonTextBoxSendTo, &QPushButton::pressed, this, &MainWindow::sendTextTo);
+		connect(m_ui->deleteSavedTextButton, &QPushButton::pressed, this, &MainWindow::deleteSavedSelectedText);
+		connect(m_ui->copySavedTextButton, &QPushButton::pressed, this, &MainWindow::copySavedSelectedText);
 
 		refreshStorageLocation();
 		transferSelectionChanged(QItemSelection(), QItemSelection());
@@ -206,6 +208,9 @@ void MainWindow::saveTextStream()
 {
 	const auto &text = m_ui->textStreamEdit->toPlainText();
 
+	if (text.length() <= 0)
+		return;
+
 	SqlSelection selection;
 	selection.setTableName(DB_TABLE_CLIPBOARD);
 	selection.setWhere(QString("%1 = ?").arg(DB_FIELD_CLIPBOARD_TEXT));
@@ -216,6 +221,8 @@ void MainWindow::saveTextStream()
 
 	TextStreamObject object(QRandomGenerator().generate(), text);
 	AppUtils::getDatabase()->insert(object);
+
+	m_ui->textStreamEdit->clear();
 }
 
 void MainWindow::showTransferRequest(const QString &deviceId, groupid groupId, int filesTotal)
@@ -381,6 +388,34 @@ void MainWindow::copyTextStream()
 {
 	QClipboard *clipboard = QApplication::clipboard();
 	clipboard->setText(m_ui->textStreamEdit->toPlainText());
+}
+
+void MainWindow::copySavedSelectedText()
+{
+	QList<TextStreamObject> selectedList;
+
+	if (ViewUtils::gatherSelections(m_ui->textTreeView->selectionModel(), m_textStreamModel, selectedList)) {
+		QString resultText;
+
+		for (const auto &textObject : selectedList) {
+			if (resultText.length() > 0)
+				resultText.append("\n\n");
+
+			resultText.append(textObject.text);
+		}
+
+		QClipboard *clipboard = QApplication::clipboard();
+		clipboard->setText(resultText);
+	}
+}
+
+void MainWindow::deleteSavedSelectedText()
+{
+	QList<TextStreamObject> selectedList;
+
+	if (ViewUtils::gatherSelections(m_ui->textTreeView->selectionModel(), m_textStreamModel, selectedList))
+		for (auto textObject : selectedList)
+			gDatabase->remove(textObject);
 }
 
 void MainWindow::deviceBlocked(const QString &deviceId, const QHostAddress &address)

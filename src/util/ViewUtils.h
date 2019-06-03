@@ -38,9 +38,10 @@ public:
 			MutexEnablingScope mutexScope(parentList);
 
 			for (const int row : selectedRows)
-				resultList.append(parentList->list()->at(row));
+				if (row >= 0 && row < parentList->list()->size())
+					resultList.append(parentList->list()->at(row));
 
-			return true;
+			return !resultList.empty();
 		}
 
 		return false;

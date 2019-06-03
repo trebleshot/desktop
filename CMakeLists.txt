@@ -124,6 +124,8 @@ set(UTIL_LIBRARY
         src/model/FlawedTransferModel.cpp
         src/model/NetworkDeviceModel.h
         src/model/NetworkDeviceModel.cpp
+        src/model/TextStreamModel.h
+        src/model/TextStreamModel.cpp
         src/model/TransferGroupModel.h
         src/model/TransferGroupModel.cpp
         src/model/TransferObjectModel.h
@@ -159,7 +161,7 @@ set(UTIL_LIBRARY
         src/util/TransferUtils.h
         src/util/TransferUtils.cpp
         src/util/ViewUtils.h
-        src/util/ViewUtils.cpp src/model/TextStreamModel.cpp src/model/TextStreamModel.h)
+        src/util/ViewUtils.cpp)
 
 add_executable(${PROJECT_EXECUTABLE} src/main.cpp ${UTIL_LIBRARY} ${UI_HEADERS} ${QRCS})
 

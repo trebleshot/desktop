@@ -38,9 +38,13 @@ public slots:
 
 	void about();
 
-	void aboutQt();
+	static void aboutQt();
 
 	void copyTextStream();
+
+	void copySavedSelectedText();
+
+	void deleteSavedSelectedText();
 
 	void deviceBlocked(const QString &deviceId, const QHostAddress &address);
 
