@@ -1,6 +1,11 @@
 <RCC>
-    <qresource prefix="/drawable">
-        <file alias="ic_launcher.png">drawable/ic_launcher.png</file>
+    <qresource prefix="/logo">
+        <file alias="trebleshot">drawable/trebleshot.png</file>
+        <file alias="trebleshot_small">drawable/trebleshot_small.png</file>
+    </qresource>
+    <qresource prefix="/icon">
+        <file alias="arrow_down">drawable/arrow_down.svg</file>
+        <file alias="arrow_up">drawable/arrow_up.svg</file>
     </qresource>
     <qresource prefix="/translation">
         <file alias="Turkish.qts">strings/Turkish.qts</file>

@@ -219,7 +219,7 @@ void MainWindow::saveTextStream()
 	// remove old one to have the date updated
 	AppUtils::getDatabase()->remove(selection);
 
-	TextStreamObject object(QRandomGenerator().generate(), text);
+	TextStreamObject object(QRandomGenerator::global()->generate(), text);  // QRandomGenerator().generate()
 	AppUtils::getDatabase()->insert(object);
 
 	m_ui->textStreamEdit->clear();
