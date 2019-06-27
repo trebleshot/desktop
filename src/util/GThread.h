@@ -20,6 +20,7 @@
 
 #include <QtCore/QThread>
 #include <QDebug>
+#include <functional>
 #include "Interrupter.h"
 
 class GThread : public QThread, public Interrupter {

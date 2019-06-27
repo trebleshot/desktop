@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8.2)
+cmake_minimum_required(VERSION 3.2.0)  # 3.1.0
 
 project(TrebleShot)
 
@@ -15,6 +15,15 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 11)
 
 # Include Qt basic functions
+if (${QTLIBDIR})
+	MESSAGE(DEBUG "QTLIBDIR: ${QTLIBDIR}")
+	set(QT_QMAKE_EXECUTABLE "${QTLIBDIR}/bin/qmake")
+	MESSAGE(DEBUG "QT_QMAKE_EXECUTABLE: ${QT_QMAKE_EXECUTABLE}")
+	set(QT_ROOT_DIR "${QTLIBDIR}")
+	set(QT_DIR "${QTLIBDIR}")
+	set(Qt5_DIR "${QTLIBDIR}")
+	set(Qt5Core_DIR "${QTLIBDIR}/lib/cmake/Qt5Core")  # /lib/cmake/Qt5Core  /include/Qt5Core
+endif ()
 include(QtCommon)
 
 # Set PROJECT_VERSION_PATCH and PROJECT_VERSION_TWEAK to 0 if not present, needed by add_project_meta
@@ -44,11 +53,11 @@ set(LINKED_LIBRARY_NAME "linked_libraries")
 set(LINKED_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${LINKED_LIBRARY_NAME})
 
 # Find the Qt5 libraries
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5Sql REQUIRED)
-find_package(Qt5Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core REQUIRED HINTS ${QTLIBDIR})  #  ${QTLIBDIR}/lib/cmake
+find_package(Qt5 COMPONENTS Gui REQUIRED HINTS ${QTLIBDIR})
+find_package(Qt5 COMPONENTS Network REQUIRED HINTS ${QTLIBDIR})
+find_package(Qt5 COMPONENTS Sql REQUIRED HINTS ${QTLIBDIR})
+find_package(Qt5 COMPONENTS Widgets REQUIRED HINTS ${QTLIBDIR})
 find_package(KF5DNSSD NO_MODULE)
 
 IF (Qt5Core_FOUND)
@@ -61,6 +70,7 @@ IF (Qt5Core_FOUND)
 
     # guess plugins and libraries directory
     set(QT_DIR "${Qt5Core_DIR}/../../..")
+    MESSAGE(DEBUG "QT_DIR: ${QT_DIR}")
     set(QT_BINARY_DIR "${QT_DIR}/bin")
     set(QT_PLUGINS_DIR "${QT_DIR}/plugins")
     get_target_property(QT_LIBRARY_DIR Qt5::Core LOCATION)

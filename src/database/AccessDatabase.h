@@ -29,6 +29,7 @@
 #include <QSqlTableModel>
 #include <QVariant>
 #include <iostream>
+#include <functional>
 
 #define DB_TABLE_TRANSFER "transfer"
 #define DB_DIVIS_TRANSFER "divisTansfer"
