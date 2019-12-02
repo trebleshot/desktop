@@ -1,66 +1,25 @@
-# TrebleShot for Desktop
-The reason why this project exist is to fill the gap on desktop 
-environment. 
-[TrebleShot](https://github.com/genonbeta/TrebleShot/)
-is an Android file transferring tool. You can send big files with it
-without feeling anxiety while doing it, because, with TrebleShot, you 
-can resume when something goes wrong.
+# TrebleShot
 
-## Monday, April 8, 2019
-```
-An end of the development cycle for another alpha release. And this time Windows 
-version is also included.  
-```
+* TrebleShot is a file-sharing tool and this is the desktop intended version.
+* Still in alpha state.
+* Uses Qt5 framework at its core and can work on Linux, Windows, MacOS.
+* Since it is still in alpha, nearly everything is subject to change.
+* Unless you want to help the development, please do not use the CI builds or the release tagged as `continuous`.
+
+For Android version follow [this link](https://github.com/genonbeta/TrebleShot/).
 
 
-## Wednesday, March 27, 2019
-```
-Windows version is functional. Service discovery has not been implemented. 
-File-sharing on Linux side slow while sending, on Windows side while receiving 
-or rather broken.
-```
-
-## Saturday, March 9, 2019
-```
-Travis CI has been integrated. Basic features has been implemented. 
-The project is in bug hunting phase.
-```
-
-## Wednesday, March 6, 2019
-```
-First alpha release is here. You can find it in releases page.  
-```
- 
-## Wednesday, Feb 29, 2019
-```
-The project is surprisingly going well and most of the structure
-that is used on other platforms has been achieved. Below are the current
-state.
-```  
-* Database structure
-* Server and client diagram
-* Data processing
-* Basic GUI
-* File sharing
-* Other small details that makes TrebleShot what it is
-
-
-This project is in development. You can find the current developmental
-changes by visiting
-[this](https://github.com/genonbeta/TrebleShot-Desktop/projects/1).
+This project is work in progress. See what is happening [here](https://github.com/genonbeta/TrebleShot-Desktop/projects/1).
 
 
 # Build
 * CMake 3.8.2+
 * Qt Framework 5.10+
 * KDE DNS-SD Development Package libkf5dnssd-dev (a.k.a. kdnssd-kf5)
+* *On Windows*, run `git submodule init` to get the required packages.
 * Run shell command ./build_trebleshot.sh
 
 Latest CI Build https://github.com/genonbeta/TrebleShot-Desktop/releases/tag/continuous
 
 # Status
 [![Build Status](https://travis-ci.org/genonbeta/TrebleShot-Desktop.svg)](https://travis-ci.org/genonbeta/TrebleShot-Desktop)
-
-```
-Have a question? Reach me out velitasali@protonmail.com
-``` 

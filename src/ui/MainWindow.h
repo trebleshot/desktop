@@ -2,7 +2,6 @@
 
 #include <src/database/AccessDatabase.h>
 #include <src/broadcast/CommunicationServer.h>
-#include <src/coolsocket/CoolSocket.h>
 #include <QMainWindow>
 #include <iostream>
 #include <QDesktopWidget>

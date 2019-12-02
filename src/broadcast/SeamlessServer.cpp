@@ -23,12 +23,12 @@
 #include <src/util/AppUtils.h>
 
 SeamlessServer::SeamlessServer(QObject *parent)
-		: CSServer(QHostAddress::Any, PORT_SEAMLESS, TIMEOUT_SOCKET_DEFAULT, parent)
+		: CoolSocket::Server(QHostAddress::Any, PORT_SEAMLESS, TIMEOUT_SOCKET_DEFAULT, parent)
 {
 
 }
 
-void SeamlessServer::connected(CSActiveConnection *connection)
+void SeamlessServer::connected(CoolSocket::Connection *connection)
 {
 	TransferTask *thisTask = nullptr;
 
@@ -68,7 +68,7 @@ void SeamlessServer::connected(CSActiveConnection *connection)
 		while (connection->socket()->isOpen()) {
 			const auto &response = connection->receive();
 
-			if (response.response == nullptr || response.length <= 0)
+			if (response.msg == nullptr || response.length <= 0)
 				return;
 
 			const QJsonObject &request = response.asJson();

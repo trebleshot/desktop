@@ -18,24 +18,24 @@
 
 #pragma once
 
+#include <coolsocket.h>
 #include <src/config/Config.h>
 #include <src/config/Keyword.h>
-#include <src/coolsocket/CoolSocket.h>
 #include <src/database/object/TransferGroup.h>
 #include <src/util/AppUtils.h>
 #include <QList>
 #include <QHostAddress>
 #include <QApplication>
 
-class CommunicationServer : public CSServer {
+class CommunicationServer : public CoolSocket::Server {
 Q_OBJECT
 
-	static void pushReply(CSActiveConnection *activeConnection, QJsonObject &json, bool result);
+	static void pushReply(CoolSocket::Connection *activeConnection, QJsonObject &json, bool result);
 
 public:
 	explicit CommunicationServer(QObject *parent = nullptr);
 
-	void connected(CSActiveConnection *connection) override;
+   	void connected(CoolSocket::Connection *connection);
 
 signals:
 

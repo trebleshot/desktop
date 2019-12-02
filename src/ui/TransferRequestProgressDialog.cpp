@@ -88,7 +88,7 @@ void TransferRequestProgressDialog::task(GThread *thread, const groupid &groupId
 				if (thread->interrupted())
 					break;
 
-				CSActiveConnection *connection = nullptr;
+				CoolSocket::Connection *connection = nullptr;
 				CommunicationBridge bridge;
 
 				bridge.moveToThread(thread);

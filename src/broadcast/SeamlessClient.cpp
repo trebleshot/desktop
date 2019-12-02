@@ -83,8 +83,8 @@ void SeamlessClient::run()
 			}
 
 			{
-				auto *activeConnection = CSClient::openConnection(connection.hostAddress, PORT_SEAMLESS,
-				                                                  TIMEOUT_SOCKET_DEFAULT, client);
+				auto *activeConnection = CoolSocket::Client::openConnection(connection.hostAddress, PORT_SEAMLESS,
+				        TIMEOUT_SOCKET_DEFAULT, client);
 
 				qDebug() << this << "Seamless port is open";
 

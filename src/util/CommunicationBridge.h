@@ -18,49 +18,45 @@
 
 #pragma once
 
-#include <src/coolsocket/CoolSocket.h>
+#include <coolsocket.h>
 #include <src/config/Config.h>
 #include <src/config/Keyword.h>
 #include <src/database/AccessDatabase.h>
 #include <src/database/object/NetworkDevice.h>
 #include <src/util/NetworkDeviceLoader.h>
 
-class CommunicationBridge : public CSClient {
+class CommunicationBridge : public QObject {
 	NetworkDevice m_device;
 	int m_secureKey = -1;
 
 public:
 	explicit CommunicationBridge(QObject *parent = nullptr, const NetworkDevice &target = NetworkDevice())
-			: CSClient(parent)
+			: QObject(parent)
 	{
 		m_device = target;
 	}
 
-	CSActiveConnection *communicate(NetworkDevice &targetDevice,
-	                                const DeviceConnection &targetConnection);
+    CoolSocket::Connection *communicate(NetworkDevice &targetDevice, const DeviceConnection &targetConnection);
 
-	CSActiveConnection *communicate(CSActiveConnection *connection,
-	                                NetworkDevice &device);
+	CoolSocket::Connection *communicate(CoolSocket::Connection *connection, NetworkDevice &device);
 
-	CSActiveConnection *connect(const QHostAddress &hostAddress);
+    CoolSocket::Connection *connect(const QHostAddress &hostAddress);
 
-	CSActiveConnection *connect(DeviceConnection *connection);
+    CoolSocket::Connection *connect(DeviceConnection *connection);
 
-	CSActiveConnection *connectWithHandshake(const QHostAddress &hostAddress, bool handshakeOnly);
+    CoolSocket::Connection *connectWithHandshake(const QHostAddress &hostAddress, bool handshakeOnly);
 
 	NetworkDevice getDevice();
 
-	CSActiveConnection *handshake(CSActiveConnection *connection,
-	                              bool handshakeOnly);
+    CoolSocket::Connection *handshake(CoolSocket::Connection *connection, bool handshakeOnly);
 
 	NetworkDevice loadDevice(const QHostAddress &hostAddress);
 
-	NetworkDevice loadDevice(CSActiveConnection *connection);
+	NetworkDevice loadDevice(CoolSocket::Connection *connection);
 
 	void setDevice(const NetworkDevice &device);
 
 	void setSecureKey(int key);
 
-	NetworkDevice updateDeviceIfOkay(CSActiveConnection *connection,
-	                                 NetworkDevice &device);
+	NetworkDevice updateDeviceIfOkay(CoolSocket::Connection *connection, NetworkDevice &device);
 };

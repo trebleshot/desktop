@@ -1,6 +1,6 @@
 language: cpp
 compiler: gcc
-sudo: require
+sudo: required
 dist: xenial
 
 before_install:
@@ -8,7 +8,7 @@ before_install:
   - sudo add-apt-repository ppa:kubuntu-ppa/backports -y
   - sudo apt-get update -qq
 
-install:
+install:2
   - sudo apt-get -y install libkf5dnssd-dev qt511base cmake
   - source /opt/qt*/bin/qt*-env.sh
 

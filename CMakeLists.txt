@@ -8,21 +8,18 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # Find includes in the build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-# Turn on automatic invocation of the MOC
-set(CMAKE_AUTOMOC ON)
-
 # Minimum C++11
 set(CMAKE_CXX_STANDARD 11)
 
 # Include Qt basic functions
 if (${QTLIBDIR})
-	MESSAGE(DEBUG "QTLIBDIR: ${QTLIBDIR}")
-	set(QT_QMAKE_EXECUTABLE "${QTLIBDIR}/bin/qmake")
-	MESSAGE(DEBUG "QT_QMAKE_EXECUTABLE: ${QT_QMAKE_EXECUTABLE}")
-	set(QT_ROOT_DIR "${QTLIBDIR}")
-	set(QT_DIR "${QTLIBDIR}")
-	set(Qt5_DIR "${QTLIBDIR}")
-	set(Qt5Core_DIR "${QTLIBDIR}/lib/cmake/Qt5Core")  # /lib/cmake/Qt5Core  /include/Qt5Core
+    MESSAGE(DEBUG "QTLIBDIR: ${QTLIBDIR}")
+    set(QT_QMAKE_EXECUTABLE "${QTLIBDIR}/bin/qmake")
+    MESSAGE(DEBUG "QT_QMAKE_EXECUTABLE: ${QT_QMAKE_EXECUTABLE}")
+    set(QT_ROOT_DIR "${QTLIBDIR}")
+    set(QT_DIR "${QTLIBDIR}")
+    set(Qt5_DIR "${QTLIBDIR}")
+    set(Qt5Core_DIR "${QTLIBDIR}/lib/cmake/Qt5Core")  # /lib/cmake/Qt5Core  /include/Qt5Core
 endif ()
 include(QtCommon)
 
@@ -110,8 +107,6 @@ set(UTIL_LIBRARY
         src/config/Config.h
         src/config/Config.cpp
         src/config/Keyword.h
-        src/coolsocket/CoolSocket.h
-        src/coolsocket/CoolSocket.cpp
         src/database/AccessDatabase.h
         src/database/AccessDatabase.cpp
         src/database/DatabaseLoader.h
@@ -184,21 +179,23 @@ if (KF5DNSSD_FOUND)
     add_definitions(-DUSE_DNSSD_FEATURE=1)
     target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC KF5::DNSSD)
 else ()
-    MESSAGE(STATUS "KDNSSD not found. Choosing bundled qmdnsengine.")
-    add_subdirectory(qmdnsengine)
-    target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC qmdnsengine)
+    MESSAGE(STATUS "KDNSSD not found. Choosing qmdnsengine. Do not forget to sync submodules with git")
+    add_subdirectory(libs/qmdnsengine)
+    target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC libs/qmdnsengine)
 endif ()
 
-target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql Qt5::Widgets)
+add_subdirectory(libs/coolsocket)
+target_link_libraries(${PROJECT_EXECUTABLE} PUBLIC coolsocket Qt5::Core Qt5::Gui Qt5::Network Qt5::Sql
+        Qt5::Widgets)
 
 fix_win_compiler()
 
-if (NOT WIN32)
+if (UNIX AND NOT APPLE)
     install(TARGETS ${PROJECT_EXECUTABLE}
             RUNTIME DESTINATION bin
             LIBRARY DESTINATION lib)
 elseif (WIN32 AND MSVC)
-	make_directory(${LINKED_LIBRARY_DIR})
+    make_directory(${LINKED_LIBRARY_DIR})
 
     configure_file(dist/Windows/package.nsi.in package.nsi)
 
@@ -206,15 +203,19 @@ elseif (WIN32 AND MSVC)
             RUNTIME DESTINATION "/"
             LIBRARY DESTINATION lib)
 
-	add_custom_command(TARGET ${PROJECT_EXECUTABLE} POST_BUILD
-                   COMMAND ${QT_BINARY_DIR}/windeployqt.exe ${PROJECT_EXECUTABLE}.exe --dir ${LINKED_LIBRARY_DIR})
+    add_custom_command(TARGET ${PROJECT_EXECUTABLE} POST_BUILD
+            COMMAND ${QT_BINARY_DIR}/windeployqt.exe ${PROJECT_EXECUTABLE}.exe --dir ${LINKED_LIBRARY_DIR})
 
-	add_custom_command(TARGET ${PROJECT_EXECUTABLE} POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${LINKED_LIBRARY_DIR} $<TARGET_FILE_DIR:${PROJECT_EXECUTABLE}>)
+    add_custom_command(TARGET ${PROJECT_EXECUTABLE} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${LINKED_LIBRARY_DIR} $<TARGET_FILE_DIR:${PROJECT_EXECUTABLE}>)
 
-	install(DIRECTORY ${LINKED_LIBRARY_DIR}/ DESTINATION .
-			PATTERN ${LINKED_LIBRARY_DIR}/*)
+    install(DIRECTORY ${LINKED_LIBRARY_DIR}/ DESTINATION .
+            PATTERN ${LINKED_LIBRARY_DIR}/*)
+else ()
+    MESSAGE(FATAL_ERROR "Your host system is currently unsupported. If you want to have it supported, "
+            "submit an issue on the tracker on GitHub. If you think you can get it working, feel free "
+            "submit your patches.")
 endif ()
 
 if (UNIX AND NOT APPLE)

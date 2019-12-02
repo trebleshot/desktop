@@ -25,7 +25,8 @@
 #define KEYWORD_REQUEST_ACQUAINTANCE "requestAcquaintance"
 #define KEYWORD_REQUEST_CLIPBOARD "requestClipboard"
 #define KEYWORD_REQUEST_HANDSHAKE "requestHandshake"
-#define KEYWORD_REQUEST_START_TRANSFER "requestStartTransfer"
+#define KEYWORD_REQUEST_TRANSFER_JOB "requestTransferJob" // Introduced in 99
+#define KEYWORD_TRANSFER_TYPE "transferType" // Introduced in 99
 #define KEYWORD_BACK_COMP_REQUEST_SEND_UPDATE "backCompRequestSendUpdate"
 #define KEYWORD_TRANSFER_REQUEST_ID "requestId"
 #define KEYWORD_TRANSFER_GROUP_ID "groupId"
@@ -66,7 +67,7 @@
 #define KEYWORD_NETWORK_KEYMGMT "ntKeyMgmt"
 #define KEYWORD_NETWORK_ADDRESS_BSSID "bsid"
 #define KEYWORD_NETWORK_ADDRESS_IP "ipAdr"
-#define KEYWORD_FLAG_TRANSFER_QR_CONN "flagTransferQRConnection";
+#define KEYWORD_FLAG_TRANSFER_QR_CONN "flagTransferQRConnection"
 
 // local
 #define KEYWORD_UNKNOWN_INTERFACE "unk0";

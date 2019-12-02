@@ -321,9 +321,10 @@ void ShowTransferDialog::taskToggle()
 
 			if (gDbSignal->reconstruct(connection))
 				try {
-					QScopedPointer<CSActiveConnection> activeConnection(bridge->communicate(device, connection));
+					// todo KEYWORD_REQUEST also needs other variables like transfer type.
+					QScopedPointer<CoolSocket::Connection> activeConnection(bridge->communicate(device, connection));
 					activeConnection->reply({
-							                        {KEYWORD_REQUEST, KEYWORD_REQUEST_START_TRANSFER},
+							                        {KEYWORD_REQUEST, KEYWORD_REQUEST_TRANSFER_JOB},
 							                        {KEYWORD_TRANSFER_GROUP_ID, QVariant(assignee.assignee.groupId)
 									                                                    .toLongLong()}
 					                        });

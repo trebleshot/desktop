@@ -1,3 +1,6 @@
-[submodule "qmdnsengine"]
-	path = qmdnsengine
+[submodule "libs/coolsocket"]
+	path = libs/coolsocket
+	url = https://github.com/libcoolsocket/qt5.git
+[submodule "libs/qmdnsengine"]
+	path = libs/qmdnsengine
 	url = https://github.com/nitroshare/qmdnsengine.git

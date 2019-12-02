@@ -18,18 +18,18 @@
 
 #pragma once
 
+#include <coolsocket.h>
 #include <src/util/Interrupter.h>
-#include "src/coolsocket/CoolSocket.h"
 #include "src/config/Config.h"
 #include "src/config/Keyword.h"
 
-class SeamlessServer : public CSServer {
+class SeamlessServer : public CoolSocket::Server {
 Q_OBJECT
 
 public:
 	explicit SeamlessServer(QObject *parent = nullptr);
 
-	void connected(CSActiveConnection *connection) override;
+	void connected(CoolSocket::Connection *connection);
 
 signals:
 
