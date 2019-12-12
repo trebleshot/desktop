@@ -38,7 +38,7 @@ QSqlDatabase *AccessDatabase::getDatabase()
 void AccessDatabase::initialize()
 {
 	QSqlQuery queryExecutor(*getDatabase());
-	QMap<QString, QSqlRecord> tables = getPassiveTables();
+	QMap<QString, QSqlRecord> tables = getTables();
 
 	for (const QString &dbTableKey : tables.keys()) {
 		QSqlRecord dbRecord = tables.value(dbTableKey);
@@ -48,7 +48,7 @@ void AccessDatabase::initialize()
 	}
 }
 
-QMap<QString, QSqlRecord> AccessDatabase::getPassiveTables()
+QMap<QString, QSqlRecord> AccessDatabase::getTables()
 {
 	static QMap<QString, QSqlRecord> dbMap;
 

@@ -194,6 +194,15 @@ if (UNIX AND NOT APPLE)
     install(TARGETS ${PROJECT_EXECUTABLE}
             RUNTIME DESTINATION bin
             LIBRARY DESTINATION lib)
+
+    install(FILES assets/drawable/${PROJECT_EXECUTABLE}.png
+            DESTINATION share/icons/hicolor/256x256/apps/)
+
+    install(FILES dist/${PROJECT_EXECUTABLE}.desktop
+            DESTINATION share/applications/)
+
+    install(FILES dist/${PROJECT_EXECUTABLE}.desktop.appdata.xml
+            DESTINATION share/appdata/)
 elseif (WIN32 AND MSVC)
     make_directory(${LINKED_LIBRARY_DIR})
 
@@ -217,14 +226,3 @@ else ()
             "submit an issue on the tracker on GitHub. If you think you can get it working, feel free "
             "submit your patches.")
 endif ()
-
-if (UNIX AND NOT APPLE)
-    install(FILES assets/drawable/${PROJECT_EXECUTABLE}.png
-            DESTINATION share/icons/hicolor/256x256/apps/)
-
-    install(FILES dist/${PROJECT_EXECUTABLE}.desktop
-            DESTINATION share/applications/)
-
-    install(FILES dist/${PROJECT_EXECUTABLE}.desktop.appdata.xml
-            DESTINATION share/appdata/)
-endif (UNIX AND NOT APPLE)

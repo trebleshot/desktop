@@ -202,7 +202,7 @@ Q_OBJECT
 public:
 	explicit AccessDatabase(QSqlDatabase *db, QObject *parent = nullptr);
 
-	static QMap<QString, QSqlRecord> getPassiveTables();
+	static QMap<QString, QSqlRecord> getTables();
 
 	QSqlDatabase *getDatabase();
 
