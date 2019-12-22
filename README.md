@@ -1,7 +1,7 @@
 # TrebleShot
 
 * TrebleShot is a file-sharing tool and this is the desktop intended version.
-* Still in alpha state and for this reason, nearly everything is subject to change.
+* Still in alpha state and for this reason, nearly everything is subject to change and probably broken.
 * Uses Qt5 framework at its core and can work on Linux, Windows, MacOS.
 * Unless you want to help the development, please do not use the CI builds (the release tagged as `continuous`).
 
